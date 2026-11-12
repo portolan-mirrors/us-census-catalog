@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Population density",
+  "metadata": {
+    "description": "People per square kilometre of land area on roughly logarithmic steps, pale cream (empty) to deep plum (dense). Measured over all 85,019 tracts with a published value: 7 classes with breaks at 25/100/400/1,000/2,500/6,000 people per km\u00b2, which fall at the 12th/23rd/37th/54th/80th/93rd percentile of the national distribution.",
+    "portolan:column": "pop_density",
+    "portolan:breaks": [
+      25,
+      100,
+      400,
+      1000,
+      2500,
+      6000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-people",
+      "filter": [
+        "has",
+        "pop_density"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pop_density"
+          ],
+          "#fcfdbf",
+          25,
+          "#fec488",
+          100,
+          "#fe9f6d",
+          400,
+          "#f1605d",
+          1000,
+          "#b63679",
+          2500,
+          "#721f81",
+          6000,
+          "#2d1160"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-people",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

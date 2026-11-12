@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Work from home",
+  "metadata": {
+    "description": "Share of workers whose usual commute is none \u2014 they worked from home \u2014 pale lilac to deep purple. Measured over all 239,713 block groups with a published value: 6 classes with breaks at 4%/8%/13%/20%/30%, which fall at the 22nd/38th/56th/74th/89th percentile of the national distribution.",
+    "portolan:column": "pct_work_from_home",
+    "portolan:breaks": [
+      4,
+      8,
+      13,
+      20,
+      30
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../bg-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "bg-connectivity",
+      "filter": [
+        "has",
+        "pct_work_from_home"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_work_from_home"
+          ],
+          "#f2f0f7",
+          4,
+          "#dadaeb",
+          8,
+          "#bcbddc",
+          13,
+          "#9e9ac8",
+          20,
+          "#756bb1",
+          30,
+          "#54278f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "bg-connectivity",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

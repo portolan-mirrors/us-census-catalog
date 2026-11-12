@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Renters paying 30%+ of income",
+  "metadata": {
+    "description": "Share of renter households spending 30% or more of income on gross rent \u2014 the federal definition of rent-burdened \u2014 pale mauve to deep magenta. Measured over all 83,901 tracts with a published value: 7 classes with breaks at 25%/35%/45%/55%/70%/85%, which fall at the 11th/23rd/41st/62nd/87th/97th percentile of the national distribution. 38.06% of tracts have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_rent_burdened_moe in the GeoParquet before drawing a conclusion from any single tract.",
+    "portolan:column": "pct_rent_burdened",
+    "portolan:breaks": [
+      25,
+      35,
+      45,
+      55,
+      70,
+      85
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-housing",
+      "filter": [
+        "has",
+        "pct_rent_burdened"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_rent_burdened"
+          ],
+          "#f1eef6",
+          25,
+          "#d4b9da",
+          35,
+          "#c994c7",
+          45,
+          "#df65b0",
+          55,
+          "#e7298a",
+          70,
+          "#ce1256",
+          85,
+          "#91003f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-housing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

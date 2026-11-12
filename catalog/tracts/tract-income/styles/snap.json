@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Households receiving SNAP",
+  "metadata": {
+    "description": "Share of households that received SNAP (food stamps) in the past 12 months, cream to dark red. Measured over all 84,279 tracts with a published value: 6 classes with breaks at 3%/8%/15%/25%/40%, which fall at the 18th/42nd/67th/85th/95th percentile of the national distribution.",
+    "portolan:column": "pct_snap",
+    "portolan:breaks": [
+      3,
+      8,
+      15,
+      25,
+      40
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-income",
+      "filter": [
+        "has",
+        "pct_snap"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_snap"
+          ],
+          "#fef0d9",
+          3,
+          "#fdd49e",
+          8,
+          "#fdbb84",
+          15,
+          "#fc8d59",
+          25,
+          "#e34a33",
+          40,
+          "#b30000"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-income",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

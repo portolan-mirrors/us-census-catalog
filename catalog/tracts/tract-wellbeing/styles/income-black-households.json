@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Median income, Black households",
+  "metadata": {
+    "description": "Median household income for Black or African American householders (ACS table B19013B), cividis navy (low) to gold (high). Measured over all 32,853 tracts with a published value: 6 classes with breaks at $30k/$45k/$60k/$85k/$120k, which fall at the 13th/31st/48th/68th/84th percentile of the national distribution. Shares its breaks and ramp with the white non-Hispanic style, so switching between the two shows the gap directly; the Census publishes this estimate only where the tract's Black household count supports one. 61.43% have no published value and draw in neutral gray rather than as a low value. 39.96% of tracts have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read median_hh_income_black_moe in the GeoParquet before drawing a conclusion from any single tract.",
+    "portolan:column": "median_hh_income_black",
+    "portolan:breaks": [
+      30000,
+      45000,
+      60000,
+      85000,
+      120000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-wellbeing",
+      "filter": [
+        "!",
+        [
+          "has",
+          "median_hh_income_black"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-wellbeing",
+      "filter": [
+        "has",
+        "median_hh_income_black"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_hh_income_black"
+          ],
+          "#00224e",
+          30000,
+          "#35456c",
+          45000,
+          "#666970",
+          60000,
+          "#958f5f",
+          85000,
+          "#cab969",
+          120000,
+          "#fee838"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-wellbeing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

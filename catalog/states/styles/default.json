@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Median household income",
+  "metadata": {
+    "description": "Median household income by state, viridis dark purple (low) to yellow (high). Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at $55k/$65k/$75k/$85k/$100k, which fall at the 2nd/15th/38th/69th/90th percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "median_hh_income",
+    "portolan:breaks": [
+      55000,
+      65000,
+      75000,
+      85000,
+      100000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../states.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "states",
+      "filter": [
+        "!",
+        [
+          "has",
+          "median_hh_income"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "states",
+      "filter": [
+        "has",
+        "median_hh_income"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_hh_income"
+          ],
+          "#440154",
+          55000,
+          "#414487",
+          65000,
+          "#2a788e",
+          75000,
+          "#22a884",
+          85000,
+          "#7ad151",
+          100000,
+          "#fde725"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "states",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

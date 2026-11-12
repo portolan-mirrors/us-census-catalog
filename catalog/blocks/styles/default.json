@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Population density",
+  "metadata": {
+    "description": "People per square kilometre of land area on roughly logarithmic steps, pale cream to deep plum; the lowest class is almost entirely the blocks with no residents at all. Measured over all 7,936,543 blocks with a published value: 7 classes with breaks at 1/10/50/200/800/2,500 people per km\u00b2, which fall at the 28th/35th/44th/51st/63rd/84th percentile of the national distribution.",
+    "portolan:column": "pop_density",
+    "portolan:breaks": [
+      1,
+      10,
+      50,
+      200,
+      800,
+      2500
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../blocks.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "blocks",
+      "filter": [
+        "has",
+        "pop_density"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pop_density"
+          ],
+          "#fcfdbf",
+          1,
+          "#fec488",
+          10,
+          "#fe9f6d",
+          50,
+          "#f1605d",
+          200,
+          "#b63679",
+          800,
+          "#721f81",
+          2500,
+          "#2d1160"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "blocks",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          0.2,
+          16,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          0.0,
+          13,
+          0.45
+        ]
+      }
+    }
+  ]
+}

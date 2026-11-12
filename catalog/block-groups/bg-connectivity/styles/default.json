@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "No home internet",
+  "metadata": {
+    "description": "Share of households with no internet subscription of any kind, pale to deep blue. Measured over all 239,548 block groups with a published value: 6 classes with breaks at 2%/5%/9%/14%/22%, which fall at the 35th/54th/70th/83rd/93rd percentile of the national distribution. 69.76% of block groups have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_no_internet_moe in the GeoParquet before drawing a conclusion from any single block group.",
+    "portolan:column": "pct_no_internet",
+    "portolan:breaks": [
+      2,
+      5,
+      9,
+      14,
+      22
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../bg-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "bg-connectivity",
+      "filter": [
+        "has",
+        "pct_no_internet"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_no_internet"
+          ],
+          "#ebf4fb",
+          2,
+          "#d0d1e6",
+          5,
+          "#a6bddb",
+          9,
+          "#74a9cf",
+          14,
+          "#2b8cbe",
+          22,
+          "#045a8d"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "bg-connectivity",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "version": 8,
+  "name": "Median home value",
+  "metadata": {
+    "description": "Median value of owner-occupied homes, pale amber to burnt brown. Measured over all 82,164 tracts with a published value: 7 classes with breaks at $125k/$200k/$275k/$375k/$550k/$850k, which fall at the 11th/28th/45th/61st/79th/92nd percentile of the national distribution. 3.34% have a coefficient of variation above 0.3 and render faded \u2014 the estimate is real but its margin of error swamps it.",
+    "portolan:column": "median_home_value",
+    "portolan:breaks": [
+      125000,
+      200000,
+      275000,
+      375000,
+      550000,
+      850000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-housing",
+      "filter": [
+        "has",
+        "median_home_value"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_home_value"
+          ],
+          "#fff3c0",
+          125000,
+          "#fee391",
+          200000,
+          "#fec44f",
+          275000,
+          "#fe9929",
+          375000,
+          "#ec7014",
+          550000,
+          "#cc4c02",
+          850000,
+          "#8c2d04"
+        ],
+        "fill-opacity": [
+          "case",
+          [
+            ">",
+            [
+              "coalesce",
+              [
+                "get",
+                "median_home_value_cv"
+              ],
+              0
+            ],
+            0.3
+          ],
+          0.35,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-housing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

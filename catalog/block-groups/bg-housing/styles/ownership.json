@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Owner-occupied homes",
+  "metadata": {
+    "description": "Share of occupied housing units lived in by their owner, pale to deep green. Measured over all 239,548 block groups with a published value: 7 classes with breaks at 25%/45%/60%/75%/88%/95%, which fall at the 11th/22nd/35th/52nd/74th/88th percentile of the national distribution.",
+    "portolan:column": "pct_owner_occupied",
+    "portolan:breaks": [
+      25,
+      45,
+      60,
+      75,
+      88,
+      95
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../bg-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "bg-housing",
+      "filter": [
+        "has",
+        "pct_owner_occupied"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_owner_occupied"
+          ],
+          "#edf8e9",
+          25,
+          "#c7e9c0",
+          45,
+          "#a1d99b",
+          60,
+          "#74c476",
+          75,
+          "#41ab5d",
+          88,
+          "#238b45",
+          95,
+          "#005a32"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "bg-housing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

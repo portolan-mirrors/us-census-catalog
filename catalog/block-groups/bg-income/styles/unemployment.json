@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Unemployment rate",
+  "metadata": {
+    "description": "Unemployed share of the civilian labor force, pale lilac to deep purple. Measured over all 239,742 block groups with a published value: 6 classes with breaks at 2%/4%/6%/9%/14%, which fall at the 36th/54th/67th/80th/91st percentile of the national distribution.",
+    "portolan:column": "pct_unemployed",
+    "portolan:breaks": [
+      2,
+      4,
+      6,
+      9,
+      14
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../bg-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "bg-income",
+      "filter": [
+        "has",
+        "pct_unemployed"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_unemployed"
+          ],
+          "#f2f0f7",
+          2,
+          "#dadaeb",
+          4,
+          "#bcbddc",
+          6,
+          "#9e9ac8",
+          9,
+          "#756bb1",
+          14,
+          "#54278f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "bg-income",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

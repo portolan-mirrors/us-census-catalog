@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Residents 65 and over",
+  "metadata": {
+    "description": "Share of residents aged 65 or older, pale apricot to burnt orange. Measured over all 84,529 tracts with a published value: 6 classes with breaks at 8%/13%/18%/24%/32%, which fall at the 9th/28th/55th/81st/95th percentile of the national distribution.",
+    "portolan:column": "pct_65_plus",
+    "portolan:breaks": [
+      8,
+      13,
+      18,
+      24,
+      32
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-people",
+      "filter": [
+        "has",
+        "pct_65_plus"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_65_plus"
+          ],
+          "#feedde",
+          8,
+          "#fdd0a2",
+          13,
+          "#fdae6b",
+          18,
+          "#fd8d3c",
+          24,
+          "#e6550d",
+          32,
+          "#a63603"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-people",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

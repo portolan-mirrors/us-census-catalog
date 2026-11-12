@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Black share",
+  "metadata": {
+    "description": "Share of residents who are Black or African American alone, pale to deep green. Measured over all 5,806,512 blocks with a published value: 6 classes with breaks at 1%/5%/15%/35%/65%, which fall at the 59th/70th/82nd/91st/95th percentile of the national distribution. 28.97% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_black",
+    "portolan:breaks": [
+      1,
+      5,
+      15,
+      35,
+      65
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../blocks.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "blocks",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_black"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "blocks",
+      "filter": [
+        "has",
+        "pct_black"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_black"
+          ],
+          "#edf8e9",
+          1,
+          "#c7e9c0",
+          5,
+          "#a1d99b",
+          15,
+          "#74c476",
+          35,
+          "#31a354",
+          65,
+          "#006d2c"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "blocks",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          0.2,
+          16,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          0.0,
+          13,
+          0.45
+        ]
+      }
+    }
+  ]
+}

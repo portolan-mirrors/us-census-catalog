@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Vacant housing units",
+  "metadata": {
+    "description": "Share of housing units vacant on Census Day 2020, cream to dark red; blocks with no housing units draw as no data, not as zero. Measured over all 5,915,599 blocks with a published value: 6 classes with breaks at 5%/15%/30%/50%/75%, which fall at the 69th/77th/83rd/87th/91st percentile of the national distribution. 27.64% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_vacant",
+    "portolan:breaks": [
+      5,
+      15,
+      30,
+      50,
+      75
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../blocks.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "blocks",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_vacant"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "blocks",
+      "filter": [
+        "has",
+        "pct_vacant"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_vacant"
+          ],
+          "#fef0d9",
+          5,
+          "#fdd49e",
+          15,
+          "#fdbb84",
+          30,
+          "#fc8d59",
+          50,
+          "#e34a33",
+          75,
+          "#b30000"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "blocks",
+      "minzoom": 11,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          0.2,
+          16,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          11,
+          0.0,
+          13,
+          0.45
+        ]
+      }
+    }
+  ]
+}

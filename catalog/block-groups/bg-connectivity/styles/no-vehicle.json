@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Households without a vehicle",
+  "metadata": {
+    "description": "Share of households with no vehicle available, pale yellow through teal to navy. Measured over all 239,548 block groups with a published value: 6 classes with breaks at 2%/5%/10%/20%/35%, which fall at the 39th/57th/74th/88th/95th percentile of the national distribution. 66.08% of block groups have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_hh_no_vehicle_moe in the GeoParquet before drawing a conclusion from any single block group.",
+    "portolan:column": "pct_hh_no_vehicle",
+    "portolan:breaks": [
+      2,
+      5,
+      10,
+      20,
+      35
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../bg-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "bg-connectivity",
+      "filter": [
+        "has",
+        "pct_hh_no_vehicle"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_hh_no_vehicle"
+          ],
+          "#f7f8c8",
+          2,
+          "#c7e9b4",
+          5,
+          "#7fcdbb",
+          10,
+          "#41b6c4",
+          20,
+          "#2c7fb8",
+          35,
+          "#253494"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "bg-connectivity",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

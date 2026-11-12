@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Foreign-born residents",
+  "metadata": {
+    "description": "Share of residents born outside the United States, pale green to deep blue. Measured over all 84,529 tracts with a published value: 6 classes with breaks at 2%/5%/10%/18%/30%, which fall at the 19th/37th/56th/73rd/87th percentile of the national distribution.",
+    "portolan:column": "pct_foreign_born",
+    "portolan:breaks": [
+      2,
+      5,
+      10,
+      18,
+      30
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-wellbeing",
+      "filter": [
+        "has",
+        "pct_foreign_born"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_foreign_born"
+          ],
+          "#f0f9e8",
+          2,
+          "#ccebc5",
+          5,
+          "#a8ddb5",
+          10,
+          "#7bccc4",
+          18,
+          "#43a2ca",
+          30,
+          "#0868ac"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-wellbeing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

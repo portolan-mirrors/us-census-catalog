@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Population density",
+  "metadata": {
+    "description": "People per square kilometre on roughly logarithmic steps, pale cream to deep plum. Measured over all 3,222 counties with a published value: 7 classes with breaks at 2/8/20/50/150/600 people per km\u00b2, which fall at the 12th/29th/53rd/74th/87th/97th percentile of the national distribution.",
+    "portolan:column": "pop_density",
+    "portolan:breaks": [
+      2,
+      8,
+      20,
+      50,
+      150,
+      600
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../counties.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "counties",
+      "filter": [
+        "has",
+        "pop_density"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pop_density"
+          ],
+          "#fcfdbf",
+          2,
+          "#fec488",
+          8,
+          "#fe9f6d",
+          20,
+          "#f1605d",
+          50,
+          "#b63679",
+          150,
+          "#721f81",
+          600,
+          "#2d1160"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "counties",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

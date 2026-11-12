@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "People of color",
+  "metadata": {
+    "description": "Share of residents who are not non-Hispanic white alone, pale blue through violet to deep purple. Measured over all 240,160 block groups with a published value: 7 classes with breaks at 10%/20%/35%/55%/75%/90%, which fall at the 18th/34th/51st/68th/80th/89th percentile of the national distribution.",
+    "portolan:column": "pct_people_of_color",
+    "portolan:breaks": [
+      10,
+      20,
+      35,
+      55,
+      75,
+      90
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../bg-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "bg-people",
+      "filter": [
+        "has",
+        "pct_people_of_color"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_people_of_color"
+          ],
+          "#e8eff6",
+          10,
+          "#bfd3e6",
+          20,
+          "#9ebcda",
+          35,
+          "#8c96c6",
+          55,
+          "#8c6bb1",
+          75,
+          "#88419d",
+          90,
+          "#6e016b"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "bg-people",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}
