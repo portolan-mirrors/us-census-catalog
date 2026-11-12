@@ -1,0 +1,60 @@
+{
+  "type": "Catalog",
+  "id": "block-groups",
+  "stac_version": "1.1.0",
+  "title": "Block Groups",
+  "description": "American Community Survey 2020–2024 5-year indicators for all 242,298 census block groups in the United States and Puerto Rico — the finest geography the Census Bureau publishes income, housing cost and commuting data for, typically 600–3,000 people. The indicators are split into four themed collections — [income](./bg-income/collection.json), [people](./bg-people/collection.json), [housing](./bg-housing/collection.json) and [connectivity](./bg-connectivity/collection.json) — because one wide national table would make a consumer who wanted median income download sixty columns and 242,298 rows. All four share the same geometry and `geoid`, so they join 1:1. Health insurance, disability, nativity and income by race are not published at this geography; they are in [tracts](../tracts/catalog.json). Every estimate carries its margin of error, and block-group margins are wide — read each collection's `*_cv` columns and its AGENTS.md before mapping. [data.census.gov](https://data.census.gov/) is authoritative.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Human-readable documentation"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "child",
+      "href": "./bg-income/collection.json",
+      "type": "application/json",
+      "title": "Income & Poverty — Block Groups"
+    },
+    {
+      "rel": "child",
+      "href": "./bg-people/collection.json",
+      "type": "application/json",
+      "title": "People & Education — Block Groups"
+    },
+    {
+      "rel": "child",
+      "href": "./bg-housing/collection.json",
+      "type": "application/json",
+      "title": "Housing & Rent — Block Groups"
+    },
+    {
+      "rel": "child",
+      "href": "./bg-connectivity/collection.json",
+      "type": "application/json",
+      "title": "Commuting & Connectivity — Block Groups"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json"
+  ]
+}

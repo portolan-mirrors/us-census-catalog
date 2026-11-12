@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:30.330555Z",
+      "breaking": false,
+      "assets": {
+        "tract-people.pmtiles": {
+          "sha256": "b18f5220d4202476f54b3471ab987f8d10d33274efc3fe28f3dcbc53bc29c132",
+          "size_bytes": 226322983,
+          "href": "tracts/tract-people/tract-people.pmtiles",
+          "mtime": 1794519527.2061055
+        },
+        "tract-people.parquet": {
+          "sha256": "4c23de26f5561185746f67862dc01dd79170dd349243cf3b549adf0bcd592ca5",
+          "size_bytes": 55801193,
+          "href": "tracts/tract-people/tract-people.parquet",
+          "source_mtime": 1794518876.4874332,
+          "mtime": 1794518876.4874332,
+          "feature_count": 85184,
+          "schema_fingerprint": "aa13af3e1bbb88cb"
+        },
+        "tract-people.thumb.jpg": {
+          "sha256": "f20c80a3fb9b1ffdbf46ee79e743233fb392c9e711e13e978090f27a1edbf5a7",
+          "size_bytes": 2842,
+          "href": "tracts/tract-people/tract-people.thumb.jpg",
+          "mtime": 1794521074.818308
+        }
+      },
+      "changes": [
+        "tract-people.pmtiles",
+        "tract-people.parquet",
+        "tract-people.thumb.jpg"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:16.720209Z",
+      "breaking": false,
+      "assets": {
+        "bg-connectivity.pmtiles": {
+          "sha256": "208cec475b967873c369767fa3c9be6f894063e065af5234ed426258b8747ea8",
+          "size_bytes": 654266471,
+          "href": "block-groups/bg-connectivity/bg-connectivity.pmtiles",
+          "mtime": 1794519506.11033
+        },
+        "bg-connectivity.parquet": {
+          "sha256": "797668ad48f8fb9a69a175097fe9f8bf793363c969e01fe8eaacdedf25e6986d",
+          "size_bytes": 93824155,
+          "href": "block-groups/bg-connectivity/bg-connectivity.parquet",
+          "source_mtime": 1794518870.0308654,
+          "mtime": 1794518870.0308654,
+          "feature_count": 242298,
+          "schema_fingerprint": "2fe74dd59d5df73c"
+        },
+        "bg-connectivity.thumb.jpg": {
+          "sha256": "8df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325",
+          "size_bytes": 2323,
+          "href": "block-groups/bg-connectivity/bg-connectivity.thumb.jpg",
+          "mtime": 1794521059.979576
+        }
+      },
+      "changes": [
+        "bg-connectivity.pmtiles",
+        "bg-connectivity.parquet",
+        "bg-connectivity.thumb.jpg"
+      ]
+    }
+  ]
+}

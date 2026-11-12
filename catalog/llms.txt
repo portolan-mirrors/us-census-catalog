@@ -1,0 +1,47 @@
+# US Census Demographics — Cloud-Native Mirror
+
+> Nationwide U.S. Census Bureau statistics as GeoParquet + PMTiles with STAC
+> metadata: ACS 2020–2024 5-year indicators at block group (~242k), tract
+> (~85k), county (3,235) and state level, plus 2020 Decennial Census counts
+> for all 8,174,955 census blocks. Every ACS estimate carries its margin of
+> error (`*_moe`, 90% confidence); headline statistics carry a reliability
+> coefficient of variation (`*_cv`). CC0-1.0; data.census.gov is the
+> authoritative source.
+
+Base URL: https://data.source.coop/portolan-mirrors/us-census-catalog/
+
+Read [AGENTS.md](https://data.source.coop/portolan-mirrors/us-census-catalog/AGENTS.md)
+first: join keys (GEOIDs nest by prefix: state 2 / county 5 / tract 11 /
+block group 12 / block 15 chars), MOE math, and the quirks that produce
+silently wrong answers. Each collection has its own AGENTS.md with tested
+queries and a README.md documenting every column.
+
+## Collections (collection.json beside each; data asset named)
+
+- Block groups (finest geography with income), themed chunks:
+  - block-groups/bg-income/bg-income.parquet — median household & per-capita income, poverty, SNAP, unemployment
+  - block-groups/bg-people/bg-people.parquet — age, race/ethnicity, education, density
+  - block-groups/bg-housing/bg-housing.parquet — tenure, rent, home value, rent burden, vacancy, stock age
+  - block-groups/bg-connectivity/bg-connectivity.parquet — vehicles, commute, internet, computer
+- Tracts, same four chunks plus:
+  - tracts/tract-wellbeing/tract-wellbeing.parquet — health insurance, disability, foreign-born, income & poverty by race
+- counties/counties.parquet and states/states.parquet — all ~35 indicators in one wide table
+- blocks/state_fips=*/<fips>.parquet — 2020 P.L. 94-171 block counts, hive-partitioned by state FIPS
+
+## Query patterns (DuckDB)
+
+INSTALL spatial; LOAD spatial; INSTALL httpfs; LOAD httpfs;
+-- national, no download:
+SELECT state, median(median_hh_income) FROM
+'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet'
+GROUP BY 1 ORDER BY 2 DESC;
+-- one state's blocks via hive partition:
+SELECT * FROM
+'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=29/29.parquet' LIMIT 5;
+-- join chunks 1:1 on geoid; roll blocks up to block groups with substr(geoid,1,12).
+
+Treat `*_cv` > 0.40 as unreliable; never sum medians across geographies; MOEs
+add in quadrature. PMTiles coarse zooms are A5 cell aggregations (counts
+summed, rates averaged) — use the GeoParquet for statistics.
+
+Source repository: https://github.com/portolan-mirrors/us-census-catalog

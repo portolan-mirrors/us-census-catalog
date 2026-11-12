@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:04.371694Z",
+      "breaking": false,
+      "assets": {
+        "bg-income.parquet": {
+          "sha256": "9693f4da4753f751164644146cc1cc9290405644df9c365136a1eb36669ec3d7",
+          "size_bytes": 93538838,
+          "href": "block-groups/bg-income/bg-income.parquet",
+          "source_mtime": 1794518850.3998835,
+          "mtime": 1794518850.3998835,
+          "feature_count": 242298,
+          "schema_fingerprint": "1c257b0d313f3770"
+        },
+        "bg-income.pmtiles": {
+          "sha256": "e7f5fe3fe7cec09a5b92dc141e002ef34b677a26633c48dfcf7458b35d9137f7",
+          "size_bytes": 610785910,
+          "href": "block-groups/bg-income/bg-income.pmtiles",
+          "mtime": 1794519279.819049
+        }
+      },
+      "changes": [
+        "bg-income.parquet",
+        "bg-income.pmtiles"
+      ]
+    }
+  ]
+}

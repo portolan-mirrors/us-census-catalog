@@ -400,6 +400,34 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
                 else meta.ACS_INTERVAL)
     coll.setdefault("extent", {})["temporal"] = {"interval": [list(interval)]}
 
+    # Spatial extent = the GeoParquet's own data bbox, not the union that
+    # `portolan add` computes across assets: the PMTiles' A5 cell zooms
+    # overhang the data footprint by a few degrees (a pentagon cell is
+    # bigger than the features it aggregates), and the collection extent
+    # should frame the data (PTL-DAT-005), not the padding.
+    if cid != "blocks":
+        pq_path = (CATALOG / meta.GROUP_OF[cid] / cid / f"{cid}.parquet"
+                   if cid in meta.GROUP_OF
+                   else CATALOG / cid / f"{cid}.parquet")
+        if pq_path.exists():
+            import pyarrow.parquet as _pq
+            geo = json.loads(_pq.read_schema(pq_path).metadata[b"geo"])
+            bbox = geo["columns"]["geometry"].get("bbox")
+            if bbox:
+                coll.setdefault("extent", {})["spatial"] = {"bbox": [bbox]}
+    else:
+        # Blocks: union the per-partition parquet bboxes (the items carry
+        # them from `portolan add`'s data scan).
+        boxes = []
+        for item_file in sorted((CATALOG / "blocks").glob("state_fips=*/*.json")):
+            item = json.loads(item_file.read_text())
+            if item.get("bbox"):
+                boxes.append(item["bbox"])
+        if boxes:
+            union = [min(b[0] for b in boxes), min(b[1] for b in boxes),
+                     max(b[2] for b in boxes), max(b[3] for b in boxes)]
+            coll.setdefault("extent", {})["spatial"] = {"bbox": [union]}
+
     if n is not None:
         coll["table:row_count"] = n
         if "geoparquet:feature_count" in coll:
@@ -408,6 +436,8 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     coll.setdefault("table:primary_geometry", "geometry")
 
     coll["providers"] = [PRODUCER, HOST]
+    # PTL-PRO-003: a mirror records its last sync date.
+    coll["updated"] = meta.EXTRACTED + "T00:00:00Z"
 
     # Links: rebuilt for the rels this script owns, so a stale `via` from an
     # earlier run cannot survive as a claimed origin.

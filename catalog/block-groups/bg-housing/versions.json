@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:08.089444Z",
+      "breaking": false,
+      "assets": {
+        "bg-housing.pmtiles": {
+          "sha256": "546c36ba12b5d2fde3044f2a6e560e35d9aa5202baa1d96fff97da3e8c8e570a",
+          "size_bytes": 713749378,
+          "href": "block-groups/bg-housing/bg-housing.pmtiles",
+          "mtime": 1794519508.8920584
+        },
+        "bg-housing.parquet": {
+          "sha256": "cf7ca15116c0156f7274dc22305cd758ada84c67fab50ad966b5c28c79857b6c",
+          "size_bytes": 96179408,
+          "href": "block-groups/bg-housing/bg-housing.parquet",
+          "source_mtime": 1794518863.3334467,
+          "mtime": 1794518863.3334467,
+          "feature_count": 242298,
+          "schema_fingerprint": "b18041770030df74"
+        },
+        "bg-housing.thumb.jpg": {
+          "sha256": "8df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325",
+          "size_bytes": 2323,
+          "href": "block-groups/bg-housing/bg-housing.thumb.jpg",
+          "mtime": 1794521054.8719966
+        }
+      },
+      "changes": [
+        "bg-housing.pmtiles",
+        "bg-housing.parquet",
+        "bg-housing.thumb.jpg"
+      ]
+    }
+  ]
+}

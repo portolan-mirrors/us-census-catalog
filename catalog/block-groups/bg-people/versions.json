@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:06.217124Z",
+      "breaking": false,
+      "assets": {
+        "bg-people.parquet": {
+          "sha256": "9e7a7960189981b6386b880891b4f725e3d0e7842a0b36480e76938db21f9b75",
+          "size_bytes": 94309008,
+          "href": "block-groups/bg-people/bg-people.parquet",
+          "source_mtime": 1794518856.9703646,
+          "mtime": 1794518856.9703646,
+          "feature_count": 242298,
+          "schema_fingerprint": "aa13af3e1bbb88cb"
+        },
+        "bg-people.pmtiles": {
+          "sha256": "400022f705ff050630fddf9bb489cc6b1b7780825f2b9eeb88ba1560842a09f2",
+          "size_bytes": 621247138,
+          "href": "block-groups/bg-people/bg-people.pmtiles",
+          "mtime": 1794519506.051155
+        }
+      },
+      "changes": [
+        "bg-people.parquet",
+        "bg-people.pmtiles"
+      ]
+    }
+  ]
+}

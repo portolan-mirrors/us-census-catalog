@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:44.566212Z",
+      "breaking": false,
+      "assets": {
+        "counties.pmtiles": {
+          "sha256": "4d49bc68d2487b026c23084decc25cdcf43db9728d090b9503743dc6cac284c3",
+          "size_bytes": 48873493,
+          "href": "counties/counties.pmtiles",
+          "mtime": 1794519530.9208407
+        },
+        "counties.parquet": {
+          "sha256": "eb919811e5b56c9e790183a44c3848107bde5ff8392e326e1719fdc1ee00f38c",
+          "size_bytes": 13591923,
+          "href": "counties/counties.parquet",
+          "source_mtime": 1794518892.4455094,
+          "mtime": 1794518892.4455094,
+          "feature_count": 3235,
+          "schema_fingerprint": "3c2154967ad844be"
+        },
+        "counties.thumb.jpg": {
+          "sha256": "aa149853ad3b527ae4389cbe2d3b95b91fb13a59d65788e70032d00416355c38",
+          "size_bytes": 2684,
+          "href": "counties/counties.thumb.jpg",
+          "mtime": 1794521085.35221
+        }
+      },
+      "changes": [
+        "counties.pmtiles",
+        "counties.parquet",
+        "counties.thumb.jpg"
+      ]
+    }
+  ]
+}

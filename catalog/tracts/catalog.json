@@ -1,0 +1,66 @@
+{
+  "type": "Catalog",
+  "id": "tracts",
+  "stac_version": "1.1.0",
+  "title": "Census Tracts",
+  "description": "American Community Survey 2020–2024 5-year indicators for all 85,184 census tracts in the United States and Puerto Rico — typically 1,200–8,000 people, the geography most small-area social research is done at. The same four themed collections as block groups — [income](./tract-income/collection.json), [people](./tract-people/collection.json), [housing](./tract-housing/collection.json), [connectivity](./tract-connectivity/collection.json) — plus [wellbeing](./tract-wellbeing/collection.json), which carries the health-insurance, disability, nativity and income-by-race tables the Census Bureau does not publish for block groups. All five share the same geometry and `geoid` and join 1:1; tract margins of error are substantially narrower than block-group margins (median household income is NULL on 1.59% of tracts against 7.69% of block groups). [data.census.gov](https://data.census.gov/) is authoritative.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Human-readable documentation"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "child",
+      "href": "./tract-income/collection.json",
+      "type": "application/json",
+      "title": "Income & Poverty — Census Tracts"
+    },
+    {
+      "rel": "child",
+      "href": "./tract-people/collection.json",
+      "type": "application/json",
+      "title": "People & Education — Census Tracts"
+    },
+    {
+      "rel": "child",
+      "href": "./tract-housing/collection.json",
+      "type": "application/json",
+      "title": "Housing & Rent — Census Tracts"
+    },
+    {
+      "rel": "child",
+      "href": "./tract-connectivity/collection.json",
+      "type": "application/json",
+      "title": "Commuting & Connectivity — Census Tracts"
+    },
+    {
+      "rel": "child",
+      "href": "./tract-wellbeing/collection.json",
+      "type": "application/json",
+      "title": "Health, Disability & Income by Race — Census Tracts"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json"
+  ]
+}

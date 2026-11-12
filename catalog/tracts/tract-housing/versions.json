@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:36.277302Z",
+      "breaking": false,
+      "assets": {
+        "tract-housing.parquet": {
+          "sha256": "97f82b99fbc5035c052da757e0c11fb415783f8542537f3b55202c4dd5291836",
+          "size_bytes": 56737539,
+          "href": "tracts/tract-housing/tract-housing.parquet",
+          "source_mtime": 1794518880.2553,
+          "mtime": 1794518880.2553,
+          "feature_count": 85184,
+          "schema_fingerprint": "b18041770030df74"
+        },
+        "tract-housing.pmtiles": {
+          "sha256": "4eaf6bb22995410e878fd6927e93edcdc26406622de4c4cd708219ba62ab3291",
+          "size_bytes": 265596074,
+          "href": "tracts/tract-housing/tract-housing.pmtiles",
+          "mtime": 1794519529.152648
+        }
+      },
+      "changes": [
+        "tract-housing.parquet",
+        "tract-housing.pmtiles"
+      ]
+    }
+  ]
+}

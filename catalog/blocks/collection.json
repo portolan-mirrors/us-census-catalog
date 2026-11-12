@@ -1,0 +1,762 @@
+{
+  "type": "Collection",
+  "id": "blocks",
+  "stac_version": "1.1.0",
+  "description": "2020 Decennial Census counts for all **8,174,955** census blocks in the 50 states, the District of Columbia and Puerto Rico — the smallest geography the Census Bureau publishes anything for. From the [2020 Census P.L. 94-171 Redistricting Data Summary Files](https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.html): total population and the seven race-alone counts plus two or more races ([P1](https://data.census.gov/table/DECENNIALPL2020.P1)), Hispanic or Latino and White-alone-not-Hispanic ([P2](https://data.census.gov/table/DECENNIALPL2020.P2)), the voting-age population 18 and over ([P3](https://data.census.gov/table/DECENNIALPL2020.P3)), housing units occupied and vacant ([H1](https://data.census.gov/table/DECENNIALPL2020.H1)), and the group-quarters population ([P5](https://data.census.gov/table/DECENNIALPL2020.P5)), with derived shares and population density.\n\nThese are **complete counts, not survey estimates**, so there are no margins of error and no coefficients of variation — the `*_moe` and `*_cv` columns the ACS collections carry do not exist here. They are, however, protected by the 2020 disclosure-avoidance system, which injects noise at block level while holding state totals exact: block counts are reliable in aggregate and should be read with care one block at a time. The Census Bureau publishes no income, education or commuting data at block level — for that, move up to the [block-group collections](../block-groups/catalog.json).\n\nRoughly three in ten census blocks are unpopulated by design (28.97% have `pop_total = 0`, measured), so `pct_white_nh`, `pct_black` and `pct_hispanic` are NULL on that share of rows, and `pct_vacant` is NULL on the 27.64% with no housing units. That is a property of census blocks, not missing data: filter `pop_total > 0` before averaging a rate. Summed over the 50 states and DC, `pop_total` equals 331,449,281 — the published 2020 resident population, exactly; Puerto Rico equals 3,285,874.\n\nGeometry is [TIGER/Line 2024 `TABBLOCK20`](https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/), not the cartographic boundary files the ACS collections use, because no cartographic edition is published for blocks. TIGER is unclipped, so a coastal block extends to the 3-mile limit rather than the shoreline, and `aland_sqkm` comes from the file's own `ALAND20` land-area field (water-only blocks have `ALAND20 = 0` and so a NULL `pop_density`). Field positions in the P.L. 94-171 files are pinned against the Census Bureau's own [R import scripts](https://www2.census.gov/programs-surveys/decennial/rdo/about/2020-census-program/Phase3/SupportMaterials/2020PL_R_import_scripts.zip) rather than read off a PDF — see the build notes in the repository for the field table and the three independent checks behind it.\n\nThe collection is **hive-partitioned by state**: 52 parquet files under `state_fips=<FIPS>/`, one STAC item each with its own bbox and row count, queryable as one table through the glob `state_fips=*/*.parquet` with `hive_partitioning=true`. The synthesized `state_fips` key carries the numeric FIPS code and sits alongside the `state` column's USPS code. Pull one state and you download one file.\n\nThe PMTiles archive carries the same columns as the GeoParquet. At feature zooms the tiles are the census geographies; at coarse zooms they are [A5](https://a5geo.org/) cell aggregations built by [tylertoo](https://github.com/geoparquet-io/tylertoo) — counts summed, rates and medians averaged unweighted over the geographies in the cell — because thinning hundreds of thousands of polygons at a national zoom would show a biased subset (small urban geographies drop first) rather than less data. Cell and feature zooms share column names, so one style expression classifies both. The aggregation is a visualization aid: statistics come from the GeoParquet, never from the tiles.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "item",
+      "href": "./state_fips=01/state_fips=01.json",
+      "type": "application/geo+json",
+      "title": "State Fips=01"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=02/state_fips=02.json",
+      "type": "application/geo+json",
+      "title": "State Fips=02"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=04/state_fips=04.json",
+      "type": "application/geo+json",
+      "title": "State Fips=04"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=05/state_fips=05.json",
+      "type": "application/geo+json",
+      "title": "State Fips=05"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=06/state_fips=06.json",
+      "type": "application/geo+json",
+      "title": "State Fips=06"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=08/state_fips=08.json",
+      "type": "application/geo+json",
+      "title": "State Fips=08"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=09/state_fips=09.json",
+      "type": "application/geo+json",
+      "title": "State Fips=09"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=10/state_fips=10.json",
+      "type": "application/geo+json",
+      "title": "State Fips=10"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=11/state_fips=11.json",
+      "type": "application/geo+json",
+      "title": "State Fips=11"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=12/state_fips=12.json",
+      "type": "application/geo+json",
+      "title": "State Fips=12"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=13/state_fips=13.json",
+      "type": "application/geo+json",
+      "title": "State Fips=13"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=15/state_fips=15.json",
+      "type": "application/geo+json",
+      "title": "State Fips=15"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=16/state_fips=16.json",
+      "type": "application/geo+json",
+      "title": "State Fips=16"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=17/state_fips=17.json",
+      "type": "application/geo+json",
+      "title": "State Fips=17"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=18/state_fips=18.json",
+      "type": "application/geo+json",
+      "title": "State Fips=18"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=19/state_fips=19.json",
+      "type": "application/geo+json",
+      "title": "State Fips=19"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=20/state_fips=20.json",
+      "type": "application/geo+json",
+      "title": "State Fips=20"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=21/state_fips=21.json",
+      "type": "application/geo+json",
+      "title": "State Fips=21"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=22/state_fips=22.json",
+      "type": "application/geo+json",
+      "title": "State Fips=22"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=23/state_fips=23.json",
+      "type": "application/geo+json",
+      "title": "State Fips=23"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=24/state_fips=24.json",
+      "type": "application/geo+json",
+      "title": "State Fips=24"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=25/state_fips=25.json",
+      "type": "application/geo+json",
+      "title": "State Fips=25"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=26/state_fips=26.json",
+      "type": "application/geo+json",
+      "title": "State Fips=26"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=27/state_fips=27.json",
+      "type": "application/geo+json",
+      "title": "State Fips=27"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=28/state_fips=28.json",
+      "type": "application/geo+json",
+      "title": "State Fips=28"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=29/state_fips=29.json",
+      "type": "application/geo+json",
+      "title": "State Fips=29"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=30/state_fips=30.json",
+      "type": "application/geo+json",
+      "title": "State Fips=30"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=31/state_fips=31.json",
+      "type": "application/geo+json",
+      "title": "State Fips=31"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=32/state_fips=32.json",
+      "type": "application/geo+json",
+      "title": "State Fips=32"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=33/state_fips=33.json",
+      "type": "application/geo+json",
+      "title": "State Fips=33"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=34/state_fips=34.json",
+      "type": "application/geo+json",
+      "title": "State Fips=34"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=35/state_fips=35.json",
+      "type": "application/geo+json",
+      "title": "State Fips=35"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=36/state_fips=36.json",
+      "type": "application/geo+json",
+      "title": "State Fips=36"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=37/state_fips=37.json",
+      "type": "application/geo+json",
+      "title": "State Fips=37"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=38/state_fips=38.json",
+      "type": "application/geo+json",
+      "title": "State Fips=38"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=39/state_fips=39.json",
+      "type": "application/geo+json",
+      "title": "State Fips=39"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=40/state_fips=40.json",
+      "type": "application/geo+json",
+      "title": "State Fips=40"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=41/state_fips=41.json",
+      "type": "application/geo+json",
+      "title": "State Fips=41"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=42/state_fips=42.json",
+      "type": "application/geo+json",
+      "title": "State Fips=42"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=44/state_fips=44.json",
+      "type": "application/geo+json",
+      "title": "State Fips=44"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=45/state_fips=45.json",
+      "type": "application/geo+json",
+      "title": "State Fips=45"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=46/state_fips=46.json",
+      "type": "application/geo+json",
+      "title": "State Fips=46"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=47/state_fips=47.json",
+      "type": "application/geo+json",
+      "title": "State Fips=47"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=48/state_fips=48.json",
+      "type": "application/geo+json",
+      "title": "State Fips=48"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=49/state_fips=49.json",
+      "type": "application/geo+json",
+      "title": "State Fips=49"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=50/state_fips=50.json",
+      "type": "application/geo+json",
+      "title": "State Fips=50"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=51/state_fips=51.json",
+      "type": "application/geo+json",
+      "title": "State Fips=51"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=53/state_fips=53.json",
+      "type": "application/geo+json",
+      "title": "State Fips=53"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=54/state_fips=54.json",
+      "type": "application/geo+json",
+      "title": "State Fips=54"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=55/state_fips=55.json",
+      "type": "application/geo+json",
+      "title": "State Fips=55"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=56/state_fips=56.json",
+      "type": "application/geo+json",
+      "title": "State Fips=56"
+    },
+    {
+      "rel": "item",
+      "href": "./state_fips=72/state_fips=72.json",
+      "type": "application/geo+json",
+      "title": "State Fips=72"
+    },
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.html",
+      "type": "text/html",
+      "title": "Decennial Census P.L. 94-171 Redistricting Data program"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/",
+      "type": "text/html",
+      "title": "2020 P.L. 94-171 state archives (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./blocks.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "2020 Census Counts — Blocks (vector tiles)",
+      "pmtiles:layers": [
+        "blocks"
+      ]
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/incubating/partition/v1.0.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/vector/v0.1.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "pmtiles:min_zoom": 0,
+  "pmtiles:max_zoom": 14,
+  "pmtiles:tile_type": "mvt",
+  "pmtiles:center": [
+    0.0,
+    43.2837497,
+    7
+  ],
+  "pmtiles:layers": [
+    "blocks"
+  ],
+  "partition:scheme": "hive",
+  "partition:keys": [
+    {
+      "name": "state_fips",
+      "type": "string"
+    }
+  ],
+  "partition:file_count": 52,
+  "title": "2020 Census Counts — Blocks",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.231086,
+          17.831518837698233,
+          179.85968107125612,
+          71.439786
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-04-01T00:00:00Z",
+          "2020-04-01T00:00:00Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "summaries": {
+    "geoparquet:geometry_type": [
+      "Polygon"
+    ],
+    "vector:geometry_types": [
+      "Polygon"
+    ]
+  },
+  "assets": {
+    "blocks": {
+      "href": "./blocks.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 7144353416,
+      "file:checksum": "1220a6cad2bfcfb9557d7d184ca792e730bed849c21b61be046fffa60d8c3cd0497a",
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Census Counts — Blocks (PMTiles)",
+      "pmtiles:layers": [
+        "blocks"
+      ]
+    },
+    "partitioned_data": {
+      "href": "./state_fips=*/*.parquet",
+      "type": "application/vnd.apache.parquet",
+      "title": "2020 Census Counts — Blocks (GeoParquet, 52 state partitions)",
+      "description": "Glob pattern for 52 partitioned files",
+      "roles": [
+        "data"
+      ]
+    },
+    "geoparquet-items": {
+      "href": "./items.parquet",
+      "type": "application/vnd.apache.parquet",
+      "title": "2020 Census Counts — Blocks (GeoParquet, 52 state partitions)",
+      "roles": [
+        "collection-mirror"
+      ],
+      "file:size": 51740,
+      "file:checksum": "1220532d3bc5d0c59d5185b3815635da21ecdb39f740a9d7c6ecf5b6850e1842cc23"
+    },
+    "styles/black-share": {
+      "href": "./styles/black-share.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Black share",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents who are Black or African American alone, pale to deep green. Measured over all 5,806,512 blocks with a published value: 6 classes with breaks at 1%/5%/15%/35%/65%, which fall at the 59th/70th/82nd/91st/95th percentile of the national distribution. 28.97% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2126,
+      "file:checksum": "122033e39965bda6b40e0f5c3f84329c2f2cc9c5b18e1c1f87afe73e486a5a120f6e"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Population density",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "People per square kilometre of land area on roughly logarithmic steps, pale cream to deep plum; the lowest class is almost entirely the blocks with no residents at all. Measured over all 7,936,543 blocks with a published value: 7 classes with breaks at 1/10/50/200/800/2,500 people per km², which fall at the 28th/35th/44th/51st/63rd/84th percentile of the national distribution.",
+      "file:size": 1928,
+      "file:checksum": "1220b991a40181c557de0d01e079ec95c13fd7d05d017fd21fbc5798d8e614a5590b"
+    },
+    "styles/hispanic-share": {
+      "href": "./styles/hispanic-share.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Hispanic or Latino share",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents who are Hispanic or Latino of any race, pale apricot to burnt orange. Measured over all 5,806,512 blocks with a published value: 6 classes with breaks at 2%/6%/15%/30%/60%, which fall at the 40th/51st/68th/82nd/92nd percentile of the national distribution. 28.97% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2160,
+      "file:checksum": "12201b3ef825813bd33c39e8df024de30cc6f5546ec2345afc957c7e17764ddd83b4"
+    },
+    "styles/vacancy": {
+      "href": "./styles/vacancy.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Vacant housing units",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of housing units vacant on Census Day 2020, cream to dark red; blocks with no housing units draw as no data, not as zero. Measured over all 5,915,599 blocks with a published value: 6 classes with breaks at 5%/15%/30%/50%/75%, which fall at the 69th/77th/83rd/87th/91st percentile of the national distribution. 27.64% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2190,
+      "file:checksum": "1220f1f940ba184c34d2c29f2ee0cad666f708857771490827f8bfae0ccb9144221a"
+    },
+    "styles/white-share": {
+      "href": "./styles/white-share.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "White, non-Hispanic share",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents who are white alone and not Hispanic or Latino, pale to deep blue. Measured over all 5,806,512 blocks with a published value: 7 classes with breaks at 10%/30%/50%/70%/85%/95%, which fall at the 12th/20th/30th/47th/65th/80th percentile of the national distribution. 28.97% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2218,
+      "file:checksum": "1220f4c680bf5b649151e40ce2c26d0f77f48d39bac8d1b0ed20c411825107b5f2a4"
+    },
+    "source-pl94171": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/",
+      "type": "text/html",
+      "title": "2020 Census P.L. 94-171 Redistricting Data Summary Files — state directories",
+      "description": "The 52 state archives (`{State_Name}/{ab}2020.pl.zip`) this collection's counts were read from, 2020 Census P.L. 94-171 redistricting data. Each archive holds a pipe-delimited geoheader plus three segment files joined on `LOGRECNO`; block records are `SUMLEV = '750'`. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 26644,
+      "file:checksum": "122004ab523521fbf1394c2e64daa6592c3d91135f68cbb398469aaa9d9a9505a3f4"
+    },
+    "source-tiger-tabblock20": {
+      "href": "https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/",
+      "type": "text/html",
+      "title": "TIGER/Line 2024 TABBLOCK20 — 2020 census block shapefiles by state",
+      "description": "The block geometry: `tl_2024_{fips}_tabblock20.zip` per state, from which only `GEOID20` and `ALAND20` are kept. Unclipped, EPSG:4269 upstream, reprojected to EPSG:4326 with ogr2ogr. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 27980,
+      "file:checksum": "12209071fea7b129bc18160b0a779cc91a14f4bb677beee69afdf2698e21a6ef6d45"
+    },
+    "source-pl-import-scripts": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/rdo/about/2020-census-program/Phase3/SupportMaterials/2020PL_R_import_scripts.zip",
+      "type": "application/zip",
+      "title": "2020 P.L. 94-171 R import scripts (field layout)",
+      "description": "The Census Bureau's own machine-readable field dictionary for the P.L. 94-171 files. Every field position this build reads is pinned against the `colnames()` assignments in `R Versions/pl_part{1,2,3}_2020_dar.r` and `pl_geohd_2020_dar.r` — the citable layout source, rather than the technical-documentation PDF. Downloaded 2026-11-12.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 10767,
+      "file:checksum": "12208e218d347c9448e61a5b1f203e967394dea67b366dfc338af7939b3d05332738"
+    },
+    "doc-pl94171-techdoc": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/summary-file/2020Census_PL94_171Redistricting_StatesTechDoc_English.pdf",
+      "type": "application/pdf",
+      "title": "2020 Census P.L. 94-171 Redistricting Data Summary File — technical documentation",
+      "description": "Table shells, universes, file layout and the disclosure-avoidance description for the 2020 redistricting files.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1829750,
+      "file:checksum": "12205ceb388b1cb99375136773c0e0bf10f885619e1a01828f9251d0d7e041975c51"
+    },
+    "doc-geo-glossary": {
+      "href": "https://www.census.gov/programs-surveys/geography/about/glossary.html",
+      "type": "text/html",
+      "title": "Census Bureau geography program glossary",
+      "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 482492,
+      "file:checksum": "122018028aab7f8602b8d1758c40756ff4abec1f86a584ac1065350ab83614d4fe95"
+    }
+  },
+  "partition:glob": "./state_fips=*/*.parquet",
+  "keywords": [
+    "census",
+    "2020 Census",
+    "decennial census",
+    "P.L. 94-171",
+    "redistricting",
+    "population",
+    "race",
+    "ethnicity",
+    "voting age population",
+    "housing occupancy",
+    "group quarters",
+    "United States",
+    "census blocks"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.html",
+      "concepts": [
+        {
+          "id": "dec-pl94171",
+          "title": "2020 Census P.L. 94-171 Redistricting Data"
+        }
+      ]
+    }
+  ],
+  "table:row_count": 8174955,
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "15-character 2020 census block GEOID — state (2) + county (3) + tract (6) + block (4), e.g. `020130001001000`. The geoheader's `GEOCODE` field, not its `GEOID` (which carries a `7500000US` summary-level prefix); the build asserts `GEOCODE == STATE || COUNTY || TRACT || BLOCK` on every row. `substr(geoid, 1, 12)` is the block group, so blocks join the ACS block-group collections by prefix."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Two-letter USPS state or territory code (`MO`, `PR`, `GU`). Carried on every collection from the `STATEFP → USPS` lookup embedded in `tools/specs.py` rather than read off the boundary files, because the 2024 cartographic boundary block-group file has no `STUSPS` column while the tract, county and state files do. In the block collection this sits alongside the hive partition key `state_fips`, which carries the numeric FIPS code."
+    },
+    {
+      "name": "pop_total",
+      "type": "int32",
+      "description": "Total population of the block, from the 2020 Decennial Census. Universe: total population. Table P1, cell 1 (`P0010001`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1). Read from the 2020 P.L. 94-171 redistricting file at the field position pinned in `docs/blocks-build-notes.md` against the Census Bureau's own R import scripts. A complete count, not a survey estimate, so there is no margin of error — but it is protected by the 2020 disclosure-avoidance system, which injects noise at the block level and exact-counts states. Blocks tile their state exhaustively: summed over the 50 states and DC this column equals 331,449,281, the published 2020 resident population, exactly. 28.97% of all 8,174,955 blocks have a population of 0 (measured)."
+    },
+    {
+      "name": "pop_white",
+      "type": "int32",
+      "description": "Population reporting White alone. Universe: total population. Table P1, cell 3 (`P0010003`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1) — a race-alone count, crossing Hispanic origin, so it is not comparable to `pop_white_nh`."
+    },
+    {
+      "name": "pop_black",
+      "type": "int32",
+      "description": "Population reporting Black or African American alone. Universe: total population. Table P1, cell 4 (`P0010004`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1). Race alone, crossing Hispanic origin."
+    },
+    {
+      "name": "pop_aian",
+      "type": "int32",
+      "description": "Population reporting American Indian and Alaska Native alone. Universe: total population. Table P1, cell 5 (`P0010005`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1)."
+    },
+    {
+      "name": "pop_asian",
+      "type": "int32",
+      "description": "Population reporting Asian alone. Universe: total population. Table P1, cell 6 (`P0010006`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1)."
+    },
+    {
+      "name": "pop_nhpi",
+      "type": "int32",
+      "description": "Population reporting Native Hawaiian and Other Pacific Islander alone. Universe: total population. Table P1, cell 7 (`P0010007`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1)."
+    },
+    {
+      "name": "pop_other",
+      "type": "int32",
+      "description": "Population reporting Some Other Race alone. Universe: total population. Table P1, cell 8 (`P0010008`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1)."
+    },
+    {
+      "name": "pop_two_plus",
+      "type": "int32",
+      "description": "Population reporting two or more races. Universe: total population. Table P1, cell 9 (`P0010009`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1). The seven race-alone columns plus this one sum exactly to `pop_total`; P1's cell 2 (\"Population of one race\") is an intermediate subtotal and is deliberately not carried, which is why the sum closes."
+    },
+    {
+      "name": "pop_hispanic",
+      "type": "int32",
+      "description": "Population of Hispanic or Latino origin, of any race. Universe: total population. Table P2, cell 2 (`P0020002`) of [P2](https://data.census.gov/table/DECENNIALPL2020.P2). Hispanic origin is asked separately from race, so this crosses all seven race columns."
+    },
+    {
+      "name": "pop_white_nh",
+      "type": "int32",
+      "description": "Population reporting White alone and not Hispanic or Latino. Universe: total population. Table P2, cell 5 (`P0020005`) of [P2](https://data.census.gov/table/DECENNIALPL2020.P2) — the not-Hispanic branch, so this is a subset of `pop_white` and the two are not interchangeable."
+    },
+    {
+      "name": "vap_total",
+      "type": "int32",
+      "description": "Voting-age population: people 18 years and over. Universe: population 18 years and over. Table P3, cell 1 (`P0030001`) of [P3](https://data.census.gov/table/DECENNIALPL2020.P3). The table this column comes from is the one P.L. 94-171 exists to publish — the race detail behind redistricting — and `pop_total − vap_total` is the under-18 population."
+    },
+    {
+      "name": "housing_units",
+      "type": "int32",
+      "description": "Total housing units in the block, occupied and vacant. Universe: housing units. Table H1, cell 1 (`H0010001`) of [H1](https://data.census.gov/table/DECENNIALPL2020.H1). A complete count of units, not of households."
+    },
+    {
+      "name": "housing_occupied",
+      "type": "int32",
+      "description": "Occupied housing units. Universe: housing units. Table H1, cell 2 (`H0010002`) of [H1](https://data.census.gov/table/DECENNIALPL2020.H1). `housing_occupied + housing_vacant == housing_units` holds on every block in this collection; the build checks it (0 violations)."
+    },
+    {
+      "name": "housing_vacant",
+      "type": "int32",
+      "description": "Vacant housing units. Universe: housing units. Table H1, cell 3 (`H0010003`) of [H1](https://data.census.gov/table/DECENNIALPL2020.H1). Includes seasonal, for-rent and for-sale units, so it is not a measure of abandonment."
+    },
+    {
+      "name": "group_quarters_pop",
+      "type": "int32",
+      "description": "Population living in group quarters — correctional facilities, juvenile facilities, nursing facilities, college/university housing, military quarters, other group quarters. Universe: population in group quarters. Table P5, cell 1 (`P0050001`) of [P5](https://data.census.gov/table/DECENNIALPL2020.P5). Group-quarters residents are included in `pop_total` but live in no housing unit, which is how a block can hold hundreds of people and few or no units."
+    },
+    {
+      "name": "pct_white_nh",
+      "type": "double",
+      "description": "`pop_white_nh` as a percent of `pop_total`, 2 decimals. Universe: total population. NULL where `pop_total` is 0 — 28.97% of blocks (measured), because roughly three in ten census blocks are unpopulated by design. That is a property of census blocks, not missing data: filter `pop_total > 0` before averaging."
+    },
+    {
+      "name": "pct_black",
+      "type": "double",
+      "description": "`pop_black` as a percent of `pop_total`, 2 decimals. Universe: total population — and note the numerator is race-alone, crossing Hispanic origin, unlike the ACS collections' `pct_black`. NULL where `pop_total` is 0 (28.97% of blocks, measured)."
+    },
+    {
+      "name": "pct_hispanic",
+      "type": "double",
+      "description": "`pop_hispanic` as a percent of `pop_total`, 2 decimals. Universe: total population. NULL where `pop_total` is 0 (28.97% of blocks, measured)."
+    },
+    {
+      "name": "pct_vacant",
+      "type": "double",
+      "description": "`housing_vacant` as a percent of `housing_units`, 2 decimals. Universe: housing units. NULL where the block has no housing units — 27.64% of blocks (measured)."
+    },
+    {
+      "name": "pop_density",
+      "type": "double",
+      "description": "People per square kilometre of land area, rounded to 1 decimal: `pop_total / aland_sqkm`. NULL where `ALAND20` is 0 — a water-only block has no land to divide by; 2.92% of the 8,174,955 blocks are NULL on this column (measured)."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND20 / 1e6` from the TIGER/Line 2024 block file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. TIGER/Line 2024 `TABBLOCK20`, which is **not** shoreline-clipped: a coastal block extends to the 3-mile limit. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    },
+    {
+      "name": "state_fips",
+      "type": "string",
+      "description": "Hive partition key, synthesized from the directory name when the `state_fips=*/*.parquet` glob is read — the 2-digit state FIPS code of the partition. Not a column in the parquet files themselves. Named `state_fips` rather than `state` so it does not shadow the USPS `state` column."
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z"
+}

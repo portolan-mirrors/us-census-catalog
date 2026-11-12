@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:46.265648Z",
+      "breaking": false,
+      "assets": {
+        "states.pmtiles": {
+          "sha256": "217d11043bc9e1eb80006f8eeb322bb920abaa54c6585ef248b7bfe0c42e8621",
+          "size_bytes": 2991468,
+          "href": "states/states.pmtiles",
+          "mtime": 1794519531.3887033
+        },
+        "states.parquet": {
+          "sha256": "9cf5a9d82cfa3918c55441b5fb4922d6b324aa2b54bdb92ac717727dd34220cd",
+          "size_bytes": 4117759,
+          "href": "states/states.parquet",
+          "source_mtime": 1794518894.2619278,
+          "mtime": 1794518894.2619278,
+          "feature_count": 56,
+          "schema_fingerprint": "3c2154967ad844be"
+        },
+        "states.thumb.jpg": {
+          "sha256": "2dba7024b0c2832cffe385948ac558b05e7c1b9339caff98a14cdcc286b500cf",
+          "size_bytes": 3032,
+          "href": "states/states.thumb.jpg",
+          "mtime": 1794521086.7715724
+        }
+      },
+      "changes": [
+        "states.pmtiles",
+        "states.parquet",
+        "states.thumb.jpg"
+      ]
+    }
+  ]
+}

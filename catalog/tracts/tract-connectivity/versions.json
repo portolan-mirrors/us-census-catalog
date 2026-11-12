@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:37.640105Z",
+      "breaking": false,
+      "assets": {
+        "tract-connectivity.parquet": {
+          "sha256": "a1d5db1ada790f65ef9844c65c02cf95161aa09b96e82a5f1e12230e5fb565e2",
+          "size_bytes": 55929687,
+          "href": "tracts/tract-connectivity/tract-connectivity.parquet",
+          "source_mtime": 1794518884.4251826,
+          "mtime": 1794518884.4251826,
+          "feature_count": 85184,
+          "schema_fingerprint": "2fe74dd59d5df73c"
+        },
+        "tract-connectivity.pmtiles": {
+          "sha256": "b805b30f9142606aecde9fd67c48d121306e8c76ec81250993c187410efa1f3e",
+          "size_bytes": 243913470,
+          "href": "tracts/tract-connectivity/tract-connectivity.pmtiles",
+          "mtime": 1794519549.766765
+        }
+      },
+      "changes": [
+        "tract-connectivity.parquet",
+        "tract-connectivity.pmtiles"
+      ]
+    }
+  ]
+}

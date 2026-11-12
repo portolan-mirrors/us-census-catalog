@@ -1,33 +1,79 @@
 # US Census Demographics — Cloud-Native Mirror
 
-Nationwide U.S. Census Bureau statistics as cloud-native **GeoParquet** and
-**PMTiles**, from states down to the ~242,000 block groups and ~8.1 million
-2020 census blocks. [data.census.gov](https://data.census.gov/) is the
-authoritative source; this catalog is a mirror optimized for analysis and
-mapping, and every collection links the exact upstream files it was built
+![census](https://img.shields.io/badge/census-blue) ![ACS](https://img.shields.io/badge/ACS-blue) ![American Community Survey](https://img.shields.io/badge/American_Community_Survey-blue) ![decennial census](https://img.shields.io/badge/decennial_census-blue) ![demographics](https://img.shields.io/badge/demographics-blue) ![United States](https://img.shields.io/badge/United_States-blue) ![GeoParquet](https://img.shields.io/badge/GeoParquet-blue) ![PMTiles](https://img.shields.io/badge/PMTiles-blue) ![STAC](https://img.shields.io/badge/STAC-blue) ![cloud-native](https://img.shields.io/badge/cloud--native-blue)
+
+Nationwide United States census statistics as cloud-native GeoParquet and
+PMTiles with STAC metadata, at every census geography from states down to
+the 242,298 block groups and 8,174,955 blocks of the 2020 Census. Eleven
+collections carry curated [American Community Survey](https://www.census.gov/programs-surveys/acs.html)
+2020–2024 5-year indicators — income, poverty, age, race and ethnicity,
+education, housing cost and tenure, vehicles, commuting, internet access,
+health insurance, disability, nativity — every estimate with its margin of
+error at the 90% confidence level and the headline statistics with a
+coefficient of variation. One collection carries 2020 Decennial Census
+P.L. 94-171 counts at block level, hive-partitioned by state.
+[data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and
+every collection links the exact upstream census.gov files it was built
 from.
 
-This README is regenerated as collections land; per-collection READMEs carry
-the full documentation, including a description of every column.
+## Collections
 
-## What's here
+### [2020 Census Counts — Blocks](catalog/blocks/)
 
-- **Block groups** (`block-groups/`) — ACS 2020–2024 5-year indicators in
-  themed chunks: income, people, housing, connectivity. The finest geography
-  with income data.
-- **Tracts** (`tracts/`) — the same chunks plus a wellbeing chunk (health
-  insurance, disability, foreign-born, income by race).
-- **Counties and states** — all indicators in one collection per geography.
-- **Blocks** (`blocks/`) — 2020 Decennial Census (P.L. 94-171) population,
-  race and ethnicity, voting age, housing occupancy, and group quarters at
-  the smallest census geography.
+2020 Decennial Census counts for all **8,174,955** census blocks in the 50 states, the District of Columbia and Puerto Rico — the smallest geography the Census Bureau publishes anything for. From t...
 
-Every ACS estimate ships with its margin of error (`*_moe`, 90% confidence),
-and headline statistics with a coefficient of variation (`*_cv`) so you can
-grey out unreliable geographies. Start with the [agent guide](AGENTS.md) for
-tested queries.
+### [All Indicators — Counties](catalog/counties/)
+
+Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
+
+### [All Indicators — States](catalog/states/)
+
+Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
+
+## Coverage
+
+**Spatial Extent**
+
+- West: -179.2311, South: -14.5487, East: 179.8597, North: 71.4398
+
+**Temporal Extent**
+
+- 2020-01-01 to 2024-12-31
+
+## Source
+
+[https://data.census.gov/](https://data.census.gov/)
+
+## Processing Notes
+
+Built from the Census Bureau's own published files over plain HTTPS, with no
+API key: the ACS 2020–2024 5-year table-based Summary File, the 2024
+cartographic boundary files, the 2020 P.L. 94-171 redistricting archives,
+and TIGER/Line 2024 TABBLOCK20 blocks. Extracted 2026-11-12.
+
+Statistics follow the Census Bureau's own methods: margins of error at the
+90% confidence level on every ACS estimate, quadrature for sums and the
+proportion/ratio formulas for percentages, jam values converted to NULL,
+coefficients of variation on headline columns, and every ACS table line
+number pinned against the release's table shells so a vintage bump that
+moves a line fails the build instead of publishing a mislabeled column.
+
+Each collection's own processing notes name its upstream files, its
+derivations and its known issues. Not an official Census Bureau product.
+
+
+## Attribution
+
+U.S. Census Bureau
 
 ## License
 
-U.S. Census Bureau data is a U.S. Government work in the public domain,
-published here as CC0-1.0. Cite the U.S. Census Bureau.
+[CC0-1.0](https://www.census.gov/about/policies/open-gov/open-data.html)
+
+## Contact
+
+Chris Holmes <cholmes@9eo.org>
+
+---
+
+*Generated by [Portolan](https://github.com/portolan-sdi/portolan-cli) from STAC metadata and .portolan/metadata.yaml*

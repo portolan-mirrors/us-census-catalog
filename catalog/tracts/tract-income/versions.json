@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:04:22.261342Z",
+      "breaking": false,
+      "assets": {
+        "tract-income.pmtiles": {
+          "sha256": "cfec1dcc8e09994772554333f88b61472f335849fd2840ac8d926430ed220f25",
+          "size_bytes": 220509520,
+          "href": "tracts/tract-income/tract-income.pmtiles",
+          "mtime": 1794519527.2378647
+        },
+        "tract-income.parquet": {
+          "sha256": "33058c93e7fe3efcaa759077f057c9113dc1c848df3b74ac3a27f2d4d2ff9e63",
+          "size_bytes": 55582340,
+          "href": "tracts/tract-income/tract-income.parquet",
+          "source_mtime": 1794518873.2343287,
+          "mtime": 1794518873.2343287,
+          "feature_count": 85184,
+          "schema_fingerprint": "1c257b0d313f3770"
+        },
+        "tract-income.thumb.jpg": {
+          "sha256": "f20c80a3fb9b1ffdbf46ee79e743233fb392c9e711e13e978090f27a1edbf5a7",
+          "size_bytes": 2842,
+          "href": "tracts/tract-income/tract-income.thumb.jpg",
+          "mtime": 1794521068.7103405
+        }
+      },
+      "changes": [
+        "tract-income.pmtiles",
+        "tract-income.parquet",
+        "tract-income.thumb.jpg"
+      ]
+    }
+  ]
+}

@@ -6,29 +6,30 @@
   ],
   "id": "us-census",
   "title": "US Census Demographics — Cloud-Native Mirror",
-  "description": "Nationwide United States census statistics as cloud-native GeoParquet and PMTiles, at every census geography from states down to the ~242,000 block groups and ~8 million 2020 census blocks. Block-group and tract collections carry curated indicators from the U.S. Census Bureau's American Community Survey (ACS) 2020–2024 5-year estimates — income, poverty, age, race and ethnicity, education, housing costs and tenure, vehicles, commuting, and internet access — every estimate with its margin of error, and headline statistics with a reliability (coefficient of variation) column. Block collections carry 2020 Decennial Census counts. This is a mirror built from the Census Bureau's published summary files and cartographic boundary files; [data.census.gov](https://data.census.gov/) is the authoritative source for all of it. Read the [agent guide](AGENTS.md) before you query.",
+  "description": "Nationwide United States census statistics as cloud-native GeoParquet and\nPMTiles with STAC metadata, at every census geography from states down to\nthe 242,298 block groups and 8,174,955 blocks of the 2020 Census. Eleven\ncollections carry curated [American Community Survey](https://www.census.gov/programs-surveys/acs.html)\n2020–2024 5-year indicators — income, poverty, age, race and ethnicity,\neducation, housing cost and tenure, vehicles, commuting, internet access,\nhealth insurance, disability, nativity — every estimate with its margin of\nerror at the 90% confidence level and the headline statistics with a\ncoefficient of variation. One collection carries 2020 Decennial Census\nP.L. 94-171 counts at block level, hive-partitioned by state.\n[data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and\nevery collection links the exact upstream census.gov files it was built\nfrom.",
   "updated": "2026-11-12T00:00:00Z",
   "license": "CC0-1.0",
   "providers": [
     {
       "name": "U.S. Census Bureau",
       "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
-      "roles": ["producer", "licensor"],
+      "roles": [
+        "producer",
+        "licensor"
+      ],
       "url": "https://www.census.gov/"
     },
     {
       "name": "Portolan Mirrors",
       "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
-      "roles": ["processor", "host"],
+      "roles": [
+        "processor",
+        "host"
+      ],
       "url": "https://github.com/portolan-mirrors/us-census-catalog"
     }
   ],
   "links": [
-    {
-      "rel": "self",
-      "href": "https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json",
-      "type": "application/json"
-    },
     {
       "rel": "root",
       "href": "./catalog.json",
@@ -38,7 +39,7 @@
       "rel": "describedby",
       "href": "./README.md",
       "type": "text/markdown",
-      "title": "Catalog README"
+      "title": "Human-readable documentation"
     },
     {
       "rel": "agents",
@@ -65,6 +66,36 @@
       "rel": "license",
       "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
       "title": "U.S. Census Bureau open data policy (public domain, U.S. Government work)"
+    },
+    {
+      "rel": "child",
+      "href": "./block-groups/catalog.json",
+      "type": "application/json",
+      "title": "Block Groups"
+    },
+    {
+      "rel": "child",
+      "href": "./tracts/catalog.json",
+      "type": "application/json",
+      "title": "Census Tracts"
+    },
+    {
+      "rel": "child",
+      "href": "./counties/collection.json",
+      "type": "application/json",
+      "title": "All Indicators — Counties"
+    },
+    {
+      "rel": "child",
+      "href": "./states/collection.json",
+      "type": "application/json",
+      "title": "All Indicators — States"
+    },
+    {
+      "rel": "child",
+      "href": "./blocks/collection.json",
+      "type": "application/json",
+      "title": "2020 Census Counts — Blocks"
     }
   ]
 }
