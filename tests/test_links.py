@@ -91,6 +91,14 @@ for path in documents:
             skipped += 1
             continue
         checked += 1
+        if "*" in href:
+            # A partitioned-data glob (e.g. ./state_fips=*/*.parquet) names a
+            # set of files, not one file: it passes when it matches anything.
+            if not any(path.parent.glob(href.lstrip("./"))):
+                errors.append(
+                    f"{rel_path}: asset {key} glob {href} matches nothing"
+                )
+            continue
         if not (path.parent / href).resolve().exists():
             errors.append(f"{rel_path}: asset {key} -> {href} does not exist")
 

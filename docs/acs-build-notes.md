@@ -53,9 +53,12 @@ Already staged under `staging/census-cache/` by `tools/download_sources.sh`
 Tables read: B01001 B01002 B01003 B03002 B05002 B08301 B08303 B15003 B18101
 B19013 B19013B B19013D B19013H B19013I B19301 B22010 B23025 B25002 B25003
 B25024 B25034 B25044 B25064 B25070 B25077 B26001 B27001 B28001 B28002
-C17002 (30 tables). `acsdt5y2024-b17020b.dat` is staged but unused: the
-St. Louis catalog derives `pct_below_poverty_black` from it at tract level,
-and that column is not in this catalog's column set.
+B17020B C17002 (31 tables). B17020B (line 2 over line 1, with CV) feeds
+`pct_below_poverty_black`, added to tract-wellbeing, counties, and states
+after the first build (orchestrator edit to `specs.py`, full rebuild
+re-validated 2026-11-12 22:28; tract-wellbeing has 34 columns,
+counties/states 112). Measured NULL rates for it: 12.84% tract /
+5.87% county / 7.14% state.
 
 Cartographic boundary files, not TIGER/Line: TIGER extends block groups
 into open water, the CB files clip to the shoreline, which is what a
@@ -64,7 +67,7 @@ choropleth wants.
 ## Commands
 
 ```sh
-python3 tools/build_acs.py --stage extract     # ~83 s, 30 tables
+python3 tools/build_acs.py --stage extract     # ~83 s, 31 tables
 python3 tools/build_acs.py --stage geometry    # ~37 s, 4 shapefiles
 python3 tools/build_acs.py --stage assemble    # ~86 s, 11 collections
 python3 tools/build_acs.py --validate          # the checks below

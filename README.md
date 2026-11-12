@@ -36,13 +36,23 @@ Run from the repo root, in order:
 
 | Step | Command | What it does |
 |---|---|---|
-| 1 | `bash tools/download_sources.sh` | ACS table-based Summary File tables, cartographic boundary files, TIGER blocks, PL 94-171 (plain HTTPS, no API key) into `staging/` |
+| 1 | `bash tools/download_sources.sh`<br>`bash tools/download_blocks.sh` | ACS table-based Summary File tables, cartographic boundary files, TIGER blocks, PL 94-171 (plain HTTPS, no API key) into `staging/` |
 | 2 | `python3 tools/build_acs.py` | Parse national ACS tables, compute indicators with Census MOE formulas, join to boundary geometry → GeoParquet per collection |
-| 3 | `python3 tools/make_tiles.py` | PMTiles per collection via [tylertoo](https://github.com/geoparquet-io/tylertoo), with A5 cell aggregation at coarse zooms |
-| 4 | `python3 tools/make_stac.py` | STAC collections: column descriptions, providers, source assets, styles |
-| 5 | `python3 tools/make_styles.py` | MapLibre styles with legends, class breaks measured from national distributions |
-| 6 | `python3 tests/run_all.py` | Gates |
-| 7 | `python3 tools/publish.py --confirm` | Publish to Source Cooperative |
+| 3 | `python3 tools/build_blocks.py` | 2020 PL 94-171 counts joined to TIGER blocks → `catalog/blocks/`, hive-partitioned by state |
+| 4 | `python3 tools/make_tiles.py` | PMTiles per collection via [tylertoo](https://github.com/geoparquet-io/tylertoo), with A5 cell aggregation at coarse zooms |
+| 5 | `python3 tools/collection_meta.py --write` | `.portolan/metadata.yaml` per collection — titles, descriptions, processing notes, known issues. Must precede `portolan add`, which reads them |
+| 6 | `portolan add catalog/<collection>/ …` | The CLI writes each `collection.json` (and the 52 block items) |
+| 7 | `python3 tools/make_styles.py` | MapLibre styles with legends, class breaks measured from national distributions |
+| 8 | `python3 tools/make_stac.py` | Finalizes the STAC: a description for every column (verified against the parquet schema), providers, license, source assets, tiles and style assets, checksums, extents, sub-catalogs |
+| 9 | `python3 tests/run_all.py` | Gates |
+| 10 | `python3 tools/publish.py --confirm` | Publish to Source Cooperative |
+
+Documentation lives in three modules: [`tools/column_docs.py`](tools/column_docs.py)
+(every column — universe quoted from the ACS table shells, table linked, derivation
+named), [`tools/collection_meta.py`](tools/collection_meta.py) (titles, descriptions,
+keywords, upstream source assets, `metadata.yaml`), and each collection's own
+`AGENTS.md`. `make_stac.py` fails the build if a column in a published parquet has no
+description.
 
 ## Licensing
 

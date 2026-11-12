@@ -1,0 +1,47 @@
+title: "2020 Census Counts — Blocks"
+description: |
+  2020 Decennial Census counts for all **8,174,955** census blocks in the 50 states, the District of Columbia and Puerto Rico — the smallest geography the Census Bureau publishes anything for. From the [2020 Census P.L. 94-171 Redistricting Data Summary Files](https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.html): total population and the seven race-alone counts plus two or more races ([P1](https://data.census.gov/table/DECENNIALPL2020.P1)), Hispanic or Latino and White-alone-not-Hispanic ([P2](https://data.census.gov/table/DECENNIALPL2020.P2)), the voting-age population 18 and over ([P3](https://data.census.gov/table/DECENNIALPL2020.P3)), housing units occupied and vacant ([H1](https://data.census.gov/table/DECENNIALPL2020.H1)), and the group-quarters population ([P5](https://data.census.gov/table/DECENNIALPL2020.P5)), with derived shares and population density.
+
+  These are **complete counts, not survey estimates**, so there are no margins of error and no coefficients of variation — the `*_moe` and `*_cv` columns the ACS collections carry do not exist here. They are, however, protected by the 2020 disclosure-avoidance system, which injects noise at block level while holding state totals exact: block counts are reliable in aggregate and should be read with care one block at a time. The Census Bureau publishes no income, education or commuting data at block level — for that, move up to the [block-group collections](../block-groups/catalog.json).
+
+  Roughly three in ten census blocks are unpopulated by design (28.97% have `pop_total = 0`, measured), so `pct_white_nh`, `pct_black` and `pct_hispanic` are NULL on that share of rows, and `pct_vacant` is NULL on the 27.64% with no housing units. That is a property of census blocks, not missing data: filter `pop_total > 0` before averaging a rate. Summed over the 50 states and DC, `pop_total` equals 331,449,281 — the published 2020 resident population, exactly; Puerto Rico equals 3,285,874.
+
+  Geometry is [TIGER/Line 2024 `TABBLOCK20`](https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/), not the cartographic boundary files the ACS collections use, because no cartographic edition is published for blocks. TIGER is unclipped, so a coastal block extends to the 3-mile limit rather than the shoreline, and `aland_sqkm` comes from the file's own `ALAND20` land-area field (water-only blocks have `ALAND20 = 0` and so a NULL `pop_density`). Field positions in the P.L. 94-171 files are pinned against the Census Bureau's own [R import scripts](https://www2.census.gov/programs-surveys/decennial/rdo/about/2020-census-program/Phase3/SupportMaterials/2020PL_R_import_scripts.zip) rather than read off a PDF — see the build notes in the repository for the field table and the three independent checks behind it.
+
+  The collection is **hive-partitioned by state**: 52 parquet files under `state_fips=<FIPS>/`, one STAC item each with its own bbox and row count, queryable as one table through the glob `state_fips=*/*.parquet` with `hive_partitioning=true`. The synthesized `state_fips` key carries the numeric FIPS code and sits alongside the `state` column's USPS code. Pull one state and you download one file.
+
+  The PMTiles archive carries the same columns as the GeoParquet. At feature zooms the tiles are the census geographies; at coarse zooms they are [A5](https://a5geo.org/) cell aggregations built by [tylertoo](https://github.com/geoparquet-io/tylertoo) — counts summed, rates and medians averaged unweighted over the geographies in the cell — because thinning hundreds of thousands of polygons at a national zoom would show a biased subset (small urban geographies drop first) rather than less data. Cell and feature zooms share column names, so one style expression classifies both. The aggregation is a visualization aid: statistics come from the GeoParquet, never from the tiles.
+
+  This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
+contact:
+  name: "Chris Holmes"
+  email: "cholmes@9eo.org"
+license: "CC0-1.0"
+license_url: "https://www.census.gov/about/policies/open-gov/open-data.html"
+attribution: "U.S. Census Bureau"
+source_url: "https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/"
+keywords: ["census", "2020 Census", "decennial census", "P.L. 94-171", "redistricting", "population", "race", "ethnicity", "voting age population", "housing occupancy", "group quarters", "United States", "census blocks"]
+processing_notes: |
+  Built 2026-11-12 from two sets of Census Bureau files, downloaded the same day: the 2020 P.L. 94-171 redistricting archives (https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/) for the counts, and TIGER/Line 2024 TABBLOCK20 shapefiles (https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/) for the geometry. 52 states (50 + DC + PR), 104 archives, 7.4 GB.
+
+  Per state: ogr2ogr converts the shapefile to EPSG:4326 parquet keeping only `GEOID20` and `ALAND20`; DuckDB joins the four pipe-delimited P.L. files on `LOGRECNO`, filters `SUMLEV = '750'`, joins to the geometry on `GEOID20 = GEOCODE`, and derives the shares and density; `gpio sort hilbert --add-bbox` writes the final partition. Field positions are pinned against the Census Bureau's own R import scripts, field counts are re-checked per state and abort on a mismatch, and the geoheader is read as Latin-1 (it carries ISO-8859-1 place names; a UTF-8 read fails on Arizona).
+
+  Validated: `pop_total` over the 50 states + DC equals the published 331,449,281 exactly and Puerto Rico 3,285,874; `housing_occupied + housing_vacant == housing_units` on every block; GEOIDs unique across all 52 partitions; zero orphans in either direction between TIGER and the P.L. files; one schema across all partitions.
+
+  Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo, with A5 cell aggregation at coarse zooms (counts summed, rates averaged) — a visualization aid, not a statistical product.
+known_issues: |
+  28.97% of blocks have `pop_total = 0` (measured), so `pct_white_nh`, `pct_black` and `pct_hispanic` are NULL on that share of rows, and `pct_vacant` is NULL on the 27.64% with no housing units. By design — most census blocks are unpopulated. Filter `pop_total > 0` before averaging a rate.
+
+  2020 block counts are protected by the Census Bureau's disclosure-avoidance system, which injects noise at block level while holding state totals exact. Reliable in aggregate; read a single block's counts with care.
+
+  Geometry is TIGER/Line, which is not shoreline-clipped: a coastal block extends to the 3-mile limit. Water-only blocks have `ALAND20 = 0` and so a NULL `pop_density`.
+
+  The race columns are race-alone counts crossing Hispanic origin (P1), while `pop_white_nh` is the not-Hispanic branch of P2. The two are not interchangeable, and `pct_black` here is not the same measure as `pct_black` in the ACS collections, which is non-Hispanic Black alone.
+
+  Blocks carry 2020 Decennial counts only. The Census Bureau publishes no income, education, commuting or internet data below block group, and this collection invents none.
+examples:
+  - engine: duckdb
+    description: "Preview the first rows, straight off the published file"
+    code: |
+      INSTALL httpfs; LOAD httpfs;
+      SELECT * FROM read_parquet('https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=*/*.parquet', hive_partitioning=true) LIMIT 5;

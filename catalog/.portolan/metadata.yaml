@@ -1,0 +1,40 @@
+title: "US Census Demographics — Cloud-Native Mirror"
+description: |
+  Nationwide United States census statistics as cloud-native GeoParquet and
+  PMTiles with STAC metadata, at every census geography from states down to
+  the 242,298 block groups and 8,174,955 blocks of the 2020 Census. Eleven
+  collections carry curated [American Community Survey](https://www.census.gov/programs-surveys/acs.html)
+  2020–2024 5-year indicators — income, poverty, age, race and ethnicity,
+  education, housing cost and tenure, vehicles, commuting, internet access,
+  health insurance, disability, nativity — every estimate with its margin of
+  error at the 90% confidence level and the headline statistics with a
+  coefficient of variation. One collection carries 2020 Decennial Census
+  P.L. 94-171 counts at block level, hive-partitioned by state.
+  [data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and
+  every collection links the exact upstream census.gov files it was built
+  from.
+contact:
+  name: 'Chris Holmes'
+  email: 'cholmes@9eo.org'
+license: "CC0-1.0"
+license_url: "https://www.census.gov/about/policies/open-gov/open-data.html"
+attribution: "U.S. Census Bureau"
+source_url: "https://data.census.gov/"
+keywords: ["census", "ACS", "American Community Survey", "decennial census",
+  "demographics", "United States", "GeoParquet", "PMTiles", "STAC",
+  "cloud-native"]
+processing_notes: |
+  Built from the Census Bureau's own published files over plain HTTPS, with no
+  API key: the ACS 2020–2024 5-year table-based Summary File, the 2024
+  cartographic boundary files, the 2020 P.L. 94-171 redistricting archives,
+  and TIGER/Line 2024 TABBLOCK20 blocks. Extracted 2026-11-12.
+
+  Statistics follow the Census Bureau's own methods: margins of error at the
+  90% confidence level on every ACS estimate, quadrature for sums and the
+  proportion/ratio formulas for percentages, jam values converted to NULL,
+  coefficients of variation on headline columns, and every ACS table line
+  number pinned against the release's table shells so a vintage bump that
+  moves a line fails the build instead of publishing a mislabeled column.
+
+  Each collection's own processing notes name its upstream files, its
+  derivations and its known issues. Not an official Census Bureau product.
