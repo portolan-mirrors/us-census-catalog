@@ -9,6 +9,7 @@ cd "$CACHE"
 
 ACS_SF="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF"
 CB="https://www2.census.gov/geo/tiger/GENZ2024/shp"
+CB2020="https://www2.census.gov/geo/tiger/GENZ2020/shp"
 
 get () {
   local url="$1"
@@ -24,6 +25,15 @@ get "$CB/cb_2024_us_bg_500k.zip"
 get "$CB/cb_2024_us_tract_500k.zip"
 get "$CB/cb_2024_us_county_500k.zip"
 get "$CB/cb_2024_us_state_500k.zip"
+get "$CB/cb_2024_us_place_500k.zip"
+# Congressional districts: the file name carries the congress number, and
+# 119 is the congress the ACS 2024 5-year release tabulates (its GEO_ID
+# prefix is 5001900US). See docs/acs-build-notes.md, "Wave 3".
+get "$CB/cb_2024_us_cd119_500k.zip"
+# ZCTAs: GENZ2020 is the ONLY cartographic ZCTA edition the Census Bureau
+# publishes (GENZ2021-GENZ2024 carry no zcta file), and the 2020-based
+# ZCTAs are the vintage the ACS tabulates (prefix 860Z200US).
+get "$CB2020/cb_2020_us_zcta520_500k.zip"
 
 # --- ACS 2020-2024 5-year table shells (pins line numbers) ---
 get "$ACS_SF/documentation/ACS20245YR_Table_Shells.txt"

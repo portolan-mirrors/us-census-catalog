@@ -60,19 +60,20 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 | File | Size | Checksum |
 |------|------|----------|
-| ./blocks.pmtiles | 6.7 GB | 1220a6cad2bf... |
 | ./state_fips=*/*.parquet | - | - |
-| ./items.parquet | 50.5 KB | 1220532d3bc5... |
+| ./items.parquet | 50.4 KB | 12209fad0824... |
+| ./thumbnail.png | 66.9 KB | 1220c57df1ec... |
+| ./blocks.pmtiles | 6.7 GB | 1220a6cad2bf... |
 | ./styles/black-share.json | 2.1 KB | 122033e39965... |
 | ./styles/default.json | 1.9 KB | 1220b991a401... |
 | ./styles/hispanic-share.json | 2.1 KB | 12201b3ef825... |
 | ./styles/vacancy.json | 2.1 KB | 1220f1f940ba... |
 | ./styles/white-share.json | 2.2 KB | 1220f4c680bf... |
-| https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/ | - | - |
-| https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/ | - | - |
-| https://www2.census.gov/programs-surveys/decennial/rdo/about/2020-census-program/Phase3/SupportMaterials/2020PL_R_import_scripts.zip | 10.5 KB | - |
-| https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/summary-file/2020Census_PL94_171Redistricting_StatesTechDoc_English.pdf | - | - |
-| https://www.census.gov/programs-surveys/geography/about/glossary.html | - | - |
+| https://www2.census.gov/programs-surveys/decennial/2020/data/01-Redistricting_File--PL_94-171/ | 26.0 KB | 122004ab5235... |
+| https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/ | 27.3 KB | 12209071fea7... |
+| https://www2.census.gov/programs-surveys/decennial/rdo/about/2020-census-program/Phase3/SupportMaterials/2020PL_R_import_scripts.zip | 10.5 KB | 12208e218d34... |
+| https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/summary-file/2020Census_PL94_171Redistricting_StatesTechDoc_English.pdf | 1.7 MB | 12205ceb388b... |
+| https://www.census.gov/programs-surveys/geography/about/glossary.html | 471.2 KB | 122018028aab... |
 | state_fips=01/01.parquet | 117.0 MB | 122020d8aa99... |
 | state_fips=02/02.parquet | 67.3 MB | 12201a386ae6... |
 | state_fips=04/04.parquet | 96.3 MB | 122074eea609... |
@@ -131,7 +132,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 ```python
 import geopandas as gpd
 
-gdf = gpd.read_parquet("./blocks.pmtiles")
+gdf = gpd.read_parquet("./state_fips=*/*.parquet")
 print(gdf.head())
 ```
 

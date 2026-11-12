@@ -10,9 +10,9 @@ Geometries are the Census Bureau's [2024 cartographic boundary files](https://ww
 
 The join is driven by geometry, so a geography with 2024 boundaries but no ACS tabulation keeps its row with NULL values instead of disappearing: 4 rows (American Samoa, Guam, the Northern Mariana Islands, the U.S. Virgin Islands) in the island areas, which have cartographic boundaries but no ACS 5-year estimates because the Island Areas run a separate decennial-only program. Keeping these rows means a national map has no holes and a consumer can see the absence; dropping them would make "every US geography" quietly mean something narrower.
 
-Finer geographies are published as themed chunks: [block groups](../block-groups/catalog.json) carry income, people, housing and connectivity, and [census tracts](../tracts/catalog.json) add a wellbeing chunk. GEOIDs nest by prefix, so `substr(geoid, 1, 5)` on a tract row is its county and `substr(geoid, 1, 2)` its state.
+Finer geographies are published as themed chunks: [block groups](../block-groups/catalog.json) carry income, people, housing and connectivity, and [census tracts](../tracts/catalog.json) add a wellbeing chunk. GEOIDs nest by prefix, so `substr(geoid, 1, 5)` on a tract row is its county and `substr(geoid, 1, 2)` its state. The same wide column set is also published for [ZCTAs](../zctas/collection.json), [places](../places/collection.json) and [congressional districts](../congressional-districts/collection.json).
 
-The PMTiles archive carries the same columns as the GeoParquet. At feature zooms the tiles are the census geographies; at coarse zooms they are [A5](https://a5geo.org/) cell aggregations built by [tylertoo](https://github.com/geoparquet-io/tylertoo) — counts summed, rates and medians averaged unweighted over the geographies in the cell — because thinning hundreds of thousands of polygons at a national zoom would show a biased subset (small urban geographies drop first) rather than less data. Cell and feature zooms share column names, so one style expression classifies both. The aggregation is a visualization aid: statistics come from the GeoParquet, never from the tiles.
+The PMTiles archive carries the same columns as the GeoParquet, minus the `*_moe` columns, and at every zoom the tiles are the real census geographies — no [A5](https://a5geo.org/) cell aggregation, unlike the catalog's finer collections, because there are few enough features here to draw them all at a national zoom. Built with [tylertoo](https://github.com/geoparquet-io/tylertoo). Statistics still come from the GeoParquet: margins of error are not in the tiles.
 
 This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
 
@@ -149,8 +149,8 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 | File | Size | Checksum |
 |------|------|----------|
 | ./states.parquet | 3.9 MB | 12209cf5a9d8... |
-| ./states.thumb.jpg | 3.0 KB | 12202dba7024... |
 | ./states.pmtiles | 2.9 MB | 1220217d1104... |
+| ./thumbnail.png | 25.7 KB | 1220a1ce7d0f... |
 | ./styles/default.json | 2.2 KB | 1220ca308170... |
 | ./styles/density.json | 2.2 KB | 1220b39e0353... |
 | ./styles/home-value.json | 2.2 KB | 1220f1188c1b... |
@@ -188,10 +188,10 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 | https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-c17002.dat | 40.1 MB | 1220dc3dc675... |
 | https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt | 5.4 MB | 12205b46f4af... |
 | https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_state_500k.zip | 3.1 MB | 12203e81cbb6... |
-| https://www.census.gov/programs-surveys/acs/library/handbooks/general.html | - | - |
-| https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf | - | - |
-| https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf | - | - |
-| https://www.census.gov/programs-surveys/geography/about/glossary.html | - | - |
+| https://www.census.gov/programs-surveys/acs/library/handbooks/general.html | 349.4 KB | 122063f2cc20... |
+| https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf | 378.9 KB | 12204d325820... |
+| https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf | 1.1 MB | 12206e0c5b1a... |
+| https://www.census.gov/programs-surveys/geography/about/glossary.html | 471.2 KB | 122018028aab... |
 
 ## Quick Start
 
@@ -213,13 +213,15 @@ print(gdf.head())
 
 ## Processing Notes
 
-Built 2026-11-12 from the ACS 2020–2024 5-year table-based Summary File (https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/), downloaded the same day over plain HTTPS — the summary file needs no API key. Tables read for this collection: B01001, B01002, B01003, B03002, B05002, B08301, B08303, B15003, B17020B, B18101, B19013, B19013B, B19013D, B19013H, B19013I, B19301, B22010, B23025, B25002, B25003, B25024, B25034, B25044, B25064, B25070, B25077, B26001, B27001, B28001, B28002, C17002. Each national `.dat` file is one row per geography with estimate and margin of error side by side, and all four summary levels are picked off `GEO_ID` by prefix in a single pass per file.
+Built 2026-11-12 from the ACS 2020–2024 5-year table-based Summary File (https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/), downloaded the same day over plain HTTPS — the summary file needs no API key. Tables read for this collection: B01001, B01002, B01003, B03002, B05002, B08301, B08303, B15003, B17020B, B18101, B19013, B19013B, B19013D, B19013H, B19013I, B19301, B22010, B23025, B25002, B25003, B25024, B25034, B25044, B25064, B25070, B25077, B26001, B27001, B28001, B28002, C17002. Each national `.dat` file is one row per geography with estimate and margin of error side by side, and every summary level is picked off `GEO_ID` by prefix in a single pass per file — this collection's is `0400000US`, read off the files themselves rather than taken from a summary-level table.
 
-Jam values (the sentinels the ACS publishes in place of unestimable values, e.g. -666666666 for an uncomputable median, and -555555555 for a controlled MOE) become NULL: any estimate or margin at or below -111111111 is dropped rather than published as a number. Counts are sums of the specified lines with margins added in quadrature; percentages use the Census Bureau's proportion formula with the ratio formula as fallback; medians are passed through untouched; coefficients of variation are `moe / 1.645 / estimate` on the headline columns. Every line number is pinned against the release's own table shells before the build starts (43 pins verified, 0 failures), so a vintage bump that moves a line fails loudly instead of publishing a mislabeled column.
+Jam values (the sentinels the ACS publishes in place of unestimable values, e.g. -666666666 for an uncomputable median, and -555555555 for a controlled MOE) become NULL: any estimate or margin at or below -111111111 is dropped rather than published as a number. Counts are sums of the specified lines with margins added in quadrature; percentages use the Census Bureau's proportion formula with the ratio formula as fallback; medians are passed through untouched; coefficients of variation are `moe / 1.645 / estimate` on the headline columns. Every line number is pinned against the release's own table shells before the build starts (44 pins verified, 0 failures, plus 4 derived line groups resolved from the shells), so a vintage bump that moves a line fails loudly instead of publishing a mislabeled column.
 
-Geometry is the 2024 cartographic boundary file for states and state equivalents (1:500,000), reprojected to EPSG:4326 with ogr2ogr — not DuckDB's `ST_Transform`, which computes correct coordinates but stamps the source CRS into the GeoParquet metadata. Geometry drives the join, so a geography with boundaries but no ACS tabulation keeps its row with NULL values.
+Geometry is the 2024 cartographic boundary file (cb_2024_us_state_500k.zip) for states and state equivalents (1:500,000), reprojected to EPSG:4326 with ogr2ogr — not DuckDB's `ST_Transform`, which computes correct coordinates but stamps the source CRS into the GeoParquet metadata. Geometry drives the join, so a geography with boundaries but no ACS tabulation keeps its row with NULL values.
 
 Cross-checked end to end against the published St. Louis census catalog, which runs the same formulas on the same vintage: 314 of 314 block groups joined, 0 mismatches on median household income, its margin of error, the poverty rate and its margin of error — exact equality, not approximate.
+
+
 
 Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo, with A5 cell aggregation at coarse zooms (counts summed, rates averaged) — a visualization aid, not a statistical product.
 
@@ -238,11 +240,11 @@ Chris Holmes <cholmes@9eo.org>
 
 ## Known Issues
 
-Island areas carry geometry but no ACS data. American Samoa, Guam, the Northern Mariana Islands and the U.S. Virgin Islands have 2024 cartographic boundaries but no ACS 5-year estimates, so their rows publish with NULL values rather than being dropped: 4 states, 13 county equivalents, 126 tracts, 405 block groups.
+Island areas carry geometry but no ACS data. American Samoa, Guam, the Northern Mariana Islands and the U.S. Virgin Islands have cartographic boundaries but no ACS 5-year estimates, so their rows publish with NULL values rather than being dropped: 4 states, 13 county equivalents, 126 tracts, 405 block groups, 17 ZCTAs, 279 places and 4 delegate districts.
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts summed, rates and medians averaged unweighted. Statistics come from the GeoParquet.
+The PMTiles archive is real geographies at every zoom, with no A5 cell aggregation (the catalog's finer collections aggregate at coarse zooms; this one has few enough features not to). `*_moe` columns are not in the tiles — statistics come from the GeoParquet.
 
 
 ---

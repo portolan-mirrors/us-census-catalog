@@ -1,12 +1,16 @@
 # ACS build notes
 
-How the eleven ACS collections in this catalog are derived, line by line,
+How the fourteen ACS collections in this catalog are derived, line by line,
 and what the build measured when it ran. Every number below came out of the
 build or out of a query against its output; nothing here is estimated.
 
-Build date: 2026-11-12. Source release: **ACS 2020–2024 5-year estimates**
-(`acsdt5y2024`, table-based Summary File). Boundaries: **2024 cartographic
-boundary files** (GENZ2024, 500k), which match the ACS vintage.
+Build date: 2026-11-12, both the first eleven collections and the three
+wave-3 ones (ZCTAs, places, congressional districts), whose own section is
+at the end of this file. Source release: **ACS 2020–2024
+5-year estimates** (`acsdt5y2024`, table-based Summary File). Boundaries:
+**2024 cartographic boundary files** (GENZ2024, 500k), which match the ACS
+vintage — with one documented exception, the ZCTA file, which only exists
+as GENZ2020.
 
 Code: [`tools/specs.py`](../tools/specs.py) (column specs, shell pinning)
 and [`tools/build_acs.py`](../tools/build_acs.py) (the three build stages
@@ -27,14 +31,19 @@ and the validation pass).
 | tract-wellbeing | `catalog/tracts/tract-wellbeing/tract-wellbeing.parquet` | 85,184 | 55.9 MB |
 | counties | `catalog/counties/counties.parquet` | 3,235 | 13.6 MB |
 | states | `catalog/states/states.parquet` | 56 | 4.1 MB |
+| zctas | `catalog/zctas/zctas.parquet` | 33,791 | 75.2 MB |
+| places | `catalog/places/places.parquet` | 32,612 | 34.5 MB |
+| congressional-districts | `catalog/congressional-districts/congressional-districts.parquet` | 441 | 9.0 MB |
 
 Why themed chunks rather than one wide table per level: the St. Louis
 catalog this build is ported from publishes one 60-column block-group
 table, which is fine for 314 rows. Nationally that is a 60-column,
 242,298-row download for a consumer who wanted median income. Block groups
-and tracts are therefore split into themed collections, and the two coarse
-levels — 3,235 counties and 56 states — carry every column in one wide
-table, because at that size width costs nothing.
+and tracts are therefore split into themed collections, and the coarse or
+non-nesting levels — 3,235 counties, 56 states, 33,791 ZCTAs, 32,612 places
+and 441 congressional districts — carry every column in one wide table,
+because at that size width costs nothing and nobody wants a themed chunk of
+ZIP code areas.
 
 ## Source files
 
@@ -47,8 +56,10 @@ Already staged under `staging/census-cache/` by `tools/download_sources.sh`
   200 MB.
 - `ACS20245YR_Table_Shells.txt` — `Table ID|Line|Indent|Unique ID|Label|…`,
   the file the line-number pins are checked against.
-- `cb_2024_us_{bg,tract,county,state}_500k.zip` — national cartographic
-  boundary shapefiles, NAD83.
+- `cb_2024_us_{bg,tract,county,state,place,cd119}_500k.zip` and
+  `cb_2020_us_zcta520_500k.zip` — national cartographic boundary
+  shapefiles, NAD83. The ZCTA one is GENZ2020 because that is the only
+  cartographic ZCTA edition published; see Wave 3 below.
 
 Tables read: B01001 B01002 B01003 B03002 B05002 B08301 B08303 B15003 B18101
 B19013 B19013B B19013D B19013H B19013I B19301 B22010 B23025 B25002 B25003
@@ -68,14 +79,20 @@ choropleth wants.
 
 ```sh
 python3 tools/build_acs.py --stage extract     # ~83 s, 31 tables
-python3 tools/build_acs.py --stage geometry    # ~37 s, 4 shapefiles
-python3 tools/build_acs.py --stage assemble    # ~86 s, 11 collections
+python3 tools/build_acs.py --stage geometry    # ~37 s, 7 shapefiles
+python3 tools/build_acs.py --stage assemble    # ~86 s, 14 collections
 python3 tools/build_acs.py --validate          # the checks below
 ```
 
 `python3 tools/build_acs.py` runs all three stages; a trailing list of
 collection ids restricts assembly (and restricts extraction to the tables
-those collections need).
+those collections need, and extraction and geometry to their summary
+levels). `--level` restricts the levels explicitly — how the wave-3
+collections were extracted without rewriting the four levels' CSVs:
+
+```sh
+python3 tools/build_acs.py zctas places congressional-districts   # 29 s all-in
+```
 
 ### Stage 1 — extract
 
@@ -96,7 +113,14 @@ times, which is the main change from the St. Louis code.
 
 B27001, B18101, B05002, B26001 and B19013B/D/H/I return 0 block-group rows:
 the Census does not publish them below tract level. That is why
-`tract-wellbeing` has no block-group twin.
+`tract-wellbeing` has no block-group twin. Those same tables *are* published
+at all three wave-3 levels, which is why those collections carry the full
+column set.
+
+Three more levels were added in wave 3 (`860Z200US` ZCTA, `1600000US`
+place, `5001900US` congressional district) — their prefixes, counts and the
+`--level` flag that extracts them without rewriting the four CSVs above are
+in the Wave 3 section at the end of this file.
 
 ### Stage 2 — geometry
 
@@ -517,3 +541,401 @@ than NULL — `pop_density` keys off raw `ALAND = 0`, not the rounded column.
 (273 MB) and geometry parquets (566 MB) are intermediate; re-running a
 stage regenerates them. `staging/geo/*.parquet` is cached — delete it to
 force a re-conversion from the shapefiles.
+
+---
+
+# Wave 3 — ZCTAs, places and congressional districts
+
+Added 2026-11-12, after the eleven collections above. Three more
+collections, each **one wide table with the full `ALL_SPEC` column set** —
+the same 112 columns as `counties` and `states`:
+
+| collection | level key | rows | parquet | pmtiles |
+|---|---|---|---|---|
+| zctas | `zcta` | 33,791 | 75.2 MB | 477.6 MB |
+| places | `place` | 32,612 | 34.5 MB | 206.2 MB |
+| congressional-districts | `cd` | 441 | 9.0 MB | 23.3 MB |
+
+Nothing in the machinery was reinvented: `tools/specs.py` gained three
+`LEVELS` prefixes and three `Collection`s, `tools/build_acs.py` gained the
+new boundary files and a `--level` filter so the extract stage could run for
+the new levels only, and `tools/make_tiles.py`, `tools/make_styles.py`,
+`tools/column_docs.py` and `tools/collection_meta.py` each gained three
+entries.
+
+## Summary-level prefixes, verified empirically
+
+The prefixes were read **off the cached `.dat` files**, not from a
+summary-level table. Counting every distinct `GEO_ID` prefix in
+`staging/census-cache/acsdt5y2024-b19013.dat` (the cached files hold *every*
+summary level the release publishes — 118 of them in that one file) gives,
+for the levels this catalog publishes:
+
+| level | GEO_ID prefix | rows in the ACS release | example GEO_ID |
+|---|---|---|---|
+| block group | `1500000US` | 242,297 | `1500000US010010201001` |
+| tract | `1400000US` | 85,382 | `1400000US01001020100` |
+| county | `0500000US` | 3,222 | `0500000US01001` |
+| state | `0400000US` | 52 | `0400000US01` |
+| **ZCTA5** | **`860Z200US`** | **33,772** | `860Z200US00601` |
+| **place** | **`1600000US`** | **32,330** | `1600000US0100100` |
+| **congressional district** | **`5001900US`** | **440** | `5001900US0101` |
+
+Two of the three wave-3 prefixes carry a component that is *not*
+zero-padding, which is exactly why they were measured rather than recalled:
+
+- `860Z200US` — summary level 860 (5-digit ZCTA) with **`Z2`** for the
+  2020-based ZCTA vintage. A guessed `8600000US` matches nothing.
+- `5001900US` — summary level 500 (congressional district) with **`19`**
+  for the **119th Congress**.
+
+All three prefixes are present with identical counts in all 31 cached
+`.dat` files, with one upstream gap: `acsdt5y2024-b19301.dat`
+(`per_capita_income`) publishes 33,303 ZCTAs and 31,741 places rather than
+33,772 and 32,330, so that column is NULL on the difference.
+
+Reproduce:
+
+```sh
+python3 - <<'PY'
+import collections
+c = collections.Counter(); ex = {}
+with open('staging/census-cache/acsdt5y2024-b19013.dat') as f:
+    f.readline()
+    for line in f:
+        g = line.split('|', 1)[0]
+        p = g.split('US', 1)[0] + 'US'
+        c[p] += 1; ex.setdefault(p, g)
+for p, n in sorted(c.items(), key=lambda kv: -kv[1])[:12]:
+    print(f'{p:12s} {n:>8d}  {ex[p]}')
+PY
+```
+
+## Which Congress the ACS 2024 5-year release tabulates: the 119th
+
+Three independent confirmations, all from the Census Bureau:
+
+1. The release's own `GEO_ID` prefix is `5001900US` (above) — the `19` is
+   the congress number.
+2. The cartographic boundary file for the vintage is
+   `cb_2024_us_cd119_500k.zip`, and `CDSESSN = '119'` on all 441 features
+   (`ogrinfo`).
+3. [ACS geography boundaries by year — 2024](https://www.census.gov/programs-surveys/acs/geography-acs/geography-boundaries-by-year/2024.html)
+   lists "Congressional District, Delegate District DC, Resident
+   Commissioner District PR" with a vintage of "119th Congress of the
+   United States", and 5-digit ZCTA with a vintage of "2020 Census".
+
+The Bureau's [119th Congress district page](https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html)
+is linked from the collection as a `metadata` asset. **District numbers are
+not stable between congresses**, so these GEOIDs are not a time series with
+any earlier release's districts.
+
+## Stage 2 — geometry: the new boundary files
+
+| level | file | features | source |
+|---|---|---|---|
+| zcta | `cb_2020_us_zcta520_500k.zip` | 33,791 | `GENZ2020/shp/` |
+| place | `cb_2024_us_place_500k.zip` | 32,612 | `GENZ2024/shp/` |
+| cd | `cb_2024_us_cd119_500k.zip` | 441 | `GENZ2024/shp/` |
+
+Availability was checked against the directory listings, not assumed:
+
+- **There is no `cb_2024_us_zcta520_500k.zip`.** `GENZ2021` through
+  `GENZ2024` carry no ZCTA file at all; `GENZ2020` is the only cartographic
+  ZCTA edition, and the 2020-based ZCTAs are both the current ones and the
+  ones the ACS tabulates (see the boundary-vintage page above). This is the
+  one place in the catalog where the boundary vintage and the estimate
+  vintage differ, and it is the Bureau's own alignment.
+- **A national place file does exist** (`cb_2024_us_place_500k.zip`), so no
+  per-state loop was needed — the per-state `cb_2024_<ss>_place_500k.zip`
+  files exist too but are redundant.
+
+The ZCTA file is the only boundary file in the catalog whose fields are
+suffixed with its vintage (`GEOID20`, `ZCTA5CE20`, `NAME20`, `LSAD20`,
+`ALAND20`, `AWATER20`), so it is read through an `ogr2ogr -sql` rename
+(`GEOID20 AS GEOID`, `ZCTA5CE20 AS NAMELSAD`, `ALAND20 AS ALAND`) and
+nothing downstream learns the difference. Output names follow the zip:
+`staging/geo/cb_2020_us_zcta520_4326.parquet`,
+`cb_2024_us_place_4326.parquet`, `cb_2024_us_cd119_4326.parquet`.
+
+## Context columns at the new levels
+
+**ZCTAs have no state and no parent.** A ZCTA approximates a USPS ZIP
+delivery area, which can cross state lines; the ACS publishes ZCTAs at the
+nation level only; and the 2020 CB ZCTA file carries **no state attribute**
+(checked with `ogrinfo` — the field list is above). So:
+
+- `state` is `CAST(NULL AS VARCHAR)` on every row. The catalog's usual
+  `substr(GEOID, 1, 2) → USPS` join would be actively wrong here: the first
+  two digits of a ZIP code are a postal region, so `06010` would come out
+  as California.
+- `name` is `'ZCTA5 ' || ZCTA5CE20` — "ZCTA5 90210" — the label the Census
+  Bureau itself uses, since there is no containing geography to name a ZCTA
+  by.
+- There is no prefix join from a ZCTA to anything. Relating ZCTAs to states
+  or counties is a spatial operation or a Census relationship file.
+
+Places and congressional districts both nest in states, so both keep the
+standard `substr(GEOID, 1, 2) → USPS` join. `name` is
+`NAMELSAD, STATE_NAME` for places ("Los Angeles city, California",
+"Brentwood CDP, New York") and `NAMELSAD` plus the state file's `NAME` for
+districts ("Congressional District 12, California") — the cd119 file carries
+no state name, so the state boundary parquet is joined in for it.
+
+## Validation results
+
+```sh
+python3 tools/build_acs.py zctas places congressional-districts --validate
+```
+
+### Row counts against published Census tallies
+
+Checked against the Census Bureau's own
+[2020 national geographic entity tallies](https://www.census.gov/geographies/reference-files/time-series/geo/tallies.html)
+([`Natl_Geographic_Tallies_2020.txt`](https://www2.census.gov/geo/docs/maps-data/data/geo_tallies2020/Natl_Geographic_Tallies_2020.txt),
+downloaded 2026-11-12):
+
+| entity | tallies file | here | note |
+|---|---|---|---|
+| ZIP Code Tabulation Areas | 33,642 US + 132 PR + 17 island = **33,791** | **33,791** | exact |
+| Incorporated places | 19,519 + 215 island = 19,734 | — | 2020 vintage |
+| Census designated places | 12,098 + 292 PR + 64 island = 12,454 | — | 2020 vintage |
+| places, both kinds | **32,188** (2020) | **32,612** (2024 CB file) | +424 over four vintages of incorporations, dissolutions and CDP re-delineations |
+| Congressional districts | 436 US (incl. the DC delegate) + 1 PR + 4 island = **441** | **441** | exact |
+
+### Uniqueness, ranges, orphans
+
+```
+  zctas                 33,791 rows   33,791 distinct geoid  0 out-of-range pct  [ok]
+  places                32,612 rows   32,612 distinct geoid  0 out-of-range pct  [ok]
+  congressional-districts  441 rows      441 distinct geoid  0 out-of-range pct  [ok]
+
+  zctas                        0 ACS rows with no polygon     19 polygons with no ACS row
+  places                       0 ACS rows with no polygon    282 polygons with no ACS row
+  congressional-districts      3 ACS rows with no polygon      4 polygons with no ACS row
+```
+
+Geometry drives the join, as everywhere else in the catalog, so the rows
+with a polygon and no ACS tabulation are **kept with NULL values**:
+
+- **ZCTAs, 19 kept**: the 17 island-area ZCTAs (USVI 00802/00820/00830/
+  00840/00850/00851, American Samoa 96799, Guam 96910/96913/96915/96916/
+  96917/96928/96929, Northern Mariana Islands 96950/96951/96952 — which is
+  exactly the tallies file's "17 island areas"), plus **11717 and 11798**,
+  both in Suffolk County, New York (located by intersecting them with the
+  county boundary file). Puerto Rico's 132 ZCTAs all have data. Nothing is
+  dropped in the other direction: all 33,772 tabulated ZCTAs have a polygon.
+- **places, 282 kept**: 279 island-area places (MP 135, AS 77, GU 57,
+  VI 10), Brentwood CDP (`3608026`) and Wyandanch CDP (`3683294`) in
+  Suffolk County NY — the same two communities as the two orphan ZCTAs, and
+  the same county whose re-delineation leaves 14 tracts and 39 block groups
+  without ACS rows — and **Louisville city, Kentucky (`2148000`)**, which
+  the boundary file still carries while the ACS tabulates the consolidated
+  `2148006` Louisville/Jefferson County metro government (balance). If you
+  want Louisville, use `2148006`.
+- **districts, 4 kept**: the island-area delegate districts `6098` (AS),
+  `6698` (GU), `6998` (MP), `7898` (VI).
+- **districts, 3 dropped**: `09ZZ`, `17ZZ`, `33ZZ` — water-only
+  pseudo-districts in Connecticut, Illinois and New Hampshire, each with
+  **population 0** in the ACS, which have no polygon in the CB file.
+  Dropped population is exactly 0, the same situation as the `9900xx` water
+  tracts.
+
+### Spot checks against data.census.gov
+
+| geography | column | value here |
+|---|---|---|
+| ZCTA 90210 (Beverly Hills) | `median_hh_income` | 187,801 (MOE 18,411), `median_home_value` 2,000,001 |
+| ZCTA 00601 (Adjuntas, PR) | `median_hh_income` | 19,454 (MOE 1,546) |
+| ZCTA 60614 (Chicago) | `median_hh_income` | 136,448, `pct_bachelors_plus` 87.21 |
+| ZCTA 33109 (Fisher Island, FL) | `median_hh_income` | 250,001 — the ACS top code, not a jam value |
+| place 0644000 Los Angeles city | `population` | 3,857,263, `median_home_value` 921,200 |
+| place 3651000 New York city | `population` | 8,483,844, `median_hh_income` 80,483 |
+| place 1150000 Washington city, DC | `population` | 681,294 — equals the DC row in `states` |
+| CD 0612 (CA-12) | `median_hh_income` | 108,648 |
+| CD 3612 (NY-12) | `median_hh_income` | 147,775, `pct_bachelors_plus` 80.31 |
+| CD 0101 (AL-01) | `median_hh_income` | 66,291 |
+
+District population across the 435 voting districts: **546,488 –
+1,021,191** (Delaware's at-large district is the maximum, and equals
+Delaware's population in `states`). Equal-population by construction, which
+is why this collection's style breaks are much tighter than any other's.
+
+Top codes are published values, not jams: `median_home_value` tops out at
+$2,000,001 and `median_hh_income` at $250,001 upstream, and the richest
+ZCTAs sit on those values.
+
+### NULL rates
+
+Congressional districts are the most complete collection in the catalog:
+**every column is NULL on exactly the four island-area delegate districts
+(0.91%)**, with one exception — `median_hh_income_asian` is NULL on 1.13%
+(those four plus one district with no published Asian-householder median).
+
+ZCTAs and places, notable columns only (full table from
+`--validate`):
+
+| column | zctas | places |
+|---|---|---|
+| `population` (and the other counts) | 0.06% | 0.86% |
+| `median_hh_income` | 9.60% | 12.71% |
+| `per_capita_income` | 3.26% | 4.28% |
+| `median_gross_rent` | 23.79% | 31.32% |
+| `median_home_value` | 10.45% | 12.78% |
+| `pct_rent_burdened` | 10.96% | 14.60% |
+| `median_hh_income_black` | 69.25% | 79.24% |
+| `median_hh_income_white_nh` | 12.08% | 17.62% |
+| `median_hh_income_asian` | 76.59% | 85.80% |
+| `median_hh_income_hispanic` | 58.55% | 69.35% |
+| `pct_below_poverty_black` | 36.59% | 46.72% |
+| most `pct_*` columns | 1.8–3.1% | 2.2–3.8% |
+
+For reference: `median_hh_income` is NULL on 1.59% of tracts and 7.69% of
+block groups, so ZCTA coverage sits just below block-group coverage and
+place coverage below that — both files are dominated by small geographies
+(a single-building urban ZCTA, a village of forty people), not by the
+cities and ZIP codes a reader pictures.
+
+## Tiles
+
+`python3 tools/make_tiles.py zctas places congressional-districts`, built
+with tylertoo from `/Users/cholmes/repos/tylertoo`; logs in
+`staging/tiles-logs/{zctas,places,congressional-districts}.log` carry the
+exact command lines.
+
+- **zctas, places** — `--band 0-5:a5 --band 6-12:geom`, the tract recipe,
+  with the same accumulate/exclude logic (`classify()` in
+  `tools/make_tiles.py`): the five count columns summed
+  (`population`, `housing_units`, `households`, `hh_no_vehicle`,
+  `group_quarters_pop`), every rate, median and `*_cv` averaged unweighted,
+  and all 45 `*_moe` columns excluded from the tiles — an averaged margin of
+  error is not a margin of error. 65 of 110 property columns kept.
+- **congressional-districts** — `--band 0-10:geom
+  --max-compressed-tile-size 2M`, the counties recipe: few enough features
+  to carry real polygons at every zoom, and wide enough (110 columns) that
+  the z0 tile needs the raised cap, exactly as counties did.
+
+### Per-zoom maximum tile size (`tylertoo stats`)
+
+| zoom | zctas | places | congressional-districts |
+|---|---|---|---|
+| 0 | 29,899 | 29,645 | 107,238 |
+| 1 | 77,966 | 77,966 | 126,041 |
+| 2 | 161,496 | 161,317 | 87,881 |
+| 3 | 274,286 | 266,194 | 82,531 |
+| 4 | 518,859 | 503,904 | 81,253 |
+| 5 | **746,904** | **684,100** | 51,332 |
+| 6 | 483,927 | 484,324 | 34,451 |
+| 7 | 398,788 | 368,037 | 22,165 |
+| 8 | 207,257 | 172,714 | 17,102 |
+| 9 | 143,332 | 82,648 | 15,324 |
+| 10 | 83,774 | 43,955 | 11,690 |
+| 11 | 43,795 | 23,577 | — |
+| 12 | 23,182 | 16,395 | — |
+| total tiles | 227,025 (z0–12) | 89,679 (z0–12) | 21,323 (z0–10) |
+
+QC finding, recorded rather than patched: the largest zctas and places
+tiles sit at **z5**, the last A5 zoom, at 747 KB and 684 KB — above
+tylertoo's default 500 KB compressed cap, which the size valve merges
+toward but cannot reach when each A5 cell carries 65 attribute columns
+(4,087 features merged for zctas, 1,952 for places). This is the same
+best-effort behaviour the tract archives show at z6 (485 KB max) and is
+documented in `docs/design.md`; raising the cap to 2M would stop the valve
+merging cells it cannot shrink below the cap, at the cost of ~1 MB tiles.
+Served tiles remain well under a megabyte either way.
+
+### Decode spot checks
+
+`tylertoo decode --zoom 12` (10 for districts) over each archive:
+
+- **No `*_moe` column in any archive** (69, 70 and 70 tile columns, 0
+  matching `_moe`), and the layer name equals the collection id in all
+  three — which is what every generated style's `source-layer` expects.
+- Full coverage at the feature zooms: 33,791 / 32,612 / 441 distinct
+  `geoid`, matching the parquet exactly.
+- Tile values equal parquet values at feature zooms (checked for ZCTAs
+  90210/00601/60614, places 0644000/3651000, districts 0612/1198/0101 on
+  `population`, `median_hh_income`, `median_home_value`,
+  `pct_bachelors_plus`).
+- A5 aggregation is exact: deduplicating the z4 zctas decode on `cell`
+  gives 3,867 cells whose `population` sums to **338,071,860** — the same
+  total as the GeoParquet's `sum(population)`.
+
+## Styles
+
+`python3 tools/make_styles.py --measure zctas places congressional-districts`
+— four styles each, the counties tier (income default, density, poverty,
+home value), measured on each collection's own national distribution and
+appended to `docs/style-breaks.json` without touching the twelve
+collections already in it. `--measure` and style writing now take an
+optional collection filter for exactly that reason.
+
+The breaks are measured, not copied: the three distributions differ from
+counties and from each other.
+
+| column | zctas | places | congressional-districts |
+|---|---|---|---|
+| `median_hh_income` (default) | 45k/60k/72k/87k/120k/160k | 40k/55k/67k/84k/115k/150k | 60k/70k/79k/91k/110k/130k |
+| percentiles | 9/29/50/70/90/97 | 10/30/50/70/88/95 | 8/29/51/70/88/95 |
+| `pop_density` | 5/20/60/200/600/2000 | 50/125/250/500/1000/2000 | 25/75/200/600/1500/4000 |
+| percentiles | 20/43/60/72/82/94 | 15/30/47/70/87/96 | 14/38/57/72/86/95 |
+| `pct_below_poverty` | 5/9/13/19/28 | 5/9/14/20/30 | 8/10/12/15/19 |
+| percentiles | 19/42/61/80/92 | 23/42/61/76/90 | 12/28/51/77/92 |
+| `median_home_value` | 100k/160k/225k/325k/500k/800k | 85k/130k/190k/290k/450k/750k | 185k/250k/335k/450k/650k/900k |
+| percentiles | 10/30/51/70/87/95 | 11/30/50/70/85/95 | 10/33/50/71/86/96 |
+
+Every class is non-empty nationally (the generator fails the run otherwise)
+and the fullest class holds 25.4% of features at worst. Two consequences of
+the measured numbers, applied by the existing logic rather than by hand:
+
+- `median_hh_income` (9.60% / 12.71% NULL) and `median_home_value`
+  (10.45% / 12.78%) get the neutral-gray "no data" underlay on zctas and
+  places; nothing on districts does (0.91% NULL, under the 5% threshold).
+- `pct_below_poverty` has a CV above 0.30 on **40.53%** of ZCTAs and
+  **56.69%** of places — past the 35% fade ceiling — so those two styles
+  say so in their description instead of fading most of the map. On
+  districts no styled column has a single feature with a CV above 0.30.
+
+## Files changed for wave 3
+
+- `tools/specs.py` — three `LEVELS` prefixes, three `Collection`s.
+- `tools/build_acs.py` — `GEO_ZIP`/`GEO_RENAME`/`GEO_FIELDS` for the new
+  boundary files, `state_expr()` (NULL for ZCTAs), three `name_expr()`
+  cases, the cd→state join, `--level` filtering on the extract and geometry
+  stages, and an orphan report in `--validate`.
+- `tools/make_tiles.py` — restructured into one filterable driver (the
+  previous version re-ran every archive on import); the counties, states,
+  tract-income and blocks recipes it emits are byte-identical to the
+  command lines in the existing logs, and `zctas`, `places` and
+  `congressional-districts` are added.
+- `tools/make_styles.py` — three `SOURCES`/`UNIT` entries, twelve styles,
+  an optional collection filter on `--measure` and on writing.
+- `tools/column_docs.py` — `LEVEL_NOUN`, `CB_VINTAGE`, `GEOID_DOC`,
+  `CONTEXT_DOC` (`name`, `state`, `aland_sqkm`, `geometry`) and the
+  measured `NULL_NOTES` for the three levels.
+- `tools/collection_meta.py` — titles, descriptions, keywords, source and
+  documentation assets (the `.dat` tables, the three CB zips at their
+  census.gov URLs, the tallies file, the ZCTA/CDP/CD119 pages), processing
+  notes, known issues, and `--write` filtering. Two corrections that fall
+  out of adding a geometry-only collection: the tiles paragraph and the
+  tiles known-issue now say "real geographies at every zoom, no A5" for the
+  collections whose archives have no `a5` band at all — which has always
+  been true of `counties` (`0-10:geom`) and `states` (`0-8:geom`) as well,
+  and the generated text claimed A5 coarse zooms for them; and the pin
+  count in the processing notes now reads 44, which is what
+  `check_all_shells()` actually returns (43 missed the `B01003`
+  context pin).
+- `tools/make_stac.py` — the root catalog's ungrouped children are derived
+  from `ALL_COLLECTIONS` instead of a hardcoded
+  `("counties", "states", "blocks")`, so the three new collections get
+  `child` links.
+- `tools/download_sources.sh` — the three new boundary zips, with the
+  GENZ2020-only ZCTA case and the congress number commented in place.
+- `catalog/{zctas,places,congressional-districts}/` — `*.parquet`,
+  `*.pmtiles`, `styles/*.json`, `.portolan/metadata.yaml`, `AGENTS.md`
+  (schema tables and quality notes written, `TODO-recipes` marker left for
+  the recipes agent).
+- `docs/style-breaks.json` — three collections appended.
+- `staging/census-cache/` — `cb_2020_us_zcta520_500k.zip`,
+  `cb_2024_us_place_500k.zip`, `cb_2024_us_cd119_500k.zip` downloaded
+  (2026-11-12).

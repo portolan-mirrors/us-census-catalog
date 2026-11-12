@@ -611,7 +611,10 @@ def finalize_root() -> str:
         if (CATALOG / group / "catalog.json").exists():
             children.append((f"./{group}/catalog.json",
                              meta.GROUP_TITLES[group]))
-    for cid in ("counties", "states", "blocks"):
+    # Every ungrouped collection, in ALL_COLLECTIONS order — counties,
+    # states, the wave-3 wide tables, then blocks. Derived rather than
+    # listed, so adding a collection to collection_meta is enough.
+    for cid in [c for c in meta.ALL_COLLECTIONS if c not in meta.GROUP_OF]:
         if (CATALOG / cid / "collection.json").exists():
             children.append((f"./{cid}/collection.json", meta.TITLES[cid]))
     for href, title in children:

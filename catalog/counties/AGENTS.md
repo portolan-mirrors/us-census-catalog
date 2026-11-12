@@ -218,7 +218,7 @@ Island areas carry geometry but no ACS data. American Samoa, Guam, the Northern 
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts summed, rates and medians averaged unweighted. Statistics come from the GeoParquet.
+The PMTiles carry real geometries at every zoom (no A5 cell band — the features are few enough to tile directly). Statistics still come from the GeoParquet.
 
 ## Related collections
 

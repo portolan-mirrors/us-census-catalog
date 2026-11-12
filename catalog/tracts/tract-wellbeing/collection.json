@@ -513,7 +513,7 @@
       "href": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_tract_500k.zip",
       "type": "application/zip",
       "title": "2024 cartographic boundary file — census tracts (1:500,000, national)",
-      "description": "The geometry this collection joins onto, shoreline-clipped and generalized for mapping. Only the join key, the name parts and `ALAND` are kept; reprojected from NAD83 to EPSG:4326 with ogr2ogr. Served by census.gov.",
+      "description": "The geometry this collection joins onto, shoreline-clipped and generalized for mapping. Only the join key, the name parts and the land-area field are kept; reprojected from NAD83 to EPSG:4326 with ogr2ogr. Served by census.gov.",
       "roles": [
         "source"
       ],

@@ -2,7 +2,9 @@ title: "US Census Demographics — Cloud-Native Mirror"
 description: |
   Nationwide United States census statistics as cloud-native GeoParquet and
   PMTiles with STAC metadata, at every census geography from states down to
-  the 242,298 block groups and 8,174,955 blocks of the 2020 Census. Eleven
+  the 242,298 block groups and 8,174,955 blocks of the 2020 Census, plus the
+  33,791 ZIP Code Tabulation Areas, 32,612 places and 441 congressional
+  districts of the 119th Congress. Fourteen
   collections carry curated [American Community Survey](https://www.census.gov/programs-surveys/acs.html)
   2020–2024 5-year indicators — income, poverty, age, race and ethnicity,
   education, housing cost and tenure, vehicles, commuting, internet access,

@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:46:41.487333Z",
+      "breaking": false,
+      "assets": {
+        "zctas.parquet": {
+          "sha256": "45e7bd0d4e856c13dc0307650a5af0ca361389fa3aaa3174a8a2f46f5320df7b",
+          "size_bytes": 75213440,
+          "href": "zctas/zctas.parquet",
+          "source_mtime": 1794522173.1053443,
+          "mtime": 1794522173.1053443,
+          "feature_count": 33791,
+          "schema_fingerprint": "a75f598206b77b7d"
+        },
+        "zctas.pmtiles": {
+          "sha256": "4fa3ef9a0a854728f9cc3bee8a60b1a32d5197225b8b451cf19ba12b793273f5",
+          "size_bytes": 477620729,
+          "href": "zctas/zctas.pmtiles",
+          "mtime": 1794522367.2130866
+        }
+      },
+      "changes": [
+        "zctas.parquet",
+        "zctas.pmtiles"
+      ]
+    }
+  ]
+}

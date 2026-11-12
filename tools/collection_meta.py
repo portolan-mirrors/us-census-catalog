@@ -21,9 +21,11 @@ What is asserted here, and from where:
   output), and `make_stac.py` passes the live count in so the description
   cannot drift from the file it describes.
 - Vintages: ACS 2020–2024 5-year (`acsdt5y2024`, table-based Summary File)
-  for the eleven ACS collections, 2020 Census P.L. 94-171 for blocks.
-- Geometry: 2024 cartographic boundary files for the ACS collections,
-  TIGER/Line 2024 `TABBLOCK20` for blocks (`docs/blocks-build-notes.md`).
+  for the fourteen ACS collections, 2020 Census P.L. 94-171 for blocks.
+- Geometry: 2024 cartographic boundary files for the ACS collections — the
+  ZCTA collection excepted, which uses GENZ2020, the only cartographic ZCTA
+  edition and the vintage the ACS tabulates — and TIGER/Line 2024
+  `TABBLOCK20` for blocks (`docs/blocks-build-notes.md`).
 - Known issues are quoted from the two build-notes files, which report what
   the validation pass counted.
 - Universes and table titles come from `tools/column_docs.py`, which quotes
@@ -59,6 +61,7 @@ ACS_SF = ("https://www2.census.gov/programs-surveys/acs/summary_file/2024/"
           "table-based-SF")
 ACS_5YR_DATA = f"{ACS_SF}/data/5YRData/"
 CB_SHP = "https://www2.census.gov/geo/tiger/GENZ2024/shp"
+CB_SHP_2020 = "https://www2.census.gov/geo/tiger/GENZ2020/shp"
 TIGER_TABBLOCK = "https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/"
 PL_DIR = ("https://www2.census.gov/programs-surveys/decennial/2020/data/"
           "01-Redistricting_File--PL_94-171/")
@@ -85,6 +88,25 @@ OPEN_DATA_POLICY = ("https://www.census.gov/about/policies/open-gov/"
 A5 = "https://a5geo.org/"
 TYLERTOO = "https://github.com/geoparquet-io/tylertoo"
 
+# Wave-3 geography documentation. Each one is cited where a claim needs it:
+# the ZCTA page for "a ZCTA is not a ZIP code", the ACS boundary-vintage page
+# for "the 2024 release tabulates the 119th Congress", the tallies file for
+# the published entity counts this build's row counts are checked against.
+ZCTA_ABOUT = ("https://www.census.gov/programs-surveys/geography/guidance/"
+              "geo-areas/zctas.html")
+CDP_ABOUT = "https://www.census.gov/programs-surveys/bas/information/cdp.html"
+ACS_BOUNDARY_VINTAGE = ("https://www.census.gov/programs-surveys/acs/"
+                        "geography-acs/geography-boundaries-by-year/2024.html")
+ACS_AREAS_PUBLISHED = ("https://www.census.gov/programs-surveys/acs/"
+                       "geography-acs/areas-published.html")
+CD_119 = ("https://www.census.gov/programs-surveys/decennial-census/about/"
+          "rdo/congressional-districts.119th_Congress.html")
+GEO_TALLIES = ("https://www.census.gov/geographies/reference-files/"
+               "time-series/geo/tallies.html")
+GEO_TALLIES_FILE = ("https://www2.census.gov/geo/docs/maps-data/data/"
+                    "geo_tallies2020/Natl_Geographic_Tallies_2020.txt")
+CONGRESS = 119
+
 LICENSE = "CC0-1.0"
 ATTRIBUTION = "U.S. Census Bureau"
 
@@ -104,10 +126,16 @@ GROUP_OF = {cid: g for g, ids in GROUPS.items() for cid in ids}
 # at the catalog root, which is also their STAC id.
 COLL_REL = dict(
     {cid: f"{g}/{cid}" for g, ids in GROUPS.items() for cid in ids},
-    counties="counties", states="states", blocks="blocks")
+    counties="counties", states="states", blocks="blocks",
+    zctas="zctas", places="places",
+    **{"congressional-districts": "congressional-districts"})
+
+# The three wave-3 collections: coarse-or-sparse levels the ACS publishes the
+# whole column set for, each a single wide table like counties and states.
+WAVE3 = ["zctas", "places", "congressional-districts"]
 
 ALL_COLLECTIONS = (GROUPS["block-groups"] + GROUPS["tracts"]
-                   + ["counties", "states", "blocks"])
+                   + ["counties", "states"] + WAVE3 + ["blocks"])
 
 LEVEL_OF = dict(cd.LEVEL_OF)
 
@@ -120,6 +148,7 @@ FEATURES = {
     "tract-income": 85184, "tract-people": 85184, "tract-housing": 85184,
     "tract-connectivity": 85184, "tract-wellbeing": 85184,
     "counties": 3235, "states": 56, "blocks": 8174955,
+    "zctas": 33791, "places": 32612, "congressional-districts": 441,
 }
 
 ACS_INTERVAL = ["2020-01-01T00:00:00Z", "2024-12-31T23:59:59Z"]
@@ -130,6 +159,9 @@ LEVEL_PLURAL = {
     "county": "counties and county equivalents",
     "state": "states and state equivalents",
     "block": "2020 census blocks",
+    "zcta": "ZIP Code Tabulation Areas",
+    "place": "incorporated places and census designated places",
+    "cd": f"congressional districts of the {CONGRESS}th Congress",
 }
 
 # --------------------------------------------------------------------------
@@ -148,6 +180,10 @@ TITLES = {
     "tract-wellbeing": "Health, Disability & Income by Race — Census Tracts",
     "counties": "All Indicators — Counties",
     "states": "All Indicators — States",
+    "zctas": "All Indicators — ZIP Code Tabulation Areas",
+    "places": "All Indicators — Places & CDPs",
+    "congressional-districts":
+        f"All Indicators — Congressional Districts ({CONGRESS}th Congress)",
     "blocks": "2020 Census Counts — Blocks",
 }
 
@@ -177,11 +213,19 @@ _KW_THEME = {
 _KW_LEVEL = {
     "bg": ["block groups"], "tract": ["census tracts"],
     "county": ["counties"], "state": ["states"], "block": ["census blocks"],
+    # "ZIP codes" is in the ZCTA keyword list because it is what people
+    # search for; the description and the known issues both say a ZCTA is
+    # not a ZIP code.
+    "zcta": ["ZCTA", "ZIP Code Tabulation Areas", "ZIP codes", "zip"],
+    "place": ["places", "cities", "towns", "census designated places",
+              "CDP", "municipalities"],
+    "cd": ["congressional districts", f"{CONGRESS}th Congress",
+           "redistricting", "politics"],
 }
 
 
 def theme_of(cid: str) -> str:
-    if cid in ("counties", "states"):
+    if cid in ("counties", "states") or cid in WAVE3:
         return "all"
     if cid == "blocks":
         return "blocks"
@@ -284,6 +328,37 @@ THEME_CAVEAT = {
         "too few households in the tract for a published median. A map of "
         "one of these columns is as much a map of where the group lives as "
         "of its income."),
+    "zctas": (
+        f"Two things to know before mapping this. A ZIP Code Tabulation Area "
+        f"[is not a ZIP code]({ZCTA_ABOUT}) — it is the Census Bureau's "
+        f"block-built approximation of a USPS 5-digit delivery area — and it "
+        f"nests in nothing, so `state` is NULL on every row and there is no "
+        f"prefix join to counties or tracts. And the medians thin out: "
+        f"`median_gross_rent` is NULL for **23.79%** of ZCTAs, "
+        f"`median_home_value` for **10.45%** and `median_hh_income` for "
+        f"**9.60%**, because a ZCTA with few renter, owner or total "
+        f"households has no publishable median."),
+    "places": (
+        f"Most of the 32,612 rows are small: the file holds every "
+        f"incorporated place and every "
+        f"[census designated place]({CDP_ABOUT}) the Census Bureau "
+        f"delineates, from New York city to villages of 40 people, and the "
+        f"suppression rates follow — `median_gross_rent` is NULL for "
+        f"**31.32%** of places, `median_home_value` for **12.78%** and "
+        f"`median_hh_income` for **12.71%**. Filter on `population` before "
+        f"drawing conclusions from a place-level distribution. A place is "
+        f"also not a partition of the country: the land between places is "
+        f"not in this file at all, so place rows do not sum to a state."),
+    "congressional-districts": (
+        f"Districts are equal-population by construction — roughly 770,000 "
+        f"people each, 546,488 to 1,021,191 in this file — so the "
+        f"distribution of every rate here is far tighter than at any other "
+        f"geography, and the map styles' class breaks are measured "
+        f"accordingly. These are the districts of the **{CONGRESS}th "
+        f"Congress** ([the vintage this ACS release tabulates]"
+        f"({ACS_BOUNDARY_VINTAGE})); district numbers are not stable across "
+        f"congresses, so do not join these GEOIDs to an earlier congress's "
+        f"districts of the same number."),
 }
 
 STATS_PARA = (
@@ -313,17 +388,55 @@ TILES_PARA = (
     "expression classifies both. The aggregation is a visualization aid: "
     "statistics come from the GeoParquet, never from the tiles.")
 
+# The collections whose PMTiles carry real polygons at every zoom, with no A5
+# aggregation at all: few enough features that nothing has to be aggregated
+# (counties `--band 0-10:geom`, states `0-8:geom`, congressional districts
+# `0-10:geom` — see staging/tiles-logs/ and tools/make_tiles.py). Saying "the
+# coarse zooms are A5 cells" of these would be false.
+GEOM_ONLY_TILES = {"counties", "states", "congressional-districts"}
+
+GEOM_TILES_PARA = (
+    "The PMTiles archive carries the same columns as the GeoParquet, minus "
+    "the `*_moe` columns, and at every zoom the tiles are the real census "
+    f"geographies — no [A5]({A5}) cell aggregation, unlike the catalog's "
+    f"finer collections, because there are few enough features here to draw "
+    f"them all at a national zoom. Built with [tylertoo]({TYLERTOO}). "
+    f"Statistics still come from the GeoParquet: margins of error are not in "
+    f"the tiles.")
+
+
+def tiles_para(cid: str) -> str:
+    return GEOM_TILES_PARA if cid in GEOM_ONLY_TILES else TILES_PARA
+
 
 def _geom_para(level: str) -> str:
     noun = LEVEL_PLURAL[level]
-    return (
+    year = cd.CB_VINTAGE[level]
+    text = (
         f"Geometries are the Census Bureau's "
-        f"[2024 cartographic boundary files]({CB_ABOUT}) for {noun} "
-        f"(GENZ2024, 1:500,000), reprojected to EPSG:4326 and joined on "
+        f"[{year} cartographic boundary files]({CB_ABOUT}) for {noun} "
+        f"(GENZ{year}, 1:500,000), reprojected to EPSG:4326 and joined on "
         f"`GEOID`. Cartographic rather than TIGER/Line because TIGER extends "
         f"census geographies into open water while the cartographic files "
-        f"clip to the shoreline, which is what a choropleth wants. The "
-        f"boundary vintage matches the estimate vintage.")
+        f"clip to the shoreline, which is what a choropleth wants. ")
+    if level == "zcta":
+        text += (
+            f"GENZ2020 and not GENZ2024 because no cartographic ZCTA file "
+            f"has been published since: the 2020-based ZCTAs are the current "
+            f"ones, and they are the vintage this release tabulates "
+            f"([ACS geography boundaries by year]"
+            f"({ACS_BOUNDARY_VINTAGE}) gives 5-digit ZCTA as \"2020 "
+            f"Census\"). The ZCTA file is also the one boundary file in this "
+            f"catalog with no state attribute, which is why `state` is NULL "
+            f"here.")
+    elif level == "cd":
+        text += (
+            f"The file is `cb_2024_us_cd{CONGRESS}_500k` — "
+            f"`CDSESSN = '{CONGRESS}'` on all 441 features — matching the "
+            f"congress this release tabulates.")
+    else:
+        text += "The boundary vintage matches the estimate vintage."
+    return text
 
 
 def _gap_para(level: str) -> str:
@@ -334,19 +447,51 @@ def _gap_para(level: str) -> str:
         "county": ("13 county equivalents", None),
         "state": ("4 rows (American Samoa, Guam, the Northern Mariana "
                   "Islands, the U.S. Virgin Islands)", None),
+        "zcta": ("17 ZCTAs", "Two more, 11717 and 11798,"),
+        "place": ("279 places (MP 135, AS 77, GU 57, VI 10)",
+                  "Two more, Brentwood CDP and Wyandanch CDP,"),
+        "cd": ("4 delegate districts (American Samoa, Guam, the Northern "
+               "Mariana Islands, the U.S. Virgin Islands)", None),
     }[level]
     text = (
-        f"The join is driven by geometry, so a geography with 2024 "
-        f"boundaries but no ACS tabulation keeps its row with NULL values "
-        f"instead of disappearing: {counts[0]} in the island areas, which "
-        f"have cartographic boundaries but no ACS 5-year estimates because "
-        f"the Island Areas run a separate decennial-only program.")
-    if counts[1]:
+        f"The join is driven by geometry, so a geography with "
+        f"{cd.CB_VINTAGE[level]} boundaries but no ACS tabulation keeps its "
+        f"row with NULL values instead of disappearing: {counts[0]} in the "
+        f"island areas, which have cartographic boundaries but no ACS 5-year "
+        f"estimates because the Island Areas run a separate decennial-only "
+        f"program.")
+    if counts[1] and level in ("bg", "tract"):
         text += (f" Suffolk County, New York was re-delineated in the 2024 "
                  f"vintage, which adds {counts[1]} with boundaries and no "
                  f"matching ACS row. ")
+    elif counts[1]:
+        # No causal claim here: what was measured is that these rows have a
+        # polygon and no ACS row, and that they sit in Suffolk County, New
+        # York (checked by intersecting them with the county file).
+        text += (f" {counts[1]} have boundaries and no matching ACS row, "
+                 f"both in Suffolk County, New York — the county "
+                 f"whose 2024 re-delineation also leaves 14 tracts and 39 "
+                 f"block groups without ACS rows elsewhere in this "
+                 f"catalog. ")
     else:
         text += " "
+    if level == "place":
+        text += (
+            "One more: `2148000` Louisville city, Kentucky, which the "
+            "boundary file still carries and the ACS tabulates as the "
+            "consolidated `2148006` Louisville/Jefferson County metro "
+            "government (balance) instead — so the Louisville you want is "
+            "`2148006`. ")
+    if level == "cd":
+        text += (
+            "In the other direction, three ACS district rows have no polygon "
+            "and so no row here: `09ZZ`, `17ZZ` and `33ZZ`, the water-only "
+            "pseudo-districts Connecticut, Illinois and New Hampshire "
+            "contribute to the tabulation, each with population 0. ")
+    if level == "zcta":
+        text += (
+            "No ACS ZCTA row is dropped in the other direction: all 33,772 "
+            "tabulated ZCTAs have a polygon. ")
     text += ("Keeping these rows means a national map has no holes and a "
              "consumer can see the absence; dropping them would make "
              "\"every US geography\" quietly mean something narrower.")
@@ -377,7 +522,41 @@ def _siblings_para(cid: str) -> str:
             "people, housing and connectivity, and "
             "[census tracts](../tracts/catalog.json) add a wellbeing chunk. "
             "GEOIDs nest by prefix, so `substr(geoid, 1, 5)` on a tract row "
-            "is its county and `substr(geoid, 1, 2)` its state.")
+            "is its county and `substr(geoid, 1, 2)` its state. The same "
+            "wide column set is also published for "
+            "[ZCTAs](../zctas/collection.json), "
+            "[places](../places/collection.json) and "
+            "[congressional districts]"
+            "(../congressional-districts/collection.json).")
+    if cid in WAVE3:
+        nests = {
+            "zctas": (
+                "A ZCTA nests in nothing: it can cross county and state "
+                "lines, so there is no prefix join from `geoid` to any other "
+                "collection here, and `state` is NULL. Relating ZCTAs to "
+                "counties or tracts is a spatial operation (or a Census "
+                "relationship file), not a string operation."),
+            "places": (
+                "A place nests in a state but not in a county — a place can "
+                "straddle a county line — so `substr(geoid, 1, 2)` joins "
+                "[states](../states/collection.json) and nothing else joins "
+                "by prefix."),
+            "congressional-districts": (
+                "A district nests in a state, so `substr(geoid, 1, 2)` joins "
+                "[states](../states/collection.json); nothing finer joins by "
+                "prefix, because district boundaries follow 2020 census "
+                "blocks rather than counties or tracts."),
+        }[cid]
+        siblings = ", ".join(
+            f"[{TITLES[c].split(' — ')[1]}](../{c}/collection.json)"
+            for c in ("counties", "states") + tuple(
+                w for w in WAVE3 if w != cid))
+        return (
+            f"{nests} The same 112-column wide table is published at the "
+            f"catalog's other coarse geographies — {siblings} — and the finer "
+            f"geographies split the indicators into themed chunks: "
+            f"[block groups](../block-groups/catalog.json) and "
+            f"[census tracts](../tracts/catalog.json).")
     return ""
 
 
@@ -406,6 +585,25 @@ def description(cid: str, features: int | None = None) -> str:
     # Island-area rows are published with NULL estimates at every level, so
     # they belong in the count at every level. _gap_para says how many.
     where = "the United States, Puerto Rico and the island areas"
+    # Which ACS releases reach this geography, from the Bureau's own
+    # "Areas Published" table.
+    release = {
+        "bg": "The 5-year file is the only ACS release published at this "
+              "geography: 1-year estimates stop well above it.",
+        "tract": "The 5-year file is the only ACS release published at this "
+                 "geography: 1-year estimates stop well above it.",
+        "zcta": f"The 5-year file is the only ACS release published for "
+                f"ZCTAs at all — [areas published]"
+                f"({ACS_AREAS_PUBLISHED}) lists the 5-digit ZCTA under the "
+                f"5-year estimates and nowhere else.",
+        "place": f"The Bureau publishes 1-year estimates only for places of "
+                 f"65,000 people or more, so the 5-year release is the only "
+                 f"one that covers all {n:,} of them ([areas published]"
+                 f"({ACS_AREAS_PUBLISHED})).",
+    }.get(level,
+          "The Bureau also publishes 1-year estimates at this geography; "
+          "the 5-year release is used throughout this catalog so every "
+          "geography in it is the same vintage and directly comparable.")
     paras = [
         f"{THEME_LEAD[theme_of(cid)]}\n\n"
         f"Curated indicators for all **{n:,}** {noun} in {where}, from the "
@@ -413,13 +611,7 @@ def description(cid: str, features: int | None = None) -> str:
         f"**2020–2024 5-year estimates** (`acsdt5y2024`, the table-based "
         f"[Summary File]({ACS_5YR_DATA})). The Census Bureau calls the ACS "
         f"\"the premier source of detailed information about the nation's "
-        f"people and housing\". "
-        + ("The 5-year file is the only ACS release published at this "
-           "geography: 1-year estimates stop well above it."
-           if level in ("bg", "tract") else
-           "The Bureau also publishes 1-year estimates at this geography; "
-           "the 5-year release is used throughout this catalog so every "
-           "geography in it is the same vintage and directly comparable."),
+        f"people and housing\". " + release,
         STATS_PARA,
     ]
     if cid in THEME_CAVEAT:
@@ -428,7 +620,7 @@ def description(cid: str, features: int | None = None) -> str:
         _geom_para(level),
         _gap_para(level),
         _siblings_para(cid),
-        TILES_PARA,
+        tiles_para(cid),
         _mirror_para(cid),
     ]
     return "\n\n".join(p for p in paras if p)
@@ -488,7 +680,7 @@ def _blocks_description(n: int) -> str:
         "alongside the `state` column's USPS code. Pull one state and you "
         "download one file.",
 
-        TILES_PARA,
+        tiles_para("blocks"),
         _mirror_para("blocks"),
     ])
 
@@ -539,8 +731,18 @@ GROUP_DESCRIPTIONS = {
 # Source assets
 # --------------------------------------------------------------------------
 
-CB_LEVEL_FILE = {"bg": "bg", "tract": "tract", "county": "county",
-                 "state": "state"}
+# level -> the cartographic boundary zip this build downloaded, as a full
+# URL. ZCTAs come from GENZ2020 (the only edition) and congressional
+# districts carry the congress number in the name.
+CB_LEVEL_URL = {
+    "bg": f"{CB_SHP}/cb_2024_us_bg_500k.zip",
+    "tract": f"{CB_SHP}/cb_2024_us_tract_500k.zip",
+    "county": f"{CB_SHP}/cb_2024_us_county_500k.zip",
+    "state": f"{CB_SHP}/cb_2024_us_state_500k.zip",
+    "zcta": f"{CB_SHP_2020}/cb_2020_us_zcta520_500k.zip",
+    "place": f"{CB_SHP}/cb_2024_us_place_500k.zip",
+    "cd": f"{CB_SHP}/cb_2024_us_cd{CONGRESS}_500k.zip",
+}
 
 
 def tables_for(cid: str) -> list[str]:
@@ -648,19 +850,83 @@ def source_assets(cid: str) -> dict:
             "Served by census.gov."),
         "roles": ["source"],
     }
-    cb = CB_LEVEL_FILE[level]
+    year = cd.CB_VINTAGE[level]
     out["source-cartographic-boundaries"] = {
-        "href": f"{CB_SHP}/cb_2024_us_{cb}_500k.zip",
+        "href": CB_LEVEL_URL[level],
         "type": "application/zip",
-        "title": f"2024 cartographic boundary file — {LEVEL_PLURAL[level]} "
-                 f"(1:500,000, national)",
+        "title": f"{year} cartographic boundary file — "
+                 f"{LEVEL_PLURAL[level]} (1:500,000, national)",
         "description": (
             f"The geometry this collection joins onto, shoreline-clipped and "
             f"generalized for mapping. Only the join key, the name parts and "
-            f"`ALAND` are kept; reprojected from NAD83 to EPSG:4326 with "
-            f"ogr2ogr. Served by census.gov."),
+            f"the land-area field are kept; reprojected from NAD83 to "
+            f"EPSG:4326 with ogr2ogr."
+            + (" GENZ2020 is the only cartographic ZCTA edition the Census "
+               "Bureau publishes, and the 2020-based ZCTAs are the vintage "
+               "this ACS release tabulates; its fields are suffixed with the "
+               "vintage (`GEOID20`, `ZCTA5CE20`, `ALAND20`) and carry no "
+               "state, which is why `state` is NULL in this collection."
+               if level == "zcta" else
+               f" `CDSESSN = '{CONGRESS}'` on every feature, matching the "
+               f"congress this ACS release tabulates."
+               if level == "cd" else "")
+            + " Served by census.gov."),
         "roles": ["source"],
     }
+    if level in ("zcta", "place", "cd"):
+        out["doc-geo-tallies"] = {
+            "href": GEO_TALLIES_FILE,
+            "type": "text/plain",
+            "title": "2020 Census national geographic entity tallies",
+            "description": (
+                f"The published count of every geographic entity type, which "
+                f"this collection's row count is checked against: 33,791 "
+                f"ZCTAs (33,642 US + 132 Puerto Rico + 17 island areas), "
+                f"19,734 incorporated places and 12,454 census designated "
+                f"places, 441 congressional districts (436 US including the "
+                f"DC delegate + 1 Puerto Rico + 4 island areas). Index page: "
+                f"{GEO_TALLIES}."),
+            "roles": ["metadata"],
+        }
+    if level == "zcta":
+        out["doc-zcta-about"] = {
+            "href": ZCTA_ABOUT,
+            "type": "text/html",
+            "title": "ZIP Code Tabulation Areas (ZCTAs) — Census Bureau",
+            "description": (
+                "What a ZCTA is and, more importantly, what it is not: the "
+                "Bureau's own page on how ZCTAs are built from census blocks "
+                "to approximate USPS 5-digit ZIP delivery areas, why they do "
+                "not match ZIP codes, and why they do not nest in any other "
+                "census geography."),
+            "roles": ["metadata"],
+        }
+    if level == "place":
+        out["doc-cdp-about"] = {
+            "href": CDP_ABOUT,
+            "type": "text/html",
+            "title": "Census Designated Places (CDPs) — Census Bureau",
+            "description": (
+                "How the Bureau delineates the unincorporated communities "
+                "that make up roughly two fifths of the rows here, and how a "
+                "CDP differs from an incorporated place."),
+            "roles": ["metadata"],
+        }
+    if level == "cd":
+        out["doc-cd119"] = {
+            "href": CD_119,
+            "type": "text/html",
+            "title": f"Congressional Districts of the {CONGRESS}th Congress "
+                     f"— Census Bureau",
+            "description": (
+                f"The Bureau's page for the district plans this collection "
+                f"maps. The vintage is confirmed by "
+                f"{ACS_BOUNDARY_VINTAGE}, which lists \"Congressional "
+                f"District, Delegate District DC, Resident Commissioner "
+                f"District PR\" with a vintage of \"{CONGRESS}th Congress of "
+                f"the United States\" for the 2024 ACS."),
+            "roles": ["metadata"],
+        }
     out["doc-acs-handbook"] = {
         "href": ACS_HANDBOOK,
         "type": "text/html",
@@ -763,9 +1029,14 @@ def processing_notes(cid: str) -> str:
         f"Summary File ({ACS_5YR_DATA}), downloaded the same day over plain "
         f"HTTPS — the summary file needs no API key. Tables read for this "
         f"collection: {tables}. Each national `.dat` file is one row per "
-        f"geography with estimate and margin of error side by side, and all "
-        f"four summary levels are picked off `GEO_ID` by prefix in a single "
-        f"pass per file.",
+        f"geography with estimate and margin of error side by side, and "
+        f"every summary level is picked off `GEO_ID` by prefix in a single "
+        f"pass per file — this collection's is `{specs.LEVELS[level]}`, read "
+        f"off the files themselves rather than taken from a summary-level "
+        f"table"
+        + (f" (the `19` is the congress number)" if level == "cd" else
+           f" (the `Z2` is the 2020 ZCTA vintage)" if level == "zcta" else "")
+        + ".",
 
         "Jam values (the sentinels the ACS publishes in place of "
         "unestimable values, e.g. -666666666 for an uncomputable median, and "
@@ -777,10 +1048,12 @@ def processing_notes(cid: str) -> str:
         "through untouched; coefficients of variation are "
         "`moe / 1.645 / estimate` on the headline columns. Every line number "
         "is pinned against the release's own table shells before the build "
-        "starts (43 pins verified, 0 failures), so a vintage bump that moves "
-        "a line fails loudly instead of publishing a mislabeled column.",
+        "starts (44 pins verified, 0 failures, plus 4 derived line groups "
+        "resolved from the shells), so a vintage bump that moves a line "
+        "fails loudly instead of publishing a mislabeled column.",
 
-        f"Geometry is the 2024 cartographic boundary file for "
+        f"Geometry is the {cd.CB_VINTAGE[level]} cartographic boundary file "
+        f"({Path(CB_LEVEL_URL[level]).name}) for "
         f"{LEVEL_PLURAL[level]} (1:500,000), reprojected to EPSG:4326 with "
         f"ogr2ogr — not DuckDB's `ST_Transform`, which computes correct "
         f"coordinates but stamps the source CRS into the GeoParquet "
@@ -793,8 +1066,43 @@ def processing_notes(cid: str) -> str:
         "its margin of error, the poverty rate and its margin of error — "
         "exact equality, not approximate.",
 
+        _wave3_validation(cid),
+
         PROCESSING_COMMON,
     ])
+
+
+def _wave3_validation(cid: str) -> str:
+    """What the validation pass counted for a wave-3 collection."""
+    return {
+        "zctas": (
+            f"Validated: 33,791 rows against the 33,791 ZCTAs in the Census "
+            f"Bureau's own [2020 geographic entity tallies]({GEO_TALLIES}) "
+            f"(33,642 US + 132 Puerto Rico + 17 island areas), 33,791 "
+            f"distinct `geoid`, no percentage outside 0–100, every one of "
+            f"the 33,772 tabulated ACS ZCTAs matched to a polygon, and 19 "
+            f"polygons with no ACS row kept with NULL values. Spot-checked "
+            f"against data.census.gov: 90210 median household income "
+            f"$187,801, 00601 (Adjuntas, PR) $19,454, 60614 (Chicago) "
+            f"$136,448."),
+        "places": (
+            f"Validated: 32,612 rows (the 2024 cartographic boundary file's "
+            f"own feature count; the Bureau's [2020 tallies]({GEO_TALLIES}) "
+            f"give 19,734 incorporated places + 12,454 CDPs = 32,188 for the "
+            f"2020 vintage), 32,612 distinct `geoid`, no percentage outside "
+            f"0–100, every one of the 32,330 tabulated ACS places matched to "
+            f"a polygon, 282 polygons with no ACS row kept with NULL values. "
+            f"Spot-checked: Los Angeles city population 3,857,263, New York "
+            f"city 8,483,844."),
+        "congressional-districts": (
+            f"Validated: 441 rows against the 441 districts in the Census "
+            f"Bureau's own [geographic entity tallies]({GEO_TALLIES}) (436 "
+            f"US including the District of Columbia delegate + 1 Puerto Rico "
+            f"+ 4 island areas), 441 distinct `geoid`, no percentage outside "
+            f"0–100, population 546,488–1,021,191 across the 435 voting "
+            f"districts. Spot-checked: CA-12 median household income "
+            f"$108,648, NY-12 $147,775, AL-01 $66,291."),
+    }.get(cid, "")
 
 
 def known_issues(cid: str) -> str:
@@ -829,11 +1137,107 @@ def known_issues(cid: str) -> str:
     level = LEVEL_OF[cid]
     items = [
         "Island areas carry geometry but no ACS data. American Samoa, Guam, "
-        "the Northern Mariana Islands and the U.S. Virgin Islands have 2024 "
+        "the Northern Mariana Islands and the U.S. Virgin Islands have "
         "cartographic boundaries but no ACS 5-year estimates, so their rows "
         "publish with NULL values rather than being dropped: 4 states, 13 "
-        "county equivalents, 126 tracts, 405 block groups.",
+        "county equivalents, 126 tracts, 405 block groups, 17 ZCTAs, 279 "
+        "places and 4 delegate districts.",
     ]
+    if cid == "zctas":
+        items.append(
+            f"**A ZCTA is not a ZIP code.** ZIP Code Tabulation Areas are "
+            f"the Census Bureau's approximation of USPS 5-digit ZIP "
+            f"delivery areas, built by assigning each 2020 census block the "
+            f"most common ZIP code of the addresses in it "
+            f"([what a ZCTA is]({ZCTA_ABOUT})). Consequences that bite: a "
+            f"ZCTA boundary is not a ZIP boundary, some ZIP codes have no "
+            f"ZCTA (PO-box-only and point ZIPs), ZCTA codes can differ from "
+            f"the ZIP code of an address inside them, and the Bureau "
+            f"re-delineates them only with each decennial census. Joining "
+            f"customer ZIP codes to this file is an approximation, and it is "
+            f"the user's job to say so.")
+        items.append(
+            "`state` is NULL on every row and there is no prefix join. A "
+            "ZCTA can cross state and county lines, the ACS tabulates ZCTAs "
+            "at the nation level only, and the 2020 cartographic boundary "
+            "ZCTA file carries no state attribute to fall back on. The "
+            "column is kept so the schema matches the catalog's other "
+            "collections. Assign ZCTAs to states spatially (and expect "
+            "ties), or use a Census relationship file.")
+        items.append(
+            "Medians thin out at this geography: `median_gross_rent` is NULL "
+            "on 23.79% of ZCTAs, `median_home_value` on 10.45%, "
+            "`median_hh_income` on 9.60%, and the race-iteration medians on "
+            "58–77% (measured). These are the Census Bureau's own "
+            "suppressions, reported rather than patched.")
+        items.append(
+            "Two ZCTAs — 11717 and 11798, in Suffolk County, New York — have "
+            "2020 boundaries but no row in this ACS tabulation and publish "
+            "with NULL values; they are the same two communities (Brentwood "
+            "and Wyandanch) that the re-delineated Suffolk County tracts and "
+            "block groups show up in elsewhere in this catalog.")
+    if cid == "places":
+        items.append(
+            f"Places do not tile the country. A place is a settlement — an "
+            f"incorporated city, town, village or borough, or a "
+            f"[census designated place]({CDP_ABOUT}) standing in for an "
+            f"unincorporated community — so the land between places is "
+            f"absent from this file and place rows do not sum to a county or "
+            f"a state. Places nest in states but not in counties: a place "
+            f"can straddle a county line, which is why there is no "
+            f"county-prefix join.")
+        items.append(
+            "Most rows are small places, so the suppression rates are high: "
+            "`median_gross_rent` is NULL on 31.32% of places, "
+            "`median_home_value` on 12.78%, `median_hh_income` on 12.71%, "
+            "and the race-iteration medians on 69–86% (measured). Filter on "
+            "`population` before reading a place-level distribution as if "
+            "every row were a city.")
+        items.append(
+            "Three non-island places carry geometry and no ACS row: "
+            "Brentwood CDP (`3608026`) and Wyandanch CDP (`3683294`) in "
+            "Suffolk County, New York, and Louisville city, Kentucky "
+            "(`2148000`), whose ACS tabulation is the consolidated "
+            "`2148006` Louisville/Jefferson County metro government "
+            "(balance) — if you want Louisville, use `2148006`.")
+    if cid == "congressional-districts":
+        items.append(
+            f"**These are the districts of the {CONGRESS}th Congress**, "
+            f"which is the vintage the ACS 2020–2024 5-year release "
+            f"tabulates: the release's `GEO_ID` prefix is `5001900US` (the "
+            f"`19`) and the boundary file is "
+            f"`cb_2024_us_cd{CONGRESS}_500k` with `CDSESSN = '{CONGRESS}'`. "
+            f"Confirmed against the Census Bureau's "
+            f"[ACS geography boundaries by year]({ACS_BOUNDARY_VINTAGE}), "
+            f"which lists \"Congressional District, Delegate District DC, "
+            f"Resident Commissioner District PR\" with the vintage "
+            f"\"{CONGRESS}th Congress of the United States\". District "
+            f"numbers are not stable between congresses — several states "
+            f"re-drew their maps for the {CONGRESS}th — so a GEOID here does "
+            f"not refer to the same ground as the same GEOID in an earlier "
+            f"congress, and estimates must not be compared across congresses "
+            f"as a time series.")
+        items.append(
+            "441 rows, not 435: the 435 voting districts plus the District "
+            "of Columbia delegate district (`1198`), Puerto Rico's Resident "
+            "Commissioner district (`7298`) and the four island-area "
+            "delegate districts (`6098`, `6698`, `6998`, `7898`), which "
+            "carry geometry but no ACS estimates. Every column in this "
+            "collection is NULL on exactly those four rows (0.91%).")
+        items.append(
+            "Three districts the ACS tabulates are absent, by construction: "
+            "`09ZZ`, `17ZZ` and `33ZZ` — water-only pseudo-districts in "
+            "Connecticut, Illinois and New Hampshire, each with population "
+            "0 — have no polygon in the cartographic boundary file and so no "
+            "row here.")
+        items.append(
+            "Districts are equal-population by design (546,488–1,021,191 "
+            "here, around 770,000 at the median), so the spread of every "
+            "rate is much narrower than at any other geography in this "
+            "catalog. Class breaks measured at county or tract level will "
+            "put almost every district in one or two classes; the styles "
+            "shipped with this collection are measured on its own "
+            "distribution.")
     if level in ("bg", "tract"):
         items.append(
             "Suffolk County, New York (36103) was re-delineated in the 2024 "
@@ -876,15 +1280,36 @@ def known_issues(cid: str) -> str:
             "`median_hh_income_black` 61.43%, `median_hh_income_hispanic` "
             "44.43%, `median_hh_income_white_nh` 10.04%. A map of one of "
             "these columns is partly a map of where the group lives.")
-    items.append(
-        "Margins of error at this geography can be large relative to the "
-        "estimate. Use the `*_cv` columns to flag or grey out unreliable "
-        "values; never compare two geographies without checking whether "
-        "their margins overlap, and never aggregate a median.")
-    items.append(
-        "PMTiles coarse zooms are A5 cell aggregations, not census "
-        "geographies — counts summed, rates and medians averaged unweighted. "
-        "Statistics come from the GeoParquet.")
+    if cid == "congressional-districts":
+        # Measured: no styled column has a single district with a CV above
+        # 0.30 (docs/style-breaks.json). Reusing the small-area warning here
+        # would be false modesty about the most reliable file in the catalog.
+        items.append(
+            "Margins of error are the narrowest in this catalog — a district "
+            "is ~770,000 people — and no styled column has a single district "
+            "with a coefficient of variation above 0.30 (measured). They are "
+            "still margins: check whether two districts' margins overlap "
+            "before calling a difference real, and never aggregate a "
+            "median.")
+    else:
+        items.append(
+            "Margins of error at this geography can be large relative to "
+            "the estimate. Use the `*_cv` columns to flag or grey out "
+            "unreliable values; never compare two geographies without "
+            "checking whether their margins overlap, and never aggregate a "
+            "median.")
+    if cid in GEOM_ONLY_TILES:
+        items.append(
+            "The PMTiles archive is real geographies at every zoom, with no "
+            "A5 cell aggregation (the catalog's finer collections aggregate "
+            "at coarse zooms; this one has few enough features not to). "
+            "`*_moe` columns are not in the tiles — statistics come from the "
+            "GeoParquet.")
+    else:
+        items.append(
+            "PMTiles coarse zooms are A5 cell aggregations, not census "
+            "geographies — counts summed, rates and medians averaged "
+            "unweighted. Statistics come from the GeoParquet.")
     return "\n\n".join(items)
 
 
@@ -940,7 +1365,9 @@ title: "US Census Demographics — Cloud-Native Mirror"
 description: |
   Nationwide United States census statistics as cloud-native GeoParquet and
   PMTiles with STAC metadata, at every census geography from states down to
-  the 242,298 block groups and 8,174,955 blocks of the 2020 Census. Eleven
+  the 242,298 block groups and 8,174,955 blocks of the 2020 Census, plus the
+  33,791 ZIP Code Tabulation Areas, 32,612 places and 441 congressional
+  districts of the 119th Congress. Fourteen
   collections carry curated [American Community Survey]({ACS_PROGRAM})
   2020–2024 5-year indicators — income, poverty, age, race and ethnicity,
   education, housing cost and tenure, vehicles, commuting, internet access,
@@ -983,12 +1410,20 @@ processing_notes: |
 # CLI
 # --------------------------------------------------------------------------
 
-def write_metadata() -> None:
-    d = CATALOG / ".portolan"
-    d.mkdir(parents=True, exist_ok=True)
-    (d / "metadata.yaml").write_text(ROOT_YAML)
-    print("✓ catalog/.portolan/metadata.yaml")
+def write_metadata(only: set[str] | None = None) -> None:
+    """Write .portolan/metadata.yaml files.
+
+    `only` writes some collections and leaves the root and the rest alone —
+    what a wave of new collections needs while other work is in flight.
+    """
+    if not only:
+        d = CATALOG / ".portolan"
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "metadata.yaml").write_text(ROOT_YAML)
+        print("✓ catalog/.portolan/metadata.yaml")
     for cid in ALL_COLLECTIONS:
+        if only and cid not in only:
+            continue
         coll_dir = CATALOG / COLL_REL[cid]
         if not coll_dir.exists():
             print(f"✗ missing collection directory: {COLL_REL[cid]}")
@@ -1010,7 +1445,13 @@ def main() -> None:
     ap.add_argument("--print", dest="show", metavar="COLLECTION",
                     help="print one collection's title, keywords, source "
                          "assets and description to stdout")
+    ap.add_argument("collections", nargs="*",
+                    help="with --write, the only collections to write (the "
+                         "catalog root is left alone)")
     args = ap.parse_args()
+    only = set(args.collections) or None
+    if only and (unknown := only - set(ALL_COLLECTIONS)):
+        raise SystemExit(f"unknown collections: {sorted(unknown)}")
     if args.show:
         cid = args.show
         print(f"# {TITLES[cid]}\n")
@@ -1019,9 +1460,9 @@ def main() -> None:
         print(description(cid))
         return
     if args.write:
-        write_metadata()
+        write_metadata(only)
         return
-    for cid in ALL_COLLECTIONS:
+    for cid in (sorted(only) if only else ALL_COLLECTIONS):
         print(f"{COLL_REL[cid]:34s} {TITLES[cid]:52s} "
               f"{len(description(cid)):5d} chars, "
               f"{len(source_assets(cid)):2d} source/doc assets")

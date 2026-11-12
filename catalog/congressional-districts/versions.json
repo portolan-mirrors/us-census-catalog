@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:46:43.336255Z",
+      "breaking": false,
+      "assets": {
+        "congressional-districts.pmtiles": {
+          "sha256": "df3c4736a03d7db5f91b4a89b59f739d1d07105eed52febf9a3316597db5b945",
+          "size_bytes": 23323339,
+          "href": "congressional-districts/congressional-districts.pmtiles",
+          "mtime": 1794522357.2750137
+        },
+        "congressional-districts.parquet": {
+          "sha256": "72de5ad13119cf40890082d4b0fbab7a33e358dd55a7b9919e774169acef5cf2",
+          "size_bytes": 9005014,
+          "href": "congressional-districts/congressional-districts.parquet",
+          "source_mtime": 1794522177.0668702,
+          "mtime": 1794522177.0668702,
+          "feature_count": 441,
+          "schema_fingerprint": "3c2154967ad844be"
+        },
+        "congressional-districts.thumb.jpg": {
+          "sha256": "f3a1b1f864b4b45360c4c0b7017b2574cb5464ff266eeed4d0ce2103ec132fe3",
+          "size_bytes": 2876,
+          "href": "congressional-districts/congressional-districts.thumb.jpg",
+          "mtime": 1794523604.270203
+        }
+      },
+      "changes": [
+        "congressional-districts.pmtiles",
+        "congressional-districts.parquet",
+        "congressional-districts.thumb.jpg"
+      ]
+    }
+  ]
+}

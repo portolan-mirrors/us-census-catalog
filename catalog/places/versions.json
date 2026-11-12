@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-12T22:46:42.545782Z",
+      "breaking": false,
+      "assets": {
+        "places.parquet": {
+          "sha256": "f1f1d49603125b11f7442af0cab12e7f95a385ab72003f26eb5d471316a5c6cb",
+          "size_bytes": 34516595,
+          "href": "places/places.parquet",
+          "source_mtime": 1794522176.044517,
+          "mtime": 1794522176.044517,
+          "feature_count": 32612,
+          "schema_fingerprint": "97ed5ae745dcfb15"
+        },
+        "places.pmtiles": {
+          "sha256": "e37493fddc60deb7c5ab8f886d37c6f0c246cb5811c3245390b9f7d7bfcac0ef",
+          "size_bytes": 206156086,
+          "href": "places/places.pmtiles",
+          "mtime": 1794522361.0717654
+        }
+      },
+      "changes": [
+        "places.parquet",
+        "places.pmtiles"
+      ]
+    }
+  ]
+}
