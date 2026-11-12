@@ -699,15 +699,6 @@
       ],
       "title": "All Indicators — Congressional Districts (119th Congress) (GeoParquet, national)"
     },
-    "thumbnail": {
-      "href": "./congressional-districts.thumb.jpg",
-      "type": "image/jpeg",
-      "roles": [
-        "thumbnail"
-      ],
-      "file:size": 2876,
-      "file:checksum": "1220f3a1b1f864b4b45360c4c0b7017b2574cb5464ff266eeed4d0ce2103ec132fe3"
-    },
     "congressional-districts-tiles": {
       "href": "./congressional-districts.pmtiles",
       "type": "application/vnd.pmtiles",
@@ -720,6 +711,16 @@
       ],
       "file:size": 23323339,
       "file:checksum": "1220df3c4736a03d7db5f91b4a89b59f739d1d07105eed52febf9a3316597db5b945"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "All Indicators — Congressional Districts (119th Congress) rendered with the default style",
+      "file:size": 54623,
+      "file:checksum": "12208441943d9c2c8bca6b82b2ab2b3e98a7c10bd1f0ec3d1217624f3cefda4b51df"
     },
     "styles/default": {
       "href": "./styles/default.json",

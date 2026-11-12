@@ -148,6 +148,16 @@
       "file:size": 34516595,
       "file:checksum": "1220f1f1d49603125b11f7442af0cab12e7f95a385ab72003f26eb5d471316a5c6cb"
     },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "All Indicators — Places & CDPs rendered with the default style",
+      "file:size": 77373,
+      "file:checksum": "12203b84a9b17514cff365103a141cf198ee14360d977f4d15a1fe78416030281dac"
+    },
     "styles/default": {
       "href": "./styles/default.json",
       "type": "application/vnd.mapbox.style+json",

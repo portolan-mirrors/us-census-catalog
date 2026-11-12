@@ -21,12 +21,6 @@
           "mtime": 1794522177.0668702,
           "feature_count": 441,
           "schema_fingerprint": "3c2154967ad844be"
-        },
-        "congressional-districts.thumb.jpg": {
-          "sha256": "f3a1b1f864b4b45360c4c0b7017b2574cb5464ff266eeed4d0ce2103ec132fe3",
-          "size_bytes": 2876,
-          "href": "congressional-districts/congressional-districts.thumb.jpg",
-          "mtime": 1794523604.270203
         }
       },
       "changes": [

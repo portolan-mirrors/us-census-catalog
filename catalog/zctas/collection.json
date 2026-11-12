@@ -148,6 +148,16 @@
       "file:size": 75213440,
       "file:checksum": "122045e7bd0d4e856c13dc0307650a5af0ca361389fa3aaa3174a8a2f46f5320df7b"
     },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "All Indicators — ZIP Code Tabulation Areas rendered with the default style",
+      "file:size": 73035,
+      "file:checksum": "122075a3d2e958b925dd15cd1280a6531d27b57042550f8238e16f2688ab82c3edb2"
+    },
     "styles/default": {
       "href": "./styles/default.json",
       "type": "application/vnd.mapbox.style+json",
