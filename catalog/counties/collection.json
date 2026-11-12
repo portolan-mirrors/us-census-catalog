@@ -699,15 +699,6 @@
       ],
       "title": "All Indicators — Counties (GeoParquet, national)"
     },
-    "thumbnail": {
-      "href": "./counties.thumb.jpg",
-      "type": "image/jpeg",
-      "roles": [
-        "thumbnail"
-      ],
-      "file:size": 2684,
-      "file:checksum": "1220aa149853ad3b527ae4389cbe2d3b95b91fb13a59d65788e70032d00416355c38"
-    },
     "counties-tiles": {
       "href": "./counties.pmtiles",
       "type": "application/vnd.pmtiles",
@@ -720,6 +711,16 @@
       ],
       "file:size": 48873493,
       "file:checksum": "12204d49bc68d2487b026c23084decc25cdcf43db9728d090b9503743dc6cac284c3"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "All Indicators — Counties rendered with the default style",
+      "file:size": 99928,
+      "file:checksum": "1220d031d6eadb28837ad6dc497e3d0d9f6373220cf14af4574efefc273cf3d44f27"
     },
     "styles/default": {
       "href": "./styles/default.json",

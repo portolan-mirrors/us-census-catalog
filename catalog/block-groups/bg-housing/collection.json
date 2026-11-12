@@ -299,15 +299,6 @@
       ],
       "title": "Housing & Rent — Block Groups (GeoParquet, national)"
     },
-    "thumbnail": {
-      "href": "./bg-housing.thumb.jpg",
-      "type": "image/jpeg",
-      "roles": [
-        "thumbnail"
-      ],
-      "file:size": 2323,
-      "file:checksum": "12208df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325"
-    },
     "bg-housing-tiles": {
       "href": "./bg-housing.pmtiles",
       "type": "application/vnd.pmtiles",
@@ -320,6 +311,16 @@
       ],
       "file:size": 713749378,
       "file:checksum": "1220546c36ba12b5d2fde3044f2a6e560e35d9aa5202baa1d96fff97da3e8c8e570a"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Housing & Rent — Block Groups rendered with the default style",
+      "file:size": 71685,
+      "file:checksum": "122006aad866795051ad2e7b51d49620d7e8b0e3d370c28c5c0fa80906acdd27c632"
     },
     "styles/default": {
       "href": "./styles/default.json",

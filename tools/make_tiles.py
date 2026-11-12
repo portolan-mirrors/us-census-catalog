@@ -1,25 +1,68 @@
 #!/usr/bin/env python3
 """Build every PMTiles archive with tylertoo (A5 cells at coarse zooms).
 
-Consolidated from the tiling run of 2026-11-12 (see staging/tiles-logs/
-for the per-archive logs and exact command lines of that run). Three
-parts, originally separate driver scripts, are concatenated below:
-recipe definitions, the ACS/counties/states runner, and the blocks run.
+One recipe per collection, and the recipes are the record of how each
+published archive was made: the command lines below are the ones in
+staging/tiles-logs/<id>.log, byte for byte. Nothing here mutates the
+catalog until a job is named on the command line, because re-tiling an
+archive that is already built and QC'd costs twenty minutes and gains
+nothing.
 
-Usage: python3 tools/make_tiles.py          # everything
-See docs/design.md for the band design and QC findings (coarsest geom
-zooms in dense metros ride the 500K merge valve; counties uses a 2M cap).
+Usage:
+  python3 tools/make_tiles.py --list                 # recipes, no work
+  python3 tools/make_tiles.py --print zctas          # the exact command
+  python3 tools/make_tiles.py zctas places           # build those two
+  python3 tools/make_tiles.py --all                  # everything
+
+Three families of recipe:
+
+  A5 + geometry   The fine geographies (block groups, tracts, blocks) and
+                  the two wave-3 collections with tens of thousands of
+                  features: A5 cell aggregation at coarse zooms, real
+                  geometry at feature zooms. Counts are summed, rates,
+                  medians and coefficients of variation averaged unweighted
+                  over the geographies in the cell. `*_moe` columns are
+                  excluded from the tiles — a margin of error that has been
+                  averaged over an A5 cell is not a margin of error.
+  geometry only   The coarse geographies (states, counties, congressional
+                  districts): few enough features that every zoom can carry
+                  the real polygons.
+  blocks          Its own band split and its own column set (2020 Decennial
+                  counts, no margins of error, no CVs).
+
+See docs/design.md for the band design and the QC findings (the coarsest
+geometry zooms in dense metros ride the 500K merge valve; the wide tables —
+counties and congressional districts, 110 columns on few features — need
+--max-compressed-tile-size 2M).
 """
-#!/usr/bin/env python3
-"""Shared recipe definitions for the ACS + counties/states tylertoo builds."""
+
+import argparse
+import subprocess
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import duckdb
 
 ROOT = "/Users/cholmes/repos/us-census-catalog"
 TT = "/Users/cholmes/repos/tylertoo/target/release/tylertoo"
+LOGDIR = f"{ROOT}/staging/tiles-logs"
+SPILL = f"{ROOT}/staging/tiles-tmp"
 
 SKIP_ALWAYS = {"geoid", "name", "state", "geometry", "bbox"}
 
-# (group, id, sum_cols) for the 9 themed ACS chunks
+# (group, id, sum_cols, a5_band, geom_band) for the 9 themed ACS chunks and
+# the two wave-3 collections that are fine enough to need A5 cells. A wave-3
+# collection sits at the catalog root, so its group is None.
+#
+# zctas and places take the tract bands (0-5:a5, 6-12:geom): 33,791 ZCTAs and
+# 32,612 places are the same order of magnitude as 85,184 tracts and far
+# coarser than 242,298 block groups, and both are polygon sets a reader
+# expects to see shaped at z6. Their sum_cols are every count column in the
+# wide table, because the wide table carries all five.
+WIDE_SUMS = ("population", "housing_units", "households", "hh_no_vehicle",
+             "group_quarters_pop")
+
 ACS_CHUNKS = [
     ("block-groups", "bg-income", ("population",), "0-7:a5", "8-13:geom"),
     ("block-groups", "bg-people", ("population",), "0-7:a5", "8-13:geom"),
@@ -30,11 +73,34 @@ ACS_CHUNKS = [
     ("tracts", "tract-housing", ("population", "housing_units", "households"), "0-5:a5", "6-12:geom"),
     ("tracts", "tract-connectivity", ("population", "hh_no_vehicle"), "0-5:a5", "6-12:geom"),
     ("tracts", "tract-wellbeing", ("population", "group_quarters_pop"), "0-5:a5", "6-12:geom"),
+    (None, "zctas", WIDE_SUMS, "0-5:a5", "6-12:geom"),
+    (None, "places", WIDE_SUMS, "0-5:a5", "6-12:geom"),
+]
+
+# (id, band, max_compressed_tile_size) for the geometry-only archives.
+# counties and congressional-districts carry 110 columns on a few thousand
+# and a few hundred features, so a single z0 tile holds every attribute of
+# every feature and overruns the default compressed-tile cap; 2M is the
+# counties precedent (staging/tiles-logs/counties.log). states fits under the
+# default because there are 56 of them.
+GEOM_ONLY = [
+    ("counties", "0-10:geom", "2M"),
+    ("states", "0-8:geom", None),
+    ("congressional-districts", "0-10:geom", "2M"),
 ]
 
 
+def coll_dir(group, cid):
+    return f"{ROOT}/catalog/{group}/{cid}" if group else f"{ROOT}/catalog/{cid}"
+
+
+def columns(path):
+    return [r[0] for r in duckdb.sql(
+        f"DESCRIBE SELECT * FROM read_parquet('{path}')").fetchall()]
+
+
 def classify(path, sum_cols):
-    cols = [r[0] for r in duckdb.sql(f"DESCRIBE SELECT * FROM read_parquet('{path}')").fetchall()]
+    cols = columns(path)
     moe = [c for c in cols if c.endswith("_moe")]
     cv = [c for c in cols if c.endswith("_cv")]
     data_cols = [c for c in cols if c not in SKIP_ALWAYS and not c.endswith("_moe")]
@@ -43,9 +109,13 @@ def classify(path, sum_cols):
     return moe, list(sum_cols), mean_cols, cv
 
 
+def moe_cols(path):
+    return [c for c in columns(path) if c.endswith("_moe")]
+
+
 def build_acs_cmd(group, cid, sum_cols, a5_band, geom_band, extra_pivot_shift=0):
-    path = f"{ROOT}/catalog/{group}/{cid}/{cid}.parquet"
-    out = f"{ROOT}/catalog/{group}/{cid}/{cid}.pmtiles"
+    d = coll_dir(group, cid)
+    path, out = f"{d}/{cid}.parquet", f"{d}/{cid}.pmtiles"
     moe, sum_cols, mean_cols, cv_cols = classify(path, sum_cols)
     cmd = [TT, "tiles", path, out]
     if extra_pivot_shift:
@@ -62,120 +132,109 @@ def build_acs_cmd(group, cid, sum_cols, a5_band, geom_band, extra_pivot_shift=0)
         cmd += ["--accumulate-attribute", f"{c}:mean"]
     for c in moe:
         cmd += ["--exclude-property", c]
-    cmd += ["--spill-dir", f"{ROOT}/staging/tiles-tmp", "-f"]
+    cmd += ["--spill-dir", SPILL, "-f"]
     return cmd, out
 
 
-if __name__ == "__main__":
-    for group, cid, sum_cols, a5_band, geom_band in ACS_CHUNKS:
-        path = f"{ROOT}/catalog/{group}/{cid}/{cid}.parquet"
-        cmd, out = build_acs_cmd(group, cid, sum_cols, a5_band, geom_band)
-        print(cid, "->", " ".join(cmd))
+def build_geom_cmd(cid, band, max_tile):
+    d = coll_dir(None, cid)
+    path, out = f"{d}/{cid}.parquet", f"{d}/{cid}.pmtiles"
+    cmd = [TT, "tiles", path, out, "--band", band]
+    if max_tile:
+        cmd += ["--max-compressed-tile-size", max_tile]
+    for c in moe_cols(path):
+        cmd += ["--exclude-property", c]
+    cmd += ["--spill-dir", SPILL, "-f"]
+    return cmd, out
 
 
-# ===== runner (ACS/counties/states) =====
-#!/usr/bin/env python3
-import subprocess, time, sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
-# (recipes definitions are inlined above in this consolidated file)
-
-LOGDIR = f"{ROOT}/staging/tiles-logs"
-
-jobs = []
-for group, cid, sum_cols, a5_band, geom_band in ACS_CHUNKS:
-    if cid == "bg-income":
-        continue  # already built + QC'd separately
-    cmd, out = build_acs_cmd(group, cid, sum_cols, a5_band, geom_band)
-    jobs.append((cid, cmd, out))
-
-# also counties (with raised cap) and states (default cap)
-import duckdb
-TT = "/Users/cholmes/repos/tylertoo/target/release/tylertoo"
-
-def moe_cols(path):
-    cols = [r[0] for r in duckdb.sql(f"DESCRIBE SELECT * FROM read_parquet('{path}')").fetchall()]
-    return [c for c in cols if c.endswith("_moe")]
-
-counties_path = f"{ROOT}/catalog/counties/counties.parquet"
-counties_out = f"{ROOT}/catalog/counties/counties.pmtiles"
-cmd = [TT, "tiles", counties_path, counties_out, "--band", "0-10:geom", "--max-compressed-tile-size", "2M"]
-for c in moe_cols(counties_path):
-    cmd += ["--exclude-property", c]
-cmd += ["--spill-dir", f"{ROOT}/staging/tiles-tmp", "-f"]
-jobs.append(("counties", cmd, counties_out))
-
-states_path = f"{ROOT}/catalog/states/states.parquet"
-states_out = f"{ROOT}/catalog/states/states.pmtiles"
-cmd = [TT, "tiles", states_path, states_out, "--band", "0-8:geom"]
-for c in moe_cols(states_path):
-    cmd += ["--exclude-property", c]
-cmd += ["--spill-dir", f"{ROOT}/staging/tiles-tmp", "-f"]
-jobs.append(("states", cmd, states_out))
-
-print(f"Running {len(jobs)} jobs, 3 at a time")
-for cid, cmd, out in jobs:
-    print(cid, len(cmd), "args")
-
-def run_job(cid, cmd, out):
-    log_path = f"{LOGDIR}/{cid}.log"
-    t0 = time.time()
-    with open(log_path, "w") as f:
-        f.write("CMD: " + " ".join(cmd) + "\n\n")
-        f.flush()
-        r = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT)
-    elapsed = time.time() - t0
-    return cid, r.returncode, elapsed, out
-
-results = []
-with ThreadPoolExecutor(max_workers=3) as ex:
-    futs = {ex.submit(run_job, cid, cmd, out): cid for cid, cmd, out in jobs}
-    for fut in as_completed(futs):
-        cid, rc, elapsed, out = fut.result()
-        print(f"DONE {cid}: rc={rc} elapsed={elapsed:.1f}s")
-        results.append((cid, rc, elapsed, out))
-
-print("\n=== SUMMARY ===")
-for cid, rc, elapsed, out in results:
-    print(f"{cid}: rc={rc} time={elapsed:.1f}s out={out}")
-
-
-# ===== blocks =====
-#!/usr/bin/env python3
-import subprocess, time, os
-
-TT = "/Users/cholmes/repos/tylertoo/target/release/tylertoo"
-ROOT = "/Users/cholmes/repos/us-census-catalog"
-
-SUM_COLS = [
+# ===== blocks: 2020 Decennial counts, 8.17M features =========================
+BLOCK_SUMS = [
     "pop_total", "pop_white", "pop_black", "pop_aian", "pop_asian", "pop_nhpi",
     "pop_other", "pop_two_plus", "pop_hispanic", "pop_white_nh", "vap_total",
     "housing_units", "housing_occupied", "housing_vacant", "group_quarters_pop",
 ]
-MEAN_COLS = ["pct_white_nh", "pct_black", "pct_hispanic", "pct_vacant", "pop_density"]
+BLOCK_MEANS = ["pct_white_nh", "pct_black", "pct_hispanic", "pct_vacant",
+               "pop_density"]
 
-INPUT = f"{ROOT}/catalog/blocks/state_fips=*/*.parquet"
-OUT = f"{ROOT}/catalog/blocks/blocks.pmtiles"
-LOG = f"{ROOT}/staging/tiles-logs/blocks.log"
 
-cmd = [TT, "tiles", INPUT, OUT,
-       "--band", "0-9:a5", "--band", "10-14:geom",
-       "--layer-name", "blocks"]
-for c in SUM_COLS:
-    cmd += ["--accumulate-attribute", f"{c}:sum"]
-for c in MEAN_COLS:
-    cmd += ["--accumulate-attribute", f"{c}:mean"]
-cmd += ["--spill-dir", f"{ROOT}/staging/tiles-tmp", "-f", "-v"]
+def build_blocks_cmd():
+    out = f"{ROOT}/catalog/blocks/blocks.pmtiles"
+    cmd = [TT, "tiles", f"{ROOT}/catalog/blocks/state_fips=*/*.parquet", out,
+           "--band", "0-9:a5", "--band", "10-14:geom",
+           "--layer-name", "blocks"]
+    for c in BLOCK_SUMS:
+        cmd += ["--accumulate-attribute", f"{c}:sum"]
+    for c in BLOCK_MEANS:
+        cmd += ["--accumulate-attribute", f"{c}:mean"]
+    cmd += ["--spill-dir", SPILL, "-f", "-v"]
+    return cmd, out
 
-print(" ".join(cmd))
+
+def recipes():
+    """id -> a zero-argument builder returning (cmd, output path)."""
+    out = {}
+    for group, cid, sums, a5, geom in ACS_CHUNKS:
+        out[cid] = (lambda g=group, c=cid, s=sums, a=a5, m=geom:
+                    build_acs_cmd(g, c, s, a, m))
+    for cid, band, cap in GEOM_ONLY:
+        out[cid] = (lambda c=cid, b=band, p=cap: build_geom_cmd(c, b, p))
+    out["blocks"] = build_blocks_cmd
+    return out
+
+
+def run_job(cid, cmd, out):
+    t0 = time.time()
+    with open(f"{LOGDIR}/{cid}.log", "w") as f:
+        f.write("CMD: " + " ".join(cmd) + "\n\n")
+        f.flush()
+        r = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT)
+    return cid, r.returncode, time.time() - t0, out
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("collections", nargs="*", help="collection ids to build")
+    ap.add_argument("--all", action="store_true", help="build every archive")
+    ap.add_argument("--list", action="store_true",
+                    help="list the recipes and exit")
+    ap.add_argument("--print", dest="show", metavar="ID", action="append",
+                    help="print a recipe's command line and exit")
+    ap.add_argument("-j", "--jobs", type=int, default=3,
+                    help="archives to build at once (default 3)")
+    args = ap.parse_args()
+    rec = recipes()
+
+    if args.list:
+        for cid in rec:
+            print(cid)
+        return 0
+    if args.show:
+        for cid in args.show:
+            cmd, _ = rec[cid]()
+            print(" ".join(cmd))
+        return 0
+
+    want = list(rec) if args.all else args.collections
+    if not want:
+        ap.error("name at least one collection, or --all / --list")
+    if unknown := [c for c in want if c not in rec]:
+        ap.error(f"unknown collections: {unknown}")
+
+    jobs = [(cid, *rec[cid]()) for cid in want]
+    print(f"Running {len(jobs)} job(s), {args.jobs} at a time")
+    results = []
+    with ThreadPoolExecutor(max_workers=args.jobs) as ex:
+        futs = {ex.submit(run_job, c, cmd, out): c for c, cmd, out in jobs}
+        for fut in as_completed(futs):
+            cid, rc, elapsed, out = fut.result()
+            print(f"DONE {cid}: rc={rc} elapsed={elapsed:.1f}s")
+            results.append((cid, rc, elapsed, out))
+    print("\n=== SUMMARY ===")
+    for cid, rc, elapsed, out in sorted(results):
+        print(f"{cid}: rc={rc} time={elapsed:.1f}s out={out}")
+    return 1 if any(rc for _, rc, _, _ in results) else 0
+
 
 if __name__ == "__main__":
-    import sys
-    if "--run" in sys.argv:
-        os.makedirs(os.path.dirname(LOG), exist_ok=True)
-        t0 = time.time()
-        with open(LOG, "w") as f:
-            f.write("CMD: " + " ".join(cmd) + "\n\n")
-            f.flush()
-            r = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT)
-        elapsed = time.time() - t0
-        print(f"blocks build rc={r.returncode} elapsed={elapsed:.1f}s")
+    raise SystemExit(main())

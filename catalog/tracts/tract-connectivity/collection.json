@@ -125,7 +125,17 @@
     }
   ],
   "assets": {
-    "tract-connectivity": {
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Commuting & Connectivity — Census Tracts rendered with the default style",
+      "file:size": 65039,
+      "file:checksum": "1220970789e27ffa2cb7c2613644ea68d0ee20d2514a5717562538670ac26cb185cd"
+    },
+    "tract-connectivity-tiles": {
       "href": "./tract-connectivity.pmtiles",
       "type": "application/vnd.pmtiles",
       "file:size": 243913470,
@@ -137,6 +147,16 @@
       "pmtiles:layers": [
         "tract-connectivity"
       ]
+    },
+    "tract-connectivity": {
+      "href": "./tract-connectivity.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "Commuting & Connectivity — Census Tracts (GeoParquet, national)",
+      "file:size": 55929687,
+      "file:checksum": "1220a1d5db1ada790f65ef9844c65c02cf95161aa09b96e82a5f1e12230e5fb565e2"
     },
     "styles/default": {
       "href": "./styles/default.json",

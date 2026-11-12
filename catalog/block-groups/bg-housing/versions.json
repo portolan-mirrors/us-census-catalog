@@ -21,12 +21,6 @@
           "mtime": 1794518863.3334467,
           "feature_count": 242298,
           "schema_fingerprint": "b18041770030df74"
-        },
-        "bg-housing.thumb.jpg": {
-          "sha256": "8df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325",
-          "size_bytes": 2323,
-          "href": "block-groups/bg-housing/bg-housing.thumb.jpg",
-          "mtime": 1794521054.8719966
         }
       },
       "changes": [

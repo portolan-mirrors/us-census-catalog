@@ -21,12 +21,6 @@
           "mtime": 1794518892.4455094,
           "feature_count": 3235,
           "schema_fingerprint": "3c2154967ad844be"
-        },
-        "counties.thumb.jpg": {
-          "sha256": "aa149853ad3b527ae4389cbe2d3b95b91fb13a59d65788e70032d00416355c38",
-          "size_bytes": 2684,
-          "href": "counties/counties.thumb.jpg",
-          "mtime": 1794521085.35221
         }
       },
       "changes": [

@@ -21,12 +21,6 @@
           "mtime": 1794518889.1405118,
           "feature_count": 85184,
           "schema_fingerprint": "9b93151a98bdb1ca"
-        },
-        "tract-wellbeing.thumb.jpg": {
-          "sha256": "f20c80a3fb9b1ffdbf46ee79e743233fb392c9e711e13e978090f27a1edbf5a7",
-          "size_bytes": 2842,
-          "href": "tracts/tract-wellbeing/tract-wellbeing.thumb.jpg",
-          "mtime": 1794521083.4991453
         }
       },
       "changes": [

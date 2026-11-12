@@ -488,6 +488,17 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
               if not (k.startswith(("source-", "doc-", "styles/")))}
     assets.pop("documentation", None)
 
+    # Self-heal an add/fix pass that left the pmtiles under the collection's
+    # own key, clobbering the parquet asset: the key <cid> belongs to the
+    # GeoParquet, tiles live under <cid>-tiles.
+    if assets.get(cid, {}).get("href", "").endswith(".pmtiles"):
+        assets[f"{cid}-tiles"] = assets.pop(cid)
+    if (coll_dir / f"{cid}.parquet").exists() and not any(
+            a.get("href", "") == f"./{cid}.parquet" for a in assets.values()):
+        assets[cid] = {"href": f"./{cid}.parquet"}
+        assets.move_to_end(cid, last=False) if hasattr(assets, "move_to_end") \
+            else None
+
     for key, asset in assets.items():
         href = asset.get("href", "")
         if href.endswith(".parquet") or href.endswith("*.parquet"):

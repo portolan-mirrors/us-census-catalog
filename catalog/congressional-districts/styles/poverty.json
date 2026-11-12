@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "People below the poverty line",
+  "metadata": {
+    "description": "Share of residents with income below the federal poverty line, pale yellow to deep red. Measured over all 437 districts with a published value: 6 classes with breaks at 8%/10%/12%/15%/19%, which fall at the 12th/28th/51st/77th/92nd percentile of the national distribution.",
+    "portolan:column": "pct_below_poverty",
+    "portolan:breaks": [
+      8,
+      10,
+      12,
+      15,
+      19
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../congressional-districts.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "congressional-districts",
+      "filter": [
+        "has",
+        "pct_below_poverty"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_below_poverty"
+          ],
+          "#fff2b0",
+          8,
+          "#fed976",
+          10,
+          "#feb24c",
+          12,
+          "#fd8d3c",
+          15,
+          "#f03b20",
+          19,
+          "#bd0026"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "congressional-districts",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

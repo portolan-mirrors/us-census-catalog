@@ -309,15 +309,6 @@
       ],
       "title": "Health, Disability & Income by Race — Census Tracts (GeoParquet, national)"
     },
-    "thumbnail": {
-      "href": "./tract-wellbeing.thumb.jpg",
-      "type": "image/jpeg",
-      "roles": [
-        "thumbnail"
-      ],
-      "file:size": 2842,
-      "file:checksum": "1220f20c80a3fb9b1ffdbf46ee79e743233fb392c9e711e13e978090f27a1edbf5a7"
-    },
     "tract-wellbeing-tiles": {
       "href": "./tract-wellbeing.pmtiles",
       "type": "application/vnd.pmtiles",
@@ -330,6 +321,16 @@
       ],
       "file:size": 250010317,
       "file:checksum": "1220a0370a6e8c78de3e3ebaf4199c476c4651a1867c0b2f2c6536e23b44d1bfc489"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Health, Disability & Income by Race — Census Tracts rendered with the default style",
+      "file:size": 64326,
+      "file:checksum": "1220a4933186ff0e04b2a169e97110b26750fa239f0d9fd9995945dedd48ee0bbed6"
     },
     "styles/default": {
       "href": "./styles/default.json",

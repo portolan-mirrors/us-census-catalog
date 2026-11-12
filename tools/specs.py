@@ -38,12 +38,25 @@ Z90 = 1.645       # ACS margins of error are published at 90% confidence
 JAM = -111111111  # any value at or below this is an ACS jam code, not data
 
 # Summary-level prefixes on GEO_ID in the table-based Summary File. One pass
-# per .dat file extracts all four (the biggest file is 200 MB).
+# per .dat file extracts every level asked for (the biggest file is 200 MB).
+#
+# Every prefix below was read OFF the cached .dat files rather than from a
+# summary-level table: `python3 -c` over acsdt5y2024-b19013.dat, counting
+# GEO_ID prefixes, gives 1500000US 242,297 / 1400000US 85,382 / 0500000US
+# 3,222 / 0400000US 52 / 860Z200US 33,772 / 1600000US 32,330 / 5001900US 440.
+# The three wave-3 prefixes carry a component that is not zero-padding:
+#   860Z200US  ZCTA5, "Z2" = the 2020-based ZCTA vintage (summary level 860)
+#   1600000US  place — incorporated places and census designated places
+#   5001900US  congressional district, "19" = the 119th Congress
+# See docs/acs-build-notes.md, "Wave 3".
 LEVELS = {
     "bg": "1500000US",
     "tract": "1400000US",
     "county": "0500000US",
     "state": "0400000US",
+    "zcta": "860Z200US",
+    "place": "1600000US",
+    "cd": "5001900US",
 }
 
 # STATEFP -> USPS. Embedded rather than read off the boundary files because
@@ -230,6 +243,12 @@ COLLECTIONS = [
     Collection("tracts", "tract-wellbeing", "tract", WELLBEING_SPEC),
     Collection(None, "counties", "county", ALL_SPEC),
     Collection(None, "states", "state", ALL_SPEC),
+    # Wave 3. Three more coarse-or-sparse levels that the ACS publishes the
+    # whole column set for, each one wide table for the same reason counties
+    # and states are: nobody wants a themed chunk of 33,000 ZIP code areas.
+    Collection(None, "zctas", "zcta", ALL_SPEC),
+    Collection(None, "places", "place", ALL_SPEC),
+    Collection(None, "congressional-districts", "cd", ALL_SPEC),
 ]
 
 

@@ -21,12 +21,6 @@
           "mtime": 1794518870.0308654,
           "feature_count": 242298,
           "schema_fingerprint": "2fe74dd59d5df73c"
-        },
-        "bg-connectivity.thumb.jpg": {
-          "sha256": "8df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325",
-          "size_bytes": 2323,
-          "href": "block-groups/bg-connectivity/bg-connectivity.thumb.jpg",
-          "mtime": 1794521059.979576
         }
       },
       "changes": [

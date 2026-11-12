@@ -6,313 +6,313 @@
   "links": [
     {
       "rel": "item",
-      "href": "./state_fips=01/state_fips=01.json",
+      "href": "./state_fips=01/01.json",
       "type": "application/geo+json",
       "title": "State Fips=01"
     },
     {
       "rel": "item",
-      "href": "./state_fips=02/state_fips=02.json",
+      "href": "./state_fips=02/02.json",
       "type": "application/geo+json",
       "title": "State Fips=02"
     },
     {
       "rel": "item",
-      "href": "./state_fips=04/state_fips=04.json",
+      "href": "./state_fips=04/04.json",
       "type": "application/geo+json",
       "title": "State Fips=04"
     },
     {
       "rel": "item",
-      "href": "./state_fips=05/state_fips=05.json",
+      "href": "./state_fips=05/05.json",
       "type": "application/geo+json",
       "title": "State Fips=05"
     },
     {
       "rel": "item",
-      "href": "./state_fips=06/state_fips=06.json",
+      "href": "./state_fips=06/06.json",
       "type": "application/geo+json",
       "title": "State Fips=06"
     },
     {
       "rel": "item",
-      "href": "./state_fips=08/state_fips=08.json",
+      "href": "./state_fips=08/08.json",
       "type": "application/geo+json",
       "title": "State Fips=08"
     },
     {
       "rel": "item",
-      "href": "./state_fips=09/state_fips=09.json",
+      "href": "./state_fips=09/09.json",
       "type": "application/geo+json",
       "title": "State Fips=09"
     },
     {
       "rel": "item",
-      "href": "./state_fips=10/state_fips=10.json",
+      "href": "./state_fips=10/10.json",
       "type": "application/geo+json",
       "title": "State Fips=10"
     },
     {
       "rel": "item",
-      "href": "./state_fips=11/state_fips=11.json",
+      "href": "./state_fips=11/11.json",
       "type": "application/geo+json",
       "title": "State Fips=11"
     },
     {
       "rel": "item",
-      "href": "./state_fips=12/state_fips=12.json",
+      "href": "./state_fips=12/12.json",
       "type": "application/geo+json",
       "title": "State Fips=12"
     },
     {
       "rel": "item",
-      "href": "./state_fips=13/state_fips=13.json",
+      "href": "./state_fips=13/13.json",
       "type": "application/geo+json",
       "title": "State Fips=13"
     },
     {
       "rel": "item",
-      "href": "./state_fips=15/state_fips=15.json",
+      "href": "./state_fips=15/15.json",
       "type": "application/geo+json",
       "title": "State Fips=15"
     },
     {
       "rel": "item",
-      "href": "./state_fips=16/state_fips=16.json",
+      "href": "./state_fips=16/16.json",
       "type": "application/geo+json",
       "title": "State Fips=16"
     },
     {
       "rel": "item",
-      "href": "./state_fips=17/state_fips=17.json",
+      "href": "./state_fips=17/17.json",
       "type": "application/geo+json",
       "title": "State Fips=17"
     },
     {
       "rel": "item",
-      "href": "./state_fips=18/state_fips=18.json",
+      "href": "./state_fips=18/18.json",
       "type": "application/geo+json",
       "title": "State Fips=18"
     },
     {
       "rel": "item",
-      "href": "./state_fips=19/state_fips=19.json",
+      "href": "./state_fips=19/19.json",
       "type": "application/geo+json",
       "title": "State Fips=19"
     },
     {
       "rel": "item",
-      "href": "./state_fips=20/state_fips=20.json",
+      "href": "./state_fips=20/20.json",
       "type": "application/geo+json",
       "title": "State Fips=20"
     },
     {
       "rel": "item",
-      "href": "./state_fips=21/state_fips=21.json",
+      "href": "./state_fips=21/21.json",
       "type": "application/geo+json",
       "title": "State Fips=21"
     },
     {
       "rel": "item",
-      "href": "./state_fips=22/state_fips=22.json",
+      "href": "./state_fips=22/22.json",
       "type": "application/geo+json",
       "title": "State Fips=22"
     },
     {
       "rel": "item",
-      "href": "./state_fips=23/state_fips=23.json",
+      "href": "./state_fips=23/23.json",
       "type": "application/geo+json",
       "title": "State Fips=23"
     },
     {
       "rel": "item",
-      "href": "./state_fips=24/state_fips=24.json",
+      "href": "./state_fips=24/24.json",
       "type": "application/geo+json",
       "title": "State Fips=24"
     },
     {
       "rel": "item",
-      "href": "./state_fips=25/state_fips=25.json",
+      "href": "./state_fips=25/25.json",
       "type": "application/geo+json",
       "title": "State Fips=25"
     },
     {
       "rel": "item",
-      "href": "./state_fips=26/state_fips=26.json",
+      "href": "./state_fips=26/26.json",
       "type": "application/geo+json",
       "title": "State Fips=26"
     },
     {
       "rel": "item",
-      "href": "./state_fips=27/state_fips=27.json",
+      "href": "./state_fips=27/27.json",
       "type": "application/geo+json",
       "title": "State Fips=27"
     },
     {
       "rel": "item",
-      "href": "./state_fips=28/state_fips=28.json",
+      "href": "./state_fips=28/28.json",
       "type": "application/geo+json",
       "title": "State Fips=28"
     },
     {
       "rel": "item",
-      "href": "./state_fips=29/state_fips=29.json",
+      "href": "./state_fips=29/29.json",
       "type": "application/geo+json",
       "title": "State Fips=29"
     },
     {
       "rel": "item",
-      "href": "./state_fips=30/state_fips=30.json",
+      "href": "./state_fips=30/30.json",
       "type": "application/geo+json",
       "title": "State Fips=30"
     },
     {
       "rel": "item",
-      "href": "./state_fips=31/state_fips=31.json",
+      "href": "./state_fips=31/31.json",
       "type": "application/geo+json",
       "title": "State Fips=31"
     },
     {
       "rel": "item",
-      "href": "./state_fips=32/state_fips=32.json",
+      "href": "./state_fips=32/32.json",
       "type": "application/geo+json",
       "title": "State Fips=32"
     },
     {
       "rel": "item",
-      "href": "./state_fips=33/state_fips=33.json",
+      "href": "./state_fips=33/33.json",
       "type": "application/geo+json",
       "title": "State Fips=33"
     },
     {
       "rel": "item",
-      "href": "./state_fips=34/state_fips=34.json",
+      "href": "./state_fips=34/34.json",
       "type": "application/geo+json",
       "title": "State Fips=34"
     },
     {
       "rel": "item",
-      "href": "./state_fips=35/state_fips=35.json",
+      "href": "./state_fips=35/35.json",
       "type": "application/geo+json",
       "title": "State Fips=35"
     },
     {
       "rel": "item",
-      "href": "./state_fips=36/state_fips=36.json",
+      "href": "./state_fips=36/36.json",
       "type": "application/geo+json",
       "title": "State Fips=36"
     },
     {
       "rel": "item",
-      "href": "./state_fips=37/state_fips=37.json",
+      "href": "./state_fips=37/37.json",
       "type": "application/geo+json",
       "title": "State Fips=37"
     },
     {
       "rel": "item",
-      "href": "./state_fips=38/state_fips=38.json",
+      "href": "./state_fips=38/38.json",
       "type": "application/geo+json",
       "title": "State Fips=38"
     },
     {
       "rel": "item",
-      "href": "./state_fips=39/state_fips=39.json",
+      "href": "./state_fips=39/39.json",
       "type": "application/geo+json",
       "title": "State Fips=39"
     },
     {
       "rel": "item",
-      "href": "./state_fips=40/state_fips=40.json",
+      "href": "./state_fips=40/40.json",
       "type": "application/geo+json",
       "title": "State Fips=40"
     },
     {
       "rel": "item",
-      "href": "./state_fips=41/state_fips=41.json",
+      "href": "./state_fips=41/41.json",
       "type": "application/geo+json",
       "title": "State Fips=41"
     },
     {
       "rel": "item",
-      "href": "./state_fips=42/state_fips=42.json",
+      "href": "./state_fips=42/42.json",
       "type": "application/geo+json",
       "title": "State Fips=42"
     },
     {
       "rel": "item",
-      "href": "./state_fips=44/state_fips=44.json",
+      "href": "./state_fips=44/44.json",
       "type": "application/geo+json",
       "title": "State Fips=44"
     },
     {
       "rel": "item",
-      "href": "./state_fips=45/state_fips=45.json",
+      "href": "./state_fips=45/45.json",
       "type": "application/geo+json",
       "title": "State Fips=45"
     },
     {
       "rel": "item",
-      "href": "./state_fips=46/state_fips=46.json",
+      "href": "./state_fips=46/46.json",
       "type": "application/geo+json",
       "title": "State Fips=46"
     },
     {
       "rel": "item",
-      "href": "./state_fips=47/state_fips=47.json",
+      "href": "./state_fips=47/47.json",
       "type": "application/geo+json",
       "title": "State Fips=47"
     },
     {
       "rel": "item",
-      "href": "./state_fips=48/state_fips=48.json",
+      "href": "./state_fips=48/48.json",
       "type": "application/geo+json",
       "title": "State Fips=48"
     },
     {
       "rel": "item",
-      "href": "./state_fips=49/state_fips=49.json",
+      "href": "./state_fips=49/49.json",
       "type": "application/geo+json",
       "title": "State Fips=49"
     },
     {
       "rel": "item",
-      "href": "./state_fips=50/state_fips=50.json",
+      "href": "./state_fips=50/50.json",
       "type": "application/geo+json",
       "title": "State Fips=50"
     },
     {
       "rel": "item",
-      "href": "./state_fips=51/state_fips=51.json",
+      "href": "./state_fips=51/51.json",
       "type": "application/geo+json",
       "title": "State Fips=51"
     },
     {
       "rel": "item",
-      "href": "./state_fips=53/state_fips=53.json",
+      "href": "./state_fips=53/53.json",
       "type": "application/geo+json",
       "title": "State Fips=53"
     },
     {
       "rel": "item",
-      "href": "./state_fips=54/state_fips=54.json",
+      "href": "./state_fips=54/54.json",
       "type": "application/geo+json",
       "title": "State Fips=54"
     },
     {
       "rel": "item",
-      "href": "./state_fips=55/state_fips=55.json",
+      "href": "./state_fips=55/55.json",
       "type": "application/geo+json",
       "title": "State Fips=55"
     },
     {
       "rel": "item",
-      "href": "./state_fips=56/state_fips=56.json",
+      "href": "./state_fips=56/56.json",
       "type": "application/geo+json",
       "title": "State Fips=56"
     },
     {
       "rel": "item",
-      "href": "./state_fips=72/state_fips=72.json",
+      "href": "./state_fips=72/72.json",
       "type": "application/geo+json",
       "title": "State Fips=72"
     },
@@ -453,19 +453,6 @@
     ]
   },
   "assets": {
-    "blocks": {
-      "href": "./blocks.pmtiles",
-      "type": "application/vnd.pmtiles",
-      "file:size": 7144353416,
-      "file:checksum": "1220a6cad2bfcfb9557d7d184ca792e730bed849c21b61be046fffa60d8c3cd0497a",
-      "roles": [
-        "data"
-      ],
-      "title": "2020 Census Counts — Blocks (PMTiles)",
-      "pmtiles:layers": [
-        "blocks"
-      ]
-    },
     "partitioned_data": {
       "href": "./state_fips=*/*.parquet",
       "type": "application/vnd.apache.parquet",
@@ -482,8 +469,31 @@
       "roles": [
         "collection-mirror"
       ],
-      "file:size": 51740,
-      "file:checksum": "1220532d3bc5d0c59d5185b3815635da21ecdb39f740a9d7c6ecf5b6850e1842cc23"
+      "file:size": 51646,
+      "file:checksum": "12209fad0824269ae1e2f8fc7605dcff83028b2392d5d42b4bef3cd9536a98783bbd"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "2020 Census Counts — Blocks rendered with the default style",
+      "file:size": 68484,
+      "file:checksum": "1220c57df1ec0d9f36848b99eb8866378432436438276fa665ac0923f9af3ced80d2"
+    },
+    "blocks-tiles": {
+      "href": "./blocks.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 7144353416,
+      "file:checksum": "1220a6cad2bfcfb9557d7d184ca792e730bed849c21b61be046fffa60d8c3cd0497a",
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Census Counts — Blocks (PMTiles)",
+      "pmtiles:layers": [
+        "blocks"
+      ]
     },
     "styles/black-share": {
       "href": "./styles/black-share.json",

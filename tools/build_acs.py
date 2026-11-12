@@ -62,7 +62,39 @@ GEO_FIELDS = {
     "tract": ["GEOID", "NAMELSAD", "NAMELSADCO", "STATE_NAME", "ALAND"],
     "county": ["GEOID", "NAMELSAD", "STATE_NAME", "ALAND"],
     "state": ["GEOID", "NAME", "ALAND"],
+    # Wave 3. The ZCTA file is the only one from a different vintage and the
+    # only one whose fields are suffixed, so it is read through a rename (see
+    # GEO_RENAME) and the rest of the build never learns the difference.
+    "zcta": ["GEOID", "NAMELSAD", "ALAND"],
+    "place": ["GEOID", "NAMELSAD", "STATE_NAME", "ALAND"],
+    "cd": ["GEOID", "NAMELSAD", "CDSESSN", "ALAND"],
 }
+
+# level -> cartographic boundary zip basename in staging/census-cache.
+# ZCTAs are published in GENZ2020 and nowhere since: the 2020-based ZCTAs
+# are the current ones (the ACS tabulates them as summary level 860Z2), and
+# https://www2.census.gov/geo/tiger/GENZ{2021..2024}/shp/ carry no zcta file
+# at all — checked, not assumed. Congressional districts carry the congress
+# number in the filename, and 119 is the congress the ACS 2024 5-year
+# release tabulates (GEO_ID prefix 5001900US).
+GEO_ZIP = {
+    "bg": "cb_2024_us_bg_500k",
+    "tract": "cb_2024_us_tract_500k",
+    "county": "cb_2024_us_county_500k",
+    "state": "cb_2024_us_state_500k",
+    "zcta": "cb_2020_us_zcta520_500k",
+    "place": "cb_2024_us_place_500k",
+    "cd": "cb_2024_us_cd119_500k",
+}
+
+# level -> {kept name: name in the shapefile}, for the one file whose fields
+# are not named the way the rest of the pipeline expects.
+GEO_RENAME = {
+    "zcta": {"GEOID": "GEOID20", "NAMELSAD": "ZCTA5CE20",
+             "ALAND": "ALAND20"},
+}
+
+CONGRESS = 119  # the Congress the ACS 2020-2024 5-year release tabulates
 
 
 def run(cmd: list, **kw) -> subprocess.CompletedProcess:
@@ -118,13 +150,19 @@ def col_types(spec: list) -> dict[str, str]:
     return types
 
 
-def extract_table(table: str, spec: list) -> dict[str, int]:
+def extract_table(table: str, spec: list,
+                  levels: list[str] | None = None) -> dict[str, int]:
     """One .dat file -> one CSV of finished columns per summary level.
+
+    `levels` restricts the pass to some of LEVELS — the wave-3 levels were
+    added after the first four had been extracted, and re-reading 1.7 GB to
+    rewrite CSVs that already exist is waste, not safety.
 
     Jam values (anything at or below -111111111, which covers the
     -555555555 "controlled, no sampling error" MOE) become NULL, never
     numbers.
     """
+    levels = list(levels or LEVELS)
     path = dat_path(table)
     if not path.exists():
         raise RuntimeError(f"missing source: {path}")
@@ -144,11 +182,11 @@ def extract_table(table: str, spec: list) -> dict[str, int]:
             needed.update(minus)
 
     columns = out_columns(spec)
-    prefixes = {p: lvl for lvl, p in LEVELS.items()}
+    prefixes = {LEVELS[lvl]: lvl for lvl in levels}
     files, writers = {}, {}
-    counts = {lvl: 0 for lvl in LEVELS}
+    counts = {lvl: 0 for lvl in levels}
     BUILD.mkdir(parents=True, exist_ok=True)
-    for lvl in LEVELS:
+    for lvl in levels:
         f = open(BUILD / f"{table}.{lvl}.csv", "w", newline="",
                  encoding="utf-8")
         files[lvl] = f
@@ -233,13 +271,14 @@ def extract_table(table: str, spec: list) -> dict[str, int]:
     return counts
 
 
-def stage_extract(only_tables: set[str] | None = None) -> dict:
+def stage_extract(only_tables: set[str] | None = None,
+                  levels: list[str] | None = None) -> dict:
     by_table = tables()
     report = {}
     for table, spec in by_table.items():
         if only_tables and table not in only_tables:
             continue
-        counts = extract_table(table, spec)
+        counts = extract_table(table, spec, levels)
         report[table] = counts
         print(f"  {table:9s} " + "  ".join(f"{k}={v}"
                                            for k, v in counts.items()))
@@ -252,26 +291,36 @@ def stage_extract(only_tables: set[str] | None = None) -> dict:
 
 def geo_parquet(level: str) -> Path:
     """National cartographic boundary shapefile -> EPSG:4326 GeoParquet."""
-    out = GEO / f"cb_2024_us_{level}_4326.parquet"
+    base = GEO_ZIP[level]
+    out = GEO / f"{base.replace('_500k', '')}_4326.parquet"
     if out.exists():
         return out
     GEO.mkdir(parents=True, exist_ok=True)
-    zip_path = CACHE / f"cb_2024_us_{level}_500k.zip"
-    shp_dir = GEO / f"cb_2024_us_{level}_500k"
+    zip_path = CACHE / f"{base}.zip"
+    shp_dir = GEO / base
     if not shp_dir.exists():
         with zipfile.ZipFile(zip_path) as z:
             z.extractall(shp_dir)
     shp = next(shp_dir.glob("*.shp"))
-    run(["ogr2ogr", "-f", "Parquet", out, shp,
-         "-t_srs", "EPSG:4326",
-         "-select", ",".join(GEO_FIELDS[level]),
-         "-lco", "COMPRESSION=ZSTD", "-lco", "GEOMETRY_NAME=geometry"])
+    rename = GEO_RENAME.get(level)
+    if rename:
+        # One SQL instead of -select, so the downstream SQL never has to
+        # know that the ZCTA file suffixes its fields with its vintage.
+        cols = ", ".join(f"{src} AS {dst}" for dst, src in rename.items())
+        run(["ogr2ogr", "-f", "Parquet", out, shp, "-t_srs", "EPSG:4326",
+             "-sql", f"SELECT {cols} FROM {shp.stem}",
+             "-lco", "COMPRESSION=ZSTD", "-lco", "GEOMETRY_NAME=geometry"])
+    else:
+        run(["ogr2ogr", "-f", "Parquet", out, shp,
+             "-t_srs", "EPSG:4326",
+             "-select", ",".join(GEO_FIELDS[level]),
+             "-lco", "COMPRESSION=ZSTD", "-lco", "GEOMETRY_NAME=geometry"])
     return out
 
 
-def stage_geometry() -> dict:
+def stage_geometry(levels: list[str] | None = None) -> dict:
     report = {}
-    for level in LEVELS:
+    for level in (levels or LEVELS):
         p = geo_parquet(level)
         n = duckdb_scalar(f"SELECT count(*) FROM read_parquet('{p}')")
         report[level] = n
@@ -330,7 +379,30 @@ def name_expr(level: str) -> str:
         "tract": "concat_ws(', ', g.NAMELSAD, g.NAMELSADCO, g.STATE_NAME)",
         "county": "concat_ws(', ', g.NAMELSAD, g.STATE_NAME)",
         "state": "g.NAME",
+        # A ZCTA has no containing geography to name it by — it crosses
+        # state and county lines — so the name is the ZCTA5 code itself,
+        # labelled the way the Census Bureau labels it.
+        "zcta": "concat('ZCTA5 ', g.NAMELSAD)",
+        "place": "concat_ws(', ', g.NAMELSAD, g.STATE_NAME)",
+        # The CD file carries no state name, so the state boundary file
+        # supplies it: "Congressional District 1, Alabama".
+        "cd": "concat_ws(', ', g.NAMELSAD, sg.NAME)",
     }[level]
+
+
+def state_expr(level: str) -> str:
+    """The `state` column.
+
+    ZCTAs are the one level with no state: they are built from USPS ZIP
+    delivery areas, which cross state lines, the ACS publishes them at the
+    nation level only, and the 2020 cartographic boundary ZCTA file carries
+    no state attribute to fall back on (its fields are ZCTA5CE20,
+    AFFGEOID20, GEOID20, NAME20, LSAD20, ALAND20, AWATER20 — checked with
+    ogrinfo). Deriving one from the first two digits of the code would be
+    wrong, because the first digits of a ZIP code are a postal region, not
+    a state, so the column publishes NULL.
+    """
+    return "CAST(NULL AS VARCHAR)" if level == "zcta" else "u.usps"
 
 
 def assemble(coll, con) -> dict:
@@ -362,6 +434,9 @@ def assemble(coll, con) -> dict:
                  f"ON t.GEOID = substr(g.GEOID, 1, 11) "
                  f"LEFT JOIN read_parquet('{geo_parquet('county')}') c "
                  f"ON c.GEOID = substr(g.GEOID, 1, 5) ")
+    elif level == "cd":
+        extra = (f"LEFT JOIN read_parquet('{geo_parquet('state')}') sg "
+                 f"ON sg.GEOID = substr(g.GEOID, 1, 2) ")
     else:
         extra = ""
 
@@ -369,7 +444,7 @@ def assemble(coll, con) -> dict:
         COPY (
             SELECT g.GEOID AS geoid,
                    {name_expr(level)} AS name,
-                   u.usps AS state,
+                   {state_expr(level)} AS state,
                    ctx.population, ctx.population_moe,
                    round(g.ALAND / 1e6, 3) AS aland_sqkm,
                    CASE WHEN g.ALAND = 0 OR ctx.population IS NULL
@@ -462,6 +537,27 @@ def validate(only: set[str] | None = None) -> int:
             problems.append(f"{coll.id}: {n - distinct} duplicate geoids")
         if bad:
             problems.append(f"{coll.id}: {bad} rows with a pct outside 0-100")
+
+    print("\n== geometry / ACS orphans (both directions) ==")
+    for coll in COLLECTIONS:
+        if only and coll.id not in only:
+            continue
+        lvl = coll.level
+        csv_path = BUILD / f"{CONTEXT_SPEC[0].table}.{lvl}.csv"
+        gp = GEO / f"{GEO_ZIP[lvl].replace('_500k', '')}_4326.parquet"
+        if not csv_path.exists() or not gp.exists():
+            continue
+        acs = (f"(SELECT geoid FROM read_csv('{csv_path}', header=true, "
+               f"nullstr=''))")
+        geom = f"(SELECT GEOID AS geoid FROM read_parquet('{gp}'))"
+        no_geom, no_acs = con.execute(
+            f"SELECT (SELECT count(*) FROM {acs} a WHERE a.geoid NOT IN "
+            f"(SELECT geoid FROM {geom})), "
+            f"(SELECT count(*) FROM {geom} g WHERE g.geoid NOT IN "
+            f"(SELECT geoid FROM {acs}))").fetchone()
+        print(f"  {coll.id:24s} {no_geom:>5,} ACS rows with no polygon "
+              f"(dropped)  {no_acs:>5,} polygons with no ACS row "
+              f"(kept, NULL values)")
 
     print("\n== state medians (sanity: 55k-120k across the 50 states + DC) ==")
     states = CATALOG / "states" / "states.parquet"
@@ -592,6 +688,10 @@ def main() -> int:
                     help="collection ids (default: all)")
     ap.add_argument("--stage", choices=["extract", "geometry", "assemble"],
                     action="append")
+    ap.add_argument("--level", choices=sorted(LEVELS), action="append",
+                    help="restrict extract and geometry to these summary "
+                         "levels (default: the levels of the collections "
+                         "being built)")
     ap.add_argument("--validate", action="store_true",
                     help="run the checks only")
     args = ap.parse_args()
@@ -612,16 +712,21 @@ def main() -> int:
           f"ACS{ACS_RELEASE}_Table_Shells.txt, 4 derived line groups "
           f"resolved")
 
+    levels = args.level
+    if not levels and only:
+        levels = list(dict.fromkeys(c.level for c in COLLECTIONS
+                                    if c.id in only))
     if "extract" in stages:
-        print("== extract: one pass per ACS table ==")
+        print("== extract: one pass per ACS table "
+              f"({'all levels' if not levels else ' '.join(levels)}) ==")
         want = None
         if only:
             want = {s.table for c in COLLECTIONS if c.id in only
                     for s in c.spec} | {s.table for s in CONTEXT_SPEC}
-        stage_extract(want)
+        stage_extract(want, levels)
     if "geometry" in stages:
         print("== geometry: cartographic boundaries -> EPSG:4326 ==")
-        stage_geometry()
+        stage_geometry(levels)
     if "assemble" in stages:
         print("== assemble: DuckDB join + gpio GeoParquet ==")
         stage_assemble(only)

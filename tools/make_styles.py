@@ -100,6 +100,10 @@ SOURCES = {
     "tract-wellbeing": ("tracts/tract-wellbeing", "tract-wellbeing.parquet"),
     "counties": ("counties", "counties.parquet"),
     "states": ("states", "states.parquet"),
+    "zctas": ("zctas", "zctas.parquet"),
+    "places": ("places", "places.parquet"),
+    "congressional-districts": ("congressional-districts",
+                                "congressional-districts.parquet"),
     "blocks": ("blocks", "state_fips=*/*.parquet"),
 }
 
@@ -118,6 +122,14 @@ UNIT = {
     "tract-wellbeing": ("tract", "tracts"),
     "counties": ("county", "counties"),
     "states": ("state", "states and state equivalents"),
+    # A ZCTA is not a ZIP code, so the noun never says "ZIP code"; places are
+    # incorporated places and census designated places together; the
+    # congressional-districts collection holds the 435 voting districts plus
+    # the DC and PR delegate districts and the four island-area delegate
+    # districts, so its plural says districts, not "congressional districts".
+    "zctas": ("ZCTA", "ZIP Code Tabulation Areas"),
+    "places": ("place", "places"),
+    "congressional-districts": ("district", "districts"),
     "blocks": ("block", "blocks"),
 }
 
@@ -407,6 +419,60 @@ STYLES["states"] = [
       fmt="usd"),
 ]
 
+# -- wave 3: ZCTAs, places, congressional districts -------------------------
+# Measured, not copied. The three distributions sit in different places from
+# the counties one and from each other (docs/style-breaks.json has the
+# quantiles behind every number below):
+#   ZCTAs      spread almost as wide as tracts — median income p10 46k /
+#              p50 72k / p90 119k, density p50 31/km² — because a rural ZCTA
+#              is a county-sized polygon and an urban one is a few blocks.
+#   places     poorer and denser than ZCTAs at the median (income p50 67k,
+#              density p50 274/km²): a place is a settlement, so the empty
+#              half of the country is simply absent from the file.
+#   districts  the tightest distribution in the catalog by construction —
+#              every district holds ~770,000 people, so median income runs
+#              p10 61k / p50 79k / p90 114k and poverty p10 7% / p90 18%.
+#              Counties breaks here would leave three of six classes with a
+#              handful of districts.
+def _wave3_styles(income, density, poverty, home_value, unit):
+    return [
+        S("default", "Median household income", "median_hh_income",
+          income, "viridis7",
+          f"Median household income by {unit}, viridis dark purple (low) to "
+          f"yellow (high)", fmt="usd", default=True),
+        S("density", "Population density", "pop_density", density, "magma7",
+          "People per square kilometre on roughly logarithmic steps, pale "
+          "cream to deep plum", fmt="dens"),
+        S("poverty", "People below the poverty line", "pct_below_poverty",
+          poverty, "ylorrd6",
+          "Share of residents with income below the federal poverty line, "
+          "pale yellow to deep red"),
+        S("home-value", "Median home value", "median_home_value",
+          home_value, "amber7",
+          "Median value of owner-occupied homes, pale amber to burnt brown",
+          fmt="usd"),
+    ]
+
+
+STYLES["zctas"] = _wave3_styles(
+    [45000, 60000, 72000, 87000, 120000, 160000],
+    [5, 20, 60, 200, 600, 2000],
+    [5, 9, 13, 19, 28],
+    [100000, 160000, 225000, 325000, 500000, 800000],
+    "ZIP Code Tabulation Area")
+STYLES["places"] = _wave3_styles(
+    [40000, 55000, 67000, 84000, 115000, 150000],
+    [50, 125, 250, 500, 1000, 2000],
+    [5, 9, 14, 20, 30],
+    [85000, 130000, 190000, 290000, 450000, 750000],
+    "place")
+STYLES["congressional-districts"] = _wave3_styles(
+    [60000, 70000, 79000, 91000, 110000, 130000],
+    [25, 75, 200, 600, 1500, 4000],
+    [8, 10, 12, 15, 19],
+    [185000, 250000, 335000, 450000, 650000, 900000],
+    "congressional district")
+
 # -- blocks: 2020 Decennial counts, 8.17M features --------------------------
 # Decennial counts are a complete enumeration, so there is no CV to fade.
 # Roughly a third of blocks have no residents and a quarter no housing units,
@@ -448,8 +514,13 @@ def parquet_glob(coll_id):
     return str(CATALOG / d / pat)
 
 
-def measure():
-    """Profile every styled column nationally; write docs/style-breaks.json."""
+def measure(only=None):
+    """Profile every styled column nationally; write docs/style-breaks.json.
+
+    `only` measures some collections and merges them into whatever the file
+    already holds, so adding a collection does not re-profile 8.2 million
+    blocks to learn nothing new about them.
+    """
     import duckdb
 
     out = {
@@ -462,7 +533,13 @@ def measure():
             "python3 tools/make_styles.py --measure."),
         "collections": {},
     }
+    if only and BREAKS_JSON.exists():
+        prev = json.loads(BREAKS_JSON.read_text())
+        out["collections"] = prev["collections"]
+        out["measured_previously"] = prev.get("measured")
     for coll_id, styles in STYLES.items():
+        if only and coll_id not in only:
+            continue
         src = parquet_glob(coll_id)
         schema = [r[0] for r in
                   duckdb.sql(f"describe select * from read_parquet('{src}')")
@@ -636,8 +713,9 @@ def build_style(coll_id, s, stat):
     })
     # Boundaries only once they can be seen: at national zoom 242k block-group
     # outlines are noise, and 8.2M block outlines are a gray sheet.
-    zmin = 11 if coll_id == "blocks" else (4 if coll_id in
-                                          ("states", "counties") else 8)
+    zmin = 11 if coll_id == "blocks" else (
+        4 if coll_id in ("states", "counties", "congressional-districts")
+        else 8)
     layers.append({
         "id": "outline", "type": "line", "source": "data",
         "source-layer": coll_id, "minzoom": zmin,
@@ -681,13 +759,21 @@ def main():
     ap.add_argument("--measure", action="store_true",
                     help="re-profile the parquet and rewrite "
                          "docs/style-breaks.json")
+    ap.add_argument("collections", nargs="*",
+                    help="collection ids to measure and write styles for "
+                         "(default: all of them)")
     args = ap.parse_args()
+    only = set(args.collections) or None
+    if only and (unknown := only - set(STYLES)):
+        sys.exit(f"✗ unknown collections: {sorted(unknown)}")
     if args.measure or not BREAKS_JSON.exists():
-        measure()
+        measure(only)
 
     m = json.loads(BREAKS_JSON.read_text())["collections"]
     total = 0
     for coll_id, styles in STYLES.items():
+        if only and coll_id not in only:
+            continue
         if coll_id not in m:
             sys.exit(f"✗ {coll_id}: not in docs/style-breaks.json — rerun "
                      f"with --measure")

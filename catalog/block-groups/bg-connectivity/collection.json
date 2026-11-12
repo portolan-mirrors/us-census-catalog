@@ -289,15 +289,6 @@
       ],
       "title": "Commuting & Connectivity — Block Groups (GeoParquet, national)"
     },
-    "thumbnail": {
-      "href": "./bg-connectivity.thumb.jpg",
-      "type": "image/jpeg",
-      "roles": [
-        "thumbnail"
-      ],
-      "file:size": 2323,
-      "file:checksum": "12208df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325"
-    },
     "bg-connectivity-tiles": {
       "href": "./bg-connectivity.pmtiles",
       "type": "application/vnd.pmtiles",
@@ -310,6 +301,16 @@
       ],
       "file:size": 654266471,
       "file:checksum": "1220208cec475b967873c369767fa3c9be6f894063e065af5234ed426258b8747ea8"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Commuting & Connectivity — Block Groups rendered with the default style",
+      "file:size": 66804,
+      "file:checksum": "12209fdfc3e184660d073fe8852f626bc9f1d47156ee6a2eda20ca22257b908e3e15"
     },
     "styles/default": {
       "href": "./styles/default.json",

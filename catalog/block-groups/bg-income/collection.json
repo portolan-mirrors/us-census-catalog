@@ -125,7 +125,17 @@
     }
   ],
   "assets": {
-    "bg-income": {
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Income & Poverty — Block Groups rendered with the default style",
+      "file:size": 70276,
+      "file:checksum": "1220cd4ef01809579e1af68c9e867a56be4f12fbbc3be16c373f4faf9b5195ab6680"
+    },
+    "bg-income-tiles": {
       "href": "./bg-income.pmtiles",
       "type": "application/vnd.pmtiles",
       "file:size": 610785910,
@@ -137,6 +147,16 @@
       "pmtiles:layers": [
         "bg-income"
       ]
+    },
+    "bg-income": {
+      "href": "./bg-income.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "Income & Poverty — Block Groups (GeoParquet, national)",
+      "file:size": 93538838,
+      "file:checksum": "12209693f4da4753f751164644146cc1cc9290405644df9c365136a1eb36669ec3d7"
     },
     "styles/default": {
       "href": "./styles/default.json",

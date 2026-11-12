@@ -21,12 +21,6 @@
           "mtime": 1794518894.2619278,
           "feature_count": 56,
           "schema_fingerprint": "3c2154967ad844be"
-        },
-        "states.thumb.jpg": {
-          "sha256": "2dba7024b0c2832cffe385948ac558b05e7c1b9339caff98a14cdcc286b500cf",
-          "size_bytes": 3032,
-          "href": "states/states.thumb.jpg",
-          "mtime": 1794521086.7715724
         }
       },
       "changes": [

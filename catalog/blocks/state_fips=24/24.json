@@ -1,0 +1,180 @@
+{
+  "type": "Feature",
+  "stac_version": "1.1.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/vector/v0.1.0/schema.json"
+  ],
+  "id": "24",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -79.48765019538243,
+          37.88660424607097
+        ],
+        [
+          -79.48765019538243,
+          39.72303620806454
+        ],
+        [
+          -74.98627582535704,
+          39.72303620806454
+        ],
+        [
+          -74.98627582535704,
+          37.88660424607097
+        ],
+        [
+          -79.48765019538243,
+          37.88660424607097
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -79.48765019538243,
+    37.88660424607097,
+    -74.98627582535704,
+    39.72303620806454
+  ],
+  "properties": {
+    "geoparquet:geometry_type": "Polygon",
+    "geoparquet:feature_count": 83827,
+    "table:column_statistics": {
+      "geoid": {
+        "minimum": "240010001001000",
+        "maximum": "245102806003029"
+      },
+      "state": {
+        "minimum": "MD",
+        "maximum": "MD"
+      },
+      "pop_total": {
+        "minimum": 0,
+        "maximum": 3731
+      },
+      "pop_white": {
+        "minimum": 0,
+        "maximum": 2343
+      },
+      "pop_black": {
+        "minimum": 0,
+        "maximum": 2244
+      },
+      "pop_aian": {
+        "minimum": 0,
+        "maximum": 115
+      },
+      "pop_asian": {
+        "minimum": 0,
+        "maximum": 1536
+      },
+      "pop_nhpi": {
+        "minimum": 0,
+        "maximum": 11
+      },
+      "pop_other": {
+        "minimum": 0,
+        "maximum": 1550
+      },
+      "pop_two_plus": {
+        "minimum": 0,
+        "maximum": 439
+      },
+      "pop_hispanic": {
+        "minimum": 0,
+        "maximum": 2034
+      },
+      "pop_white_nh": {
+        "minimum": 0,
+        "maximum": 2246
+      },
+      "vap_total": {
+        "minimum": 0,
+        "maximum": 3717
+      },
+      "housing_units": {
+        "minimum": 0,
+        "maximum": 1787
+      },
+      "housing_occupied": {
+        "minimum": 0,
+        "maximum": 1594
+      },
+      "housing_vacant": {
+        "minimum": 0,
+        "maximum": 1717
+      },
+      "group_quarters_pop": {
+        "minimum": 0,
+        "maximum": 3436
+      },
+      "pct_white_nh": {
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "null_count": 18553
+      },
+      "pct_black": {
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "null_count": 18553
+      },
+      "pct_hispanic": {
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "null_count": 18553
+      },
+      "pct_vacant": {
+        "minimum": 0.0,
+        "maximum": 100.0,
+        "null_count": 18452
+      },
+      "pop_density": {
+        "minimum": 0.0,
+        "maximum": 122821.6,
+        "null_count": 4191
+      },
+      "aland_sqkm": {
+        "minimum": 0.0,
+        "maximum": 49.212
+      }
+    },
+    "title": "State Fips=24",
+    "vector:geometry_types": [
+      "Polygon"
+    ],
+    "datetime": "2020-04-01T00:00:00Z"
+  },
+  "links": [
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json",
+      "type": "application/json",
+      "title": "2020 Census Counts — Blocks"
+    },
+    {
+      "rel": "collection",
+      "href": "../collection.json",
+      "type": "application/json",
+      "title": "2020 Census Counts — Blocks"
+    }
+  ],
+  "assets": {
+    "data": {
+      "href": "./24.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 52577133,
+      "file:checksum": "12204f90a49d6fa96d31d81bbc211068bf3deed02003d65ac57ab658e7b1b2e01f5e",
+      "roles": [
+        "data"
+      ]
+    }
+  },
+  "collection": "blocks"
+}

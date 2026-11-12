@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "People below the poverty line",
+  "metadata": {
+    "description": "Share of residents with income below the federal poverty line, pale yellow to deep red. Measured over all 32,878 ZIP Code Tabulation Areas with a published value: 6 classes with breaks at 5%/9%/13%/19%/28%, which fall at the 19th/42nd/61st/80th/92nd percentile of the national distribution. 40.53% of ZIP Code Tabulation Areas have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_below_poverty_moe in the GeoParquet before drawing a conclusion from any single ZCTA.",
+    "portolan:column": "pct_below_poverty",
+    "portolan:breaks": [
+      5,
+      9,
+      13,
+      19,
+      28
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zctas.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zctas",
+      "filter": [
+        "has",
+        "pct_below_poverty"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_below_poverty"
+          ],
+          "#fff2b0",
+          5,
+          "#fed976",
+          9,
+          "#feb24c",
+          13,
+          "#fd8d3c",
+          19,
+          "#f03b20",
+          28,
+          "#bd0026"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zctas",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

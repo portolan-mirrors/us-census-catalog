@@ -284,15 +284,6 @@
       ],
       "title": "People & Education — Census Tracts (GeoParquet, national)"
     },
-    "thumbnail": {
-      "href": "./tract-people.thumb.jpg",
-      "type": "image/jpeg",
-      "roles": [
-        "thumbnail"
-      ],
-      "file:size": 2842,
-      "file:checksum": "1220f20c80a3fb9b1ffdbf46ee79e743233fb392c9e711e13e978090f27a1edbf5a7"
-    },
     "tract-people-tiles": {
       "href": "./tract-people.pmtiles",
       "type": "application/vnd.pmtiles",
@@ -305,6 +296,16 @@
       ],
       "file:size": 226322983,
       "file:checksum": "1220b18f5220d4202476f54b3471ab987f8d10d33274efc3fe28f3dcbc53bc29c132"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "People & Education — Census Tracts rendered with the default style",
+      "file:size": 71347,
+      "file:checksum": "12201818e92d7c9a4aa0b7beca953bda6b0a5bf2cb20d749d4fd96673d9997c54e5d"
     },
     "styles/default": {
       "href": "./styles/default.json",

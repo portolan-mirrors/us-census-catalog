@@ -170,7 +170,18 @@ LEVEL_OF["blocks"] = "block"
 LEVEL_NOUN = {
     "bg": "block group", "tract": "census tract", "county": "county",
     "state": "state", "block": "census block",
+    "zcta": "ZIP Code Tabulation Area", "place": "place",
+    "cd": "congressional district",
 }
+
+# The cartographic boundary vintage behind each level's geometry. ZCTAs are
+# the exception: the 2020-based ZCTAs are the current ones and the Census
+# Bureau has published no cartographic ZCTA file since GENZ2020, which is
+# also the vintage the ACS tabulates (summary level 860Z2).
+CB_VINTAGE = {"bg": 2024, "tract": 2024, "county": 2024, "state": 2024,
+              "zcta": 2020, "place": 2024, "cd": 2024}
+
+CONGRESS = 119  # the Congress the ACS 2020-2024 5-year release tabulates
 
 GEOID_DOC = {
     "bg": "12-character census block-group GEOID — state (2) + county (3) + "
@@ -196,6 +207,38 @@ GEOID_DOC = {
              "the 50 states, the District of Columbia, Puerto Rico and the "
              "four island areas. Matches `GEOID` in the 2024 cartographic "
              "boundary state file; the ACS `0400000US` prefix is stripped.",
+    "zcta": "5-digit ZIP Code Tabulation Area code, e.g. `90210`. **Not a "
+            "ZIP code**: a ZCTA is the Census Bureau's approximation of the "
+            "area a USPS 5-digit ZIP delivery area covers, built from 2020 "
+            "census blocks, and the two are not interchangeable (see the "
+            "collection's known issues). ZCTAs do not nest in any other "
+            "census geography — a ZCTA can cross county and state lines — so "
+            "there is no prefix join to counties, tracts or states, and the "
+            "first two characters are a postal region, not a state FIPS "
+            "code. Matches `GEOID20`/`ZCTA5CE20` in the Census Bureau's 2020 "
+            "cartographic boundary ZCTA file; the ACS `860Z200US` prefix is "
+            "stripped.",
+    "place": "7-character place GEOID — state FIPS (2) + place FIPS (5), "
+             "e.g. `0644000` for Los Angeles city. `substr(geoid, 1, 2)` is "
+             "the state FIPS code, which is the only prefix join a place "
+             "supports: places nest in states but not in counties (a place "
+             "can straddle a county line) and a place is not a census-tract "
+             "aggregate. Matches `GEOID` in the 2024 cartographic boundary "
+             "place file; the ACS `1600000US` prefix is stripped.",
+    "cd": f"4-character congressional district GEOID — state FIPS (2) + "
+          f"district (2), e.g. `0612` for California's 12th. "
+          f"`substr(geoid, 1, 2)` is the state FIPS code. At-large states "
+          f"use district `00` (AK, DE, ND, SD, VT, WY) and the non-voting "
+          f"delegate districts use `98` (`1198` District of Columbia, `7298` "
+          f"Puerto Rico, plus the four island areas). Districts of the "
+          f"**{CONGRESS}th Congress**, which is the vintage the ACS "
+          f"2020–2024 5-year release tabulates: matches `GEOID` in the "
+          f"`cb_2024_us_cd{CONGRESS}_500k` cartographic boundary file "
+          f"(`CDSESSN = '{CONGRESS}'` on every feature) and the ACS "
+          f"`5001900US` prefix, whose `19` is the congress number, is "
+          f"stripped. District numbers are not stable across congresses, so "
+          f"a `geoid` here does not join to a 118th-Congress district of the "
+          f"same number.",
     "block": "15-character 2020 census block GEOID — state (2) + county (3) "
              "+ tract (6) + block (4), e.g. `020130001001000`. The "
              "geoheader's `GEOCODE` field, not its `GEOID` (which carries a "
@@ -222,8 +265,34 @@ CONTEXT_DOC = {
                   "Missouri\".",
         "state": "State name from the cartographic boundary state file's "
                  "`NAME` field — \"Missouri\".",
+        "zcta": "`'ZCTA5 ' || ZCTA5CE20` from the 2020 cartographic "
+                "boundary ZCTA file — \"ZCTA5 90210\". A ZCTA has no "
+                "containing geography to name it by, because it crosses "
+                "county and state lines, and the Census Bureau publishes no "
+                "other name for one; this is the label data.census.gov uses.",
+        "place": "Human-readable name from the cartographic boundary place "
+                 "file: `NAMELSAD`, `STATE_NAME` — \"Los Angeles city, "
+                 "California\", \"Brentwood CDP, New York\". `NAMELSAD` "
+                 "carries the legal/statistical descriptor, so the name "
+                 "itself says whether a place is a city, town, village, "
+                 "borough or CDP.",
+        "cd": "`NAMELSAD` from the cartographic boundary congressional "
+              "district file plus the state name from the state file — "
+              "\"Congressional District 12, California\", \"Delegate "
+              "District (at Large), District of Columbia\".",
     }[level],
     "state": lambda level: (
+        "Always NULL in this collection. A ZIP Code Tabulation Area is not "
+        "inside any state: it approximates a USPS ZIP delivery area, which "
+        "can cross state lines, the ACS publishes ZCTAs at the nation level "
+        "only, and the 2020 cartographic boundary ZCTA file carries no state "
+        "attribute (its fields are `ZCTA5CE20`, `AFFGEOID20`, `GEOID20`, "
+        "`NAME20`, `LSAD20`, `ALAND20`, `AWATER20`). The column is kept so "
+        "the schema matches the other collections; deriving a value from the "
+        "first digits of the code would be wrong, because those are a postal "
+        "region. To assign ZCTAs to states, do it spatially, and expect "
+        "ties."
+        if level == "zcta" else
         "Two-letter USPS state or territory code (`MO`, `PR`, `GU`). Carried "
         "on every collection from the `STATEFP → USPS` lookup embedded in "
         "`tools/specs.py` rather than read off the boundary files, because "
@@ -236,6 +305,8 @@ CONTEXT_DOC = {
         "Land area in square kilometres, rounded to 3 decimals. "
         + ("`ALAND20 / 1e6` from the TIGER/Line 2024 block file."
            if level == "block" else
+           "`ALAND20 / 1e6` from the 2020 cartographic boundary ZCTA file."
+           if level == "zcta" else
            "`ALAND / 1e6` from the cartographic boundary file.")
         + " Land only: water area is excluded, which is what makes it the "
           "right denominator for population density."),
@@ -257,10 +328,14 @@ CONTEXT_DOC = {
         + ("TIGER/Line 2024 `TABBLOCK20`, which is **not** shoreline-clipped: "
            "a coastal block extends to the 3-mile limit."
            if level == "block" else
-           f"From the Census Bureau's 2024 cartographic boundary "
-           f"{LEVEL_NOUN[level]} file (GENZ2024, 1:500,000), which clips to "
-           f"the shoreline — TIGER/Line would extend the "
-           f"{LEVEL_NOUN[level]} into open water.")
+           f"From the Census Bureau's {CB_VINTAGE[level]} cartographic "
+           f"boundary {LEVEL_NOUN[level]} file (GENZ{CB_VINTAGE[level]}, "
+           f"1:500,000), which clips to the shoreline — TIGER/Line would "
+           f"extend the {LEVEL_NOUN[level]} into open water."
+           + (" GENZ2020 because the Census Bureau has published no "
+              "cartographic ZCTA file since: the 2020-based ZCTAs are the "
+              "current ones, and they are the vintage the ACS tabulates."
+              if level == "zcta" else ""))
         + " Generalized for mapping and point-in-polygon work, not for "
           "legal-boundary or precise-area work."),
     "bbox": lambda level: (
@@ -814,6 +889,84 @@ NULL_NOTES = {
         "NULL on 1.13% of block groups.",
     ("pct_no_computer", "bg"):
         "NULL on 1.13% of block groups.",
+
+    # --- wave 3: ZCTAs, places, congressional districts -------------------
+    # Every rate below was counted by tools/build_acs.py --validate on the
+    # published file (docs/acs-build-notes.md, "Wave 3").
+    ("population", "zcta"):
+        "NULL on 0.06% of ZCTAs — the 19 ZCTAs that have a 2020 "
+        "cartographic boundary but no row in the ACS tabulation (17 in the "
+        "island areas, plus 11717 and 11798 in Suffolk County, New York).",
+    ("population", "place"):
+        "NULL on 0.86% of places — the 282 places with 2024 boundaries but "
+        "no ACS row: 279 in the island areas (MP 135, AS 77, GU 57, VI 10), "
+        "Brentwood CDP and Wyandanch CDP in Suffolk County, New York, and "
+        "Louisville city, Kentucky, whose ACS tabulation is the consolidated "
+        "`2148006` Louisville/Jefferson County metro government (balance).",
+    ("population", "cd"):
+        "NULL on 0.91% of districts — the four island-area delegate "
+        "districts (American Samoa, Guam, the Northern Mariana Islands, the "
+        "U.S. Virgin Islands), which have 2024 boundaries but no ACS 5-year "
+        "estimates. Every other column in this collection is NULL on the "
+        "same four rows and nowhere else.",
+    ("median_hh_income", "zcta"):
+        "**NULL on 9.60% of ZCTAs.** A ZCTA with few households has no "
+        "publishable median — the rate sits between the tract (1.59%) and "
+        "block-group (7.69%) rates because a rural ZCTA is large but a "
+        "single-building urban one is tiny.",
+    ("median_hh_income", "place"):
+        "**NULL on 12.71% of places.** Thousands of places in the file are "
+        "villages and CDPs of a few hundred people, which is where the "
+        "Census Bureau's suppression bites; the population-weighted "
+        "coverage is far better than the row-weighted rate suggests.",
+    ("median_gross_rent", "zcta"):
+        "**NULL on 23.79% of ZCTAs** — nearly a quarter. A ZCTA with few "
+        "renter households paying cash rent has no publishable rent median.",
+    ("median_gross_rent", "place"):
+        "**NULL on 31.32% of places** — a third of them, mostly small "
+        "places with few cash-renting households.",
+    ("median_home_value", "zcta"):
+        "NULL on 10.45% of ZCTAs.",
+    ("median_home_value", "place"):
+        "NULL on 12.78% of places.",
+    ("pct_rent_burdened", "zcta"):
+        "NULL on 10.96% of ZCTAs, where the denominator (renter households "
+        "whose rent-to-income ratio could be computed) came out at or below "
+        "0.",
+    ("pct_rent_burdened", "place"):
+        "NULL on 14.60% of places, where the denominator (renter households "
+        "whose rent-to-income ratio could be computed) came out at or below "
+        "0.",
+    ("median_hh_income_black", "zcta"):
+        "**NULL on 69.25% of ZCTAs** (79.24% of places), wherever too few "
+        "Black-householder households live there for a published median. A "
+        "map of this column is as much a map of where the group lives as of "
+        "its income.",
+    ("median_hh_income_black", "place"):
+        "**NULL on 79.24% of places.**",
+    ("median_hh_income_asian", "zcta"):
+        "**NULL on 76.59% of ZCTAs** (85.80% of places) — the sparsest "
+        "column at this geography.",
+    ("median_hh_income_asian", "place"):
+        "**NULL on 85.80% of places** — the sparsest column in the catalog.",
+    ("median_hh_income_asian", "cd"):
+        "NULL on 1.13% of districts: the four island-area delegate "
+        "districts plus one district with no published "
+        "Asian-householder median.",
+    ("median_hh_income_hispanic", "zcta"):
+        "**NULL on 58.55% of ZCTAs** (69.35% of places).",
+    ("median_hh_income_hispanic", "place"):
+        "**NULL on 69.35% of places.**",
+    ("median_hh_income_white_nh", "zcta"):
+        "NULL on 12.08% of ZCTAs (17.62% of places).",
+    ("median_hh_income_white_nh", "place"):
+        "NULL on 17.62% of places.",
+    ("pct_below_poverty_black", "zcta"):
+        "NULL on 36.59% of ZCTAs: no Black-alone population for whom "
+        "poverty status is determined, so no rate.",
+    ("pct_below_poverty_black", "place"):
+        "NULL on 46.72% of places: no Black-alone population for whom "
+        "poverty status is determined, so no rate.",
 }
 
 # Levels where every ACS column inherits the same floor of missingness. Added

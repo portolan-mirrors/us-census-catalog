@@ -699,15 +699,6 @@
       ],
       "title": "All Indicators — States (GeoParquet, national)"
     },
-    "thumbnail": {
-      "href": "./states.thumb.jpg",
-      "type": "image/jpeg",
-      "roles": [
-        "thumbnail"
-      ],
-      "file:size": 3032,
-      "file:checksum": "12202dba7024b0c2832cffe385948ac558b05e7c1b9339caff98a14cdcc286b500cf"
-    },
     "states-tiles": {
       "href": "./states.pmtiles",
       "type": "application/vnd.pmtiles",
@@ -720,6 +711,16 @@
       ],
       "file:size": 2991468,
       "file:checksum": "1220217d11043bc9e1eb80006f8eeb322bb920abaa54c6585ef248b7bfe0c42e8621"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "All Indicators — States rendered with the default style",
+      "file:size": 26320,
+      "file:checksum": "1220a1ce7d0fb5a12d03e0f41c904817b617bd14b0d33b9ea05e93b399844ccb0c92"
     },
     "styles/default": {
       "href": "./styles/default.json",

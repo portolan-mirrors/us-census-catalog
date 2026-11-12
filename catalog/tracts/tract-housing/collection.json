@@ -125,7 +125,17 @@
     }
   ],
   "assets": {
-    "tract-housing": {
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Housing & Rent — Census Tracts rendered with the default style",
+      "file:size": 68861,
+      "file:checksum": "12204105767a9942bd4b4141c5a38f6649ba7ec4463a0b8a5289d9dcbfe3b16e0894"
+    },
+    "tract-housing-tiles": {
       "href": "./tract-housing.pmtiles",
       "type": "application/vnd.pmtiles",
       "file:size": 265596074,
@@ -137,6 +147,16 @@
       "pmtiles:layers": [
         "tract-housing"
       ]
+    },
+    "tract-housing": {
+      "href": "./tract-housing.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "Housing & Rent — Census Tracts (GeoParquet, national)",
+      "file:size": 56737539,
+      "file:checksum": "122097f82b99fbc5035c052da757e0c11fb415783f8542537f3b55202c4dd5291836"
     },
     "styles/default": {
       "href": "./styles/default.json",

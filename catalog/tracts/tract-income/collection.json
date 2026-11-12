@@ -254,15 +254,6 @@
       ],
       "title": "Income & Poverty — Census Tracts (GeoParquet, national)"
     },
-    "thumbnail": {
-      "href": "./tract-income.thumb.jpg",
-      "type": "image/jpeg",
-      "roles": [
-        "thumbnail"
-      ],
-      "file:size": 2842,
-      "file:checksum": "1220f20c80a3fb9b1ffdbf46ee79e743233fb392c9e711e13e978090f27a1edbf5a7"
-    },
     "tract-income-tiles": {
       "href": "./tract-income.pmtiles",
       "type": "application/vnd.pmtiles",
@@ -275,6 +266,16 @@
       ],
       "file:size": 220509520,
       "file:checksum": "1220cfec1dcc8e09994772554333f88b61472f335849fd2840ac8d926430ed220f25"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Income & Poverty — Census Tracts rendered with the default style",
+      "file:size": 66582,
+      "file:checksum": "1220d4a5c0897720ee8f165af7f7e60ba9ed1ee1393a3193b292ff931fd1c6816ddd"
     },
     "styles/default": {
       "href": "./styles/default.json",
