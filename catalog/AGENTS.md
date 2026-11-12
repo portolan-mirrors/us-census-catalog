@@ -1,4 +1,4 @@
-# AGENTS.md — Example Catalog
+# AGENTS.md — US Census Demographics Mirror
 
 Guidance for AI agents and automated clients working with this catalog.
 
@@ -10,28 +10,43 @@ downstream catches it.
 
 ## What this catalog holds
 
-TODO(setup): the collections, and what each one covers. Name the public root
-URL so a client that arrived here by another route can orient itself.
-
-## How to read it
-
-TODO(setup): one worked query per format you publish, each one run against the
-published files before it was written down.
+U.S. Census Bureau demographics as GeoParquet + PMTiles, rooted at
+`https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json`.
+ACS 2020–2024 5-year indicators at block group, tract, county, and state
+level, grouped into themed collections (income, people, housing,
+connectivity, wellbeing), plus 2020 Decennial counts at block level. Each
+collection's own `AGENTS.md` documents its columns and carries tested
+queries; this file covers what spans collections.
 
 ## Join keys
 
-TODO(setup): the columns that join collections to each other, and their types.
-State which side is unique. If no two collections join, say that instead.
+Every ACS collection has a `geoid` column (string): the full census GEOID.
+Lengths by geography — state 2, county 5, tract 11, block group 12,
+block 15. GEOIDs nest by prefix: a block group's county is
+`substr(geoid, 1, 5)`, its tract `substr(geoid, 1, 11)`; a block's block
+group is `substr(geoid, 1, 12)`. Collections at the same geography join 1:1
+on `geoid`.
 
 ## Quirks that produce silently wrong answers
 
-TODO(setup): the traps. A projection that is not WGS84, so lengths come out in
-feet. A column whose name differs from the one the source documentation uses. A
-category field with inconsistent casing. A geometry column that GDAL names
-`geometry_bbox` where the query you copied says `bbox`. These are the entries
-that earn this file, so write them as you find them.
+- ACS margins of error are published at the **90% confidence level**. To sum
+  estimates across geographies, add MOEs in quadrature; never sum medians at
+  all (a median of a region is not derivable from its parts).
+- Jam values (e.g. `-666666666`) in Census files mean "no estimate"; they
+  are already `NULL` here. A query that averages a column needs no jam
+  filtering, but remember NULLs reduce the row count.
+- Coarse zooms of each PMTiles archive are **A5 cell aggregations**, not
+  census geographies: counts are sums, rates and medians are unweighted
+  means of the underlying geographies' values. Use the GeoParquet, not
+  tiles, for statistics.
+- Geometries are the Census cartographic boundary files (500k, shoreline-
+  clipped), in EPSG:4326 — good for mapping and point-in-polygon, not for
+  legal-boundary or area-measurement work. Blocks use TIGER/Line (not
+  shoreline-clipped).
 
 ## Structure
 
 Assets and structural links resolve relative to the object that carries them.
-Catalogs here carry no `self` link, so a client tracks its own location.
+STAC browsers and `pystac` both resolve them. The data browser at
+[source.coop](https://source.coop/portolan-mirrors/us-census-catalog) renders
+each collection with map previews, legends, schema, and download links.

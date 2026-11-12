@@ -33,3 +33,7 @@ __pycache__/
 *.pyc
 .venv/
 .ruff_cache/
+
+# Census source downloads and build scratch
+staging/
+*.dat

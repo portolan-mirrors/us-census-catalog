@@ -1,32 +1,33 @@
-# Example Catalog
+# US Census Demographics — Cloud-Native Mirror
 
-TODO(setup): replace this file. It is the front door to the published catalog,
-the page people land on at the public base URL. It is not the same document as
-the README in the repository root, which is never published.
+Nationwide U.S. Census Bureau statistics as cloud-native **GeoParquet** and
+**PMTiles**, from states down to the ~242,000 block groups and ~8.1 million
+2020 census blocks. [data.census.gov](https://data.census.gov/) is the
+authoritative source; this catalog is a mirror optimized for analysis and
+mapping, and every collection links the exact upstream files it was built
+from.
 
-## What is here
+This README is regenerated as collections land; per-collection READMEs carry
+the full documentation, including a description of every column.
 
-TODO(setup): the datasets, in one paragraph. Say what each collection covers,
-the area and the time range, and what a reader can do with it.
+## What's here
+
+- **Block groups** (`block-groups/`) — ACS 2020–2024 5-year indicators in
+  themed chunks: income, people, housing, connectivity. The finest geography
+  with income data.
+- **Tracts** (`tracts/`) — the same chunks plus a wellbeing chunk (health
+  insurance, disability, foreign-born, income by race).
+- **Counties and states** — all indicators in one collection per geography.
+- **Blocks** (`blocks/`) — 2020 Decennial Census (P.L. 94-171) population,
+  race and ethnicity, voting age, housing occupancy, and group quarters at
+  the smallest census geography.
+
+Every ACS estimate ships with its margin of error (`*_moe`, 90% confidence),
+and headline statistics with a coefficient of variation (`*_cv`) so you can
+grey out unreliable geographies. Start with the [agent guide](AGENTS.md) for
+tested queries.
 
 ## License
 
-TODO(setup): the SPDX identifier, or `other` with a link to the terms. Say who
-holds the rights and what a reuser has to attribute.
-
-## Provenance
-
-TODO(setup): where the data came from. Say whether this catalog is the official
-publication from the producing organization, or a mirror of someone else's data.
-If it is a mirror, link the upstream and say how often it syncs.
-
-## Access
-
-TODO(setup): one query someone can run without downloading anything, against a
-real published file. Run it before you paste it.
-
-```sql
--- Example shape. Replace the URL and the columns with your own.
-INSTALL spatial; LOAD spatial; INSTALL httpfs; LOAD httpfs;
-SELECT count(*) FROM 'https://example.invalid/prefix/collection/data.parquet';
-```
+U.S. Census Bureau data is a U.S. Government work in the public domain,
+published here as CC0-1.0. Cite the U.S. Census Bureau.

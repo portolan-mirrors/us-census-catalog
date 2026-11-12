@@ -4,10 +4,31 @@
   "stac_extensions": [
     "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json"
   ],
-  "id": "example-catalog",
-  "title": "Example Catalog",
-  "description": "TODO(setup): one or two sentences saying what this catalog holds, who produced the data, and who it is for. A person and an agent both read this first.",
+  "id": "us-census",
+  "title": "US Census Demographics — Cloud-Native Mirror",
+  "description": "Nationwide United States census statistics as cloud-native GeoParquet and PMTiles, at every census geography from states down to the ~242,000 block groups and ~8 million 2020 census blocks. Block-group and tract collections carry curated indicators from the U.S. Census Bureau's American Community Survey (ACS) 2020–2024 5-year estimates — income, poverty, age, race and ethnicity, education, housing costs and tenure, vehicles, commuting, and internet access — every estimate with its margin of error, and headline statistics with a reliability (coefficient of variation) column. Block collections carry 2020 Decennial Census counts. This is a mirror built from the Census Bureau's published summary files and cartographic boundary files; [data.census.gov](https://data.census.gov/) is the authoritative source for all of it. Read the [agent guide](AGENTS.md) before you query.",
+  "updated": "2026-11-12T00:00:00Z",
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": ["producer", "licensor"],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": ["processor", "host"],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
   "links": [
+    {
+      "rel": "self",
+      "href": "https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json",
+      "type": "application/json"
+    },
     {
       "rel": "root",
       "href": "./catalog.json",
@@ -27,13 +48,23 @@
     },
     {
       "rel": "vcs",
-      "href": "https://github.com/TODO(setup)",
+      "href": "https://github.com/portolan-mirrors/us-census-catalog",
       "title": "Source repository"
     },
     {
       "rel": "issues",
-      "href": "https://github.com/TODO(setup)/issues",
+      "href": "https://github.com/portolan-mirrors/us-census-catalog/issues",
       "title": "Issue tracker"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "title": "U.S. Census Bureau data portal (authoritative source)"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "title": "U.S. Census Bureau open data policy (public domain, U.S. Government work)"
     }
   ]
 }
