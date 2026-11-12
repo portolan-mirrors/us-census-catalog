@@ -22,7 +22,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 ## Spatial Coverage
 
-- **Bounding Box**: [-179.146711, -14.548699, 179.77847011250077, 71.387815]
+- **Bounding Box**: [-179.146711, 17.88329, -65.221081, 71.387815]
 
 ## Temporal Coverage
 
@@ -151,8 +151,8 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 | File | Size | Checksum |
 |------|------|----------|
 | ./congressional-districts.parquet | 8.6 MB | 122072de5ad1... |
-| ./congressional-districts.thumb.jpg | 2.8 KB | 1220f3a1b1f8... |
 | ./congressional-districts.pmtiles | 22.2 MB | 1220df3c4736... |
+| ./thumbnail.png | 53.3 KB | 12208441943d... |
 | ./styles/default.json | 1.9 KB | 1220ec423a45... |
 | ./styles/density.json | 1.9 KB | 1220cb4bbef0... |
 | ./styles/home-value.json | 1.9 KB | 1220a34a835c... |
@@ -189,9 +189,9 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 | https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b28002.dat | 55.4 MB | 122012446ff0... |
 | https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-c17002.dat | 40.1 MB | 1220dc3dc675... |
 | https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt | 5.4 MB | 12205b46f4af... |
-| https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_cd119_500k.zip | - | - |
-| https://www2.census.gov/geo/docs/maps-data/data/geo_tallies2020/Natl_Geographic_Tallies_2020.txt | - | - |
-| https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html | - | - |
+| https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_cd119_500k.zip | 6.7 MB | 12202b4238ae... |
+| https://www2.census.gov/geo/docs/maps-data/data/geo_tallies2020/Natl_Geographic_Tallies_2020.txt | 1.7 KB | 122006db85a1... |
+| https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.119th_Congress.html | 364.2 KB | 122030586438... |
 | https://www.census.gov/programs-surveys/acs/library/handbooks/general.html | 349.4 KB | 122063f2cc20... |
 | https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf | 378.9 KB | 12204d325820... |
 | https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf | 1.1 MB | 12206e0c5b1a... |

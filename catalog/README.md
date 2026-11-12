@@ -48,7 +48,7 @@ Every indicator in this catalog's ACS column set, in one table: income and pover
 
 **Spatial Extent**
 
-- West: -179.2311, South: -14.5487, East: 179.8597, North: 71.4398
+- West: -179.2311, South: 17.8315, East: -65.1685, North: 71.4398
 
 **Temporal Extent**
 

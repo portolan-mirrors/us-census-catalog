@@ -111,10 +111,163 @@ PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query below was run against the published URLs with DuckDB 1.4.1 and its
+real output is quoted beside it. `BG_INCOME` stands for
+`https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet`
+throughout; substitute it literally.
+
+### 1. Where does block-group median household income sit, nationally?
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT count(*)                                                     AS block_groups,
+       count(median_hh_income)                                      AS published,
+       round(100.0*(count(*)-count(median_hh_income))/count(*), 2)  AS pct_suppressed,
+       quantile_cont(median_hh_income, 0.10)::int                   AS p10,
+       quantile_cont(median_hh_income, 0.50)::int                   AS p50,
+       quantile_cont(median_hh_income, 0.90)::int                   AS p90
+FROM 'BG_INCOME';
+```
+
+→ `242298 | 223659 | 7.69 | 40977 | 79643 | 154327`. The 7.69% suppression rate
+is the one in the table above; a national decile sweep over 242k rows is one
+column's worth of bytes and ran in **2.9 s**.
+
+Add `WHERE state = 'NM'` for one state — `1614 | 1444 | 32725 | 62982 | 115441`,
+same cost. `state` has no row-group statistics in this file (it is a string
+column), so the filter does not skip row groups; what makes both queries cheap
+is that DuckDB fetches only the columns named. The predicate that *does* prune
+row groups is on `bbox` — see recipe 5.
+
+### 2. How unequal is one county? (GEOID prefix, no join needed)
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS block_groups, count(median_hh_income) AS published,
+       min(median_hh_income)::int                 AS poorest_bg,
+       quantile_cont(median_hh_income, 0.5)::int  AS median_bg,
+       max(median_hh_income)::int                 AS richest_bg
+FROM 'BG_INCOME'
+WHERE substr(geoid, 1, 5) = '17031';   -- Cook County, Illinois
+```
+
+→ `4001 | 3528 | 2499 | 85773 | 250001`. Read that carefully: **2,499 and
+250,001 are the ACS bottom- and top-codes**, not measurements, and they carry
+no margin of error at all (`median_hh_income_moe IS NULL` on all 3,458 such
+rows nationally — 120 at 2,499 and 3,338 at 250,001, measured). A "100× spread"
+from those two numbers is an artifact of coding. For a defensible spread, drop
+to coded-free, reliable rows:
+
+```sql
+LOAD httpfs;
+SELECT geoid, median_hh_income::int AS income, round(median_hh_income_cv, 2) AS cv
+FROM 'BG_INCOME'
+WHERE substr(geoid,1,5) = '17031' AND median_hh_income IS NOT NULL
+  AND median_hh_income_cv < 0.20
+ORDER BY median_hh_income DESC LIMIT 3;
+```
+
+→ `170318011004 | 248798 | 0.1`, `170318067002 | 246053 | 0.16`,
+`170318089002 | 244300 | 0.14`. 2.9 s.
+
+### 3. Does income track education at this scale? (1:1 join to a sibling chunk)
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS pairs,
+       round(corr(i.median_hh_income, p.pct_bachelors_plus), 3) AS r_income_vs_degree,
+       round(corr(i.median_hh_income, p.pct_people_of_color), 3) AS r_income_vs_poc
+FROM 'BG_INCOME' i
+JOIN '…/block-groups/bg-people/bg-people.parquet' p USING (geoid)
+WHERE i.median_hh_income IS NOT NULL;
+```
+
+→ `223659 | 0.674 | -0.183`. The join is 1:1 on `geoid` and loses nothing: all
+223,659 block groups with a published median matched. 8.7 s for two full-file
+column scans.
+
+### 4. The poorest block groups — and why the naive answer is wrong (`*_cv`)
+
+```sql
+LOAD httpfs;
+SELECT geoid, median_hh_income::int AS income, median_hh_income_moe::int AS moe,
+       round(median_hh_income_cv, 2) AS cv
+FROM 'BG_INCOME'
+WHERE median_hh_income IS NOT NULL ORDER BY median_hh_income LIMIT 5;
+```
+
+→ five rows all reading `2499 | NULL | NULL` (`240054906051`, `484410109005`,
+`280119503001`, `051190027001`, `471570101203`). Bottom-coded, no margin, not
+rankable. Now ask for reliable estimates only:
+
+```sql
+LOAD httpfs;
+SELECT geoid, state, median_hh_income::int AS income, median_hh_income_moe::int AS moe,
+       round(median_hh_income_cv, 2) AS cv
+FROM 'BG_INCOME'
+WHERE median_hh_income_cv < 0.12 ORDER BY median_hh_income LIMIT 5;
+```
+
+→ `121270820002 | FL | 3996 | 182 | 0.03`, `421010188022 | PA | 6250 | 830 |
+0.08`, `120860007191 | FL | 9375 | 470 | 0.03`, `261635350001 | MI | 9583 |
+1573 | 0.1`, `295101101002 | MO | 9583 | 1430 | 0.09`. 5.1 s.
+
+How much of the file survives that filter:
+
+```sql
+LOAD httpfs;
+SELECT CASE WHEN median_hh_income_cv IS NULL THEN 'no CV (top/bottom-coded)'
+            WHEN median_hh_income_cv < 0.12 THEN 'reliable (<0.12)'
+            WHEN median_hh_income_cv < 0.40 THEN 'caution (0.12-0.40)'
+            ELSE 'unreliable (>0.40)' END AS band,
+       count(*) AS n, round(100.0*count(*)/sum(count(*)) OVER (), 1) AS pct
+FROM 'BG_INCOME' WHERE median_hh_income IS NOT NULL GROUP BY 1 ORDER BY 2 DESC;
+```
+
+→ `caution 147002 (65.7%)`, `reliable 47063 (21.0%)`, `unreliable 26136
+(11.7%)`, `no CV 3458 (1.5%)`. One block group in five is reliable on its own.
+Note the `IS NULL` arm: without it the coded rows fall into the `ELSE` and get
+mislabelled "unreliable".
+
+### 5. Lowest-income block groups within 3 km of a point (`bbox` + spatial)
+
+```sql
+LOAD spatial; LOAD httpfs;
+SELECT geoid, median_hh_income::int AS income, round(median_hh_income_cv, 2) AS cv,
+       round(ST_Distance(
+         ST_Transform(geometry, 'EPSG:4326', 'EPSG:32616', always_xy := true),
+         ST_Transform(ST_Point(-87.6298, 41.8781), 'EPSG:4326', 'EPSG:32616', always_xy := true))) AS metres
+FROM 'BG_INCOME'
+WHERE bbox.xmin < -87.59 AND bbox.xmax > -87.67      -- bbox of the 3 km disc:
+  AND bbox.ymin < 41.906 AND bbox.ymax > 41.851      -- prunes row groups first
+  AND ST_DWithin(
+        ST_Transform(geometry, 'EPSG:4326', 'EPSG:32616', always_xy := true),
+        ST_Transform(ST_Point(-87.6298, 41.8781), 'EPSG:4326', 'EPSG:32616', always_xy := true),
+        3000)
+  AND median_hh_income_cv < 0.40
+ORDER BY median_hh_income LIMIT 5;
+```
+
+→ `170318429001 | 29363 | 0.39 | 2549`, `170312838001 | 46346 | 0.39 | 2146`,
+`170313105001 | 63070 | 0.24 | 2969`, `170310811003 | 64750 | 0.39 | 2638`,
+`170312832001 | 66404 | 0.18 | 2337`. 3.7 s against a 93 MB file; only 142 rows
+survive the `bbox` predicate (measured), which is what makes the geometry
+decode cheap. The `bbox` box must *contain* the disc, and the four comparisons
+are an intersection test (`xmin < east AND xmax > west AND …`), not a
+containment test — write it the other way round and you silently drop every
+polygon that straddles the edge.
+
+Two things that will otherwise bite:
+
+- With `LOAD spatial`, `geometry` reads back as a `GEOMETRY`, so `ST_GeomFromWKB`
+  is unnecessary and in fact errors. Without the extension it is a `BLOB`.
+- **`ST_Distance_Spheroid` and `ST_DWithin_Spheroid` take `POINT(latitude,
+  longitude)`** — the opposite of this catalog's `(lon, lat)` geometries, and
+  they only accept points. Checked: Chicago→New York comes out 1147.2 km with
+  `(lat, lon)` and 1521.3 km with `(lon, lat)`; the true distance is ~1145 km.
+  The `ST_Transform` form above avoids the trap and measures to the polygon
+  rather than its centroid.
+
+Statistics come from the GeoParquet. The PMTiles archive has no `*_moe` or
+`*_cv` columns and its coarse zooms are A5 cell aggregations, so no number
+above can be reproduced from tiles.

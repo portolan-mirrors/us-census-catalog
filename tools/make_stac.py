@@ -400,33 +400,45 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
                 else meta.ACS_INTERVAL)
     coll.setdefault("extent", {})["temporal"] = {"interval": [list(interval)]}
 
-    # Spatial extent = the GeoParquet's own data bbox, not the union that
-    # `portolan add` computes across assets: the PMTiles' A5 cell zooms
-    # overhang the data footprint by a few degrees (a pentagon cell is
-    # bigger than the features it aggregates), and the collection extent
-    # should frame the data (PTL-DAT-005), not the padding.
-    if cid != "blocks":
+    # Spatial extent = the framing bbox of the data, chosen deliberately
+    # (see docs/conformance.md):
+    # - not the `portolan add` asset union — the PMTiles' A5 cell zooms
+    #   overhang the data footprint by a few degrees;
+    # - restricted to the western hemisphere — the handful of Aleutian
+    #   geographies east of the antimeridian (and, for ACS collections,
+    #   the no-data Pacific island areas Guam/CNMI/American Samoa) would
+    #   otherwise make the bbox span the globe, and map clients that fit
+    #   it open on the Atlantic instead of the data. A STAC antimeridian
+    #   (west > east) bbox was tried and MapLibre fitBounds mishandles it.
+    #   For ACS collections the extent covers every geography that carries
+    #   estimates except the ~5 populated Aleutian geographies east of
+    #   180°; the excluded geometries still ship in the data.
+    ext_sql = None
+    pq_glob = None
+    if cid == "blocks":
+        pq_glob = str(CATALOG / "blocks" / "state_fips=*" / "*.parquet")
+        ext_sql = "bbox.xmin < 0"
+    else:
         pq_path = (CATALOG / meta.GROUP_OF[cid] / cid / f"{cid}.parquet"
                    if cid in meta.GROUP_OF
                    else CATALOG / cid / f"{cid}.parquet")
         if pq_path.exists():
-            import pyarrow.parquet as _pq
-            geo = json.loads(_pq.read_schema(pq_path).metadata[b"geo"])
-            bbox = geo["columns"]["geometry"].get("bbox")
-            if bbox:
-                coll.setdefault("extent", {})["spatial"] = {"bbox": [bbox]}
-    else:
-        # Blocks: union the per-partition parquet bboxes (the items carry
-        # them from `portolan add`'s data scan).
-        boxes = []
-        for item_file in sorted((CATALOG / "blocks").glob("state_fips=*/*.json")):
-            item = json.loads(item_file.read_text())
-            if item.get("bbox"):
-                boxes.append(item["bbox"])
-        if boxes:
-            union = [min(b[0] for b in boxes), min(b[1] for b in boxes),
-                     max(b[2] for b in boxes), max(b[3] for b in boxes)]
-            coll.setdefault("extent", {})["spatial"] = {"bbox": [union]}
+            pq_glob = str(pq_path)
+            # western hemisphere + rows that carry ACS estimates
+            ext_sql = "bbox.xmin < 0 AND population IS NOT NULL"
+    if pq_glob:
+        import duckdb
+        # max(xmax) only over western-hemisphere edges: a feature that
+        # straddles the antimeridian (Aleutians West) has xmax near +180
+        # and would re-widen the frame to the whole globe.
+        row = duckdb.sql(
+            f"SELECT min(bbox.xmin), min(bbox.ymin), "
+            f"max(CASE WHEN bbox.xmax < 0 THEN bbox.xmax END), "
+            f"max(bbox.ymax) FROM read_parquet('{pq_glob}') "
+            f"WHERE {ext_sql}").fetchone()
+        if row and row[0] is not None:
+            bbox = [round(v, 6) for v in row]
+            coll.setdefault("extent", {})["spatial"] = {"bbox": [bbox]}
 
     if n is not None:
         coll["table:row_count"] = n

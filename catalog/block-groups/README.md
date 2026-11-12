@@ -16,7 +16,7 @@ American Community Survey 2020–2024 5-year indicators for all 242,298 census b
 
 **Spatial Extent**
 
-- West: -179.1467, South: -14.5487, East: 179.7785, North: 71.3878
+- West: -179.1467, South: 17.8833, East: -65.2211, North: 71.3878
 
 **Temporal Extent**
 

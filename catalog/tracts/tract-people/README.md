@@ -20,7 +20,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 ## Spatial Coverage
 
-- **Bounding Box**: [-179.146711, -14.548699, 179.77847011250077, 71.387815]
+- **Bounding Box**: [-179.146711, 17.88329, -65.221081, 71.387815]
 
 ## Temporal Coverage
 

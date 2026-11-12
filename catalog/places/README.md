@@ -22,7 +22,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 ## Spatial Coverage
 
-- **Bounding Box**: [-176.6966776733884, -14.37374, 174.15531284398085, 71.3397102533974]
+- **Bounding Box**: [-176.696678, 17.950739, -65.290424, 71.33971]
 
 ## Temporal Coverage
 
@@ -152,6 +152,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./places.pmtiles | 196.6 MB | 1220e37493fd... |
 | ./places.parquet | 32.9 MB | 1220f1f1d496... |
+| ./thumbnail.png | 75.6 KB | 12203b84a9b1... |
 | ./styles/default.json | 2.6 KB | 1220121597ce... |
 | ./styles/density.json | 1.8 KB | 1220855d7c77... |
 | ./styles/home-value.json | 2.6 KB | 1220c62fffce... |
@@ -188,9 +189,9 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 | https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b28002.dat | 55.4 MB | 122012446ff0... |
 | https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-c17002.dat | 40.1 MB | 1220dc3dc675... |
 | https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt | 5.4 MB | 12205b46f4af... |
-| https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_place_500k.zip | - | - |
-| https://www2.census.gov/geo/docs/maps-data/data/geo_tallies2020/Natl_Geographic_Tallies_2020.txt | - | - |
-| https://www.census.gov/programs-surveys/bas/information/cdp.html | - | - |
+| https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_place_500k.zip | 21.9 MB | 12202be68094... |
+| https://www2.census.gov/geo/docs/maps-data/data/geo_tallies2020/Natl_Geographic_Tallies_2020.txt | 1.7 KB | 122006db85a1... |
+| https://www.census.gov/programs-surveys/bas/information/cdp.html | 325.1 KB | 1220fdee5fb1... |
 | https://www.census.gov/programs-surveys/acs/library/handbooks/general.html | 349.4 KB | 122063f2cc20... |
 | https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf | 378.9 KB | 12204d325820... |
 | https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf | 1.1 MB | 12206e0c5b1a... |
