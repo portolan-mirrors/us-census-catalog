@@ -1,16 +1,18 @@
 # Block Groups
 
-American Community Survey 2020–2024 5-year indicators for all 242,298 census block groups in the United States and Puerto Rico — the finest geography the Census Bureau publishes income, housing cost and commuting data for, typically 600–3,000 people. The indicators are split into four themed collections — [income](./bg-income/collection.json), [people](./bg-people/collection.json), [housing](./bg-housing/collection.json) and [connectivity](./bg-connectivity/collection.json) — because one wide national table would make a consumer who wanted median income download sixty columns and 242,298 rows. All four share the same geometry and `geoid`, so they join 1:1. Health insurance, disability, nativity and income by race are not published at this geography; they are in [tracts](../tracts/catalog.json). Every estimate carries its margin of error, and block-group margins are wide — read each collection's `*_cv` columns and its AGENTS.md before mapping. [data.census.gov](https://data.census.gov/) is authoritative.
+**[🗺️ Open in the data browser](https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/block-groups/catalog.json)** · [Source repository](https://github.com/portolan-mirrors/us-census-catalog) · [Agent guide](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/AGENTS.md) · [STAC root](https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)
+
+American Community Survey 2020–2024 5-year indicators for all 242,298 census block groups in the United States and Puerto Rico — the finest geography the Census Bureau publishes income, housing cost and commuting data for, typically 600–3,000 people. The indicators are split into four themed collections — [income](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/collection.json), [people](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-people/collection.json), [housing](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-housing/collection.json) and [connectivity](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-connectivity/collection.json) — because one wide national table would make a consumer who wanted median income download sixty columns and 242,298 rows. All four share the same geometry and `geoid`, so they join 1:1. Health insurance, disability, nativity and income by race are not published at this geography; they are in [tracts](https://source.coop/portolan-mirrors/us-census-catalog/tracts/catalog.json). Every estimate carries its margin of error, and block-group margins are wide — read each collection's `*_cv` columns and its AGENTS.md before mapping. [data.census.gov](https://data.census.gov/) is authoritative.
 
 ## Collections
 
-### [bg-connectivity](bg-connectivity/)
+### [bg-connectivity](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-connectivity)
 
-### [bg-housing](bg-housing/)
+### [bg-housing](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-housing)
 
-### [bg-income](bg-income/)
+### [bg-income](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income)
 
-### [bg-people](bg-people/)
+### [bg-people](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-people)
 
 ## Coverage
 

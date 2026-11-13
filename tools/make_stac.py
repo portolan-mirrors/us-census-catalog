@@ -498,6 +498,13 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
         ensure_link(links, "pmtiles", f"./{cid}.pmtiles", PMTILES_TYPE,
                     f"{meta.TITLES[cid]} (vector tiles)",
                     **{"pmtiles:layers": [cid]})
+    # A human-clickable way into the interactive map from any STAC client.
+    browser = ("https://browser.portolan-sdi.org/?catalog="
+               f"{meta.PUBLIC_BASE}/catalog.json#/external/"
+               "data.source.coop/portolan-mirrors/us-census-catalog/"
+               f"{meta.COLL_REL[cid]}/collection.json")
+    ensure_link(links, "alternate", browser, "text/html",
+                "Open in the Portolan Browser (interactive map)")
     coll["links"] = links
 
     # Assets. Source and style assets are rebuilt rather than merged, so a

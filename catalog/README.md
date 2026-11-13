@@ -1,5 +1,7 @@
 # US Census Demographics — Cloud-Native Mirror
 
+**[🗺️ Open in the data browser](https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)** · [Source repository](https://github.com/portolan-mirrors/us-census-catalog) · [Agent guide](https://source.coop/portolan-mirrors/us-census-catalog/AGENTS.md) · [STAC root](https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)
+
 ![census](https://img.shields.io/badge/census-blue) ![ACS](https://img.shields.io/badge/ACS-blue) ![American Community Survey](https://img.shields.io/badge/American_Community_Survey-blue) ![decennial census](https://img.shields.io/badge/decennial_census-blue) ![demographics](https://img.shields.io/badge/demographics-blue) ![United States](https://img.shields.io/badge/United_States-blue) ![GeoParquet](https://img.shields.io/badge/GeoParquet-blue) ![PMTiles](https://img.shields.io/badge/PMTiles-blue) ![STAC](https://img.shields.io/badge/STAC-blue) ![cloud-native](https://img.shields.io/badge/cloud--native-blue)
 
 Nationwide United States census statistics as cloud-native GeoParquet and
@@ -20,27 +22,27 @@ from.
 
 ## Collections
 
-### [2020 Census Counts — Blocks](blocks/)
+### [2020 Census Counts — Blocks](https://source.coop/portolan-mirrors/us-census-catalog/blocks)
 
 2020 Decennial Census counts for all **8,174,955** census blocks in the 50 states, the District of Columbia and Puerto Rico — the smallest geography the Census Bureau publishes anything for. From t...
 
-### [All Indicators — Congressional Districts (119th Congress)](congressional-districts/)
+### [All Indicators — Congressional Districts (119th Congress)](https://source.coop/portolan-mirrors/us-census-catalog/congressional-districts)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 
-### [All Indicators — Counties](counties/)
+### [All Indicators — Counties](https://source.coop/portolan-mirrors/us-census-catalog/counties)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 
-### [All Indicators — Places & CDPs](places/)
+### [All Indicators — Places & CDPs](https://source.coop/portolan-mirrors/us-census-catalog/places)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 
-### [All Indicators — States](states/)
+### [All Indicators — States](https://source.coop/portolan-mirrors/us-census-catalog/states)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 
-### [All Indicators — ZIP Code Tabulation Areas](zctas/)
+### [All Indicators — ZIP Code Tabulation Areas](https://source.coop/portolan-mirrors/us-census-catalog/zctas)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 

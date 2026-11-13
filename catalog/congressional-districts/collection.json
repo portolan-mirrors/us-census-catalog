@@ -60,6 +60,12 @@
       "pmtiles:layers": [
         "congressional-districts"
       ]
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [

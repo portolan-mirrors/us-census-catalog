@@ -53,6 +53,12 @@
       "title": "Source repository"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/catalog.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "issues",
       "href": "https://github.com/portolan-mirrors/us-census-catalog/issues",
       "title": "Issue tracker"

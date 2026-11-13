@@ -1,18 +1,20 @@
 # Census Tracts
 
-American Community Survey 2020–2024 5-year indicators for all 85,184 census tracts in the United States and Puerto Rico — typically 1,200–8,000 people, the geography most small-area social research is done at. The same four themed collections as block groups — [income](./tract-income/collection.json), [people](./tract-people/collection.json), [housing](./tract-housing/collection.json), [connectivity](./tract-connectivity/collection.json) — plus [wellbeing](./tract-wellbeing/collection.json), which carries the health-insurance, disability, nativity and income-by-race tables the Census Bureau does not publish for block groups. All five share the same geometry and `geoid` and join 1:1; tract margins of error are substantially narrower than block-group margins (median household income is NULL on 1.59% of tracts against 7.69% of block groups). [data.census.gov](https://data.census.gov/) is authoritative.
+**[🗺️ Open in the data browser](https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/tracts/catalog.json)** · [Source repository](https://github.com/portolan-mirrors/us-census-catalog) · [Agent guide](https://source.coop/portolan-mirrors/us-census-catalog/tracts/AGENTS.md) · [STAC root](https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)
+
+American Community Survey 2020–2024 5-year indicators for all 85,184 census tracts in the United States and Puerto Rico — typically 1,200–8,000 people, the geography most small-area social research is done at. The same four themed collections as block groups — [income](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/collection.json), [people](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/collection.json), [housing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/collection.json), [connectivity](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/collection.json) — plus [wellbeing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/collection.json), which carries the health-insurance, disability, nativity and income-by-race tables the Census Bureau does not publish for block groups. All five share the same geometry and `geoid` and join 1:1; tract margins of error are substantially narrower than block-group margins (median household income is NULL on 1.59% of tracts against 7.69% of block groups). [data.census.gov](https://data.census.gov/) is authoritative.
 
 ## Collections
 
-### [tract-connectivity](tract-connectivity/)
+### [tract-connectivity](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity)
 
-### [tract-housing](tract-housing/)
+### [tract-housing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing)
 
-### [tract-income](tract-income/)
+### [tract-income](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income)
 
-### [tract-people](tract-people/)
+### [tract-people](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people)
 
-### [tract-wellbeing](tract-wellbeing/)
+### [tract-wellbeing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing)
 
 ## Coverage
 
