@@ -298,9 +298,7 @@
       "description": "The Bureau's own guidance on what ACS estimates can and cannot support: 1-year versus 5-year releases, margins of error, comparing across vintages, and small-area reliability. Read it before drawing a conclusion from a single block group.",
       "roles": [
         "metadata"
-      ],
-      "file:size": 357817,
-      "file:checksum": "122063f2cc2016b73d39da36df2e31fdf66e09a8c340d9d0fcd80fba3ae217302bd5"
+      ]
     },
     "doc-acs-accuracy": {
       "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf",
@@ -331,9 +329,7 @@
       "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
       "roles": [
         "metadata"
-      ],
-      "file:size": 482492,
-      "file:checksum": "122018028aab7f8602b8d1758c40756ff4abec1f86a584ac1065350ab83614d4fe95"
+      ]
     }
   },
   "keywords": [

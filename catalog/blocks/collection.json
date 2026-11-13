@@ -558,9 +558,7 @@
       "description": "The 52 state archives (`{State_Name}/{ab}2020.pl.zip`) this collection's counts were read from, 2020 Census P.L. 94-171 redistricting data. Each archive holds a pipe-delimited geoheader plus three segment files joined on `LOGRECNO`; block records are `SUMLEV = '750'`. Served by census.gov.",
       "roles": [
         "source"
-      ],
-      "file:size": 26644,
-      "file:checksum": "122004ab523521fbf1394c2e64daa6592c3d91135f68cbb398469aaa9d9a9505a3f4"
+      ]
     },
     "source-tiger-tabblock20": {
       "href": "https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/",
@@ -569,9 +567,7 @@
       "description": "The block geometry: `tl_2024_{fips}_tabblock20.zip` per state, from which only `GEOID20` and `ALAND20` are kept. Unclipped, EPSG:4269 upstream, reprojected to EPSG:4326 with ogr2ogr. Served by census.gov.",
       "roles": [
         "source"
-      ],
-      "file:size": 27980,
-      "file:checksum": "12209071fea7b129bc18160b0a779cc91a14f4bb677beee69afdf2698e21a6ef6d45"
+      ]
     },
     "source-pl-import-scripts": {
       "href": "https://www2.census.gov/programs-surveys/decennial/rdo/about/2020-census-program/Phase3/SupportMaterials/2020PL_R_import_scripts.zip",
@@ -602,9 +598,7 @@
       "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
       "roles": [
         "metadata"
-      ],
-      "file:size": 482492,
-      "file:checksum": "122018028aab7f8602b8d1758c40756ff4abec1f86a584ac1065350ab83614d4fe95"
+      ]
     }
   },
   "partition:glob": "./state_fips=*/*.parquet",

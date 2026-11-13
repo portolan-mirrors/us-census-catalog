@@ -191,6 +191,12 @@ def source_meta(url: str) -> dict:
     when the staged local copy's length matches that exactly — so it is the
     hash of the bytes the Bureau served, not of something reassembled here.
     """
+    # Only stable files get size/checksum. An HTML page or a directory
+    # listing is rendered per request (analytics nonces and all), so a
+    # recorded digest fails PTL-DAT-001 against the live bytes — verified
+    # with `portolan check --live` 2026-11-13.
+    if not url.lower().endswith((".dat", ".zip", ".pdf", ".txt")):
+        return {}
     try:
         recorded = json.loads(SOURCE_SIZES.read_text())
     except (OSError, json.JSONDecodeError):
