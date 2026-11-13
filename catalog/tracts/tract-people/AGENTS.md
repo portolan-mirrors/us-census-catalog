@@ -116,10 +116,122 @@ PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. **This collection has no `*_cv` columns** — reliability work here uses
+`<name>_moe` directly.
+
+### 1. How old is the country, tract by tract?
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT count(median_age)               AS published,
+       quantile_cont(median_age, 0.10) AS p10,
+       quantile_cont(median_age, 0.50) AS p50,
+       quantile_cont(median_age, 0.90) AS p90
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/tract-people.parquet';
+```
+
+→ `84483 | 31.0 | 39.9 | 50.6`, in **2.1 s**. 84,483 of 85,184 tracts carry a
+median age. Grouping the 701 that do not (measured) gives 515 tracts with
+`population = 0`, 140 with no ACS row at all (`population IS NULL` — the
+island areas and the re-delineated Suffolk County tracts), and 46 with a
+population but no publishable median. Almost all of the missingness is
+"nobody lives here", not suppression.
+
+One state, with the margin alongside:
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, population, median_age, median_age_moe AS moe, pct_65_plus
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/tract-people.parquet'
+WHERE state = 'FL' AND population > 2000
+ORDER BY median_age DESC LIMIT 5;
+```
+
+→ `12071001915 | Census Tract 19.15, Lee County, Florida | 3044 | 81.5 | 1.4 |
+91.92`, `12103027330 | … Pinellas County … | 2437 | 80.0 | 4.7 | 73.37`,
+`12099005944 | … Palm Beach County … | 2342 | 78.0 | 3.5 | 85.23`,
+`12099005947 | … Palm Beach County … | 4220 | 77.6 | 2.5 | 86.97`,
+`12021011003 | … Collier County … | 3779 | 77.1 | 3.0 | 80.82`. 4.3 s.
+
+A median age of 81.5 ± 1.4 with 91.92% of residents over 65 is a retirement
+community, and the margin is narrow enough to say so. The `population > 2000`
+gate keeps out tiny tracts whose median age swings on a handful of people.
+
+### 2. Which tract am I in? (point-in-polygon, `bbox` prefilter)
+
+```sql
+LOAD spatial; LOAD httpfs;
+SELECT geoid, name, population, median_age, pct_bachelors_plus
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/tract-people.parquet'
+WHERE bbox.xmin <= -122.3493 AND bbox.xmax >= -122.3493
+  AND bbox.ymin <=   47.6205 AND bbox.ymax >=   47.6205
+  AND ST_Contains(geometry, ST_Point(-122.3493, 47.6205));
+```
+
+→ one row: `53033007101 | Census Tract 71.01, King County, Washington | 3104 |
+30.6 | 74.27`. **6.5 s** against a 56 MB file, because the four `bbox`
+comparisons prune row groups by the parquet's own statistics before any
+geometry is decoded. Drop them and DuckDB decodes 85,184 polygons instead.
+
+The pattern generalises to any lookup: `bbox.xmin <= lon AND bbox.xmax >= lon
+AND bbox.ymin <= lat AND bbox.ymax >= lat` is the exact bbox-contains-point
+test, and `ST_Contains` then resolves the handful of candidates. Geometry is
+`(lon, lat)` in EPSG:4326, so `ST_Point` takes longitude first. With
+`LOAD spatial`, `geometry` reads back as a `GEOMETRY` — `ST_GeomFromWKB` is
+unnecessary and raises a binder error.
+
+These are shoreline-clipped cartographic boundaries, which is what you want
+for a point-in-polygon lookup on land and not what you want for a point
+offshore.
+
+### 3. Education and income at tract scale (1:1 join to a sibling chunk)
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS tracts,
+       round(corr(p.pct_bachelors_plus, i.median_hh_income), 3) AS r_degree_income,
+       round(corr(p.median_age, i.median_hh_income), 3)         AS r_age_income
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/tract-people.parquet' p
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet' i
+  USING (geoid)
+WHERE i.median_hh_income IS NOT NULL AND p.pct_bachelors_plus IS NOT NULL;
+```
+
+→ `83827 | 0.715 | 0.165`. 8.1 s. The degree–income correlation is 0.715 at
+tract level against 0.674 at block-group level (measured in
+[`bg-income`](../../block-groups/bg-income/AGENTS.md)) — tightening as the
+margins narrow, which is what you would expect if the block-group figure is
+attenuated by noise rather than describing a different world.
+
+### 4. Significance before ranking (`*_moe`)
+
+```sql
+LOAD httpfs;
+SELECT count(*)                                                        AS estimate_over_50,
+       count(*) FILTER (WHERE pct_hispanic - pct_hispanic_moe > 50)    AS significantly_over_50
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/tract-people.parquet'
+WHERE pct_hispanic > 50;
+```
+
+→ `9621 | 6793`. 3.9 s. Of the 9,621 tracts estimated to be majority-Hispanic,
+6,793 — 71% — stay above 50% at the bottom of their 90% margin. Compare the
+same shape of test on `pct_65_plus` at block-group level, where only a third
+survive (5,004 → 1,663, measured in
+[`bg-people`](../../block-groups/bg-people/AGENTS.md)). Narrower margins are
+the whole argument for working at this geography; they are not a licence to
+skip the test.
+
+### Related recipes elsewhere
+
+- The same indicators one geography down, with wider margins:
+  [`block-groups/bg-people/AGENTS.md`](../../block-groups/bg-people/AGENTS.md).
+- Race and ethnicity as 2020 complete counts (different universe definitions —
+  read the field notes): [`blocks/AGENTS.md`](../../blocks/AGENTS.md).
+- Income by race for these same tracts:
+  [`tracts/tract-wellbeing/AGENTS.md`](../tract-wellbeing/AGENTS.md).
+
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe`
+columns and its coarse zooms are A5 cell aggregations, so no significance test
+above can be reproduced from tiles.

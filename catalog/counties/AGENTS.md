@@ -173,7 +173,14 @@ Every indicator in this catalog's ACS column set, in one table: income and pover
 
 ## Field notes
 
-- **Every estimate has a `<name>_moe`**, at the 90% confidence level — the
+- **`population_moe` is the one exception to the rule below: it is NULL on
+  3,103 of 3,235 counties** (measured — only 132 small rural counties carry
+  one, and all 56 rows in [`states`](../states/collection.json) carry none).
+  Read `population` at this geography as a count to use rather than an
+  estimate to put an interval on, and check for NULLs before putting
+  `population_moe` into a quadrature sum. Every other `*_moe` column here is
+  populated normally.
+- **Every other estimate has a `<name>_moe`**, at the 90% confidence level — the
   level the Census Bureau publishes. To compare two geographies, check
   whether their margins overlap before calling a difference real. To sum
   estimates across geographies, add the margins in quadrature
@@ -228,10 +235,144 @@ The PMTiles carry real geometries at every zoom (no A5 cell band — the feature
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. This file is 13 MB and 3,235 rows: everything here is seconds, and nothing
+needs a filter to be affordable.
+
+### 1. What does a county's median household income look like?
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT count(*)                                   AS counties,
+       count(median_hh_income)                    AS with_data,
+       quantile_cont(median_hh_income, 0.10)::int AS p10,
+       quantile_cont(median_hh_income, 0.50)::int AS p50,
+       quantile_cont(median_hh_income, 0.90)::int AS p90,
+       max(pct_below_poverty)                     AS worst_poverty_rate
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet';
+```
+
+→ `3235 | 3221 | 46875 | 65346 | 89168 | 63.65`, in **3.0 s**. Count the gap
+carefully: 3,222 counties carry ACS data at all (the 13 missing are the
+island-area county equivalents, which have 2024 boundaries and no ACS
+estimates), and 3,221 of those have a publishable income median. The single
+county with data but no median is De Baca County, New Mexico (`35011`),
+population 1,576 — measured.
+
+One state is `WHERE state = 'CA'`:
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, median_hh_income::int AS income, round(median_hh_income_cv, 3) AS cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet'
+WHERE state = 'CA'
+ORDER BY median_hh_income DESC LIMIT 5;
+```
+
+→ `06085 | Santa Clara County, California | 164281 | 0.007`, `06081 | San Mateo
+County, California | 158855 | 0.011`, `06041 | Marin County, California |
+149091 | 0.018`, `06075 | San Francisco County, California | 140970 | 0.011`,
+`06001 | Alameda County, California | 129367 | 0.006`. 5.5 s.
+
+### 2. Each county against its own state (GEOID prefix join)
+
+```sql
+LOAD httpfs;
+SELECT c.name, c.median_hh_income::int AS county_income,
+       s.median_hh_income::int         AS state_income,
+       round(100.0*c.median_hh_income/s.median_hh_income - 100, 1) AS pct_vs_state
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet' c
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet' s
+  ON substr(c.geoid, 1, 2) = s.geoid
+WHERE c.state = 'NY' AND c.median_hh_income_cv < 0.10
+ORDER BY pct_vs_state DESC LIMIT 5;
+```
+
+→ `Nassau County, New York | 146202 | 85974 | 70.1`, `Suffolk County, New York
+| 130686 | 85974 | 52.0`, `Putnam County, New York | 126257 | 85974 | 46.9`,
+`Westchester County, New York | 118976 | 85974 | 38.4`, `Rockland County, New
+York | 109959 | 85974 | 27.9`. 6.1 s.
+
+`substr(geoid, 1, 2)` is the whole join: a county GEOID is state FIPS + county
+FIPS, so the first two characters *are* the state row's `geoid`. The same
+prefix trick reaches down as well as up — `substr(tract_geoid, 1, 5)` is a
+county.
+
+### 3. Is a difference between two counties real? (margins, not estimates)
+
+```sql
+LOAD httpfs;
+SELECT name, median_hh_income::int AS income, median_hh_income_moe::int AS moe,
+       (median_hh_income - median_hh_income_moe)::int AS lo,
+       (median_hh_income + median_hh_income_moe)::int AS hi
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet'
+WHERE geoid IN ('06075', '06081');
+```
+
+→ `San Francisco County, California | 140970 | 2593 | 138377 | 143563`,
+`San Mateo County, California | 158855 | 2851 | 156004 | 161706`. 3.7 s.
+
+The two 90% intervals do not overlap, so San Mateo really is richer than San
+Francisco. Do this before reporting any pair. Counties are the geography where
+most comparisons survive — the median CV on `median_hh_income` is 0.042 here
+against 0.125 at tract level (measured) — but "most" is not "all".
+
+### 4. Summing across counties: margins add in quadrature
+
+```sql
+LOAD httpfs;
+SELECT (SELECT sum(households) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet' WHERE state='NY') AS county_sum,
+       (SELECT round(sqrt(sum(households_moe*households_moe))) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet' WHERE state='NY') AS quadrature_moe,
+       (SELECT households     FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet'   WHERE state='NY') AS state_row,
+       (SELECT households_moe FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet'   WHERE state='NY') AS state_moe;
+```
+
+→ `7722646 | 8003 | 7722646 | 12717`. 5.5 s.
+
+Two things worth keeping. First, the counties **sum exactly** to the state row,
+7,722,646 either way: counts are additive and the geographies nest, so this is
+a usable consistency check on any rollup you write. Second, the quadrature
+margin (±8,003) is *not* the state's published margin (±12,717) — the Bureau
+estimates the state directly rather than by adding counties, so its margin is
+its own. `sqrt(sum(moe*moe))` is the right way to put a margin on *your* sum;
+it does not reproduce the Bureau's.
+
+**Never do this with a median.** `sum()` and quadrature apply to counts and to
+estimates of counts. A region's median household income is not derivable from
+its counties' medians at all, with or without margins.
+
+### 5. `population_moe` is NULL on 3,103 of 3,235 counties
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS counties, count(population) AS with_population,
+       count(population_moe) AS with_a_population_margin
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet';
+```
+
+→ `3235 | 3222 | 132`. 3.1 s.
+
+Measured, and it contradicts the general rule that every estimate here carries
+a margin: only 132 counties have a `population_moe`, and all 56 rows in
+[`states`](../states/collection.json) have none. The 132 are small rural
+counties (28 in Texas, 26 in Nebraska, 14 in South Dakota, …, measured by
+grouping on `state`). Every other `*_moe` column in this collection is
+populated normally; it is `population` specifically that arrives without a
+margin at these coarse geographies. Treat `population` at county and state
+level as a count to use and not as an estimate to put an interval on, and do
+not write `population_moe` into a quadrature sum without checking for NULLs
+first — `sqrt(sum(moe*moe))` over a NULL-bearing column returns NULL.
+
+### Related recipes elsewhere
+
+- Top counties nationally, the poorest tract inside the richest county, and
+  density against car ownership: [`catalog/AGENTS.md`](../AGENTS.md).
+- The race-iteration medians, which are published far more often here than at
+  tract level: [`tracts/tract-wellbeing/AGENTS.md`](../tracts/tract-wellbeing/AGENTS.md).
+- Looking inside a county: [`tracts/`](../tracts/AGENTS.md) and
+  [`block-groups/`](../block-groups/AGENTS.md).
+
+Statistics come from the GeoParquet. The county PMTiles archive is real
+polygons at every zoom (no A5 band), but it carries no `*_moe` or `*_cv`
+columns, so no reliability test above can be reproduced from tiles.

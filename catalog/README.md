@@ -20,27 +20,27 @@ from.
 
 ## Collections
 
-### [2020 Census Counts — Blocks](catalog/blocks/)
+### [2020 Census Counts — Blocks](blocks/)
 
 2020 Decennial Census counts for all **8,174,955** census blocks in the 50 states, the District of Columbia and Puerto Rico — the smallest geography the Census Bureau publishes anything for. From t...
 
-### [All Indicators — Congressional Districts (119th Congress)](catalog/congressional-districts/)
+### [All Indicators — Congressional Districts (119th Congress)](congressional-districts/)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 
-### [All Indicators — Counties](catalog/counties/)
+### [All Indicators — Counties](counties/)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 
-### [All Indicators — Places & CDPs](catalog/places/)
+### [All Indicators — Places & CDPs](places/)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 
-### [All Indicators — States](catalog/states/)
+### [All Indicators — States](states/)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 
-### [All Indicators — ZIP Code Tabulation Areas](catalog/zctas/)
+### [All Indicators — ZIP Code Tabulation Areas](zctas/)
 
 Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
 

@@ -4,15 +4,15 @@ American Community Survey 2020–2024 5-year indicators for all 85,184 census tr
 
 ## Collections
 
-### [tracts/tract-connectivity](tracts/tracts/tract-connectivity/)
+### [tract-connectivity](tract-connectivity/)
 
-### [tracts/tract-housing](tracts/tracts/tract-housing/)
+### [tract-housing](tract-housing/)
 
-### [tracts/tract-income](tracts/tracts/tract-income/)
+### [tract-income](tract-income/)
 
-### [tracts/tract-people](tracts/tracts/tract-people/)
+### [tract-people](tract-people/)
 
-### [tracts/tract-wellbeing](tracts/tracts/tract-wellbeing/)
+### [tract-wellbeing](tract-wellbeing/)
 
 ## Coverage
 

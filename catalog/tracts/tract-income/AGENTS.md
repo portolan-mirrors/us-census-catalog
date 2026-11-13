@@ -111,10 +111,124 @@ PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it.
+
+### 1. Where does tract median household income sit, nationally?
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT count(*)                                                    AS tracts,
+       count(median_hh_income)                                     AS published,
+       round(100.0*(count(*)-count(median_hh_income))/count(*), 2) AS pct_suppressed,
+       quantile_cont(median_hh_income, 0.10)::int                  AS p10,
+       quantile_cont(median_hh_income, 0.50)::int                  AS p50,
+       quantile_cont(median_hh_income, 0.90)::int                  AS p90
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet';
+```
+
+→ `85184 | 83828 | 1.59 | 42851 | 77004 | 140000`, in **2.3 s**. 1.59%
+suppressed against 7.69% at block-group level: the reason to work here.
+
+One state is the same query with `WHERE state = 'XX'`:
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, median_hh_income::int AS income, round(median_hh_income_cv, 2) AS cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet'
+WHERE state = 'MS' AND median_hh_income_cv < 0.15
+ORDER BY median_hh_income DESC LIMIT 5;
+```
+
+→ `28089030301 | Census Tract 303.01, Madison County, Mississippi | 155357 |
+0.08`, `28033070722 | … DeSoto County … | 154518 | 0.04`, `28033070631 | …
+DeSoto County … | 148081 | 0.03`, `28089030204 | … Madison County … | 134943 |
+0.09`, `28033070634 | … DeSoto County … | 131007 | 0.14`. 6.5 s. Note the
+`name` column already carries county and state, so a state's top tracts need
+no join to be readable.
+
+### 2. Which geography should this question be asked at? (`*_cv`, two files)
+
+```sql
+LOAD httpfs;
+SELECT 'tract' AS geography, count(median_hh_income_cv) AS n,
+       round(quantile_cont(median_hh_income_cv, 0.5), 3) AS median_cv,
+       round(100.0*count(*) FILTER (WHERE median_hh_income_cv > 0.40)
+             / count(median_hh_income_cv), 1) AS pct_unreliable
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet'
+UNION ALL
+SELECT 'block group', count(median_hh_income_cv),
+       round(quantile_cont(median_hh_income_cv, 0.5), 3),
+       round(100.0*count(*) FILTER (WHERE median_hh_income_cv > 0.40)
+             / count(median_hh_income_cv), 1)
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet';
+```
+
+→ `tract | 83266 | 0.125 | 1.5`, `block group | 220201 | 0.202 | 11.8`. 4.1 s
+for both files.
+
+The median tract CV is 0.125, right on the "use with caution" line; the median
+block group is 0.202, and one block group in eight is outright unreliable
+against one tract in 67. Run this before deciding which geography a question
+belongs at — and if a block-group answer must be mapped, grey out by `_cv`
+rather than pretending the holes are not there.
+
+### 3. One county's tracts, cheapest to most expensive housing (sibling join)
+
+```sql
+LOAD httpfs;
+SELECT i.geoid, i.median_hh_income::int AS income, h.median_home_value::int AS home_value,
+       round(h.median_home_value / i.median_hh_income, 1) AS value_to_income
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet' i
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/tract-housing.parquet' h
+  USING (geoid)
+WHERE substr(i.geoid, 1, 5) = '48201'          -- Harris County, Texas
+  AND i.median_hh_income_cv < 0.15 AND h.median_home_value_cv < 0.15
+ORDER BY value_to_income DESC LIMIT 5;
+```
+
+→ `48201521000 | 47985 | 610400 | 12.7`, `48201530701 | 20516 | 225000 |
+11.0`, `48201430700 | 88870 | 972900 | 10.9`, `48201411002 | 101875 | 1067400
+| 10.5`, `48201430200 | 82434 | 821800 | 10.0`. 9.6 s.
+
+The join is 1:1 on `geoid` — all five tract chunks hold the same 85,184 rows.
+`value_to_income` is a ratio of two medians from two different universes
+(owner-occupied units vs all households); it is a useful screening index and
+not a household-level statistic. Both `_cv` gates matter: without them this
+ranking fills with tracts whose home-value median is ±50%.
+
+### 4. Is the difference between two tracts real? (margins, not estimates)
+
+```sql
+LOAD httpfs;
+SELECT geoid, median_hh_income::int AS income, median_hh_income_moe::int AS moe,
+       (median_hh_income - median_hh_income_moe)::int AS lo,
+       (median_hh_income + median_hh_income_moe)::int AS hi
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet'
+WHERE geoid IN ('48201521000', '48201430200');
+```
+
+→ `48201430200 | 82434 | 16096 | 66338 | 98530`, `48201521000 | 47985 | 5337 |
+42648 | 53322`. 5.0 s.
+
+The two 90% intervals, [42,648–53,322] and [66,338–98,530], do not overlap,
+so these two Harris County tracts really do differ in income. Run the same
+check before reporting any pair: at tract level the margins are narrow enough
+that many comparisons survive, and wide enough that plenty do not. Never do
+this by subtracting medians and ignoring the margins, and never sum or average
+the medians themselves — a region's median is not derivable from its parts'.
+
+### Related recipes elsewhere
+
+- Income inequality inside a county at the finest geography available, and the
+  top/bottom-coded values that carry no margin:
+  [`block-groups/bg-income/AGENTS.md`](../../block-groups/bg-income/AGENTS.md).
+- Income by race alongside these overall medians, NULL-aware:
+  [`tracts/tract-wellbeing/AGENTS.md`](../tract-wellbeing/AGENTS.md).
+- Top counties by income, and the poorest tracts inside the richest county:
+  [`catalog/AGENTS.md`](../../AGENTS.md).
+
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe` or
+`*_cv` columns and its coarse zooms are A5 cell aggregations that average
+medians unweighted, so nothing above can be reproduced from tiles.

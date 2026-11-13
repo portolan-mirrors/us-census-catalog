@@ -241,10 +241,126 @@ PMTiles coarse zooms (z0–z5) are A5 cell aggregations, not census geographies 
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix (`substr(geoid, 1, 2)` → `states`). Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. Remember the two rules this geography enforces: **places do not tile the
+country** (never sum them to a state or national total) and **most rows are
+tiny** (always filter on `population` before an average or a ranking).
+
+### 1. The biggest places, and one state's
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT geoid, name, population, median_hh_income::int AS income, pct_rent_burdened
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/places/places.parquet'
+ORDER BY population DESC NULLS LAST LIMIT 5;
+```
+
+→ `3651000 | New York city, New York | 8483844 | 80483 | 52.41`, `0644000 |
+Los Angeles city, California | 3857263 | 81939 | 59.25`, `1714000 | Chicago
+city, Illinois | 2711226 | 77902 | 48.35`, `4835000 | Houston city, Texas |
+2328253 | 64813 | 54.06`, `0455000 | Phoenix city, Arizona | 1642323 | 81332 |
+51.76`. 6.2 s. `NULLS LAST` is required: 282 places have boundaries and no ACS
+data, and without it they sort first on a `DESC` ordering.
+
+One state, with a size gate:
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, population, median_gross_rent::int AS rent
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/places/places.parquet'
+WHERE state = 'TX' AND population > 100000
+ORDER BY median_gross_rent DESC NULLS LAST LIMIT 5;
+```
+
+→ `4827684 | Frisco city, Texas | 219304 | 2014`, `4870808 | Sugar Land city,
+Texas | 110016 | 1957`, `4801924 | Allen city, Texas | 110265 | 1932`,
+`4845744 | McKinney city, Texas | 210600 | 1901`, `4856348 | Pearland city,
+Texas | 127514 | 1860`. 3.5 s. Drop `population > 100000` and this becomes a
+list of small suburbs with wide margins; the gate is the query.
+
+### 2. The most rent-burdened large cities (`*_cv`)
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, population, pct_rent_burdened,
+       pct_rent_burdened_moe AS moe, round(pct_rent_burdened_cv, 3) AS cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/places/places.parquet'
+WHERE population > 100000 AND pct_rent_burdened_cv < 0.05
+ORDER BY pct_rent_burdened DESC LIMIT 5;
+```
+
+→ `0646842 | Menifee city, California | 110305 | 70.63 | 5.26 | 0.045`,
+`0621712 | El Cajon city, California | 104449 | 70.1 | 4.31 | 0.037`,
+`1225175 | Gainesville city, Florida | 145702 | 68.04 | 3.54 | 0.032`,
+`1245060 | Miami Gardens city, Florida | 113177 | 67.96 | 5.43 | 0.049`,
+`1232000 | Hollywood city, Florida | 155082 | 67.67 | 4.7 | 0.042`. 4.6 s.
+
+Seven in ten renter households paying 30% or more of income on rent, with
+margins of 4–5 points, in cities of 100,000+. The denominator is renter
+households whose rent-to-income ratio the Bureau could compute (B25070 minus
+its "Not computed" line), not all households — quote it that way.
+
+### 3. Every city against its own state (GEOID prefix join)
+
+```sql
+LOAD httpfs;
+SELECT p.name, p.population, p.median_hh_income::int AS place_income,
+       s.median_hh_income::int AS state_income,
+       round(p.median_hh_income::double / s.median_hh_income, 2) AS ratio
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/places/places.parquet' p
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet' s
+  ON substr(p.geoid, 1, 2) = s.geoid
+WHERE p.population > 250000 AND p.median_hh_income_cv < 0.05
+ORDER BY ratio DESC LIMIT 5;
+```
+
+→ `Gilbert town, Arizona | 280262 | 122551 | 79964 | 1.53`, `San Jose city,
+California | 990138 | 146427 | 99122 | 1.48`, `Plano city, Texas | 290594 |
+112253 | 78476 | 1.43`, `San Francisco city, California | 830235 | 140970 |
+99122 | 1.42`, `Irvine city, California | 311690 | 136719 | 99122 | 1.38`.
+5.1 s.
+
+A place GEOID is state FIPS (2) + place FIPS (5), so `substr(geoid, 1, 2)` is
+the state's `geoid` — the only prefix join this collection supports. There is
+no county component in the GEOID at all and therefore **no**
+`substr(geoid, 1, 5)` route to [`counties`](../counties/collection.json): that
+relationship is spatial, and it is one-to-many. Measured, with the
+`bbox`-overlap + `ST_Intersects` pattern from
+[`zctas/AGENTS.md`](../zctas/AGENTS.md), Houston city (`4835000`) intersects
+five counties — Harris, Fort Bend, Montgomery, Brazoria and Waller.
+
+### 4. The consolidated-city trap, in one query
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, population, median_hh_income::int AS income
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/places/places.parquet'
+WHERE geoid IN ('2148000', '2148006');
+```
+
+→ `2148006 | Louisville/Jefferson County metro government (balance), Kentucky
+| 631818 | 66849` and `2148000 | Louisville city, Kentucky | NULL | NULL`.
+2.5 s.
+
+Searching this file for "Louisville city" finds the row with no data. The
+consolidated metro government is the entity the ACS tabulates, and it is
+`2148006`. Match places by GEOID where you can; where you must match by name,
+check for a NULL `population` and look for a sibling row before concluding a
+city has no data. The same shape of trap exists for other consolidated
+city-counties, and for the 279 island-area places and 2 Suffolk County CDPs
+that make up the rest of the 282 data-free rows.
+
+### Related recipes elsewhere
+
+- The most rent-burdened large cities with each city's state rate beside it:
+  [`catalog/AGENTS.md`](../AGENTS.md).
+- Looking inside a city — the geographies that do tile it:
+  [`tracts/AGENTS.md`](../tracts/AGENTS.md),
+  [`block-groups/AGENTS.md`](../block-groups/AGENTS.md).
+- For a total over an area, use geographies that tile the country:
+  [`counties/AGENTS.md`](../counties/AGENTS.md).
+
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe` or
+`*_cv` columns and its z0–z5 zooms are A5 cell aggregations, so nothing above
+can be reproduced from tiles.

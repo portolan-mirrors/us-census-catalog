@@ -135,10 +135,140 @@ PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. In this collection the NULLs are the subject, not an inconvenience: four
+of the columns are published on a minority of tracts, and a query that ignores
+that produces a confident answer about where a population *lives* while
+claiming to be about its income.
+
+### 1. Where are the most people uninsured? (`*_cv`-gated top-N)
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT geoid, name, pct_uninsured, pct_uninsured_moe AS moe,
+       round(pct_uninsured_cv, 2) AS cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/tract-wellbeing.parquet'
+WHERE population > 2000 AND pct_uninsured_cv < 0.12
+ORDER BY pct_uninsured DESC LIMIT 5;
+```
+
+→ `18087970401 | Census Tract 9704.01, LaGrange County, Indiana | 77.5 | 2.77
+| 0.02`, `18039000902 | Census Tract 9.02, Elkhart County, Indiana | 74.66 |
+2.79 | 0.02`, `48201433004 | … Harris County, Texas | 71.54 | 9.7 | 0.08`,
+`48113009610 | … Dallas County, Texas | 69.53 | 9.45 | 0.08`, `48113019013 | …
+Dallas County, Texas | 69.09 | 7.0 | 0.06`. 5.7 s.
+
+77.5% ± 2.77 is an extraordinarily tight margin for a tract-level share, which
+is what makes the top two credible. Remember the universe: `pct_uninsured` is
+a share of the **civilian noninstitutionalised** population, so active-duty
+personnel and people in institutions are outside the denominator entirely.
+
+### 2. How often is each race-iteration median published at all?
+
+```sql
+LOAD httpfs;
+SELECT round(100.0*count(median_hh_income_white_nh)/count(*), 2) AS pct_published_white_nh,
+       round(100.0*count(median_hh_income_black)/count(*), 2)    AS pct_published_black,
+       round(100.0*count(median_hh_income_hispanic)/count(*), 2) AS pct_published_hispanic,
+       round(100.0*count(median_hh_income_asian)/count(*), 2)    AS pct_published_asian
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/tract-wellbeing.parquet';
+```
+
+→ `89.96 | 38.57 | 55.57 | 28.73`. **4.2 s**, and it re-measures the
+data-quality table above exactly.
+
+Read this before mapping any of those four columns. A national map of
+`median_hh_income_asian` is drawn on 28.73% of tracts, and the 71% of tracts
+that are blank are overwhelmingly tracts where few Asian-householder
+households live — so the map's *coverage* is a map of residential patterns,
+and the map's *colour* is income only where the colour exists. "No data" is
+never "low income" here.
+
+### 3. Income by race against income overall, NULL-aware (sibling join)
+
+```sql
+LOAD httpfs;
+SELECT w.geoid, i.median_hh_income::int                AS overall,
+       w.median_hh_income_white_nh::int                AS white_nh,
+       w.median_hh_income_black::int                   AS black,
+       round(w.median_hh_income_black::double / w.median_hh_income_white_nh, 2) AS black_to_white
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/tract-wellbeing.parquet' w
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet' i
+  USING (geoid)
+WHERE substr(w.geoid, 1, 5) = '13121'            -- Fulton County, Georgia
+  AND w.median_hh_income_black_cv    < 0.20
+  AND w.median_hh_income_white_nh_cv < 0.20
+ORDER BY black_to_white LIMIT 5;
+```
+
+→ `13121011437 | 105188 | 109405 | 15688 | 0.14`, `13121001501 | 105640 |
+120583 | 18907 | 0.16`, `13121006601 | 47237 | 143382 | 23163 | 0.16`,
+`13121008000 | 52837 | 184700 | 53317 | 0.29`, `13121007100 | 36635 | 115742 |
+34615 | 0.3`. 8.1 s.
+
+Both `_cv` gates are load-bearing: these race-iteration medians rest on small
+samples and without the filter the ratio column fills with noise. The third
+row is worth staring at — the tract's overall median ($47,237) sits *below*
+both of the race-specific medians it contains, which is possible because the
+three medians have three different universes (all households; non-Hispanic
+White householders; Black householders) and a median is not a weighted
+average of sub-medians.
+
+Now the part the ranking hides:
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS tracts,
+       count(median_hh_income_black)    AS black_published,
+       count(median_hh_income_white_nh) AS white_published,
+       count(*) FILTER (WHERE median_hh_income_black    IS NOT NULL
+                          AND median_hh_income_white_nh IS NOT NULL) AS both
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/tract-wellbeing.parquet'
+WHERE substr(geoid, 1, 5) = '13121';
+```
+
+→ `327 | 245 | 238 | 164`. 3.3 s. Fulton County has 327 tracts; only **164**
+can be compared at all, and that is before the `_cv` gates. Quote the
+denominator whenever you quote a gap: "in the 164 of 327 Fulton County tracts
+where both medians are published" is a true sentence, "in Fulton County" is
+not.
+
+### 4. Disability and insurance together, reliability-gated
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, pct_with_disability, round(pct_with_disability_cv, 2) AS dis_cv,
+       pct_uninsured, round(pct_uninsured_cv, 2) AS unins_cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/tract-wellbeing.parquet'
+WHERE population > 2000
+  AND pct_with_disability_cv < 0.10 AND pct_uninsured_cv < 0.20
+ORDER BY pct_with_disability DESC LIMIT 5;
+```
+
+→ `04013071505 | Census Tract 715.05, Maricopa County, Arizona | 39.31 | 0.09
+| 7.04 | 0.1`, `40019892801 | … Carter County, Oklahoma | 38.5 | 0.07 | 23.05
+| 0.12`, `04015950705 | … Mohave County, Arizona | 35.84 | 0.1 | 12.21 | 0.2`,
+`40135030201 | … Sequoyah County, Oklahoma | 35.29 | 0.1 | 11.89 | 0.18`,
+`48113021000 | Census Tract 210, Dallas County, Texas | 35.23 | 0.08 | 27.99 |
+0.17`. 9.8 s.
+
+The two columns move independently: Maricopa 715.05 pairs a 39% disability
+share with 7% uninsured, Carter County pairs 38.5% with 23%. Reading one as a
+proxy for the other would be wrong in both directions. Note the two different
+`_cv` thresholds — the columns have different precision, and forcing one
+threshold on both drops rows for the wrong reason.
+
+### Related recipes elsewhere
+
+- Overall income and the margin-overlap test:
+  [`tracts/tract-income/AGENTS.md`](../tract-income/AGENTS.md).
+- The same race-iteration medians at county scale, where they are published far
+  more often (Black-householder median NULL on 39.47% of counties against
+  61.43% of tracts): [`counties/AGENTS.md`](../../counties/AGENTS.md).
+- There is no block-group twin for this theme — the Census Bureau does not
+  publish these tables below tract.
+
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe` or
+`*_cv` columns and its coarse zooms are A5 cell aggregations, so nothing above
+can be reproduced from tiles.

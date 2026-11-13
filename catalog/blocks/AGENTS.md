@@ -12,7 +12,8 @@ Guidance for AI agents and automated clients working with this collection.
 
 ## Where it lives
 
-- **GeoParquet** (use this for statistics): `https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=*/*.parquet` — 52 state partitions, read as one table with `hive_partitioning=true`; one state is one file
+- **GeoParquet, one state** (the normal case): `https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=<FIPS>/<FIPS>.parquet` — e.g. `.../state_fips=29/29.parquet`. One state is one file; pull one and you download one file.
+- **GeoParquet, all 52 partitions as one table**: `s3://us-west-2.opendata.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=*/*.parquet` with `hive_partitioning = true`. The glob needs object listing, so it works over the S3 endpoint (anonymously, with `SET s3_region='us-west-2'`) and **not** over `https://data.source.coop/…`, where a `state_fips=*/*.parquet` URL returns 404 — plain HTTPS cannot list a directory. Over HTTPS, pass an explicit list of partition URLs to `read_parquet([...], hive_partitioning = true)` instead. Both forms are shown under Example queries.
 - **PMTiles** (use this for maps): `https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/blocks.pmtiles`, layer `blocks`
 - **STAC collection**: `https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/collection.json` — carries a full description for every column
 
@@ -80,9 +81,12 @@ Guidance for AI agents and automated clients working with this collection.
   the under-18 population.
 - **Group-quarters residents are in `pop_total` but live in no housing
   unit**, which is how a block can hold hundreds of people and no units.
-- **Hive partitioning:** read the glob with `hive_partitioning=true` and
-  `state_fips` appears as a column alongside the USPS `state` column. Query
-  one state by reading its single file — do not scan 52 files to filter one.
+- **Hive partitioning:** with `hive_partitioning = true`, `state_fips` appears
+  as a synthesized `BIGINT` column (from the directory name) alongside the
+  USPS `state` column. Query one state by reading its single file — do not
+  scan 52 files to filter one. The `state_fips=*/*.parquet` glob needs object
+  listing and therefore the S3 endpoint; over plain HTTPS it 404s, and an
+  explicit list of URLs is the substitute. See "Where it lives" above.
 
 ## Data quality
 
@@ -99,11 +103,185 @@ Blocks carry 2020 Decennial counts only. The Census Bureau publishes no income, 
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     reads a single state partition rather than the whole glob, and at least
-     one that rolls blocks up to their block group (`substr(geoid, 1, 12)`)
-     and joins a block-group collection. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. Rhode Island (`state_fips=44`, a 12.8 MB file) is the example state because it
+is small; every query works on any of the 52 partitions unchanged — Missouri's
+`state_fips=29` is 163 MB, Ohio's `state_fips=39` is 126 MB.
+
+### 1. One state, one file (the hive partition is the filter)
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT count(*) AS blocks, sum(pop_total) AS population, sum(housing_units) AS housing_units,
+       round(100.0*count(*) FILTER (WHERE pop_total = 0)/count(*), 2) AS pct_empty
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=44/44.parquet';
+```
+
+→ `25649 | 1097379 | 483474 | 16.64`, in **2.1 s** against the 12.8 MB
+partition. Rhode Island's 1,097,379 is
+its published 2020 resident population, exactly — these are complete counts,
+not estimates, and there are no `_moe` or `_cv` columns to ask for.
+
+16.64% of Rhode Island's blocks hold nobody. Nationally the figure is 28.97%
+(recipe 5 measures it). Always `WHERE pop_total > 0` before averaging a rate:
+`pct_white_nh`, `pct_black` and `pct_hispanic` are NULL on every empty block,
+and `avg()` skipping them is not the same as weighting them.
+
+### 2. The densest inhabited blocks in a state
+
+```sql
+LOAD httpfs;
+SELECT geoid, pop_total, housing_units, round(aland_sqkm, 4) AS sqkm,
+       round(pop_density) AS per_sqkm
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=44/44.parquet'
+WHERE pop_total > 500
+ORDER BY pop_density DESC LIMIT 5;
+```
+
+→ `440070036023015 | 1374 | 0 | 0.006 | 248778`, `440070008003011 | 544 | 4 |
+0.005 | 99579`, `440070020002005 | 585 | 0 | 0.007 | 84403`,
+`440070036021013 | 622 | 0 | 0.011 | 59081`, `440090514001030 | 795 | 0 | 0.02
+| 39041`. 3.1 s.
+
+Look at `housing_units`: zero, on four of the five. 1,374 people and no
+housing units is a **group-quarters block** — a dormitory, a barracks, a
+correctional facility. Group-quarters residents are counted in `pop_total` and
+live in no housing unit, so a density ranking at block level returns
+institutions before neighbourhoods. Join `group_quarters_pop` or gate on
+`housing_units > 0` if you want where people live.
+
+Also: a single block's counts are protected by the 2020 disclosure-avoidance
+system, which injects noise at block level while holding state totals exact.
+Aggregate freely; treat one block's numbers as approximate.
+
+### 3. Blocks inside a bounding box (`bbox` row-group pruning)
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS blocks, sum(pop_total) AS people, sum(housing_units) AS units
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=44/44.parquet'
+WHERE bbox.xmin < -71.39 AND bbox.xmax > -71.42       -- downtown Providence
+  AND bbox.ymin < 41.835 AND bbox.ymax > 41.815;
+```
+
+→ `590 | 27039 | 11638`, in **3.9 s**. The `bbox`
+covering column has row-group statistics (unlike the string columns), so this
+predicate is pushed into the parquet reader and most row groups are never
+fetched. The four comparisons are an intersection test — `xmin < east AND xmax
+> west AND ymin < north AND ymax > south` — not a containment test; writing it
+the other way round silently drops every block straddling the edge of the box.
+
+Note what this gives you that no ACS collection can: a population and housing
+count for an arbitrary small area, with no margin of error.
+
+### 4. Rolling blocks up to block groups, and joining the ACS
+
+```sql
+LOAD httpfs;
+WITH bg AS (
+  SELECT substr(geoid, 1, 12) AS bg_geoid,
+         sum(pop_total)       AS decennial_2020,
+         sum(housing_units)   AS units
+  FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=44/44.parquet'
+  GROUP BY 1)
+SELECT bg.bg_geoid, bg.decennial_2020, i.population AS acs_2020_2024, bg.units,
+       i.median_hh_income::int AS income
+FROM bg
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet' i
+  ON i.geoid = bg.bg_geoid
+WHERE i.state = 'RI'
+ORDER BY bg.decennial_2020 DESC LIMIT 5;
+```
+
+→ `440090514001 | 6495 | 5762 | 256 | 119444`, `440070036023 | 4359 | 2434 |
+260 | 124324`, `440090501041 | 3942 | 3798 | 1583 | 144963`, `440070020002 |
+3917 | 4727 | 1231 | NULL`, `440070126011 | 3540 | 3634 | 310 | 117143`.
+4.5 s.
+
+`substr(geoid, 1, 12)` is the rollup. A block GEOID is state 2 + county 3 +
+tract 6 + block 4 = 15 characters; a block-group GEOID is state 2 + county 3 +
+tract 6 + block group 1 = 12, and the block-group digit is the **first digit of
+the 4-digit block number**. So characters 1–12 of a block GEOID are exactly its
+block group, blocks nest perfectly inside block groups, and this `sum()` is
+exact rather than apportioned.
+
+**The two population columns are not comparable row by row, and neither is
+wrong.** `decennial_2020` is an April 2020 complete count; `acs_2020_2024` is
+a 2020–2024 five-year survey estimate of an average over five years. Row one
+differs by 13%, row four by 21% — real change, survey error and different
+reference periods, in unknown proportions. Use the decennial count when you
+need a count, the ACS estimate when you need an ACS-consistent denominator,
+and never present a difference between them as growth.
+
+At state scale they agree closely:
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS block_groups, sum(decennial_2020) AS decennial_total,
+       sum(acs) AS acs_total,
+       round(100.0*(sum(acs)-sum(decennial_2020))/sum(decennial_2020), 2) AS pct_diff
+FROM (
+  SELECT substr(b.geoid, 1, 12) AS bg, sum(b.pop_total) AS decennial_2020,
+         any_value(i.population) AS acs
+  FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=44/44.parquet' b
+  JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet' i
+    ON i.geoid = substr(b.geoid, 1, 12)
+  GROUP BY 1);
+```
+
+→ `789 | 1097379 | 1101801 | 0.4`. 3.7 s. All 789 Rhode Island block groups
+matched (nothing fell out of the join), the blocks sum to the published 2020
+count, and the ACS total is 0.4% higher — and equals the `RI` row in
+[`states`](../states/collection.json) exactly, as it must.
+
+### 5. All 52 partitions as one table
+
+The glob needs object listing, which plain HTTPS cannot do, so this one uses
+the S3 endpoint — anonymously, no credentials:
+
+```sql
+LOAD httpfs;
+SET s3_region = 'us-west-2';
+SELECT count(*) AS blocks, sum(pop_total) AS people,
+       round(100.0*count(*) FILTER (WHERE pop_total = 0)/count(*), 2) AS pct_empty
+FROM read_parquet('s3://us-west-2.opendata.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=*/*.parquet',
+                  hive_partitioning = true);
+```
+
+→ `8174955 | 334735155 | 28.97`, in **26.6 s** — a national sweep of 8.17
+million blocks across 52 files, two columns, no download. 8,174,955 is the row
+count this collection documents, 334,735,155 is the 2020 resident population
+of the 50 states, DC and Puerto Rico (331,449,281 + 3,285,874), and 28.97% is
+the empty-block rate quoted above. All three re-measured.
+
+The same URL over `https://data.source.coop/…` returns **404 (Not Found)** —
+DuckDB cannot list an HTTP directory. Over HTTPS, name the partitions:
+
+```sql
+LOAD httpfs;
+SELECT state_fips, count(*) AS blocks, sum(pop_total) AS people
+FROM read_parquet([
+        'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=44/44.parquet',
+        'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=50/50.parquet',
+        'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=33/33.parquet'],
+      hive_partitioning = true)
+GROUP BY 1 ORDER BY 1;
+```
+
+→ `33 | 31948 | 1377529`, `44 | 25649 | 1097379`, `50 | 24611 | 643077`. 3.0 s.
+`state_fips` is synthesized from the directory name and comes back as a
+`BIGINT` (so `33`, not `'33'`), alongside the USPS `state` column from inside
+the files.
+
+### Related recipes elsewhere
+
+- ACS income, housing and commuting for these block groups:
+  [`block-groups/AGENTS.md`](../block-groups/AGENTS.md) and the four chunk
+  guides under it.
+- The `bbox`-prefilter pattern with real geometry predicates:
+  [`block-groups/bg-income/AGENTS.md`](../block-groups/bg-income/AGENTS.md),
+  [`tracts/tract-people/AGENTS.md`](../tracts/tract-people/AGENTS.md).
+
+Statistics come from the GeoParquet. The blocks PMTiles archive is for maps
+only, and its coarse zooms are A5 cell aggregations rather than census blocks.

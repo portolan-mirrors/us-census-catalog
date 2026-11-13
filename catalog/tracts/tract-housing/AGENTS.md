@@ -124,10 +124,134 @@ PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it.
+
+### 1. What is a tract's housing worth, and where is the top code?
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT count(median_home_value)                        AS published,
+       quantile_cont(median_home_value, 0.10)::int     AS p10,
+       quantile_cont(median_home_value, 0.50)::int     AS p50,
+       quantile_cont(median_home_value, 0.90)::int     AS p90,
+       count(*) FILTER (WHERE median_home_value = 2000001) AS top_coded
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/tract-housing.parquet';
+```
+
+→ `82164 | 121000 | 305100 | 778000 | 576`, in **2.1 s**. 576 tracts sit on
+the upstream top code of $2,000,001 — that is a published ceiling, not a jam
+value, so it is not NULL and it is not a measurement either. Exclude it before
+fitting anything, and never read it as "the median home is worth two million".
+
+One state, reliability-gated:
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, median_home_value::int AS value, round(median_home_value_cv, 2) AS cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/tract-housing.parquet'
+WHERE state = 'CO' AND median_home_value_cv < 0.12
+ORDER BY median_home_value DESC LIMIT 5;
+```
+
+→ `08013012505 | Census Tract 125.05, Boulder County, Colorado | 1675500 |
+0.04`, `08035014142 | … Douglas County … | 1643600 | 0.04`, `08005005622 | …
+Arapahoe County … | 1632800 | 0.07`, `08107000500 | Census Tract 5, Routt
+County, Colorado | 1630900 | 0.08`, `08013012401 | … Boulder County … |
+1602200 | 0.04`. 5.0 s.
+
+### 2. The most rent-burdened tracts, reliability-filtered (`*_cv`)
+
+```sql
+LOAD httpfs;
+SELECT geoid, state, households, pct_rent_burdened,
+       pct_rent_burdened_moe AS moe, round(pct_rent_burdened_cv, 2) AS cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/tract-housing.parquet'
+WHERE households > 1000 AND pct_rent_burdened_cv < 0.10
+ORDER BY pct_rent_burdened DESC LIMIT 5;
+```
+
+→ `12105011821 | FL | 1002 | 100.0 | 12.37 | 0.08`, `12085001108 | FL | 2625 |
+100.0 | 15.71 | 0.1`, `12099005955 | FL | 2568 | 100.0 | 14.03 | 0.09`,
+`12011110357 | FL | 2200 | 100.0 | 16.29 | 0.1`, `15003008415 | HI | 1130 |
+100.0 | 9.12 | 0.06`. 4.7 s.
+
+Four of the five are Florida and the fifth is Hawaii; `pct_rent_burdened =
+100.0` on 1,000–2,600 households is a real finding, not a small-sample
+artifact, and the `_cv` gate is what lets you say so. Remember the
+denominator: renter households whose rent-to-income ratio the Bureau could
+compute, which excludes B25070's "Not computed" line. It is not a share of all
+households in the tract.
+
+### 3. Rent burden across the income distribution (1:1 sibling join)
+
+```sql
+LOAD httpfs;
+WITH j AS (
+  SELECT ntile(5) OVER (ORDER BY i.median_hh_income) AS q,
+         h.pct_rent_burdened, h.median_gross_rent
+  FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet' i
+  JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/tract-housing.parquet' h
+    USING (geoid)
+  WHERE i.median_hh_income IS NOT NULL AND h.pct_rent_burdened IS NOT NULL)
+SELECT q AS income_quintile, count(*) AS tracts,
+       round(avg(pct_rent_burdened), 1) AS avg_rent_burdened,
+       round(avg(median_gross_rent))    AS avg_of_tract_rent_medians
+FROM j GROUP BY 1 ORDER BY 1;
+```
+
+→
+
+```
+1 | 16705 | 56.2 |  991
+2 | 16705 | 49.4 | 1163
+3 | 16704 | 47.2 | 1359
+4 | 16704 | 46.7 | 1655
+5 | 16704 | 44.8 | 2248
+```
+
+8.0 s. Rent more than doubles from the poorest to the richest quintile of
+tracts while the burdened share falls only 11 points — the burden is a floor,
+not a poverty phenomenon.
+
+`avg_of_tract_rent_medians` is named awkwardly on purpose: it is the mean of
+85,184 tract medians, which is **not** the median rent of the quintile and is
+not a quantity the Census Bureau publishes. It is legitimate as "what the
+typical tract in this band looks like" and illegitimate as "what renters pay".
+A median of a region is not derivable from the medians of its parts.
+
+### 4. When to step down a geography — and when not to
+
+```sql
+LOAD httpfs;
+SELECT 'tract' AS geography,
+       round(100.0*(count(*)-count(median_gross_rent))/count(*), 2) AS pct_rent_null,
+       round(100.0*(count(*)-count(median_home_value))/count(*), 2) AS pct_value_null
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/tract-housing.parquet'
+UNION ALL
+SELECT 'block group',
+       round(100.0*(count(*)-count(median_gross_rent))/count(*), 2),
+       round(100.0*(count(*)-count(median_home_value))/count(*), 2)
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-housing/bg-housing.parquet';
+```
+
+→ `tract | 5.92 | 3.55`, `block group | 29.68 | 10.03`. 8.3 s for both files.
+
+Going down to block groups multiplies missing rent medians by five and missing
+home values by three. Go down anyway when the question is genuinely
+sub-tract — a single neighbourhood, a service area — and accept the holes;
+stay here when the question is comparative or mapped at scale.
+
+### Related recipes elsewhere
+
+- The same columns one geography down, and the rent-vs-income correlation:
+  [`block-groups/bg-housing/AGENTS.md`](../../block-groups/bg-housing/AGENTS.md).
+- Most rent-burdened large cities, with each city's state for context:
+  [`places/AGENTS.md`](../../places/AGENTS.md).
+- Housing units as 2020 complete counts, rolled up from blocks:
+  [`blocks/AGENTS.md`](../../blocks/AGENTS.md).
+
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe` or
+`*_cv` columns and its coarse zooms are A5 cell aggregations that average
+medians unweighted, so nothing above can be reproduced from tiles.

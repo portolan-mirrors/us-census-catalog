@@ -115,10 +115,122 @@ PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. **This collection has no `*_cv` columns** — every reliability test below
+therefore works from `<name>_moe` directly, which is the only honest option
+here.
+
+### 1. How much does educational attainment vary between block groups?
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT count(pct_bachelors_plus)                  AS published,
+       quantile_cont(pct_bachelors_plus, 0.10)    AS p10,
+       quantile_cont(pct_bachelors_plus, 0.50)    AS p50,
+       quantile_cont(pct_bachelors_plus, 0.90)    AS p90
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-people/bg-people.parquet';
+```
+
+→ `240099 | 8.94 | 29.47 | 67.11`, in 3.6 s. A factor of seven between the
+tenth and ninetieth percentile block group — the spread this geography exists
+to show.
+
+One state is the same query plus `WHERE state = 'XX'`; DuckDB fetches only the
+columns named, so a state slice costs about what the national sweep costs.
+
+### 2. The trap: top-N on a share without its margin
+
+```sql
+LOAD httpfs;
+SELECT geoid, population, pct_bachelors_plus, pct_bachelors_plus_moe AS moe
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-people/bg-people.parquet'
+WHERE state = 'NC' AND population > 1000
+ORDER BY pct_bachelors_plus DESC LIMIT 5;
+```
+
+→ `370630015011 | 3333 | 100.0 | 37.31`, `371830516001 | 1083 | 100.0 | 8.97`,
+`371190064032 | 1813 | 100.0 | 35.43`, `371830516002 | 1025 | 97.49 | 50.26`,
+`371190028001 | 1023 | 96.62 | 7.71`. 4.1 s.
+
+Three ties at 100.0, and the margins run from ±7.71 to ±50.26 points. The
+fourth row's estimate of 97.49 ± 50.26 is consistent with anything from 47% to
+100%. A ranking built on the estimate alone is a ranking of noise; rank on
+`estimate - moe` instead, which is what recipe 3 does.
+
+### 3. Significance, not estimates: where is the 65+ share really over half?
+
+```sql
+LOAD httpfs;
+SELECT count(*)                                                     AS estimate_over_50,
+       count(*) FILTER (WHERE pct_65_plus - pct_65_plus_moe > 50)   AS significantly_over_50
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-people/bg-people.parquet'
+WHERE pct_65_plus > 50;
+```
+
+→ `5004 | 1663`, 4.4 s. 5,004 block groups estimate a majority over 65; only
+1,663 of them — a third — stay above 50% at the bottom of their 90% margin.
+The other 3,341 are candidates, not findings. `estimate - moe` is the lower
+bound of the published interval, so this is the Bureau's own arithmetic, not an
+added assumption.
+
+### 4. Educated *and* well-paid, both tests passed (1:1 join to a sibling chunk)
+
+```sql
+LOAD httpfs;
+SELECT p.geoid, p.population, p.pct_bachelors_plus, p.pct_bachelors_plus_moe AS moe,
+       i.median_hh_income::int AS income, round(i.median_hh_income_cv, 2) AS income_cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-people/bg-people.parquet' p
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet' i
+  USING (geoid)
+WHERE p.state = 'NC' AND p.population > 1000
+  AND p.pct_bachelors_plus - p.pct_bachelors_plus_moe > 80
+  AND i.median_hh_income_cv < 0.12
+ORDER BY p.pct_bachelors_plus DESC;
+```
+
+→ four rows: `371830518002 | 1723 | 96.58 | 8.65 | 242963 | 0.08`,
+`370630020332 | 1859 | 96.48 | 6.44 | 173732 | 0.11`,
+`370630020201 | 3190 | 95.11 | 12.51 | 196364 | 0.07`,
+`371350107061 | 1904 | 88.67 | 4.92 | 209099 | 0.03`. 8.5 s.
+
+Four survivors out of the dozens the naive query in recipe 2 would have
+offered. The join is 1:1 on `geoid`: both chunks hold all 242,298 block
+groups, same geometry, same vintage.
+
+### 5. The very youngest block groups — and what they turn out to be
+
+```sql
+LOAD httpfs;
+SELECT geoid, state, population, median_age, median_age_moe AS moe, pct_under_18
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-people/bg-people.parquet'
+WHERE population > 2000 AND median_age + median_age_moe < 22
+ORDER BY median_age LIMIT 5;
+```
+
+→ `360470509002 | NY | 2614 | 9.8 | 4.9 | 63.85`, `515500201004 | VA | 2080 |
+10.5 | 7.1 | 71.3`, `360470238002 | NY | 2947 | 10.6 | 2.0 | 60.26`,
+`482013314001 | TX | 2428 | 10.7 | 3.1 | 68.49`, `340297170021 | NJ | 2194 |
+10.9 | 2.1 | 61.8`. 8.4 s.
+
+Note what came back: the `pct_under_18` column, 60–71% on every row, says
+these are *family* neighbourhoods with very many children, not dormitories.
+A median age of 9.8 cannot be a student population. Reading one column without
+its neighbours is how a geography gets mislabelled — the `median_age + moe <
+22` test is doing real work here (it is an upper bound), but the
+interpretation came from the second column.
+
+### Related recipes elsewhere
+
+- Income inequality inside a single county, and the lat/lon axis trap in
+  DuckDB's spheroid functions:
+  [`block-groups/bg-income/AGENTS.md`](../bg-income/AGENTS.md).
+- Point-in-polygon "which geography am I in":
+  [`tracts/tract-people/AGENTS.md`](../../tracts/tract-people/AGENTS.md).
+- Race and ethnicity by decennial complete count rather than ACS estimate:
+  [`blocks/AGENTS.md`](../../blocks/AGENTS.md) — different universe definitions,
+  read its field notes first.
+
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe`
+columns and its coarse zooms are A5 cell aggregations, so no significance test
+above can be reproduced from tiles.

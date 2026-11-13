@@ -240,10 +240,121 @@ PMTiles coarse zooms (z0–z5) are A5 cell aggregations, not census geographies 
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection spatially, since `geoid` prefixes do not join here. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. **A ZCTA is not a ZIP code** (see above), `state` is NULL on every row, and
+`geoid` prefixes join nothing — all three shape the recipes below.
+
+### 1. Income for a list of ZIP codes
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT geoid, population, median_hh_income::int AS income,
+       round(median_hh_income_cv, 2) AS cv, median_gross_rent::int AS rent
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/zctas/zctas.parquet'
+WHERE geoid IN ('90210', '10001', '60614', '00601', '99501')
+ORDER BY income DESC NULLS LAST;
+```
+
+→ `90210 | 19004 | 187801 | 0.06 | 3251`, `60614 | 70693 | 136448 | 0.03 |
+2030`, `10001 | 30511 | 129852 | 0.12 | 3361`, `99501 | 16175 | 70891 | 0.06 |
+1254`, `00601 | 16669 | 19454 | 0.05 | 427`. **4.8 s**.
+
+This is the shape to use for a customer or patient ZIP list: an `IN` list on
+`geoid`, no join, nothing clever. Two obligations come with it.
+
+First, say what you did. These are ZIP Code *Tabulation Areas* — the Bureau's
+approximation of USPS delivery areas, built from 2020 blocks and re-delineated
+once a decade. Some ZIP codes (PO-box-only and point ZIPs) have no ZCTA at
+all, so an `IN` list of *n* ZIPs can return fewer than *n* rows and the
+shortfall is not missing data. Second, carry the `_cv`: `10001`'s 0.12 sits
+exactly on the "use with caution" line while `60614`'s 0.03 is solid, and a
+table that prints both without that column invites a comparison the data does
+not support.
+
+### 2. The two traps, measured
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS zctas, count(state) AS rows_with_state,
+       count(population) AS with_acs_data
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/zctas/zctas.parquet';
+```
+
+→ `33791 | 0 | 33772`. 2.8 s.
+
+`count(state) = 0`: the column exists so the schema matches the catalog's other
+collections, and it is NULL on all 33,791 rows. `WHERE state = 'CA'` returns
+nothing here — silently, with no error. And `substr(geoid, 1, 2)` is a postal
+region, not a state FIPS code, so a prefix join to
+[`states`](../states/collection.json) or [`counties`](../counties/collection.json)
+produces wrong rows rather than no rows. The 19 ZCTAs with boundaries and no
+ACS tabulation are 17 island-area ZCTAs plus `11717` and `11798`.
+
+### 3. The highest-income ZCTAs, reliability-gated (`*_cv`)
+
+```sql
+LOAD httpfs;
+SELECT geoid, population, median_hh_income::int AS income,
+       round(median_hh_income_cv, 3) AS cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/zctas/zctas.parquet'
+WHERE population > 10000 AND median_hh_income_cv < 0.10
+ORDER BY median_hh_income DESC LIMIT 5;
+```
+
+→ `20817 | 37454 | 249332 | 0.024`, `60521 | 18056 | 249200 | 0.055`, `94920 |
+12609 | 246045 | 0.063`, `22207 | 35479 | 245745 | 0.038`, `02420 | 16215 |
+245031 | 0.05`. 4.9 s.
+
+Every one of those is just under $250,001, which is the upstream top code for
+`median_hh_income` — the richest ZCTAs are pressed against the ceiling, and a
+ranking at the very top is a ranking of rounding. The `population > 10000`
+gate matters more here than at any other geography: a ZCTA's population varies
+by three orders of magnitude, so without it the top of this list is tiny rural
+ZCTAs with huge margins.
+
+### 4. Relating a ZCTA to real geography — spatially, because prefixes cannot
+
+```sql
+LOAD spatial; LOAD httpfs;
+WITH z AS (
+  SELECT geoid, geometry, bbox
+  FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/zctas/zctas.parquet'
+  WHERE geoid = '63119')
+SELECT z.geoid AS zcta, c.geoid AS county_geoid, c.name AS county
+FROM z
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet' c
+  ON  c.bbox.xmin <= z.bbox.xmax AND c.bbox.xmax >= z.bbox.xmin
+  AND c.bbox.ymin <= z.bbox.ymax AND c.bbox.ymax >= z.bbox.ymin
+WHERE ST_Intersects(c.geometry, z.geometry);
+```
+
+→ two rows: `63119 | 29510 | St. Louis city, Missouri` and `63119 | 29189 |
+St. Louis County, Missouri`. 10.3 s.
+
+One ZCTA, two counties — which is the whole point. ZCTAs do not nest, so the
+answer to "what county is this ZIP in" is a *set*, and any pipeline that
+assumes one row will silently pick one arbitrarily. The `bbox`-overlap
+condition in the `ON` clause is a cheap candidate filter that lets `ST_Intersects`
+run on a handful of polygons instead of 3,235; it is an intersection test
+(`c.xmin <= z.xmax AND c.xmax >= z.xmin AND …`), and writing it as containment
+would drop every county the ZCTA only partly covers — exactly the rows you
+want.
+
+For a population-weighted allocation rather than a membership list, use the
+Census Bureau's own
+[ZCTA-to-county relationship files](https://www.census.gov/geographies/reference-files/time-series/geo/relationship-files.html)
+and say which one.
+
+### Related recipes elsewhere
+
+- The same 112 columns at geographies whose GEOIDs *do* nest:
+  [`counties/AGENTS.md`](../counties/AGENTS.md),
+  [`states/AGENTS.md`](../states/AGENTS.md),
+  [`places/AGENTS.md`](../places/AGENTS.md).
+- Point-in-polygon lookups and the `bbox` prefilter pattern in general:
+  [`tracts/tract-people/AGENTS.md`](../tracts/tract-people/AGENTS.md).
+
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe` or
+`*_cv` columns and its z0–z5 zooms are A5 cell aggregations, so nothing above
+can be reproduced from tiles.

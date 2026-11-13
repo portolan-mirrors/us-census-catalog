@@ -4,13 +4,13 @@ American Community Survey 2020–2024 5-year indicators for all 242,298 census b
 
 ## Collections
 
-### [block-groups/bg-connectivity](block-groups/block-groups/bg-connectivity/)
+### [bg-connectivity](bg-connectivity/)
 
-### [block-groups/bg-housing](block-groups/block-groups/bg-housing/)
+### [bg-housing](bg-housing/)
 
-### [block-groups/bg-income](block-groups/block-groups/bg-income/)
+### [bg-income](bg-income/)
 
-### [block-groups/bg-people](block-groups/block-groups/bg-people/)
+### [bg-people](bg-people/)
 
 ## Coverage
 

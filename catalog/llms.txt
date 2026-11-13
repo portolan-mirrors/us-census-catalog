@@ -35,10 +35,18 @@ INSTALL spatial; LOAD spatial; INSTALL httpfs; LOAD httpfs;
 SELECT state, median(median_hh_income) FROM
 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet'
 GROUP BY 1 ORDER BY 2 DESC;
--- one state's blocks via hive partition:
-SELECT * FROM
+-- one state's blocks via hive partition (name columns; SELECT * returns raw WKB):
+SELECT geoid, pop_total, housing_units FROM
 'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=29/29.parquet' LIMIT 5;
 -- join chunks 1:1 on geoid; roll blocks up to block groups with substr(geoid,1,12).
+-- all 52 block partitions as one table needs object listing, so use the S3 endpoint
+-- (anonymous) — a state_fips=*/*.parquet glob over https://data.source.coop/ returns 404:
+SET s3_region='us-west-2';
+SELECT count(*) FROM read_parquet(
+'s3://us-west-2.opendata.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=*/*.parquet',
+hive_partitioning=true);
+-- filter cheaply with the bbox covering struct (it has row-group stats; string columns do not):
+-- WHERE bbox.xmin < east AND bbox.xmax > west AND bbox.ymin < north AND bbox.ymax > south
 
 Treat `*_cv` > 0.40 as unreliable; never sum medians across geographies; MOEs
 add in quadrature. PMTiles coarse zooms are A5 cell aggregations (counts

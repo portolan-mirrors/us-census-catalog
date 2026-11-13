@@ -173,7 +173,14 @@ Every indicator in this catalog's ACS column set, in one table: income and pover
 
 ## Field notes
 
-- **Every estimate has a `<name>_moe`**, at the 90% confidence level — the
+- **`population_moe` is NULL on all 56 rows** (measured) — the one exception to
+  the rule below. At this geography `population` arrives without a margin, so
+  read it as a count to use rather than an estimate to put an interval on, and
+  check for NULLs before putting `population_moe` into a quadrature sum
+  (`sqrt(sum(moe*moe))` over a NULL-bearing column returns NULL). Every other
+  `*_moe` column here is populated normally; [`counties`](../counties/collection.json)
+  has the same gap on 3,103 of 3,235 rows.
+- **Every other estimate has a `<name>_moe`**, at the 90% confidence level — the
   level the Census Bureau publishes. To compare two geographies, check
   whether their margins overlap before calling a difference real. To sum
   estimates across geographies, add the margins in quadrature
@@ -223,10 +230,125 @@ The PMTiles carry real geometries at every zoom (no A5 cell band — the feature
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. 56 rows and 4 MB: no filter is ever needed for cost here, and `SELECT *`
+is a reasonable thing to do.
+
+### 1. The whole country, ranked
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT name, population, median_hh_income::int AS income,
+       round(median_hh_income_cv, 4) AS cv, pct_below_poverty
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet'
+WHERE median_hh_income IS NOT NULL
+ORDER BY median_hh_income DESC LIMIT 5;
+```
+
+→ `District of Columbia | 681294 | 109870 | 0.011 | 15.44`, `Massachusetts |
+7044056 | 103960 | 0.003 | 10.04`, `Maryland | 6206011 | 103678 | 0.004 |
+9.45`, `New Jersey | 9343809 | 103556 | 0.003 | 9.72`, `Hawaii | 1445235 |
+100389 | 0.007 | 10.04`. 4.2 s.
+
+The `IS NOT NULL` filter is not cosmetic — four of the 56 rows have no ACS data
+at all:
+
+```sql
+LOAD httpfs;
+SELECT count(*) AS rows, count(population) AS with_acs_data,
+       string_agg(name, ', ') FILTER (WHERE population IS NULL) AS no_data
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet';
+```
+
+→ `56 | 52 | American Samoa, United States Virgin Islands, Guam, Commonwealth
+of the Northern Mariana Islands`. 1.4 s. The island areas run a decennial-only
+program, so they have 2024 boundaries and no ACS 5-year estimates. Any
+`ORDER BY … ASC` without that filter returns four NULL rows first, and any
+`count(*)` denominator of 56 is wrong by four.
+
+### 2. How much does a state average hide? (GEOID prefix join to counties)
+
+```sql
+LOAD httpfs;
+SELECT s.state, s.median_hh_income::int AS state_income,
+       min(c.median_hh_income)::int    AS poorest_county,
+       max(c.median_hh_income)::int    AS richest_county,
+       round(max(c.median_hh_income)/min(c.median_hh_income), 2) AS ratio
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet' s
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet' c
+  ON s.geoid = substr(c.geoid, 1, 2)
+WHERE s.median_hh_income IS NOT NULL AND c.median_hh_income IS NOT NULL
+GROUP BY 1, 2 ORDER BY ratio DESC LIMIT 5;
+```
+
+→ `KY | 63726 | 22188 | 122497 | 5.52`, `GA | 77353 | 28380 | 143784 | 5.07`,
+`TN | 69595 | 28814 | 135594 | 4.71`, `VA | 93170 | 38675 | 181765 | 4.7`,
+`CO | 95470 | 36861 | 149594 | 4.06`. 6.2 s.
+
+Kentucky's richest county has 5.5× the median income of its poorest, and the
+state figure of $63,726 describes neither. `substr(c.geoid, 1, 2) = s.geoid`
+is the whole join — a county GEOID begins with its state's FIPS code. This is
+the query to run before quoting any state-level number as a description of
+anywhere in particular.
+
+### 3. Reliability at this geography: the CVs are tiny
+
+```sql
+LOAD httpfs;
+SELECT max(median_hh_income_cv)  AS worst_income_cv,
+       max(pct_below_poverty_cv) AS worst_poverty_cv,
+       max(median_gross_rent_cv) AS worst_rent_cv,
+       max(pct_uninsured_cv)     AS worst_uninsured_cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet';
+```
+
+→ `0.011 | 0.031 | 0.01 | 0.042`. 2.2 s.
+
+The *worst* CV on any of these columns across all 52 states with data is
+0.042, far inside the 0.12 "reliable" threshold. So: no `_cv` filtering is
+needed at state level, and conversely, class breaks measured from this
+collection will be useless at tract or block-group level, where the same
+columns run to 0.40 and beyond. Reliability is a property of geography size,
+not of the column.
+
+### 4. A national total, with its margin in quadrature
+
+```sql
+LOAD httpfs;
+SELECT count(*)                                            AS states_counted,
+       sum(households)                                     AS us_households,
+       round(sqrt(sum(households_moe*households_moe)))     AS quadrature_moe
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet'
+WHERE households IS NOT NULL AND state <> 'PR';
+```
+
+→ `51 | 129227496 | 48498`. 3.6 s. 129.2 million households across the 50
+states and DC, ±48,498 at 90% confidence.
+
+`sqrt(sum(moe*moe))` is the Census Bureau's own rule for a derived sum: the
+margins are independent, so they add in quadrature rather than linearly
+(linear addition gives ±279,582 here, measured — 5.8 times too wide).
+Two conditions on using it:
+
+- **It applies to counts, never to medians.** There is no formula that turns
+  52 state medians into a national median; the quantity does not exist in this
+  file and must not be constructed.
+- **It silently returns NULL if any margin is NULL.** `population_moe` is NULL
+  on all 56 rows of this collection (measured — see the field notes), so
+  `sqrt(sum(population_moe*population_moe))` over these rows returns NULL
+  rather than a number. That is the right answer, and it is the reason to
+  check.
+
+### Related recipes elsewhere
+
+- The counties inside a state, each against its state:
+  [`counties/AGENTS.md`](../counties/AGENTS.md).
+- Cities against their states, districts against their states:
+  [`places/AGENTS.md`](../places/AGENTS.md),
+  [`congressional-districts/AGENTS.md`](../congressional-districts/AGENTS.md).
+- 2020 Decennial complete counts, which sum to published state totals exactly:
+  [`blocks/AGENTS.md`](../blocks/AGENTS.md).
+
+Statistics come from the GeoParquet. The state PMTiles archive is real polygons
+at every zoom (no A5 band) but carries no `*_moe` or `*_cv` columns.

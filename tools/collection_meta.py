@@ -674,11 +674,15 @@ def _blocks_description(n: int) -> str:
 
         "The collection is **hive-partitioned by state**: 52 parquet files "
         "under `state_fips=<FIPS>/`, one STAC item each with its own bbox "
-        "and row count, queryable as one table through the glob "
-        "`state_fips=*/*.parquet` with `hive_partitioning=true`. The "
-        "synthesized `state_fips` key carries the numeric FIPS code and sits "
-        "alongside the `state` column's USPS code. Pull one state and you "
-        "download one file.",
+        "and row count. Pull one state and you download one file. To query "
+        "all 52 as one table use the glob over the anonymous S3 endpoint "
+        "(`SET s3_region='us-west-2'; ... read_parquet('s3://us-west-2."
+        "opendata.source.coop/portolan-mirrors/us-census-catalog/blocks/"
+        "state_fips=*/*.parquet', hive_partitioning=true)`) — an HTTPS glob "
+        "cannot list a directory and returns 404; see the "
+        "[agent guide](AGENTS.md) for the tested forms. The synthesized "
+        "`state_fips` key carries the numeric FIPS code and sits alongside "
+        "the `state` column's USPS code.",
 
         tiles_para("blocks"),
         _mirror_para("blocks"),
@@ -1335,9 +1339,11 @@ def metadata_yaml(cid: str) -> str:
                  if cid == "blocks" else
                  f"{PUBLIC_BASE}/{rel}/{cid}.parquet")
     example = (
-        f"INSTALL httpfs; LOAD httpfs;\n"
-        f"SELECT * FROM read_parquet('{data_href}', "
-        f"hive_partitioning=true) LIMIT 5;"
+        "INSTALL httpfs; LOAD httpfs; SET s3_region='us-west-2';\n"
+        "SELECT geoid, pop_total, housing_units FROM read_parquet("
+        "'s3://us-west-2.opendata.source.coop/portolan-mirrors/"
+        "us-census-catalog/blocks/state_fips=*/*.parquet', "
+        "hive_partitioning=true) LIMIT 5;"
         if cid == "blocks" else
         f"INSTALL httpfs; LOAD httpfs;\nSELECT * FROM '{data_href}' LIMIT 5;")
     lines = [

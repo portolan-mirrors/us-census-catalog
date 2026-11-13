@@ -117,10 +117,144 @@ PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix. Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it.
+
+### 1. How rare is transit commuting? (the distribution first, always)
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT count(pct_commute_transit)                           AS published,
+       round(avg(pct_commute_transit), 2)                   AS mean,
+       quantile_cont(pct_commute_transit, 0.50)             AS p50,
+       round(quantile_cont(pct_commute_transit, 0.99), 2)   AS p99,
+       max(pct_commute_transit)                             AS max
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/tract-connectivity.parquet';
+```
+
+→ `84378 | 3.37 | 0.1 | 49.67 | 100.0`, in **2.7 s**. The median tract sends
+one commuter in a thousand by transit, the 99th percentile sends half, and the
+maximum is 100. A linear colour ramp on this column shows one colour; this is
+the distribution that `styles/` class breaks were measured from.
+
+One state, reliability-gated:
+
+```sql
+LOAD httpfs;
+SELECT geoid, name, pct_commute_transit, round(pct_commute_transit_cv, 2) AS cv,
+       pct_commute_drive_alone
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/tract-connectivity.parquet'
+WHERE state = 'MA' AND pct_commute_transit_cv < 0.12
+ORDER BY pct_commute_transit DESC LIMIT 5;
+```
+
+→ `25025050700 | Census Tract 507, Suffolk County, Massachusetts | 58.7 | 0.11
+| 13.51`, `25025050600 | … | 54.08 | 0.05 | 14.1`, `25025050500 | … | 53.39 |
+0.12 | 17.82`, `25025050200 | … | 47.56 | 0.06 | 21.9`, `25025081200 | … |
+34.57 | 0.12 | 32.99`. 6.4 s. All five are Suffolk County — Boston. Carrying
+`pct_commute_drive_alone` alongside is a free sanity check: the two shares
+share the B08301 denominator, so they must trade off, and they do.
+
+### 2. The commute and the income distribution (1:1 sibling join)
+
+```sql
+LOAD httpfs;
+WITH j AS (
+  SELECT ntile(5) OVER (ORDER BY i.median_hh_income) AS q,
+         c.pct_work_from_home, c.pct_commute_45min_plus, c.pct_no_internet
+  FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/tract-income.parquet' i
+  JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/tract-connectivity.parquet' c
+    USING (geoid)
+  WHERE i.median_hh_income IS NOT NULL AND c.pct_work_from_home IS NOT NULL)
+SELECT q AS income_quintile,
+       round(avg(pct_work_from_home), 1)     AS wfh,
+       round(avg(pct_commute_45min_plus), 1) AS commute_45min_plus,
+       round(avg(pct_no_internet), 1)        AS no_internet
+FROM j GROUP BY 1 ORDER BY 1;
+```
+
+→
+
+```
+1 |  8.2 | 14.7 | 13.1
+2 |  9.9 | 15.3 |  9.2
+3 | 12.3 | 16.1 |  6.8
+4 | 16.1 | 17.4 |  4.6
+5 | 24.0 | 19.0 |  2.4
+```
+
+7.0 s. Working from home triples across the income distribution while
+households without internet fall by a factor of five — the same gradient from
+two directions. Long commutes rise slightly with income, which surprises
+people and is a real feature of these estimates.
+
+One caveat the numbers hide: `pct_commute_45min_plus` divides by workers who
+did **not** work from home (B08303's universe) while `pct_work_from_home`
+divides by all workers 16+ (B08301). The two columns in this table do not
+share a denominator and must not be added.
+
+### 3. Where "no internet" is highest, and the degenerate-universe trap (`*_cv`)
+
+```sql
+LOAD httpfs;
+SELECT geoid, state, population, pct_no_internet,
+       pct_no_internet_moe AS moe, round(pct_no_internet_cv, 2) AS cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/tract-connectivity.parquet'
+WHERE population > 2000 AND pct_no_internet_cv < 0.12
+ORDER BY pct_no_internet DESC LIMIT 5;
+```
+
+→ `42027012100 | PA | 7817 | 100.0 | 0.0 | 0.0`, `36071015008 | NY | 4994 |
+88.16 | 11.13 | 0.08`, `36071015007 | NY | 5740 | 86.56 | 9.36 | 0.07`,
+`36087011505 | NY | 3764 | 79.69 | 7.02 | 0.05`, `36087011506 | NY | 6601 |
+79.53 | 7.73 | 0.06`. 4.5 s.
+
+The first row is the lesson. 7,817 residents, 100.0% of households without
+internet, margin exactly 0.0 — because the tract has **8 households and 7,797
+people in group quarters** (measured, below). It is a dormitory. `population`
+is not a household count, so a population gate does not protect a
+household-denominated column:
+
+```sql
+LOAD httpfs;
+SELECT w.geoid, w.population, w.group_quarters_pop, h.households, c.pct_no_internet
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/tract-wellbeing.parquet' w
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/tract-housing.parquet' h USING (geoid)
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/tract-connectivity.parquet' c USING (geoid)
+WHERE w.geoid = '42027012100';
+```
+
+→ `42027012100 | 7817 | 7797 | 8 | 100.0`. 9.5 s (three files, one row).
+Gate on `households` from
+[`tract-housing`](../tract-housing/collection.json), and read `moe = 0.0` as a
+flag to inspect the row rather than as high precision.
+
+### 4. Which tracts are genuinely majority-transit? (margins, not estimates)
+
+```sql
+LOAD httpfs;
+SELECT count(*)                                                                  AS estimate_over_25,
+       count(*) FILTER (WHERE pct_commute_transit - pct_commute_transit_moe > 25) AS significantly_over_25
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/tract-connectivity.parquet'
+WHERE pct_commute_transit > 25;
+```
+
+→ `2882 | 1716`. 4.1 s. 2,882 tracts estimate at least a quarter of commuters
+on transit; 1,716 of them — 60% — hold that at the bottom of their 90% margin.
+Two in five of the apparent transit strongholds do not survive their own
+margin.
+`estimate - moe` is the published interval's lower bound, so this is the
+Bureau's own arithmetic rather than an added assumption.
+
+### Related recipes elsewhere
+
+- The same columns one geography down, with the car-free count vs share
+  distinction:
+  [`block-groups/bg-connectivity/AGENTS.md`](../../block-groups/bg-connectivity/AGENTS.md).
+- Population density against car ownership and transit, nationally:
+  [`catalog/AGENTS.md`](../../AGENTS.md).
+
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe` or
+`*_cv` columns and its coarse zooms are A5 cell aggregations, so nothing above
+can be reproduced from tiles.

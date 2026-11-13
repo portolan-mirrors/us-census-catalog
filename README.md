@@ -20,6 +20,48 @@ mirroring United States Census Bureau demographics as cloud-native
   [data.census.gov](https://data.census.gov/) is authoritative, and every
   collection links the exact upstream files it was built from
 
+## Quick start
+
+No download, no API key, no sign-up — DuckDB range-reads the columns it needs
+straight out of the published GeoParquet:
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+
+-- The richest counties in the country, with the unreliable estimates filtered out
+SELECT name, population, median_hh_income
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet'
+WHERE population > 100000 AND median_hh_income_cv < 0.05
+ORDER BY median_hh_income DESC
+LIMIT 5;
+```
+
+```
+Loudoun County, Virginia        |  432998 | 181765.0
+Santa Clara County, California  | 1902047 | 164281.0
+San Mateo County, California    |  742340 | 158855.0
+Fairfax County, Virginia        | 1147837 | 153637.0
+Howard County, Maryland         |  336328 | 149763.0
+```
+
+Run against the published URL with DuckDB 1.4.1 on 2026-11-13: **about 5
+seconds**, no file on disk. `median_hh_income_cv` is the reliability column — every headline
+statistic has one, and `< 0.05` is what keeps a county of four thousand people
+out of a national ranking. Swap `counties` for `states`, `places`,
+`zctas`, `congressional-districts`, or one of the themed tract and block-group
+chunks; add `WHERE state = 'XX'` for one state; add `LOAD spatial;` to get
+`geometry` back as a `GEOMETRY` for point-in-polygon and distance work.
+
+Then read the agent guides, which carry the join keys, the NULL stories, and
+4–5 tested recipes per collection with their real output:
+
+- [`catalog/AGENTS.md`](catalog/AGENTS.md) — cross-collection showcase queries
+  and which collection answers which question
+- [`catalog/<collection>/AGENTS.md`](catalog/) — per-collection schema, quirks
+  and recipes
+- [`catalog/llms.txt`](catalog/llms.txt) — the one-page orientation for an
+  automated client
+
 ## Repository layout
 
 | Path | Purpose |

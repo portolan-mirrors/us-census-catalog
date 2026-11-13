@@ -233,10 +233,117 @@ The PMTiles archive is real polygons at every zoom (z0–z10), with no A5 aggreg
 
 ## Example queries
 
-<!-- TODO-recipes: a later agent writes this section. Requirements:
-     3-5 DuckDB recipes, each actually executed against the published URLs
-     above (not localhost, not a local path) with its real output pasted in;
-     `INSTALL httpfs; LOAD httpfs;` on the first one; at least one that
-     filters or orders on a `*_cv` column, and at least one that joins
-     another collection by GEOID prefix (`substr(geoid, 1, 2)` → `states`). Do not write a query that has not
-     been run. -->
+Every query here was run against the published URLs with DuckDB 1.4.1
+immediately before it was written down, and its real output is quoted beside
+it. 441 rows and 9 MB: cost is never a reason to filter in this collection.
+
+### 1. One district's profile
+
+```sql
+INSTALL httpfs; LOAD httpfs;
+SELECT name, population, median_hh_income::int AS income, pct_below_poverty,
+       pct_bachelors_plus, pct_commute_transit, pct_hh_no_vehicle,
+       pct_uninsured, median_gross_rent::int AS rent, pct_rent_burdened
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/congressional-districts.parquet'
+WHERE geoid = '0612';            -- state FIPS 06 + district 12 = CA-12
+```
+
+→ `Congressional District 12, California | 748393 | 108648 | 12.54 | 54.06 |
+11.67 | 15.1 | 4.54 | 2133 | 51.17`. **4.6 s**, and the income matches the
+data.census.gov spot-check in the section above.
+
+The GEOID is four characters: two of state FIPS, two of district number,
+zero-padded — `0612`, not `CA12` and not `612`. At-large and delegate
+districts use `98` (`1198` for the District of Columbia, `7298` for Puerto
+Rico). `SELECT *` on one row returns all 112 columns if you want the whole
+profile; this subset is just the readable version.
+
+### 2. Where does that district rank nationally?
+
+```sql
+LOAD httpfs;
+WITH r AS (
+  SELECT geoid, name,
+         rank() OVER (ORDER BY median_hh_income DESC)    AS rank_income,
+         rank() OVER (ORDER BY pct_below_poverty DESC)   AS rank_poverty,
+         rank() OVER (ORDER BY pct_commute_transit DESC) AS rank_transit
+  FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/congressional-districts.parquet'
+  WHERE population IS NOT NULL)
+SELECT name, rank_income, rank_poverty, rank_transit,
+       (SELECT count(*) FROM r) AS of_districts
+FROM r WHERE geoid = '0612';
+```
+
+→ `Congressional District 12, California | 57 | 187 | 26 | 437`. 3.2 s.
+
+57th of 437 by income, 26th by transit commuting, middling on poverty. The
+`WHERE population IS NOT NULL` is what makes the denominator honest: it drops
+the four island-area delegate districts, which have boundaries and no ACS
+estimates, and leaves the 437 rows that can actually be ranked. Without it,
+`rank()` on a `DESC` ordering puts four NULL rows at the top and every rank
+shifts by four.
+
+For the 435 voting districts only, filter
+`state NOT IN ('DC','PR','AS','GU','MP','VI')` instead.
+
+### 3. Every district against its own state (GEOID prefix join)
+
+```sql
+LOAD httpfs;
+SELECT d.name, d.median_hh_income::int AS district_income,
+       s.median_hh_income::int         AS state_income,
+       (d.median_hh_income - s.median_hh_income)::int AS gap
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/congressional-districts.parquet' d
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet' s
+  ON substr(d.geoid, 1, 2) = s.geoid
+WHERE d.state = 'NY'
+ORDER BY gap DESC LIMIT 5;
+```
+
+→ `Congressional District 12, New York | 147775 | 85974 | 61801`, `District 4 |
+141082 | 85974 | 55108`, `District 3 | 139677 | 85974 | 53703`, `District 1 |
+134242 | 85974 | 48268`, `District 2 | 128330 | 85974 | 42356`. 4.7 s. NY-12's
+$147,775 matches the data.census.gov spot-check above.
+
+`substr(geoid, 1, 2)` is the only prefix join available: districts are not
+built from counties or tracts in any GEOID sense, and relating a district to
+the tracts inside it is a spatial operation (the `bbox` + `ST_Intersects`
+pattern in [`zctas/AGENTS.md`](../zctas/AGENTS.md)).
+
+### 4. Why `*_cv` filtering is pointless here — and where it is not
+
+```sql
+LOAD httpfs;
+SELECT round(max(median_hh_income_cv), 3)       AS max_income_cv,
+       round(max(pct_below_poverty_cv), 3)      AS max_poverty_cv,
+       round(max(pct_rent_burdened_cv), 3)      AS max_rent_burden_cv,
+       round(max(median_hh_income_black_cv), 3) AS max_black_income_cv
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/congressional-districts.parquet';
+```
+
+→ `0.021 | 0.05 | 0.033 | 0.48`. 2.8 s.
+
+Districts are equal-population by construction, so the headline columns are
+the most precise in the catalog: the *worst* CV on median household income
+across all 441 districts is 0.021, six times inside the 0.12 reliability
+threshold. A `WHERE median_hh_income_cv < 0.12` filter here removes nothing,
+and class breaks borrowed from tract or county work will put almost every
+district in one class.
+
+The fourth number is the exception that keeps the habit worth having:
+`median_hh_income_black_cv` reaches 0.48. The race-iteration medians rest on a
+subset of households, so they carry real uncertainty even at this geography —
+filter *those* on `_cv` as you would anywhere else.
+
+### Related recipes elsewhere
+
+- The state figures these districts are compared against, and the quadrature
+  rule for summing: [`states/AGENTS.md`](../states/AGENTS.md).
+- Looking inside a district: [`tracts/AGENTS.md`](../tracts/AGENTS.md) and
+  [`block-groups/AGENTS.md`](../block-groups/AGENTS.md), related spatially.
+- 2020 Decennial block counts, the geography districts are drawn from:
+  [`blocks/AGENTS.md`](../blocks/AGENTS.md).
+
+Statistics come from the GeoParquet. The district PMTiles archive is real
+polygons at every zoom (z0–z10, no A5 band) but carries no `*_moe` or `*_cv`
+columns, so recipe 4 cannot be reproduced from tiles.
