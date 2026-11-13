@@ -220,7 +220,7 @@ Island areas carry geometry but no ACS data. American Samoa, Guam, the Northern 
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-The PMTiles carry real geometries at every zoom (no A5 cell band — the features are few enough to tile directly). Statistics still come from the GeoParquet.
+The PMTiles carry real geometries at every zoom — the features are few enough to tile directly, so there is no coarser-geography band at coarse zooms (the catalog's finer collections switch to counties and tracts there). Statistics still come from the GeoParquet.
 
 ## Related collections
 
@@ -351,4 +351,5 @@ Two conditions on using it:
   [`blocks/AGENTS.md`](../blocks/AGENTS.md).
 
 Statistics come from the GeoParquet. The state PMTiles archive is real polygons
-at every zoom (no A5 band) but carries no `*_moe` or `*_cv` columns.
+at every zoom — it needs no coarser-geography band at coarse zooms — but
+carries no `*_moe` columns.

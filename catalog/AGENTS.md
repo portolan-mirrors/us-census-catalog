@@ -71,10 +71,16 @@ Three geographies break the prefix rule, and each breaks it differently:
   precision — it usually means a tiny or group-quarters universe. `population`
   is not a household count, so gate household-denominated shares on
   `households`, not on `population`.
-- Coarse zooms of each PMTiles archive are **A5 cell aggregations**, not
-  census geographies: counts are sums, rates and medians are unweighted
-  means of the underlying geographies' values. Use the GeoParquet, not
-  tiles, for statistics.
+- Coarse zooms of a PMTiles archive are **a coarser census geography**, not
+  the collection's own: counties at z0–z5, tracts in the middle (z6–z7 in the
+  `bg-*` archives, z6–z9 in `blocks`), the collection's own features below
+  that. In the ACS archives those bands carry the Census Bureau's own county
+  and tract estimates under the same column names — official values, not an
+  aggregation of the file — so a feature clicked at a coarse zoom is a real
+  county or tract with its own `geoid` and `name`. `counties`, `states` and
+  `congressional-districts` are real polygons at every zoom. `*_moe` columns
+  are excluded from every tile; use the GeoParquet, not tiles, for
+  statistics.
 - Geometries are the Census cartographic boundary files (500k, shoreline-
   clipped), in EPSG:4326 — good for mapping and point-in-polygon, not for
   legal-boundary or area-measurement work. Blocks use TIGER/Line (not

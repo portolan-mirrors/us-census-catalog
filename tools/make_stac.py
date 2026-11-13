@@ -408,8 +408,9 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
 
     # Spatial extent = the framing bbox of the data, chosen deliberately
     # (see docs/conformance.md):
-    # - not the `portolan add` asset union — the PMTiles' A5 cell zooms
-    #   overhang the data footprint by a few degrees;
+    # - not the `portolan add` asset union — the PMTiles' coarse zooms are
+    #   the national county and tract bands, which reach past this
+    #   collection's own framed footprint;
     # - restricted to the western hemisphere — the handful of Aleutian
     #   geographies east of the antimeridian (and, for ACS collections,
     #   the no-data Pacific island areas Guam/CNMI/American Samoa) would

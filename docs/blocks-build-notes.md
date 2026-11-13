@@ -430,3 +430,13 @@ GROUP BY 1, 2 ORDER BY 1;
 | 56 | WY | 53,769 | 576,851 | 271,887 | 74.3 MB |
 | 72 | PR | 41,987 | 3,285,874 | 1,598,159 | 19.6 MB |
 | | **52** | **8,174,955** | **334,735,155** | **142,096,895** | **5.23 GB** |
+
+## Tiles rebuilt as a census pyramid (2026-11-13)
+
+`blocks.pmtiles` is now built with `tylertoo pyramid`: z0–z5 counties and
+z6–z9 tracts, both exact sums of these block counts with the rate columns
+recomputed from the summed counts (`tools/build_tile_staging.py`), and
+z10–z14 the blocks themselves. Connecticut's 2020 block GEOIDs are
+crosswalked onto the 2024 planning-region geographies on the preserved
+6-digit tract number before grouping, so the aggregates still total
+334,735,155 exactly.

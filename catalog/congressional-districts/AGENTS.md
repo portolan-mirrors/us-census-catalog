@@ -222,7 +222,7 @@ Spot-checked against data.census.gov: CA-12 median household income $108,648, NY
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-The PMTiles archive is real polygons at every zoom (z0–z10), with no A5 aggregation — there are few enough districts for that. Statistics still come from the GeoParquet: `*_moe` columns are not in the tiles.
+The PMTiles archive is real polygons at every zoom (z0–z10), with no coarser-geography band at coarse zooms — there are few enough districts to draw them all nationally. Statistics still come from the GeoParquet: `*_moe` columns are not in the tiles.
 
 ## Related collections
 
@@ -345,5 +345,6 @@ filter *those* on `_cv` as you would anywhere else.
   [`blocks/AGENTS.md`](../blocks/AGENTS.md).
 
 Statistics come from the GeoParquet. The district PMTiles archive is real
-polygons at every zoom (z0–z10, no A5 band) but carries no `*_moe` or `*_cv`
-columns, so recipe 4 cannot be reproduced from tiles.
+polygons at every zoom (z0–z10) and needs no coarser-geography band at coarse
+zooms. It carries the `*_cv` columns recipe 4 reads, but no `*_moe` columns —
+and it is a map artifact either way: query the GeoParquet for numbers.

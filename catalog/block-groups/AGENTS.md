@@ -135,9 +135,11 @@ So:
   have no polygon and so no row; their population is exactly 0.
 - Geometry is the 500k cartographic boundary files, shoreline-clipped,
   EPSG:4326 — good for mapping and point-in-polygon, not for area measurement.
-- PMTiles coarse zooms are **A5 cell aggregations**, not block groups, and the
-  tiles carry no `*_moe` or `*_cv`. Statistics come from the GeoParquet,
-  always.
+- PMTiles z0–z5 are **counties** and z6–z7 **tracts**, not block groups — the
+  Census Bureau's own estimates for those geographies, under the same column
+  names, so one style classifies every zoom — and z8–z13 are the block groups
+  themselves. The tiles carry no `*_moe` columns. Statistics come from the
+  GeoParquet, always.
 
 ## Where to look next
 

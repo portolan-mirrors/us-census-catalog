@@ -85,7 +85,6 @@ CB_ABOUT = ("https://www.census.gov/geographies/mapping-files/time-series/"
             "geo/cartographic-boundary.html")
 OPEN_DATA_POLICY = ("https://www.census.gov/about/policies/open-gov/"
                     "open-data.html")
-A5 = "https://a5geo.org/"
 TYLERTOO = "https://github.com/geoparquet-io/tylertoo"
 
 # Wave-3 geography documentation. Each one is cited where a claim needs it:
@@ -376,37 +375,105 @@ STATS_PARA = (
     "names its ACS table, its exact universe, and the lines summed to make "
     "it.")
 
-TILES_PARA = (
-    "The PMTiles archive carries the same columns as the GeoParquet. At "
-    f"feature zooms the tiles are the census geographies; at coarse zooms "
-    f"they are [A5]({A5}) cell aggregations built by "
-    f"[tylertoo]({TYLERTOO}) — counts summed, rates and medians averaged "
-    "unweighted over the geographies in the cell — because thinning "
-    "hundreds of thousands of polygons at a national zoom would show a "
-    "biased subset (small urban geographies drop first) rather than less "
-    "data. Cell and feature zooms share column names, so one style "
-    "expression classifies both. The aggregation is a visualization aid: "
-    "statistics come from the GeoParquet, never from the tiles.")
+# The census-geography pyramid. Coarse zooms carry a COARSER CENSUS
+# GEOGRAPHY, with that geography's own published values under the same column
+# names — not an abstract cell grid, and not a client-side roll-up of this
+# collection's features. The zoom bands below are exactly the ones
+# tools/make_tiles.py hands `tylertoo pyramid`, as recorded in
+# staging/tiles-logs/<id>.pyramid.log.
+PYRAMID = {
+    "bg": {
+        "bands": "z0–z5 are county polygons and z6–z7 census tracts, each "
+                 "carrying the Census Bureau's own published estimates for "
+                 "that geography, and z8–z13 are the block groups themselves",
+        "not": "below z8 you are looking at counties and tracts, not block "
+               "groups",
+        "coarse": "a real county or tract",
+    },
+    "tract": {
+        "bands": "z0–z5 are county polygons carrying the Census Bureau's own "
+                 "published county estimates, and z6–z12 are the census "
+                 "tracts themselves",
+        "not": "below z6 you are looking at counties, not tracts",
+        "coarse": "a real county",
+    },
+    "zcta": {
+        "bands": "z0–z5 are county polygons carrying the Census Bureau's own "
+                 "published county estimates, and z6–z12 are the ZIP Code "
+                 "Tabulation Areas themselves. ZCTAs do not nest inside "
+                 "counties, so the county band is orientation at national "
+                 "zooms — real county values — and not a roll-up of these "
+                 "features",
+        "not": "below z6 you are looking at counties, not ZIP Code "
+               "Tabulation Areas",
+        "coarse": "a real county",
+    },
+    "place": {
+        "bands": "z0–z5 are county polygons carrying the Census Bureau's own "
+                 "published county estimates, and z6–z12 are the places "
+                 "themselves. Places do not nest inside counties — a place "
+                 "can cross a county line — so the county band is "
+                 "orientation at national zooms, not a roll-up of these "
+                 "features",
+        "not": "below z6 you are looking at counties, not places",
+        "coarse": "a real county",
+    },
+}
 
-# The collections whose PMTiles carry real polygons at every zoom, with no A5
-# aggregation at all: few enough features that nothing has to be aggregated
-# (counties `--band 0-10:geom`, states `0-8:geom`, congressional districts
-# `0-10:geom` — see staging/tiles-logs/ and tools/make_tiles.py). Saying "the
-# coarse zooms are A5 cells" of these would be false.
+BLOCKS_TILES_PARA = (
+    f"The PMTiles archive is a census-geography pyramid built with "
+    f"[tylertoo]({TYLERTOO}): z0–z5 are county polygons and z6–z9 census "
+    f"tracts carrying exact sums of the 2020 block counts — decennial counts "
+    f"aggregate exactly, and the rate columns are recomputed from the summed "
+    f"counts rather than averaged — and z10–z14 are the blocks themselves. "
+    f"Thinning 8.1 million polygons down to a national zoom would show a "
+    f"biased subset (small urban blocks drop first) rather than less data, "
+    f"so the coarse zooms step up to a coarser census geography instead. "
+    f"Every band carries the same column names, so one style expression "
+    f"classifies every zoom — but below z10 you are looking at counties and "
+    f"tracts, not blocks, and clicking a coarse feature identifies a real "
+    f"county or tract by `geoid` and `name`. Statistics come from the "
+    f"GeoParquet, never from the tiles.")
+
+# The collections whose PMTiles carry real polygons at every zoom, with no
+# coarser-geography band at all: few enough features that nothing has to be
+# aggregated (counties `--band 0-10:geom`, states `0-8:geom`, congressional
+# districts `0-10:geom` — see staging/tiles-logs/ and tools/make_tiles.py).
+# Saying "the coarse zooms are a coarser geography" of these would be false.
 GEOM_ONLY_TILES = {"counties", "states", "congressional-districts"}
 
 GEOM_TILES_PARA = (
     "The PMTiles archive carries the same columns as the GeoParquet, minus "
     "the `*_moe` columns, and at every zoom the tiles are the real census "
-    f"geographies — no [A5]({A5}) cell aggregation, unlike the catalog's "
-    f"finer collections, because there are few enough features here to draw "
-    f"them all at a national zoom. Built with [tylertoo]({TYLERTOO}). "
-    f"Statistics still come from the GeoParquet: margins of error are not in "
-    f"the tiles.")
+    "geographies — there are few enough features here to draw them all at a "
+    "national zoom, so this archive needs none of the coarser-geography "
+    "coarse-zoom bands the catalog's finer collections carry. Built with "
+    f"[tylertoo]({TYLERTOO}). Statistics still come from the GeoParquet: "
+    f"margins of error are not in the tiles.")
 
 
 def tiles_para(cid: str) -> str:
-    return GEOM_TILES_PARA if cid in GEOM_ONLY_TILES else TILES_PARA
+    if cid in GEOM_ONLY_TILES:
+        return GEOM_TILES_PARA
+    if cid == "blocks":
+        return BLOCKS_TILES_PARA
+    p = PYRAMID[LEVEL_OF[cid]]
+    return (
+        f"The PMTiles archive is a census-geography pyramid built with "
+        f"[tylertoo]({TYLERTOO}): {p['bands']}. Thinning this many polygons "
+        f"down to a national zoom would show a biased subset (small urban "
+        f"geographies drop first) rather than less data, so the coarse zooms "
+        f"step up to a coarser census geography instead of a thinned sample "
+        f"of this one. Every band carries the same column names, so one "
+        f"style expression classifies every zoom — but {p['not']}, and the "
+        f"values there are the Bureau's official estimates for those "
+        f"geographies, with their own meaning, rather than a "
+        f"visualization-only average: clicking a coarse feature identifies "
+        f"{p['coarse']} by `geoid` and `name`. The `*_moe` columns are "
+        f"excluded from the tiles at every zoom — a margin of error is "
+        f"computed for one specific geography and cannot be carried across "
+        f"bands — while the `*_cv` columns are kept. Statistics come from "
+        f"the GeoParquet, never from the tiles.")
 
 
 def _geom_para(level: str) -> str:
@@ -991,9 +1058,12 @@ PROCESSING_COMMON = (
     "Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, "
     "Hilbert row order, and a covering `bbox` column with row-group "
     "statistics, so a spatial filter can skip most of the file over the "
-    "network. Tiled to PMTiles with tylertoo, with A5 cell aggregation at "
-    "coarse zooms (counts summed, rates averaged) — a visualization aid, not "
-    "a statistical product.")
+    "network. Tiled to PMTiles with tylertoo as a census-geography pyramid, "
+    "so coarse zooms carry a coarser census geography — counties, then "
+    "tracts — with that geography's own official values, instead of a "
+    "thinned sample of this collection's features; the collections small "
+    "enough to draw nationally (counties, states, congressional districts) "
+    "are tiled as real polygons at every zoom.")
 
 
 def processing_notes(cid: str) -> str:
@@ -1136,6 +1206,27 @@ def known_issues(cid: str) -> str:
             "Blocks carry 2020 Decennial counts only. The Census Bureau "
             "publishes no income, education, commuting or internet data "
             "below block group, and this collection invents none.",
+
+            "PMTiles coarse zooms are a different census geography from this "
+            "collection's: below z10 you are looking at counties and tracts, "
+            "not blocks. Those bands carry exact sums of the block counts "
+            "(rates recomputed from the summed counts), so they are "
+            "consistent with the data — but the geometry and the `geoid` "
+            "belong to the county or tract. Statistics come from the "
+            "GeoParquet.",
+
+            "Connecticut needs a crosswalk in those coarse bands. The 2020 "
+            "block GEOIDs carry Connecticut's old 8-county prefixes "
+            "(09001–09015), while the 2024 boundaries used for the county "
+            "and tract bands are the 9 planning regions (09110–09190) that "
+            "replaced them as the county equivalent in 2022. The build "
+            "matches blocks to current geographies on the 6-digit tract "
+            "number, which is preserved across the change, so no Connecticut "
+            "population is dropped: the aggregates still sum to the "
+            "published national block total of 334,735,155 exactly. The "
+            "block rows themselves are untouched — they keep the 2020 "
+            "GEOIDs, so a 5-character prefix join from Connecticut blocks to "
+            "the 2024-vintage counties collection finds no match.",
         ])
 
     level = LEVEL_OF[cid]
@@ -1305,15 +1396,18 @@ def known_issues(cid: str) -> str:
     if cid in GEOM_ONLY_TILES:
         items.append(
             "The PMTiles archive is real geographies at every zoom, with no "
-            "A5 cell aggregation (the catalog's finer collections aggregate "
-            "at coarse zooms; this one has few enough features not to). "
-            "`*_moe` columns are not in the tiles — statistics come from the "
-            "GeoParquet.")
+            "coarser-geography coarse-zoom band (the catalog's finer "
+            "collections switch to counties and tracts at coarse zooms; this "
+            "one has few enough features not to). `*_moe` columns are not in "
+            "the tiles — statistics come from the GeoParquet.")
     else:
+        p = PYRAMID[LEVEL_OF[cid]]
         items.append(
-            "PMTiles coarse zooms are A5 cell aggregations, not census "
-            "geographies — counts summed, rates and medians averaged "
-            "unweighted. Statistics come from the GeoParquet.")
+            f"PMTiles coarse zooms are a different census geography from "
+            f"this collection's: {p['not']}. The values there are the "
+            f"Census Bureau's own estimates for those geographies, not an "
+            f"aggregation of this file, and `*_moe` columns are not in the "
+            f"tiles. Statistics come from the GeoParquet.")
     return "\n\n".join(items)
 
 

@@ -1,39 +1,80 @@
 #!/usr/bin/env python3
-"""Build every PMTiles archive with tylertoo (A5 cells at coarse zooms).
+"""Build every PMTiles archive with tylertoo `pyramid` (census geography at
+coarse zooms, not A5 cells).
 
 One recipe per collection, and the recipes are the record of how each
 published archive was made: the command lines below are the ones in
-staging/tiles-logs/<id>.log, byte for byte. Nothing here mutates the
+staging/tiles-logs/<id>.pyramid.log, byte for byte. Nothing here mutates the
 catalog until a job is named on the command line, because re-tiling an
-archive that is already built and QC'd costs twenty minutes and gains
-nothing.
+archive that is already built and QC'd costs real time and gains nothing.
 
 Usage:
   python3 tools/make_tiles.py --list                 # recipes, no work
-  python3 tools/make_tiles.py --print zctas          # the exact command
+  python3 tools/make_tiles.py --print bg-income       # the exact command
   python3 tools/make_tiles.py zctas places           # build those two
   python3 tools/make_tiles.py --all                  # everything
 
-Three families of recipe:
+Three families of recipe, all built with `tylertoo pyramid --generalize`
+(every band is raw GeoParquet features, never pre-aggregated cells):
 
-  A5 + geometry   The fine geographies (block groups, tracts, blocks) and
-                  the two wave-3 collections with tens of thousands of
-                  features: A5 cell aggregation at coarse zooms, real
-                  geometry at feature zooms. Counts are summed, rates,
-                  medians and coefficients of variation averaged unweighted
-                  over the geographies in the cell. `*_moe` columns are
-                  excluded from the tiles — a margin of error that has been
-                  averaged over an A5 cell is not a margin of error.
-  geometry only   The coarse geographies (states, counties, congressional
-                  districts): few enough features that every zoom can carry
-                  the real polygons.
-  blocks          Its own band split and its own column set (2020 Decennial
-                  counts, no margins of error, no CVs).
+  census pyramid  The ACS themed collections (block-groups/bg-*,
+                   tracts/tract-*) and the two wave-3 collections (zctas,
+                   places): county polygons at national zooms, tract
+                   polygons at mid zooms (bg-* only — tract-* and zctas/
+                   places go straight from county to their own geometry),
+                   the collection's own feature geometry at close zooms.
+                   Every band carries the SAME layer name, the collection
+                   id, because every style's source-layer is the collection
+                   id. `*_moe` columns are excluded from every tile — those
+                   margins of error were computed by the Census Bureau for
+                   one specific geography and are meaningless mixed across
+                   zooms with a different geography in the band below.
 
-See docs/design.md for the band design and the QC findings (the coarsest
-geometry zooms in dense metros ride the 500K merge valve; the wide tables —
-counties and congressional districts, 110 columns on few features — need
---max-compressed-tile-size 2M).
+                     bg-<theme>      0-5  county   (staging/agg)
+                                     6-7  tract    (catalog/tracts/tract-<theme>)
+                                     8-13 bg       (catalog/block-groups/bg-<theme>)
+                     tract-<theme>   0-5  county   (staging/agg)
+                                     6-12 tract    (catalog/tracts/tract-<theme>)
+                     zctas, places   0-5  county   (catalog/counties/counties.parquet)
+                                     6-12 own       (catalog/<cid>/<cid>.parquet)
+
+                   The county band for each ACS theme is NOT a client-side
+                   rollup of the finer geography: it is counties.parquet's
+                   own columns for that theme, column-pruned to the exact
+                   schema of the theme's finest table (see
+                   tools/build_tile_staging.py). Those are the Census
+                   Bureau's own county-level ACS estimates — strictly
+                   better than summing or averaging block groups or tracts
+                   client-side. zctas and places reuse counties.parquet
+                   untouched: its column list is identical to theirs
+                   (verified column-for-column), and its `state` column
+                   carries real values where zctas' own is NULL.
+
+  geometry only    The coarse geographies (states, counties, congressional
+                   districts): few enough features that every zoom can
+                   carry the real polygons. Unchanged by this rebuild.
+
+  blocks pyramid   2020 Decennial counts, no margins of error, no CVs, its
+                   own three-band split:
+
+                     0-5  county aggregate  (staging/agg/blocks-county.parquet)
+                     6-9  tract aggregate   (staging/agg/blocks-tract.parquet)
+                     10-14 blocks           (catalog/blocks/state_fips=*/*.parquet,
+                                             a glob band input — confirmed working)
+
+                   The county/tract aggregates are built by
+                   tools/build_tile_staging.py: summed counts, recomputed
+                   rates (pct_white_nh/pct_black/pct_hispanic/pct_vacant/
+                   pop_density), geometry joined from the cached CB
+                   county/tract parquets in staging/geo/. Connecticut's
+                   2020 block GEOIDs carry its old 8-county prefixes while
+                   the CB 2024 geometry uses the 9 planning regions that
+                   replaced them in 2022; build_tile_staging.py crosswalks
+                   on the preserved tract-number suffix before the join, so
+                   no Connecticut population is dropped.
+
+See docs/design.md for the full band design and QC findings, and
+tools/build_tile_staging.py for how staging/agg/ is produced.
 """
 
 import argparse
@@ -46,48 +87,10 @@ import duckdb
 
 ROOT = "/Users/cholmes/repos/us-census-catalog"
 TT = "/Users/cholmes/repos/tylertoo/target/release/tylertoo"
+AGG = f"{ROOT}/staging/agg"
 LOGDIR = f"{ROOT}/staging/tiles-logs"
-SPILL = f"{ROOT}/staging/tiles-tmp"
 
 SKIP_ALWAYS = {"geoid", "name", "state", "geometry", "bbox"}
-
-# (group, id, sum_cols, a5_band, geom_band) for the 9 themed ACS chunks and
-# the two wave-3 collections that are fine enough to need A5 cells. A wave-3
-# collection sits at the catalog root, so its group is None.
-#
-# zctas and places take the tract bands (0-5:a5, 6-12:geom): 33,791 ZCTAs and
-# 32,612 places are the same order of magnitude as 85,184 tracts and far
-# coarser than 242,298 block groups, and both are polygon sets a reader
-# expects to see shaped at z6. Their sum_cols are every count column in the
-# wide table, because the wide table carries all five.
-WIDE_SUMS = ("population", "housing_units", "households", "hh_no_vehicle",
-             "group_quarters_pop")
-
-ACS_CHUNKS = [
-    ("block-groups", "bg-income", ("population",), "0-7:a5", "8-13:geom"),
-    ("block-groups", "bg-people", ("population",), "0-7:a5", "8-13:geom"),
-    ("block-groups", "bg-housing", ("population", "housing_units", "households"), "0-7:a5", "8-13:geom"),
-    ("block-groups", "bg-connectivity", ("population", "hh_no_vehicle"), "0-7:a5", "8-13:geom"),
-    ("tracts", "tract-income", ("population",), "0-5:a5", "6-12:geom"),
-    ("tracts", "tract-people", ("population",), "0-5:a5", "6-12:geom"),
-    ("tracts", "tract-housing", ("population", "housing_units", "households"), "0-5:a5", "6-12:geom"),
-    ("tracts", "tract-connectivity", ("population", "hh_no_vehicle"), "0-5:a5", "6-12:geom"),
-    ("tracts", "tract-wellbeing", ("population", "group_quarters_pop"), "0-5:a5", "6-12:geom"),
-    (None, "zctas", WIDE_SUMS, "0-5:a5", "6-12:geom"),
-    (None, "places", WIDE_SUMS, "0-5:a5", "6-12:geom"),
-]
-
-# (id, band, max_compressed_tile_size) for the geometry-only archives.
-# counties and congressional-districts carry 110 columns on a few thousand
-# and a few hundred features, so a single z0 tile holds every attribute of
-# every feature and overruns the default compressed-tile cap; 2M is the
-# counties precedent (staging/tiles-logs/counties.log). states fits under the
-# default because there are 56 of them.
-GEOM_ONLY = [
-    ("counties", "0-10:geom", "2M"),
-    ("states", "0-8:geom", None),
-    ("congressional-districts", "0-10:geom", "2M"),
-]
 
 
 def coll_dir(group, cid):
@@ -99,41 +102,88 @@ def columns(path):
         f"DESCRIBE SELECT * FROM read_parquet('{path}')").fetchall()]
 
 
-def classify(path, sum_cols):
-    cols = columns(path)
-    moe = [c for c in cols if c.endswith("_moe")]
-    cv = [c for c in cols if c.endswith("_cv")]
-    data_cols = [c for c in cols if c not in SKIP_ALWAYS and not c.endswith("_moe")]
-    mean_cols = [c for c in data_cols if c not in sum_cols and c not in cv and
-                 (c.startswith("pct_") or c.startswith("median_") or c in ("per_capita_income", "pop_density"))]
-    return moe, list(sum_cols), mean_cols, cv
-
-
 def moe_cols(path):
     return [c for c in columns(path) if c.endswith("_moe")]
 
 
-def build_acs_cmd(group, cid, sum_cols, a5_band, geom_band, extra_pivot_shift=0):
+# (group, cid, theme) for the 9 themed ACS chunks: theme names the
+# staging/agg/<theme>-county.parquet band and the matching
+# catalog/tracts/tract-<theme>/tract-<theme>.parquet table.
+BG_CHUNKS = [
+    ("block-groups", "bg-income", "income"),
+    ("block-groups", "bg-people", "people"),
+    ("block-groups", "bg-housing", "housing"),
+    ("block-groups", "bg-connectivity", "connectivity"),
+]
+TRACT_CHUNKS = [
+    ("tracts", "tract-income", "income"),
+    ("tracts", "tract-people", "people"),
+    ("tracts", "tract-housing", "housing"),
+    ("tracts", "tract-connectivity", "connectivity"),
+    ("tracts", "tract-wellbeing", "wellbeing"),
+]
+WAVE3 = ["zctas", "places"]
+
+
+def build_bg_cmd(group, cid, theme):
     d = coll_dir(group, cid)
-    path, out = f"{d}/{cid}.parquet", f"{d}/{cid}.pmtiles"
-    moe, sum_cols, mean_cols, cv_cols = classify(path, sum_cols)
-    cmd = [TT, "tiles", path, out]
-    if extra_pivot_shift:
-        lo, hi = a5_band.split(":")[0].split("-")
-        lo2, hi2 = geom_band.split(":")[0].split("-")
-        a5_band = f"{lo}-{int(hi)+extra_pivot_shift}:a5"
-        geom_band = f"{int(lo2)+extra_pivot_shift}-{hi2}:geom"
-    cmd += ["--band", a5_band, "--band", geom_band]
-    for c in sum_cols:
-        cmd += ["--accumulate-attribute", f"{c}:sum"]
-    for c in mean_cols:
-        cmd += ["--accumulate-attribute", f"{c}:mean"]
-    for c in cv_cols:
-        cmd += ["--accumulate-attribute", f"{c}:mean"]
-    for c in moe:
+    out = f"{d}/{cid}.pmtiles"
+    bg_path = f"{d}/{cid}.parquet"
+    tract_path = f"{ROOT}/catalog/tracts/tract-{theme}/tract-{theme}.parquet"
+    county_path = f"{AGG}/{theme}-county.parquet"
+    cmd = [TT, "pyramid", out,
+           "--band", f"0-5:{county_path}:{cid}",
+           "--band", f"6-7:{tract_path}:{cid}",
+           "--band", f"8-13:{bg_path}:{cid}",
+           "--generalize"]
+    for c in moe_cols(bg_path):
         cmd += ["--exclude-property", c]
-    cmd += ["--spill-dir", SPILL, "-f"]
+    cmd += ["--report", f"{LOGDIR}/{cid}.report.json", "-f"]
     return cmd, out
+
+
+def build_tract_cmd(group, cid, theme):
+    d = coll_dir(group, cid)
+    out = f"{d}/{cid}.pmtiles"
+    tract_path = f"{d}/{cid}.parquet"
+    county_path = f"{AGG}/{theme}-county.parquet"
+    cmd = [TT, "pyramid", out,
+           "--band", f"0-5:{county_path}:{cid}",
+           "--band", f"6-12:{tract_path}:{cid}",
+           "--generalize"]
+    for c in moe_cols(tract_path):
+        cmd += ["--exclude-property", c]
+    cmd += ["--report", f"{LOGDIR}/{cid}.report.json", "-f"]
+    return cmd, out
+
+
+def build_wave3_cmd(cid):
+    d = coll_dir(None, cid)
+    out = f"{d}/{cid}.pmtiles"
+    own_path = f"{d}/{cid}.parquet"
+    county_path = f"{ROOT}/catalog/counties/counties.parquet"
+    cmd = [TT, "pyramid", out,
+           "--band", f"0-5:{county_path}:{cid}",
+           "--band", f"6-12:{own_path}:{cid}",
+           "--generalize"]
+    for c in moe_cols(own_path):
+        cmd += ["--exclude-property", c]
+    cmd += ["--report", f"{LOGDIR}/{cid}.report.json", "-f"]
+    return cmd, out
+
+
+# ===== geometry-only archives: unchanged by this rebuild =====================
+# (id, band, max_compressed_tile_size) for the coarse geographies: few enough
+# features that every zoom carries the real polygons. counties and
+# congressional-districts carry 110 columns on a few thousand / a few hundred
+# features, so a single z0 tile overruns the default compressed-tile cap;
+# 2M is the counties precedent (staging/tiles-logs/counties.log). states fits
+# under the default because there are 56 of them.
+GEOM_ONLY = [
+    ("counties", "0-10:geom", "2M"),
+    ("states", "0-8:geom", None),
+    ("congressional-districts", "0-10:geom", "2M"),
+]
 
 
 def build_geom_cmd(cid, band, max_tile):
@@ -144,39 +194,35 @@ def build_geom_cmd(cid, band, max_tile):
         cmd += ["--max-compressed-tile-size", max_tile]
     for c in moe_cols(path):
         cmd += ["--exclude-property", c]
-    cmd += ["--spill-dir", SPILL, "-f"]
+    cmd += ["-f"]
     return cmd, out
 
 
-# ===== blocks: 2020 Decennial counts, 8.17M features =========================
-BLOCK_SUMS = [
-    "pop_total", "pop_white", "pop_black", "pop_aian", "pop_asian", "pop_nhpi",
-    "pop_other", "pop_two_plus", "pop_hispanic", "pop_white_nh", "vap_total",
-    "housing_units", "housing_occupied", "housing_vacant", "group_quarters_pop",
-]
-BLOCK_MEANS = ["pct_white_nh", "pct_black", "pct_hispanic", "pct_vacant",
-               "pop_density"]
-
-
+# ===== blocks: 2020 Decennial counts, 8.17M features, its own 3-band plan ===
 def build_blocks_cmd():
     out = f"{ROOT}/catalog/blocks/blocks.pmtiles"
-    cmd = [TT, "tiles", f"{ROOT}/catalog/blocks/state_fips=*/*.parquet", out,
-           "--band", "0-9:a5", "--band", "10-14:geom",
-           "--layer-name", "blocks"]
-    for c in BLOCK_SUMS:
-        cmd += ["--accumulate-attribute", f"{c}:sum"]
-    for c in BLOCK_MEANS:
-        cmd += ["--accumulate-attribute", f"{c}:mean"]
-    cmd += ["--spill-dir", SPILL, "-f", "-v"]
+    county_path = f"{AGG}/blocks-county.parquet"
+    tract_path = f"{AGG}/blocks-tract.parquet"
+    blocks_glob = f"{ROOT}/catalog/blocks/state_fips=*/*.parquet"
+    cmd = [TT, "pyramid", out,
+           "--band", f"0-5:{county_path}:blocks",
+           "--band", f"6-9:{tract_path}:blocks",
+           "--band", f"10-14:{blocks_glob}:blocks",
+           "--generalize",
+           "--report", f"{LOGDIR}/blocks.report.json",
+           "-f"]
     return cmd, out
 
 
 def recipes():
     """id -> a zero-argument builder returning (cmd, output path)."""
     out = {}
-    for group, cid, sums, a5, geom in ACS_CHUNKS:
-        out[cid] = (lambda g=group, c=cid, s=sums, a=a5, m=geom:
-                    build_acs_cmd(g, c, s, a, m))
+    for group, cid, theme in BG_CHUNKS:
+        out[cid] = (lambda g=group, c=cid, t=theme: build_bg_cmd(g, c, t))
+    for group, cid, theme in TRACT_CHUNKS:
+        out[cid] = (lambda g=group, c=cid, t=theme: build_tract_cmd(g, c, t))
+    for cid in WAVE3:
+        out[cid] = (lambda c=cid: build_wave3_cmd(c))
     for cid, band, cap in GEOM_ONLY:
         out[cid] = (lambda c=cid, b=band, p=cap: build_geom_cmd(c, b, p))
     out["blocks"] = build_blocks_cmd
@@ -185,7 +231,7 @@ def recipes():
 
 def run_job(cid, cmd, out):
     t0 = time.time()
-    with open(f"{LOGDIR}/{cid}.log", "w") as f:
+    with open(f"{LOGDIR}/{cid}.pyramid.log", "w") as f:
         f.write("CMD: " + " ".join(cmd) + "\n\n")
         f.flush()
         r = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT)

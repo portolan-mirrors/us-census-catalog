@@ -4,10 +4,11 @@ from the NATIONAL distribution of each column.
 
 Three to five styles per collection: one default (the headline indicator for
 that theme) plus the variants worth their own card. Every style is a choropleth
-`step` on one published column — never a computed expression, because the
-PMTiles carry the same column names at A5 cell zooms and at feature zooms, so
-one expression classifies both, and a column that exists in the GeoParquet is
-the only thing guaranteed to exist in the tiles.
+`step` on one published column — never a computed expression, because every
+band of the PMTiles pyramid carries the same column names (counties at the
+national zooms, tracts in the middle, the collection's own features below
+that), so one expression classifies every zoom, and a column that exists in
+the GeoParquet is the only thing guaranteed to exist in the tiles.
 
 Breaks
 ------

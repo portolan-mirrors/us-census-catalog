@@ -14,8 +14,11 @@ mirroring United States Census Bureau demographics as cloud-native
   geography, ~8.1M polygons)
 - Statistics ship in themed "chunks": each collection is one geography ×
   one theme, with its own GeoParquet, PMTiles, and 3–5 legend-bearing map
-  styles. Coarse zooms aggregate into [A5](https://a5geo.org/) cells so the
-  national view shows all the data, not a thinned subset.
+  styles. Coarse zooms of a PMTiles archive step up to a coarser census
+  geography — counties at z0–z5, tracts in the middle — carrying the Census
+  Bureau's own estimates for those geographies, so the national view shows
+  official values for every part of the country rather than a thinned subset
+  of the fine features.
 - A mirror that liberally references the source:
   [data.census.gov](https://data.census.gov/) is authoritative, and every
   collection links the exact upstream files it was built from
@@ -81,7 +84,7 @@ Run from the repo root, in order:
 | 1 | `bash tools/download_sources.sh`<br>`bash tools/download_blocks.sh` | ACS table-based Summary File tables, cartographic boundary files, TIGER blocks, PL 94-171 (plain HTTPS, no API key) into `staging/` |
 | 2 | `python3 tools/build_acs.py` | Parse national ACS tables, compute indicators with Census MOE formulas, join to boundary geometry → GeoParquet per collection |
 | 3 | `python3 tools/build_blocks.py` | 2020 PL 94-171 counts joined to TIGER blocks → `catalog/blocks/`, hive-partitioned by state |
-| 4 | `python3 tools/make_tiles.py` | PMTiles per collection via [tylertoo](https://github.com/geoparquet-io/tylertoo), with A5 cell aggregation at coarse zooms |
+| 4 | `python3 tools/build_tile_staging.py`<br>`python3 tools/make_tiles.py --all` | PMTiles per collection via [tylertoo](https://github.com/geoparquet-io/tylertoo) `pyramid`: counties at z0–z5, tracts at the mid zooms, the collection's own features at the close zooms. The staging step builds the coarse-band inputs under `staging/agg/` |
 | 5 | `python3 tools/collection_meta.py --write` | `.portolan/metadata.yaml` per collection — titles, descriptions, processing notes, known issues. Must precede `portolan add`, which reads them |
 | 6 | `portolan add catalog/<collection>/ …` | The CLI writes each `collection.json` (and the 52 block items) |
 | 7 | `python3 tools/make_styles.py` | MapLibre styles with legends, class breaks measured from national distributions |

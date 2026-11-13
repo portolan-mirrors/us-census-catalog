@@ -142,8 +142,10 @@ against **0.202** at block group, and 1.5% of tract medians are over the 0.40
   geometry and NULL ACS values.
 - Geometry is the 500k cartographic boundary files, shoreline-clipped,
   EPSG:4326 — good for mapping and point-in-polygon, not for area measurement.
-- PMTiles coarse zooms are **A5 cell aggregations**, not tracts, and the tiles
-  carry no `*_moe` or `*_cv`. Statistics come from the GeoParquet, always.
+- PMTiles z0–z5 are **counties**, not tracts — the Census Bureau's own county
+  estimates under the same column names, so one style classifies every zoom —
+  and z6–z12 are the tracts themselves. The tiles carry no `*_moe` columns.
+  Statistics come from the GeoParquet, always.
 
 ## Where to look next
 

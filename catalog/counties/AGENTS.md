@@ -225,7 +225,7 @@ Island areas carry geometry but no ACS data. American Samoa, Guam, the Northern 
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-The PMTiles carry real geometries at every zoom (no A5 cell band — the features are few enough to tile directly). Statistics still come from the GeoParquet.
+The PMTiles carry real geometries at every zoom — the features are few enough to tile directly, so there is no coarser-geography band at coarse zooms (the catalog's finer collections switch to counties and tracts there). Statistics still come from the GeoParquet.
 
 ## Related collections
 
@@ -374,5 +374,7 @@ first — `sqrt(sum(moe*moe))` over a NULL-bearing column returns NULL.
   [`block-groups/`](../block-groups/AGENTS.md).
 
 Statistics come from the GeoParquet. The county PMTiles archive is real
-polygons at every zoom (no A5 band), but it carries no `*_moe` or `*_cv`
-columns, so no reliability test above can be reproduced from tiles.
+polygons at every zoom — it needs no coarser-geography band at coarse zooms,
+and it is the file the finer collections' own coarse zooms are built from —
+but it carries no `*_moe` columns, so no test above that reads a margin of
+error can be reproduced from tiles.

@@ -102,7 +102,7 @@ Suffolk County, New York (36103) was re-delineated in the 2024 vintage: 39 block
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts summed, rates and medians averaged unweighted. Statistics come from the GeoParquet.
+PMTiles coarse zooms are a different census geography from this collection's: below z6 you are looking at counties, not tracts. The values there are the Census Bureau's own estimates for those geographies, not an aggregation of this file, and `*_moe` columns are not in the tiles. Statistics come from the GeoParquet.
 
 ## Related collections
 
@@ -233,5 +233,5 @@ skip the test.
   [`tracts/tract-wellbeing/AGENTS.md`](../tract-wellbeing/AGENTS.md).
 
 Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe`
-columns and its coarse zooms are A5 cell aggregations, so no significance test
-above can be reproduced from tiles.
+columns, and below z6 its features are counties rather than tracts, so no
+significance test above can be reproduced from tiles.

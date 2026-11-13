@@ -96,6 +96,10 @@ Geometry is TIGER/Line, which is not shoreline-clipped: a coastal block extends 
 
 Blocks carry 2020 Decennial counts only. The Census Bureau publishes no income, education, commuting or internet data below block group, and this collection invents none.
 
+PMTiles coarse zooms are a different census geography from this collection's: below z10 you are looking at counties and tracts, not blocks. Those bands carry exact sums of the block counts (rates recomputed from the summed counts), so they are consistent with the data — but the geometry and the `geoid` belong to the county or tract. Statistics come from the GeoParquet.
+
+Connecticut needs a crosswalk in those coarse bands. The 2020 block GEOIDs carry Connecticut's old 8-county prefixes (09001–09015), while the 2024 boundaries used for the county and tract bands are the 9 planning regions (09110–09190) that replaced them as the county equivalent in 2022. The build matches blocks to current geographies on the 6-digit tract number, which is preserved across the change, so no Connecticut population is dropped: the aggregates still sum to the published national block total of 334,735,155 exactly. The block rows themselves are untouched — they keep the 2020 GEOIDs, so a 5-character prefix join from Connecticut blocks to the 2024-vintage counties collection finds no match.
+
 ## Related collections
 
 - [`block-groups/`](../block-groups/catalog.json) — ACS indicators at the finest geography the Bureau publishes income and housing data for. A block's block group is `substr(geoid, 1, 12)`.
@@ -284,4 +288,6 @@ the files.
   [`tracts/tract-people/AGENTS.md`](../tracts/tract-people/AGENTS.md).
 
 Statistics come from the GeoParquet. The blocks PMTiles archive is for maps
-only, and its coarse zooms are A5 cell aggregations rather than census blocks.
+only, and below z10 its features are counties and tracts rather than census
+blocks — exact sums of these block counts, but carrying the county's or
+tract's `geoid` and geometry.

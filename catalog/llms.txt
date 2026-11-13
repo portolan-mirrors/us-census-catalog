@@ -49,7 +49,10 @@ hive_partitioning=true);
 -- WHERE bbox.xmin < east AND bbox.xmax > west AND bbox.ymin < north AND bbox.ymax > south
 
 Treat `*_cv` > 0.40 as unreliable; never sum medians across geographies; MOEs
-add in quadrature. PMTiles coarse zooms are A5 cell aggregations (counts
-summed, rates averaged) — use the GeoParquet for statistics.
+add in quadrature. PMTiles coarse zooms are a coarser census geography, not
+the collection's own — counties at z0–z5, tracts in the middle, carrying the
+Census Bureau's own estimates for those geographies — so use the GeoParquet
+for statistics and check the zoom before reading a tiled feature as a block
+group, tract, ZCTA or place.
 
 Source repository: https://github.com/portolan-mirrors/us-census-catalog

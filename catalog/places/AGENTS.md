@@ -230,7 +230,7 @@ Spot-checked against data.census.gov: Los Angeles city population 3,857,263 and 
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-PMTiles coarse zooms (z0–z5) are A5 cell aggregations, not census geographies — counts summed, rates and medians averaged unweighted; z6–z12 are the real polygons. Statistics come from the GeoParquet.
+PMTiles coarse zooms are a different census geography from this collection's: below z6 you are looking at counties, not places. The values there are the Census Bureau's own estimates for those geographies, not an aggregation of this file, and `*_moe` columns are not in the tiles. Statistics come from the GeoParquet.
 
 ## Related collections
 
@@ -361,6 +361,6 @@ that make up the rest of the 282 data-free rows.
 - For a total over an area, use geographies that tile the country:
   [`counties/AGENTS.md`](../counties/AGENTS.md).
 
-Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe` or
-`*_cv` columns and its z0–z5 zooms are A5 cell aggregations, so nothing above
-can be reproduced from tiles.
+Statistics come from the GeoParquet. The PMTiles archive carries no `*_moe`
+columns, and its z0–z5 features are counties rather than places, so nothing
+above can be reproduced from tiles.

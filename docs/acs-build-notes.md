@@ -939,3 +939,15 @@ the measured numbers, applied by the existing logic rather than by hand:
 - `staging/census-cache/` — `cb_2020_us_zcta520_500k.zip`,
   `cb_2024_us_place_500k.zip`, `cb_2024_us_cd119_500k.zip` downloaded
   (2026-11-12).
+
+## Tiles rebuilt as a census pyramid (2026-11-13)
+
+The A5 cell bands described above are gone. Every ACS archive is now built
+with `tylertoo pyramid`: county polygons at z0–z5 carrying the Census
+Bureau's own county estimates (column-pruned to each theme's schema by
+`tools/build_tile_staging.py`), tract polygons at z6–z7 in the `bg-*`
+archives, and the collection's own features below that — z8–z13 for block
+groups, z6–z12 for tracts, zctas and places. `*_moe` columns are excluded
+from every band, `*_cv` kept. The zoom, size and dedup findings above
+describe the old A5 build and are left as history; `docs/design.md` and
+`tools/make_tiles.py` hold the current design.
