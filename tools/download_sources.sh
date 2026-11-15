@@ -50,6 +50,11 @@ for t in b27001 b18101 b05002 b26001 b19013b b17020b b19013h b19013i b19013d; do
   get "$ACS_SF/data/5YRData/acsdt5y2024-$t.dat"
 done
 
+# --- ACS tables: income depth batch (bands, Gini, earnings, poverty by age) ---
+for t in b19001 b19083 b20002 b17001; do
+  get "$ACS_SF/data/5YRData/acsdt5y2024-$t.dat"
+done
+
 echo "DONE $(date)"
 ls -la | tail -3
 [ -f failures.log ] && { echo "FAILURES:"; cat failures.log; exit 1; }

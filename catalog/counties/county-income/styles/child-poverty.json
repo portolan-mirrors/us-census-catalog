@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Children below the poverty line",
+  "metadata": {
+    "description": "Share of residents under 18 with income below the federal poverty line, pale pink to deep magenta \u2014 not published for block groups. Measured over all 3,220 counties with a published value: 6 classes with breaks at 10%/15%/19%/26%/32%, which fall at the 19th/42nd/58th/80th/89th percentile of the national distribution.",
+    "portolan:column": "pct_below_poverty_under_18",
+    "portolan:breaks": [
+      10,
+      15,
+      19,
+      26,
+      32
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-income",
+      "filter": [
+        "has",
+        "pct_below_poverty_under_18"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_below_poverty_under_18"
+          ],
+          "#feebe2",
+          10,
+          "#fcc5c0",
+          15,
+          "#fa9fb5",
+          19,
+          "#f768a1",
+          26,
+          "#dd3497",
+          32,
+          "#7a0177"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-income",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

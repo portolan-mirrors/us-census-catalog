@@ -13,7 +13,7 @@ description: |
   coefficient of variation. Every geography is a sub-catalog of themed
   collections (income, people, housing, connectivity, wellbeing), and the
   five coarse-or-sparse geographies — counties, states, ZCTAs, places,
-  congressional districts — add a sixth collection carrying all 112 columns
+  congressional districts — add a sixth collection carrying all 135 columns
   in one wide table. One further collection carries 2020 Decennial Census
   P.L. 94-171 counts at block level, hive-partitioned by state.
   [data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and

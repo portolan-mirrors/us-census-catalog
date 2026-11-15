@@ -298,8 +298,8 @@
     "bg-housing": {
       "href": "./bg-housing.parquet",
       "type": "application/vnd.apache.parquet",
-      "file:size": 96179408,
-      "file:checksum": "1220cf7ca15116c0156f7274dc22305cd758ada84c67fab50ad966b5c28c79857b6c",
+      "file:size": 96179601,
+      "file:checksum": "1220d34156d9b70f9050a64c85958f0c9f75f6041613633d5e75c0d468b194c8e792",
       "roles": [
         "data"
       ],

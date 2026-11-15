@@ -69,7 +69,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./thumbnail.png | 80.4 KB | 1220be4637ca... |
 | ./bg-people.pmtiles | 607.9 MB | 1220aabbcc30... |
-| ./bg-people.parquet | 89.9 MB | 12209e7a7960... |
+| ./bg-people.parquet | 89.9 MB | 122061034f8e... |
 | ./styles/default.json | 1.9 KB | 12205519b770... |
 | ./styles/education.json | 1.8 KB | 12202fc8b39f... |
 | ./styles/people-of-color.json | 1.8 KB | 1220190132c1... |

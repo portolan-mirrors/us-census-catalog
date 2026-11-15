@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Children below the poverty line",
+  "metadata": {
+    "description": "Share of residents under 18 with income below the federal poverty line, pale pink to deep magenta \u2014 not published for block groups. Measured over all 29,774 places with a published value: 6 classes with breaks at 3%/10%/20%/32%/48%, which fall at the 30th/48th/67th/81st/91st percentile of the national distribution. 8.7% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_below_poverty_under_18",
+    "portolan:breaks": [
+      3,
+      10,
+      20,
+      32,
+      48
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-income",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_below_poverty_under_18"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-income",
+      "filter": [
+        "has",
+        "pct_below_poverty_under_18"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_below_poverty_under_18"
+          ],
+          "#feebe2",
+          3,
+          "#fcc5c0",
+          10,
+          "#fa9fb5",
+          20,
+          "#f768a1",
+          32,
+          "#dd3497",
+          48,
+          "#7a0177"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-income",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

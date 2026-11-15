@@ -286,8 +286,13 @@ def _b(breaks, file, default):
     return (breaks or {}).get(file, default)
 
 
-def income_styles(breaks=None):
-    return [
+def income_styles(breaks=None, extended=True):
+    """`extended=False` for bg-income: block groups carry neither
+    `gini_index` nor `pct_below_poverty_under_18` (B19083 and B17001 are
+    not published at block-group level — see tools/specs.py
+    INCOME_SPEC_BG), so the two styles below would reference a column that
+    does not exist in that collection's GeoParquet."""
+    styles = [
         S("default", "Median household income", "median_hh_income",
           _b(breaks, "default", [40000, 55000, 70000, 90000, 120000, 160000]),
           "viridis7",
@@ -306,6 +311,21 @@ def income_styles(breaks=None):
           "Unemployed share of the civilian labor force, pale lilac to deep "
           "purple"),
     ]
+    if extended:
+        styles.append(
+            S("gini", "Income inequality (Gini index)", "gini_index",
+              _b(breaks, "gini", [0.37, 0.40, 0.43, 0.47, 0.51]), "cividis6",
+              "Gini index of household income inequality, 0 (perfect "
+              "equality) to 1 (perfect inequality), navy (low) to gold "
+              "(high) — not published for block groups", fmt="num"))
+        styles.append(
+            S("child-poverty", "Children below the poverty line",
+              "pct_below_poverty_under_18",
+              _b(breaks, "child-poverty", [2, 7, 16, 30, 43]), "rdpu6",
+              "Share of residents under 18 with income below the federal "
+              "poverty line, pale pink to deep magenta — not published for "
+              "block groups"))
+    return styles
 
 
 # -- people -----------------------------------------------------------------
@@ -394,7 +414,8 @@ BG_TRACT = {
 
 STYLES = {}
 for _theme, _fn in BG_TRACT.items():
-    STYLES[f"bg-{_theme}"] = _fn()
+    STYLES[f"bg-{_theme}"] = (income_styles(extended=False) if _theme == "income"
+                              else _fn())
     STYLES[f"tract-{_theme}"] = _fn()
 
 # -- tract-wellbeing --------------------------------------------------------
@@ -575,6 +596,8 @@ WIDE_THEME_BREAKS = {
             "poverty": [8, 11, 14, 18, 25],
             "snap": [7, 10, 14, 17, 24],
             "unemployment": [3, 4, 5, 6, 8],
+            "gini": [0.42, 0.44, 0.46, 0.48, 0.50],
+            "child-poverty": [10, 15, 19, 26, 32],
         },
         "people": {
             "default": [2, 8, 20, 50, 150, 600],
@@ -607,6 +630,8 @@ WIDE_THEME_BREAKS = {
             "poverty": [10, 12, 14, 17, 22],
             "snap": [8.5, 11, 12, 14, 16],
             "unemployment": [3.5, 4.5, 5, 6, 6.5],
+            "gini": [0.45, 0.46, 0.47, 0.48, 0.49],
+            "child-poverty": [10, 13, 16, 19, 22],
         },
         "people": {
             "default": [5, 15, 40, 80, 150, 400],
@@ -646,6 +671,8 @@ WIDE_THEME_BREAKS = {
             "poverty": [5, 9, 13, 19, 28],
             "snap": [3, 7, 12, 17, 26],
             "unemployment": [1, 3, 4.5, 6.5, 10],
+            "gini": [0.37, 0.40, 0.43, 0.47, 0.50],
+            "child-poverty": [2, 8, 15, 27, 38],
         },
         "people": {
             "default": [5, 20, 60, 200, 600, 2000],
@@ -678,6 +705,8 @@ WIDE_THEME_BREAKS = {
             "poverty": [5, 9, 14, 20, 30],
             "snap": [2.5, 7.5, 13, 21, 32],
             "unemployment": [0.5, 2.5, 4.5, 7.5, 12],
+            "gini": [0.34, 0.39, 0.42, 0.46, 0.50],
+            "child-poverty": [3, 10, 20, 32, 48],
         },
         "people": {
             "default": [50, 125, 250, 500, 1000, 2000],
@@ -710,6 +739,8 @@ WIDE_THEME_BREAKS = {
             "poverty": [8, 10, 12, 15, 19],
             "snap": [7.5, 10, 13, 15, 20],
             "unemployment": [4, 5, 5.5, 6, 7],
+            "gini": [0.44, 0.45, 0.47, 0.48, 0.50],
+            "child-poverty": [10, 14, 17, 21, 25],
         },
         "people": {
             "default": [25, 75, 200, 600, 1500, 4000],
@@ -1009,6 +1040,8 @@ def fmt_value(x, fmt):
         return f"${x / 1000:g}k" if x >= 1000 else f"${x:g}"
     if fmt in ("dens", "km2"):
         return f"{x:,g}"
+    if fmt == "num":
+        return f"{x:g}"
     return f"{x:g}%"
 
 

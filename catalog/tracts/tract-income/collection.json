@@ -2,7 +2,7 @@
   "type": "Collection",
   "id": "tracts/tract-income",
   "stac_version": "1.1.0",
-  "description": "Income, poverty and employment: median household income and per capita income ([B19013](https://data.census.gov/table/ACSDT5Y2024.B19013), [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301)), the share of people below the poverty line and below twice it ([C17002](https://data.census.gov/table/ACSDT5Y2024.C17002)), the share of households receiving SNAP ([B22010](https://data.census.gov/table/ACSDT5Y2024.B22010)), and the unemployment rate as a share of the civilian labor force ([B23025](https://data.census.gov/table/ACSDT5Y2024.B23025)), plus total population ([B01003](https://data.census.gov/table/ACSDT5Y2024.B01003)) and population density for context.\n\nCurated indicators for all **85,184** census tracts in the United States, Puerto Rico and the island areas, from the U.S. Census Bureau's [American Community Survey](https://www.census.gov/programs-surveys/acs.html) **2020–2024 5-year estimates** (`acsdt5y2024`, the table-based [Summary File](https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/)). The Census Bureau calls the ACS \"the premier source of detailed information about the nation's people and housing\". The 5-year file is the only ACS release published at this geography: 1-year estimates stop well above it.\n\nEvery estimate ships with its margin of error — `<column>_moe`, at the 90% confidence level, the level the Census Bureau publishes — and the headline statistics also carry a coefficient of variation (`<column>_cv` = `moe / 1.645 / estimate`) so small-area noise can be flagged rather than mapped as if certain. Derived percentages propagate error with the Census Bureau's own formulas from [ACS Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf): sums add in quadrature, proportions use the subset formula with the ratio formula as fallback. ACS jam values for suppressed or unestimable cells are NULL here, never numbers, and medians are published as the Bureau publishes them — a median cannot be aggregated to a larger area. Each column's description names its ACS table, its exact universe, and the lines summed to make it.\n\nGeometries are the Census Bureau's [2024 cartographic boundary files](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) for census tracts (GENZ2024, 1:500,000), reprojected to EPSG:4326 and joined on `GEOID`. Cartographic rather than TIGER/Line because TIGER extends census geographies into open water while the cartographic files clip to the shoreline, which is what a choropleth wants. The boundary vintage matches the estimate vintage.\n\nThe join is driven by geometry, so a geography with 2024 boundaries but no ACS tabulation keeps its row with NULL values instead of disappearing: 126 tracts in the island areas, which have cartographic boundaries but no ACS 5-year estimates because the Island Areas run a separate decennial-only program. Suffolk County, New York was re-delineated in the 2024 vintage, which adds 14 tracts with boundaries and no matching ACS row. Keeping these rows means a national map has no holes and a consumer can see the absence; dropping them would make \"every US geography\" quietly mean something narrower.\n\nThis is one themed chunk of five at this geography. The other themes are [People & Education](../tract-people/collection.json), [Housing & Rent](../tract-housing/collection.json), [Commuting & Connectivity](../tract-connectivity/collection.json) and [Health, Disability & Income by Race](../tract-wellbeing/collection.json), split that way so a consumer who wants one theme reads one file. Chunks at the same geography hold the same rows and the same geometry, so they join 1:1 on `geoid`. There is no wide all-indicator table at this geography: a 112-column file over this many rows would make every consumer download all of it. A question that crosses themes either joins the chunks on `geoid` or steps up to [counties](../../counties/counties/collection.json). GEOIDs nest by prefix: `substr(geoid, 1, 5)` is the county and `substr(geoid, 1, 2)` the state, and a tract's block groups are the 12-character GEOIDs whose first 11 characters match it. Every other geography in this catalog is organized the same way — [block groups](../../block-groups/catalog.json), [counties](../../counties/catalog.json), [states](../../states/catalog.json), [ZCTAs](../../zctas/catalog.json), [places and CDPs](../../places/catalog.json) and [congressional districts](../../congressional-districts/catalog.json) — and the [blocks](../../blocks/collection.json) collection carries 2020 Decennial counts, a different survey and vintage rather than a finer version of these numbers.\n\nThe PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons carrying the Census Bureau's own published county estimates, and z6–z12 are the census tracts themselves. Thinning this many polygons down to a national zoom would show a biased subset (small urban geographies drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead of a thinned sample of this one. Every band carries the same column names, so one style expression classifies every zoom — but below z6 you are looking at counties, not tracts, and the values there are the Bureau's official estimates for those geographies, with their own meaning, rather than a visualization-only average: clicking a coarse feature identifies a real county by `geoid` and `name`. The `*_moe` columns are excluded from the tiles at every zoom — a margin of error is computed for one specific geography and cannot be carried across bands — while the `*_cv` columns are kept. Statistics come from the GeoParquet, never from the tiles.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "description": "Income, poverty and employment: median household income and per capita income ([B19013](https://data.census.gov/table/ACSDT5Y2024.B19013), [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301)), the share of people below the poverty line and below twice it ([C17002](https://data.census.gov/table/ACSDT5Y2024.C17002)), the share of households receiving SNAP ([B22010](https://data.census.gov/table/ACSDT5Y2024.B22010)), the unemployment rate as a share of the civilian labor force ([B23025](https://data.census.gov/table/ACSDT5Y2024.B23025)), the household income distribution collapsed to 7 shares from under $25,000 to $200,000 or more ([B19001](https://data.census.gov/table/ACSDT5Y2024.B19001)), and median earnings for workers with earnings ([B20002](https://data.census.gov/table/ACSDT5Y2024.B20002)) — plus, at every level but block groups, where the Census Bureau does not publish them, the Gini index of income inequality ([B19083](https://data.census.gov/table/ACSDT5Y2024.B19083)) and the poverty rate by age for children under 18 and adults 65 and over ([B17001](https://data.census.gov/table/ACSDT5Y2024.B17001)), plus total population ([B01003](https://data.census.gov/table/ACSDT5Y2024.B01003)) and population density for context.\n\nCurated indicators for all **85,184** census tracts in the United States, Puerto Rico and the island areas, from the U.S. Census Bureau's [American Community Survey](https://www.census.gov/programs-surveys/acs.html) **2020–2024 5-year estimates** (`acsdt5y2024`, the table-based [Summary File](https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/)). The Census Bureau calls the ACS \"the premier source of detailed information about the nation's people and housing\". The 5-year file is the only ACS release published at this geography: 1-year estimates stop well above it.\n\nEvery estimate ships with its margin of error — `<column>_moe`, at the 90% confidence level, the level the Census Bureau publishes — and the headline statistics also carry a coefficient of variation (`<column>_cv` = `moe / 1.645 / estimate`) so small-area noise can be flagged rather than mapped as if certain. Derived percentages propagate error with the Census Bureau's own formulas from [ACS Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf): sums add in quadrature, proportions use the subset formula with the ratio formula as fallback. ACS jam values for suppressed or unestimable cells are NULL here, never numbers, and medians are published as the Bureau publishes them — a median cannot be aggregated to a larger area. Each column's description names its ACS table, its exact universe, and the lines summed to make it.\n\nGeometries are the Census Bureau's [2024 cartographic boundary files](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) for census tracts (GENZ2024, 1:500,000), reprojected to EPSG:4326 and joined on `GEOID`. Cartographic rather than TIGER/Line because TIGER extends census geographies into open water while the cartographic files clip to the shoreline, which is what a choropleth wants. The boundary vintage matches the estimate vintage.\n\nThe join is driven by geometry, so a geography with 2024 boundaries but no ACS tabulation keeps its row with NULL values instead of disappearing: 126 tracts in the island areas, which have cartographic boundaries but no ACS 5-year estimates because the Island Areas run a separate decennial-only program. Suffolk County, New York was re-delineated in the 2024 vintage, which adds 14 tracts with boundaries and no matching ACS row. Keeping these rows means a national map has no holes and a consumer can see the absence; dropping them would make \"every US geography\" quietly mean something narrower.\n\nThis is one themed chunk of five at this geography. The other themes are [People & Education](../tract-people/collection.json), [Housing & Rent](../tract-housing/collection.json), [Commuting & Connectivity](../tract-connectivity/collection.json) and [Health, Disability & Income by Race](../tract-wellbeing/collection.json), split that way so a consumer who wants one theme reads one file. Chunks at the same geography hold the same rows and the same geometry, so they join 1:1 on `geoid`. There is no wide all-indicator table at this geography: a 135-column file over this many rows would make every consumer download all of it. A question that crosses themes either joins the chunks on `geoid` or steps up to [counties](../../counties/counties/collection.json). GEOIDs nest by prefix: `substr(geoid, 1, 5)` is the county and `substr(geoid, 1, 2)` the state, and a tract's block groups are the 12-character GEOIDs whose first 11 characters match it. Every other geography in this catalog is organized the same way — [block groups](../../block-groups/catalog.json), [counties](../../counties/catalog.json), [states](../../states/catalog.json), [ZCTAs](../../zctas/catalog.json), [places and CDPs](../../places/catalog.json) and [congressional districts](../../congressional-districts/catalog.json) — and the [blocks](../../blocks/collection.json) collection carries 2020 Decennial counts, a different survey and vintage rather than a finer version of these numbers.\n\nThe PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons carrying the Census Bureau's own published county estimates, and z6–z12 are the census tracts themselves. Thinning this many polygons down to a national zoom would show a biased subset (small urban geographies drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead of a thinned sample of this one. Every band carries the same column names, so one style expression classifies every zoom — but below z6 you are looking at counties, not tracts, and the values there are the Bureau's official estimates for those geographies, with their own meaning, rather than a visualization-only average: clicking a coarse feature identifies a real county by `geoid` and `name`. The `*_moe` columns are excluded from the tiles at every zoom — a margin of error is computed for one specific geography and cannot be carried across bands — while the `*_cv` columns are kept. Statistics come from the GeoParquet, never from the tiles.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
   "links": [
     {
       "rel": "agents",
@@ -197,6 +197,121 @@
       "description": "Margin of error for `pct_unemployed` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
     },
     {
+      "name": "pct_income_under_25k",
+      "type": "double",
+      "description": "Percent of households with income under $25,000 in the past 12 months. Universe: households. Lines 2–5 (\"Less than $10,000\" through \"$20,000 to $24,999\") of [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) (Household Income in the Past 12 Months) over line 1 — the first of 7 shares this catalog collapses B19001's 16 published brackets into."
+    },
+    {
+      "name": "pct_income_under_25k_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_income_under_25k` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_income_25_50k",
+      "type": "double",
+      "description": "Percent of households with income $25,000 to $49,999. Universe: households. Lines 6–10 of [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) over line 1."
+    },
+    {
+      "name": "pct_income_25_50k_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_income_25_50k` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_income_50_75k",
+      "type": "double",
+      "description": "Percent of households with income $50,000 to $74,999. Universe: households. Lines 11–12 of [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) over line 1 — the table's own brackets are $50,000–59,999 and $60,000–74,999, combined here to a $25,000-wide band like its neighbors."
+    },
+    {
+      "name": "pct_income_50_75k_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_income_50_75k` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_income_75_100k",
+      "type": "double",
+      "description": "Percent of households with income $75,000 to $99,999. Universe: households. Line 13 of [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) over line 1 — the one share in this collapse that is already a single published bracket."
+    },
+    {
+      "name": "pct_income_75_100k_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_income_75_100k` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_income_100_150k",
+      "type": "double",
+      "description": "Percent of households with income $100,000 to $149,999. Universe: households. Lines 14–15 of [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) over line 1."
+    },
+    {
+      "name": "pct_income_100_150k_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_income_100_150k` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_income_150_200k",
+      "type": "double",
+      "description": "Percent of households with income $150,000 to $199,999. Universe: households. Line 16 of [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) over line 1."
+    },
+    {
+      "name": "pct_income_150_200k_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_income_150_200k` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_income_200k_plus",
+      "type": "double",
+      "description": "Percent of households with income $200,000 or more. Universe: households. Line 17 of [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) over line 1 — the table's open-ended top bracket, published as-is."
+    },
+    {
+      "name": "pct_income_200k_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_income_200k_plus` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "median_earnings",
+      "type": "double",
+      "description": "Median earnings in the past 12 months, in 2024 inflation-adjusted dollars — wages, salary, and self-employment income, for people who have earnings. Universe: population 16 years and over with earnings in the past 12 months — a narrower universe than `median_hh_income`'s (households) or `per_capita_income`'s (total population): someone with no earnings, retired or unemployed, is outside it, so this is not comparable to either. Line 1 of [B20002](https://data.census.gov/table/ACSDT5Y2024.B20002) (Median Earnings in the Past 12 Months by Sex for the Population 16 Years and Over With Earnings), the combined-sex total; the male and female medians the table also publishes are not carried here."
+    },
+    {
+      "name": "median_earnings_moe",
+      "type": "double",
+      "description": "Margin of error for `median_earnings` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_earnings_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_earnings`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "gini_index",
+      "type": "double",
+      "description": "Gini index of income inequality among households, from 0 (perfect equality) to 1 (perfect inequality) — the Census Bureau's own summary statistic, not computed here from the income distribution. Universe: households. The single line of [B19083](https://data.census.gov/table/ACSDT5Y2024.B19083) (Gini Index of Income Inequality), published as the Census Bureau publishes it, to 4 decimal places. **Not published for block groups** — B19083 carries no block-group rows in this release (measured against the cached `.dat` file), which is why there is no `gini_index` column in `bg-income`; see that collection's known issues."
+    },
+    {
+      "name": "gini_index_moe",
+      "type": "double",
+      "description": "Margin of error for `gini_index` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "pct_below_poverty_under_18",
+      "type": "double",
+      "description": "Child poverty rate: percent of the population under 18 below the federal poverty level. Universe: population under 18 for whom poverty status is determined — narrower than `pct_below_poverty`'s all-ages universe, so the two percentages are not directly comparable. [B17001](https://data.census.gov/table/ACSDT5Y2024.B17001) (Poverty Status in the Past 12 Months by Sex by Age) bins ages non-standardly; the six under-18 age labels (\"Under 5 years\" through \"16 and 17 years\") each appear once under the below-poverty branch and once under the at-or-above branch, for each sex. The numerator sums the 12 below-poverty lines for those labels (lines 4–9 male, 18–23 female); the denominator adds the matching 12 at-or-above lines (33–38 male, 47–52 female) to get the full under-18 population for whom poverty status is determined. **Not published for block groups** — B17001 carries no block-group rows in this release (measured); see `bg-income`'s known issues."
+    },
+    {
+      "name": "pct_below_poverty_under_18_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_poverty_under_18` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_below_poverty_65_plus",
+      "type": "double",
+      "description": "Senior poverty rate: percent of the population 65 and over below the federal poverty level. Universe: population 65 and over for whom poverty status is determined. The two 65-and-over age labels of [B17001](https://data.census.gov/table/ACSDT5Y2024.B17001) (\"65 to 74 years\", \"75 years and over\") each appear once under the below-poverty branch and once under the at-or-above branch, for each sex. The numerator sums the 4 below-poverty lines for those labels (15, 16, 29, 30); the denominator adds the matching at-or-above lines (44, 45, 58, 59) to get the full 65-and-over population for whom poverty status is determined. **Not published for block groups** — B17001 carries no block-group rows in this release (measured); see `bg-income`'s known issues."
+    },
+    {
+      "name": "pct_below_poverty_65_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_poverty_65_plus` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
       "name": "geometry",
       "type": "binary",
       "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2024 cartographic boundary census tract file (GENZ2024, 1:500,000), which clips to the shoreline — TIGER/Line would extend the census tract into open water. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
@@ -253,8 +368,8 @@
     "tract-income": {
       "href": "./tract-income.parquet",
       "type": "application/vnd.apache.parquet",
-      "file:size": 55582340,
-      "file:checksum": "122033058c93e7fe3efcaa759077f057c9113dc1c848df3b74ac3a27f2d4d2ff9e63",
+      "file:size": 59663585,
+      "file:checksum": "122032dc287ba559aa930608ebb0845bc721fec7d3f7c3d6895e8d2d3fba89e59cb4",
       "roles": [
         "data"
       ],
@@ -270,8 +385,8 @@
       "pmtiles:layers": [
         "tract-income"
       ],
-      "file:size": 222187425,
-      "file:checksum": "122077aafe190aa09d64933f751627def3f2ff0cf1219a1873241185e2bba74d299a"
+      "file:size": 323229152,
+      "file:checksum": "1220633d0ea73dca321b76088091c2eec0c585bdf90d9750be9e0ffb25e6ea42a94f"
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -282,6 +397,17 @@
       "title": "Income & Poverty — Census Tracts rendered with the default style",
       "file:size": 90848,
       "file:checksum": "1220670e8a71d7a52e7d84b95aa5a7b1e01ae93ce1b8d39781091cf1de0262da6920"
+    },
+    "styles/child-poverty": {
+      "href": "./styles/child-poverty.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Children below the poverty line",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents under 18 with income below the federal poverty line, pale pink to deep magenta — not published for block groups. Measured over all 83,841 tracts with a published value: 6 classes with breaks at 2%/7%/16%/30%/43%, which fall at the 21st/39th/60th/80th/90th percentile of the national distribution.",
+      "file:size": 1882,
+      "file:checksum": "1220f2e6e4f8734241ada64e9772cc5ac48c6182ec5e499ac58230c5865a2ff3c093"
     },
     "styles/default": {
       "href": "./styles/default.json",
@@ -294,6 +420,17 @@
       "description": "Median household income, viridis dark purple (low) through teal and green to yellow (high). Measured over all 83,828 tracts with a published value: 7 classes with breaks at $40k/$55k/$70k/$90k/$120k/$160k, which fall at the 8th/22nd/41st/64th/83rd/94th percentile of the national distribution. 4.92% have a coefficient of variation above 0.3 and render faded — the estimate is real but its margin of error swamps it.",
       "file:size": 2313,
       "file:checksum": "12202fa6e1eb1f24efbae1ed2bd76ae2a862b224b03a4e3438bfcf8ca1c0c8abd129"
+    },
+    "styles/gini": {
+      "href": "./styles/gini.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Income inequality (Gini index)",
+      "roles": [
+        "style"
+      ],
+      "description": "Gini index of household income inequality, 0 (perfect equality) to 1 (perfect inequality), navy (low) to gold (high) — not published for block groups. Measured over all 84,191 tracts with a published value: 6 classes with breaks at 0.37/0.4/0.43/0.47/0.51, which fall at the 20th/38th/57th/78th/90th percentile of the national distribution.",
+      "file:size": 1880,
+      "file:checksum": "1220b6a40af3b9209fe4ffdc69064c3ffa13f50f28958b232620906cf10e87a7ed88"
     },
     "styles/poverty": {
       "href": "./styles/poverty.json",
@@ -339,6 +476,24 @@
       "file:size": 18313708,
       "file:checksum": "122038d1a992bb058d184009b10b9b34987279aee575e4323165cfb5706c69b6ca90"
     },
+    "source-b17001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b17001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B17001 — Poverty Status in the Past 12 Months by Sex by Age",
+      "description": "The upstream file this collection's B17001 columns were read from: one pipe-delimited row per geography, estimate (`B17001_E###`) and margin of error (`B17001_M###`) side by side, for every summary level in one national file. Universe: Population for whom poverty status is determined. Served by census.gov, not by this mirror; see [B17001](https://data.census.gov/table/ACSDT5Y2024.B17001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b19001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19001 — Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The upstream file this collection's B19001 columns were read from: one pipe-delimited row per geography, estimate (`B19001_E###`) and margin of error (`B19001_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ]
+    },
     "source-b19013": {
       "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013.dat",
       "type": "text/plain",
@@ -350,6 +505,15 @@
       "file:size": 17917916,
       "file:checksum": "1220b25a176b0e6c339b6f3a2a0d3d8446bf06f5f080b4395993ec9a8313efb1c229"
     },
+    "source-b19083": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19083.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19083 — Gini Index of Income Inequality",
+      "description": "The upstream file this collection's B19083 columns were read from: one pipe-delimited row per geography, estimate (`B19083_E###`) and margin of error (`B19083_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B19083](https://data.census.gov/table/ACSDT5Y2024.B19083) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ]
+    },
     "source-b19301": {
       "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19301.dat",
       "type": "text/plain",
@@ -360,6 +524,15 @@
       ],
       "file:size": 17123907,
       "file:checksum": "12209fc107e98fee7fa49bb8314560205569184fad65fb64b80adb5c5bdd83ccc409"
+    },
+    "source-b20002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b20002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B20002 — Median Earnings in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) by Sex for the Population 16 Years and Over With Earnings in the Past 12 Months",
+      "description": "The upstream file this collection's B20002 columns were read from: one pipe-delimited row per geography, estimate (`B20002_E###`) and margin of error (`B20002_M###`) side by side, for every summary level in one national file. Universe: Population 16 years and over with earnings. Served by census.gov, not by this mirror; see [B20002](https://data.census.gov/table/ACSDT5Y2024.B20002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ]
     },
     "source-b22010": {
       "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b22010.dat",

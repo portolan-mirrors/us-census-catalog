@@ -95,6 +95,8 @@ TABLE_UNIVERSE = {
                "Workers 16 years and over who did not work from home"),
     "B15003": ("Educational Attainment for the Population 25 Years and Over",
                "Population 25 years and over"),
+    "B17001": ("Poverty Status in the Past 12 Months by Sex by Age",
+               "Population for whom poverty status is determined"),
     "B17020B": ("Poverty Status in the Past 12 Months by Age (Black or "
                 "African American Alone)",
                 "Black or African American alone population for whom "
@@ -120,6 +122,13 @@ TABLE_UNIVERSE = {
                 "Inflation-Adjusted Dollars) (Hispanic or Latino "
                 "Householder)",
                 "Households with a householder who is Hispanic or Latino"),
+    "B19001": ("Household Income in the Past 12 Months (in 2024 "
+               "Inflation-Adjusted Dollars)", "Households"),
+    "B19083": ("Gini Index of Income Inequality", "Households"),
+    "B20002": ("Median Earnings in the Past 12 Months (in 2024 "
+               "Inflation-Adjusted Dollars) by Sex for the Population 16 "
+               "Years and Over With Earnings in the Past 12 Months",
+               "Population 16 years and over with earnings"),
     "B19301": ("Per Capita Income in the Past 12 Months (in 2024 "
                "Inflation-Adjusted Dollars)", "Total population"),
     "B22010": ("Receipt of Food Stamps/SNAP in the Past 12 Months by "
@@ -406,6 +415,88 @@ ACS_DOC = {
         "what an unemployment rate divides by. Line 5 (\"Unemployed\") over "
         f"line 3 of {acs_table('B23025')}. Members of the Armed Forces and "
         "people not in the labor force are excluded from both parts."),
+    "pct_income_under_25k": (
+        "Percent of households with income under $25,000 in the past 12 "
+        "months. Universe: households. Lines 2–5 (\"Less than $10,000\" "
+        f"through \"$20,000 to $24,999\") of {acs_table('B19001')} "
+        "(Household Income in the Past 12 Months) over line 1 — the first "
+        "of 7 shares this catalog collapses B19001's 16 published brackets "
+        "into."),
+    "pct_income_25_50k": (
+        "Percent of households with income $25,000 to $49,999. Universe: "
+        f"households. Lines 6–10 of {acs_table('B19001')} over line 1."),
+    "pct_income_50_75k": (
+        "Percent of households with income $50,000 to $74,999. Universe: "
+        f"households. Lines 11–12 of {acs_table('B19001')} over line 1 — "
+        "the table's own brackets are $50,000–59,999 and $60,000–74,999, "
+        "combined here to a $25,000-wide band like its neighbors."),
+    "pct_income_75_100k": (
+        "Percent of households with income $75,000 to $99,999. Universe: "
+        f"households. Line 13 of {acs_table('B19001')} over line 1 — the "
+        "one share in this collapse that is already a single published "
+        "bracket."),
+    "pct_income_100_150k": (
+        "Percent of households with income $100,000 to $149,999. Universe: "
+        f"households. Lines 14–15 of {acs_table('B19001')} over line 1."),
+    "pct_income_150_200k": (
+        "Percent of households with income $150,000 to $199,999. Universe: "
+        f"households. Line 16 of {acs_table('B19001')} over line 1."),
+    "pct_income_200k_plus": (
+        "Percent of households with income $200,000 or more. Universe: "
+        f"households. Line 17 of {acs_table('B19001')} over line 1 — the "
+        "table's open-ended top bracket, published as-is."),
+    "median_earnings": (
+        "Median earnings in the past 12 months, in 2024 inflation-adjusted "
+        "dollars — wages, salary, and self-employment income, for people "
+        "who have earnings. Universe: population 16 years and over with "
+        f"earnings in the past 12 months — a narrower universe than "
+        "`median_hh_income`'s (households) or `per_capita_income`'s (total "
+        "population): someone with no earnings, retired or unemployed, is "
+        f"outside it, so this is not comparable to either. Line 1 of "
+        f"{acs_table('B20002')} (Median Earnings in the Past 12 Months by "
+        "Sex for the Population 16 Years and Over With Earnings), the "
+        "combined-sex total; the male and female medians the table also "
+        "publishes are not carried here."),
+    "gini_index": (
+        "Gini index of income inequality among households, from 0 (perfect "
+        "equality) to 1 (perfect inequality) — the Census Bureau's own "
+        "summary statistic, not computed here from the income distribution. "
+        f"Universe: households. The single line of {acs_table('B19083')} "
+        "(Gini Index of Income Inequality), published as the Census Bureau "
+        "publishes it, to 4 decimal places. **Not published for block "
+        "groups** — B19083 carries no block-group rows in this release "
+        "(measured against the cached `.dat` file), which is why there is "
+        "no `gini_index` column in `bg-income`; see that collection's "
+        "known issues."),
+    "pct_below_poverty_under_18": (
+        "Child poverty rate: percent of the population under 18 below the "
+        "federal poverty level. Universe: population under 18 for whom "
+        "poverty status is determined — narrower than `pct_below_poverty`'s "
+        "all-ages universe, so the two percentages are not directly "
+        f"comparable. {acs_table('B17001')} (Poverty Status in the Past 12 "
+        "Months by Sex by Age) bins ages non-standardly; the six under-18 "
+        "age labels (\"Under 5 years\" through \"16 and 17 years\") each "
+        "appear once under the below-poverty branch and once under the "
+        "at-or-above branch, for each sex. The numerator sums the 12 "
+        "below-poverty lines for those labels (lines 4–9 male, 18–23 "
+        "female); the denominator adds the matching 12 at-or-above lines "
+        "(33–38 male, 47–52 female) to get the full under-18 population "
+        "for whom poverty status is determined. **Not published for block "
+        "groups** — B17001 carries no block-group rows in this release "
+        "(measured); see `bg-income`'s known issues."),
+    "pct_below_poverty_65_plus": (
+        "Senior poverty rate: percent of the population 65 and over below "
+        "the federal poverty level. Universe: population 65 and over for "
+        "whom poverty status is determined. The two 65-and-over age labels "
+        f"of {acs_table('B17001')} (\"65 to 74 years\", \"75 years and "
+        "over\") each appear once under the below-poverty branch and once "
+        "under the at-or-above branch, for each sex. The numerator sums the "
+        "4 below-poverty lines for those labels (15, 16, 29, 30); the "
+        "denominator adds the matching at-or-above lines (44, 45, 58, 59) "
+        "to get the full 65-and-over population for whom poverty status is "
+        "determined. **Not published for block groups** — B17001 carries "
+        "no block-group rows in this release (measured); see `bg-income`'s "
+        "known issues."),
 
     # --- people -----------------------------------------------------------
     "median_age": (

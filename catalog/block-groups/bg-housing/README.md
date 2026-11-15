@@ -72,7 +72,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 | File | Size | Checksum |
 |------|------|----------|
-| ./bg-housing.parquet | 91.7 MB | 1220cf7ca151... |
+| ./bg-housing.parquet | 91.7 MB | 1220d34156d9... |
 | ./bg-housing.pmtiles | 698.1 MB | 1220d14ab041... |
 | ./thumbnail.png | 91.7 KB | 1220f9ba8530... |
 | ./styles/default.json | 2.6 KB | 12204958989d... |

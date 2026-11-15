@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Income inequality (Gini index)",
+  "metadata": {
+    "description": "Gini index of household income inequality, 0 (perfect equality) to 1 (perfect inequality), navy (low) to gold (high) \u2014 not published for block groups. Measured over all 31,178 places with a published value: 6 classes with breaks at 0.34/0.39/0.42/0.46/0.5, which fall at the 21st/43rd/59th/79th/90th percentile of the national distribution.",
+    "portolan:column": "gini_index",
+    "portolan:breaks": [
+      0.34,
+      0.39,
+      0.42,
+      0.46,
+      0.5
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-income",
+      "filter": [
+        "has",
+        "gini_index"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "gini_index"
+          ],
+          "#00224e",
+          0.34,
+          "#35456c",
+          0.39,
+          "#666970",
+          0.42,
+          "#958f5f",
+          0.46,
+          "#cab969",
+          0.5,
+          "#fee838"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-income",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

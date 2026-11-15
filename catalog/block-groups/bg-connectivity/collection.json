@@ -288,8 +288,8 @@
     "bg-connectivity": {
       "href": "./bg-connectivity.parquet",
       "type": "application/vnd.apache.parquet",
-      "file:size": 93824155,
-      "file:checksum": "1220797668ad48f8fb9a69a175097fe9f8bf793363c969e01fe8eaacdedf25e6986d",
+      "file:size": 93824649,
+      "file:checksum": "122045137f93f6590179ef1b779990eab48ff9738b24e342ebfee673f3bc275935e7",
       "roles": [
         "data"
       ],

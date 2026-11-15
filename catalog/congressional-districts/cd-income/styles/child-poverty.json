@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Children below the poverty line",
+  "metadata": {
+    "description": "Share of residents under 18 with income below the federal poverty line, pale pink to deep magenta \u2014 not published for block groups. Measured over all 437 districts with a published value: 6 classes with breaks at 10%/14%/17%/21%/25%, which fall at the 18th/43rd/63rd/80th/90th percentile of the national distribution.",
+    "portolan:column": "pct_below_poverty_under_18",
+    "portolan:breaks": [
+      10,
+      14,
+      17,
+      21,
+      25
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-income",
+      "filter": [
+        "has",
+        "pct_below_poverty_under_18"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_below_poverty_under_18"
+          ],
+          "#feebe2",
+          10,
+          "#fcc5c0",
+          14,
+          "#fa9fb5",
+          17,
+          "#f768a1",
+          21,
+          "#dd3497",
+          25,
+          "#7a0177"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-income",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

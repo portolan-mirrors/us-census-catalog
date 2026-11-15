@@ -78,6 +78,19 @@ design, not by a bug.
 **Margins never reach the tiles.** Tiling excludes every `*_moe` property
 and keeps every `*_cv`.
 
+**Name the collections when you run build_acs.py.** A bare run rebuilds
+all 42 collections, because the wide tables need every theme's columns.
+The rebuild is value-neutral, which was verified in batch 2 by an EXCEPT
+both ways against the published file, geometry included. It is not
+byte-identical though, so it dirties files you did not mean to touch and
+forces a larger republish. Pass explicit ids instead.
+
+**A wide table's parquet belongs in the group directory.** `assemble()`
+in `build_acs.py` wrote it to `catalog/<group>/<id>/<id>.parquet` after
+the 2026-11-15 restructure, one level below where every published `../`
+href points. Fixed with `out_dir_for()`. Check this path after any
+change to the builder.
+
 ## Thumbnails
 
 chiitiler renders them. Settings: conus bbox `-125,24,-66,50`, framed to

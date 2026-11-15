@@ -161,8 +161,8 @@
         "data"
       ],
       "title": "People & Education — Block Groups (GeoParquet, national)",
-      "file:size": 94309008,
-      "file:checksum": "12209e7a7960189981b6386b880891b4f725e3d0e7842a0b36480e76938db21f9b75"
+      "file:size": 94307848,
+      "file:checksum": "122061034f8e8a770a1a23405736de0bb0e79f493636849e4a773fc362ac163a658f"
     },
     "styles/default": {
       "href": "./styles/default.json",

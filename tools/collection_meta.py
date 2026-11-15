@@ -345,8 +345,15 @@ THEME_LEAD = {
         f"capita income ({_t('B19013')}, {_t('B19301')}), the share of "
         "people below the poverty line and below twice it "
         f"({_t('C17002')}), the share of households receiving SNAP "
-        f"({_t('B22010')}), and the unemployment rate as a share of the "
-        f"civilian labor force ({_t('B23025')}), plus total population "
+        f"({_t('B22010')}), the unemployment rate as a share of the "
+        f"civilian labor force ({_t('B23025')}), the household income "
+        "distribution collapsed to 7 shares from under $25,000 to $200,000 "
+        f"or more ({_t('B19001')}), and median earnings for workers with "
+        f"earnings ({_t('B20002')}) — plus, at every level but block "
+        "groups, where the Census Bureau does not publish them, the Gini "
+        f"index of income inequality ({_t('B19083')}) and the poverty rate "
+        f"by age for children under 18 and adults 65 and over ({_t('B17001')})"
+        ", plus total population "
         f"({_t('B01003')}) and population density for context."),
     "people": (
         "Who lives here: median age and the shares under 18 and 65 or over "
@@ -390,7 +397,7 @@ THEME_LEAD = {
         "tenure, vehicles and commuting and internet access, health "
         "insurance and disability and nativity, and median household income "
         "by race and ethnicity. At this many features width costs little, so "
-        "the whole 112-column table is published here as well as a theme at "
+        "the whole 135-column table is published here as well as a theme at "
         "a time in the five themed chunks beside it — a cross-theme question "
         "needs no join."),
 }
@@ -935,10 +942,10 @@ def _siblings_para(cid: str) -> str:
                  for c in themed]
         joined = ", ".join(links[:-1]) + f" and {links[-1]}"
         return (
-            f"**This is the full table** — all 112 columns on every row, the "
+            f"**This is the full table** — all 135 columns on every row, the "
             f"file to read when a question crosses themes or when you want "
             f"one row with everything on it. The same rows are also published "
-            f"as {_NUM[len(themed)]} themed chunks of 23–34 columns each — "
+            f"as {_NUM[len(themed)]} themed chunks of 29–46 columns each — "
             f"{joined} — for a consumer who wants one theme and not the rest; "
             f"each carries the same `geoid`, the same geometry and the same "
             f"seven context columns, so it joins 1:1 back to this table. This "
@@ -955,7 +962,7 @@ def _siblings_para(cid: str) -> str:
         wide_clause = (
             f" A sixth collection, "
             f"[{THEME_TITLE['all']}](../{wide}/collection.json), carries all "
-            f"112 columns on the same rows in one wide table — at this many "
+            f"135 columns on the same rows in one wide table — at this many "
             f"features width costs little, so take that one if a question "
             f"crosses themes.")
     elif level == "bg":
@@ -966,7 +973,7 @@ def _siblings_para(cid: str) -> str:
     else:
         wide_clause = (
             " There is no wide all-indicator table at this geography: a "
-            "112-column file over this many rows would make every consumer "
+            "135-column file over this many rows would make every consumer "
             "download all of it. A question that crosses themes either joins "
             "the chunks on `geoid` or steps up to "
             "[counties](../../counties/counties/collection.json).")
@@ -1267,9 +1274,9 @@ GROUP_DESCRIPTIONS = {
         f"[people](./county-people/collection.json), "
         f"[housing](./county-housing/collection.json), "
         f"[connectivity](./county-connectivity/collection.json) and "
-        f"[wellbeing](./county-wellbeing/collection.json), 23–34 columns each "
+        f"[wellbeing](./county-wellbeing/collection.json), 29–46 columns each "
         f"— and the sixth, [all indicators](./counties/collection.json), is "
-        f"the wide 112-column table, whose GeoParquet and PMTiles stay at "
+        f"the wide 135-column table, whose GeoParquet and PMTiles stay at "
         f"`counties/counties.parquet` and `counties/counties.pmtiles`. All "
         f"six hold the same `geoid` and the same geometry and join 1:1. One "
         f"quirk to carry: `population_moe` is NULL on 3,103 of the 3,235 "
@@ -1288,7 +1295,7 @@ GROUP_DESCRIPTIONS = {
         f"[housing](./state-housing/collection.json), "
         f"[connectivity](./state-connectivity/collection.json), "
         f"[wellbeing](./state-wellbeing/collection.json) and the wide "
-        f"112-column [all indicators](./states/collection.json) table, whose "
+        f"135-column [all indicators](./states/collection.json) table, whose "
         f"GeoParquet and PMTiles stay at `states/states.parquet` and "
         f"`states/states.pmtiles`. All six hold the same `geoid` and the same "
         f"geometry and join 1:1; `population_moe` is NULL on all 56 rows "
@@ -1305,7 +1312,7 @@ GROUP_DESCRIPTIONS = {
         f"[housing](./zcta-housing/collection.json), "
         f"[connectivity](./zcta-connectivity/collection.json), "
         f"[wellbeing](./zcta-wellbeing/collection.json) and the wide "
-        f"112-column [all indicators](./zctas/collection.json) table, whose "
+        f"135-column [all indicators](./zctas/collection.json) table, whose "
         f"GeoParquet and PMTiles stay at `zctas/zctas.parquet` and "
         f"`zctas/zctas.pmtiles`. All six hold the same `geoid` and the same "
         f"geometry and join 1:1. The medians thin out at this geography — "
@@ -1327,7 +1334,7 @@ GROUP_DESCRIPTIONS = {
         f"[housing](./place-housing/collection.json), "
         f"[connectivity](./place-connectivity/collection.json), "
         f"[wellbeing](./place-wellbeing/collection.json) and the wide "
-        f"112-column [all indicators](./places/collection.json) table, whose "
+        f"135-column [all indicators](./places/collection.json) table, whose "
         f"GeoParquet and PMTiles stay at `places/places.parquet` and "
         f"`places/places.pmtiles`. All six hold the same `geoid` and the same "
         f"geometry and join 1:1. Most rows are small, so the suppression "
@@ -1351,7 +1358,7 @@ GROUP_DESCRIPTIONS = {
         f"[housing](./cd-housing/collection.json), "
         f"[connectivity](./cd-connectivity/collection.json), "
         f"[wellbeing](./cd-wellbeing/collection.json) and the wide "
-        f"112-column [all indicators]"
+        f"135-column [all indicators]"
         f"(./congressional-districts/collection.json) table, whose "
         f"GeoParquet and PMTiles stay at "
         f"`congressional-districts/congressional-districts.parquet` and "
@@ -1923,7 +1930,7 @@ def _pruned_para(cid: str) -> str:
     n = len(cd.columns_for(cid))
     return (
         f"This collection is a themed cut of "
-        f"[{TITLES[wide]}](../{wide}/collection.json), the wide 112-column "
+        f"[{TITLES[wide]}](../{wide}/collection.json), the wide 135-column "
         f"table at this geography: the same rows, the same geometry and the "
         f"same seven context columns, with {n} columns kept and the other "
         f"themes' dropped. Nothing is recomputed — every value here is the "
@@ -2353,6 +2360,23 @@ def known_issues(cid: str) -> str:
             "`per_capita_income` is incomplete upstream: B19301 "
             "publishes 242,069 block-group rows against 242,297 for "
             "B01003, and the missing 228 come through as NULL.")
+    if level == "bg" and cid == "bg-income":
+        items.append(
+            "**Three income-depth columns do not exist at block-group "
+            "level, and that is a Census Bureau publication gap, not a "
+            "build error.** B19083 (Gini index) and B17001 (poverty status "
+            "by age) carry no `1500000US`-prefixed rows in this release's "
+            "`.dat` files — every other summary level this catalog uses is "
+            "present in both files, block groups are the one exception "
+            "(measured 2026-11-15 against "
+            "`staging/census-cache/acsdt5y2024-b19083.dat` and "
+            "`-b17001.dat`). `gini_index`, `pct_below_poverty_under_18` and "
+            "`pct_below_poverty_65_plus` are omitted from this collection's "
+            "schema entirely rather than published as all-NULL columns; "
+            "`tract-income` and every coarser income collection carries all "
+            "three. Household income bands (`pct_income_*`, from B19001) "
+            "and `median_earnings` (B20002) ARE published at block-group "
+            "level and are carried here.")
     # Only the medians this collection actually carries: a known-issues list
     # that names a column the file does not have is noise at best.
     sparse = [(c, r) for c, r in SUPPRESSED_MEDIANS[level].items()
@@ -2521,7 +2545,7 @@ description: |
   coefficient of variation. Every geography is a sub-catalog of themed
   collections (income, people, housing, connectivity, wellbeing), and the
   five coarse-or-sparse geographies — counties, states, ZCTAs, places,
-  congressional districts — add a sixth collection carrying all 112 columns
+  congressional districts — add a sixth collection carrying all 135 columns
   in one wide table. One further collection carries 2020 Decennial Census
   P.L. 94-171 counts at block level, hive-partitioned by state.
   [data.census.gov]({DATA_CENSUS}) is authoritative; this is a mirror, and

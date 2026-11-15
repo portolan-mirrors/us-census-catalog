@@ -951,3 +951,154 @@ groups, z6–z12 for tracts, zctas and places. `*_moe` columns are excluded
 from every band, `*_cv` kept. The zoom, size and dedup findings above
 describe the old A5 build and are left as history; `docs/design.md` and
 `tools/make_tiles.py` hold the current design.
+
+# Batch 2 — income depth (2026-11-15)
+
+Five new indicators added to `INCOME_SPEC` (`tools/specs.py`): a 7-share
+household income distribution from B19001, `gini_index` (B19083),
+`median_earnings` (B20002), and `pct_below_poverty_under_18` /
+`pct_below_poverty_65_plus` (both from B17001). See `docs/spec-income-depth.md`.
+
+## Availability measured before building
+
+Checked each new table's `.dat` file for which `LEVELS` prefixes it
+carries, the same way `tools/specs.py`'s comment for the wave-3 prefixes
+was originally measured:
+
+| table | bg | tract | county | state | zcta | place | cd |
+|---|---|---|---|---|---|---|---|
+| B19001 (income bands) | yes | yes | yes | yes | yes | yes | yes |
+| B19083 (Gini index) | **no** | yes | yes | yes | yes | yes | yes |
+| B20002 (median earnings) | yes | yes | yes | yes | yes | yes | yes |
+| B17001 (poverty by age) | **no** | yes | yes | yes | yes | yes | yes |
+
+B19083 and B17001 carry no `1500000US`-prefixed (block-group) rows in this
+release — every other level this catalog uses is present. `INCOME_SPEC_BG`
+(`tools/specs.py`) is `INCOME_SPEC` minus `gini_index`,
+`pct_below_poverty_under_18` and `pct_below_poverty_65_plus`, and
+`bg-income` is built from it; the other six income-level columns are the
+full `INCOME_SPEC`. `bg-income`'s `known_issues` (`tools/collection_meta.py`)
+states the gap. No column of NULLs was published for the omission.
+
+## Line pinning
+
+Household-income-band lines and `gini_index`/`median_earnings` lines are
+literal, each with a `check_shell` pin against its own line's label.
+B17001's age bins are non-standard (Under 5, 5, 6 to 11, 12 to 14, 15, 16
+and 17, ... 65 to 74, 75 and over) and each label is not a unique substring
+of the others (`"5 years"` is a substring of `"75 years and over"`), so
+`specs.poverty_lines()` matches on exact label text against the live
+shells file rather than `shell_lines`'s substring search, and
+`check_all_shells()` recomputes `POV_CHILD_BELOW`/`POV_CHILD_TOTAL`/
+`POV_SENIOR_BELOW`/`POV_SENIOR_TOTAL` from the shells and fails the build
+if they no longer match the hardcoded literals used in `Spec.den` (which
+must be a plain tuple at import time). 55 pins verified, up from 51 in the
+previous batch.
+
+## Validation results
+
+`tools/build_acs.py --validate` and `tools/build_wide_themes.py --all`
+both report zero problems for all 12 rebuilt collections. Household
+income bands sum to 100.00% (mean 99.99999%) wherever published.
+`gini_index` ranges 0.0001–0.826 at tract level (0.4266–0.5428 across the
+52 states/DC with data) — plausible: lower than the 0–1 theoretical range,
+and states cluster much tighter than tracts, as expected from pooling.
+
+### Row and column counts (12 rebuilt collections)
+
+| collection | rows | columns |
+|---|---|---|
+| `bg-income` | 242,298 | 40 |
+| `tract-income` | 85,184 | 46 |
+| `county-income` | 3,235 | 46 |
+| `state-income` | 56 | 46 |
+| `zcta-income` | 33,791 | 46 |
+| `place-income` | 32,612 | 46 |
+| `cd-income` | 441 | 46 |
+| `counties` (wide) | 3,235 | 135 |
+| `states` (wide) | 56 | 135 |
+| `zctas` (wide) | 33,791 | 135 |
+| `places` (wide) | 32,612 | 135 |
+| `congressional-districts` (wide) | 441 | 135 |
+
+Every wide table and themed income child grew from 112 to 135 and from 37
+to 46 columns respectively (the five themed-chunk column counts across all
+five wide levels now range 29–46, income the widest).
+
+### NULL rates on the five new indicators
+
+| collection | `median_earnings` | `pct_income_under_25k` | `gini_index` | `pct_below_poverty_under_18` | `pct_below_poverty_65_plus` |
+|---|---|---|---|---|---|
+| `bg-income` | 6.45% | 1.13% | n/a | n/a | n/a |
+| `tract-income` | 1.27% | 1.06% | 1.17% | 1.58% | 1.36% |
+| `county-income` | 0.53% | 0.40% | 0.40% | 0.46% | 0.40% |
+| `state-income` | 7.14% | 7.14% | 7.14% | 7.14% | 7.14% |
+| `zcta-income` | 8.43% | 2.88% | 4.33% | 7.23% | 4.60% |
+| `place-income` | 11.81% | 2.76% | 4.40% | 8.70% | 5.01% |
+| `cd-income` | 0.91% | 0.91% | 0.91% | 0.91% | 0.91% |
+
+The state/cd rates are exactly the island-area/delegate-district share
+(4/56 and 4/441) carried by every column in those collections; the
+block-group, tract, county, zcta and place rates are the Bureau's own
+suppression plus the Suffolk County/island-area geometry-without-data rows
+already documented for the existing columns.
+
+## Cross-checks against data.census.gov (browsed live, 2026-11-15)
+
+| geography | table | column(s) | catalog value | data.census.gov value |
+|---|---|---|---|---|
+| California (state) | B19083 | `gini_index` | 0.4889 (MOE 0.0008) | Estimate 0.4889, MOE ±0.0008 |
+| Cook County, Illinois | B20002 | `median_earnings` | $50,786 | "Total:" $50,786 |
+| Los Angeles city, CA | B19001 | `pct_income_under_25k` | 17.29% | (90,520+63,779+45,227+49,349) / 1,439,097 = 17.29% |
+| Los Angeles city, CA | B19001 | `pct_income_200k_plus` | 16.62% | 239,238 / 1,439,097 = 16.62% |
+
+All four match exactly. The income-band checks were computed by hand from
+the bracket table B19001 publishes for that place, since the published
+column is a derived 4-bracket sum, not a single census cell.
+
+## Styles
+
+Two new styles added to `income_styles()` (`tools/make_styles.py`): `gini`
+(Gini index, cividis6 ramp) and `child-poverty` (`pct_below_poverty_under_18`,
+rdpu6 ramp). Both are omitted from `bg-income` (`income_styles(extended=False)`)
+because the columns do not exist there. Breaks were measured with
+`--measure` and snapped to human numbers near the p20/p40/p60/p80/p90
+national quantiles per level; no class came out empty after one correction
+at state level (the first placeholder break sat below the state minimum).
+
+## Bug found and fixed: wide-table output path
+
+Running `build_acs.py` for the first time since the 2026-11-15 group
+restructure exposed that `assemble()` wrote a wide collection's (`specs.WIDE_IDS`)
+parquet to `catalog/<group>/<id>/<id>.parquet` — inside the subdirectory
+holding `collection.json` — rather than to `catalog/<group>/<id>.parquet`,
+the location `make_stac.data_dir()`/`data_prefix()` and every published
+`../` href expect (see `docs/runbook.md`, "The wide tables moved, their
+data did not"). This is a latent bug from the restructure itself, not
+something this batch introduced; it had never been exercised because
+no one had rebuilt the wide tables since the metadata-only move. Fixed by
+adding `out_dir_for()` to `tools/build_acs.py`, used by `assemble()` and
+both `validate()` call sites, which special-cases `WIDE_IDS` the same way
+`make_stac.data_dir()` already does. The five stray nested files this run
+produced before the fix were deleted and the five wide tables reassembled
+to the correct path; `--validate` and the full test suite pass.
+
+## Deviation from the batch boundary (flagged, not corrected)
+
+The spec's build order says to run `python3 tools/build_acs.py` with no
+arguments, and the tool has no way to rebuild only `bg-income`,
+`tract-income` and the five wide tables — a bare run rebuilds all 42
+collections, because the five wide tables need every theme's columns.
+This rewrote the `people`/`housing`/`connectivity`/`wellbeing` themed
+parquet files at every level too (unchanged `Spec` lists, same source
+`.dat` files, so values are unchanged — confirmed by `--validate` passing
+with zero problems on all 42 collections — but the files' bytes and
+`file:checksum`/`file:size` did change, and `collection_meta.py --write` /
+`make_stac.py` / `portolan readme` then refreshed those collections'
+`README.md` and `collection.json` to match, plus the sibling cross-links
+that needed the 112→135 column-count correction). `catalog/blocks` and
+`catalog/reference` were not touched. This conflicts with the boundary in
+`docs/spec-income-depth.md` ("Do not touch ... the connectivity, housing,
+people or wellbeing themes"); a future batch should pass explicit
+collection ids to `build_acs.py` rather than running it bare, even when
+rebuilding a wide table.

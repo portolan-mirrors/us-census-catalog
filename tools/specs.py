@@ -110,6 +110,33 @@ CONTEXT_SPEC = [
     Spec("population", "count", "B01003", [1], None, ("B01003", 1, "Total")),
 ]
 
+#   B17001 (Poverty Status in the Past 12 Months by Sex by Age) bins ages in
+# a non-standard scheme: Under 5, 5, 6 to 11, 12 to 14, 15, 16 and 17, 18 to
+# 24, 25 to 34, 35 to 44, 45 to 54, 55 to 64, 65 to 74, 75 and over — each
+# label occurring four times (below-poverty male, below-poverty female,
+# at-or-above male, at-or-above female), ascending in that order. The two
+# "below poverty" occurrences of a label are its numerator lines; all four
+# are the "for whom poverty status is determined" denominator for that age
+# band. `poverty_lines` resolves both from the shells rather than trusting
+# four hand-counted integers per label, and `check_all_shells` recomputes
+# the literal line lists below against it so a vintage that renumbers one
+# fails the build instead of silently shifting a child- or senior-poverty
+# rate.
+POV_CHILD_LABELS = ["Under 5 years", "5 years", "6 to 11 years",
+                    "12 to 14 years", "15 years", "16 and 17 years"]
+POV_SENIOR_LABELS = ["65 to 74 years", "75 years and over"]
+
+# Literal line numbers for this vintage (ACS20245YR), derived once by the
+# same exact-label logic `poverty_lines` applies at build time — see
+# check_all_shells, which recomputes and compares. Only `check_all_shells`
+# needs to call `poverty_lines`; Spec.den is a plain tuple at import time
+# everywhere else in this module, and these stay consistent with that.
+POV_CHILD_BELOW = [4, 5, 6, 7, 8, 9, 18, 19, 20, 21, 22, 23]
+POV_CHILD_TOTAL = [4, 5, 6, 7, 8, 9, 18, 19, 20, 21, 22, 23,
+                   33, 34, 35, 36, 37, 38, 47, 48, 49, 50, 51, 52]
+POV_SENIOR_BELOW = [15, 16, 29, 30]
+POV_SENIOR_TOTAL = [15, 16, 29, 30, 44, 45, 58, 59]
+
 INCOME_SPEC = [
     Spec("median_hh_income", "median", "B19013", [1], None,
          ("B19013", 1, "Median household income"), cv=True),
@@ -123,7 +150,49 @@ INCOME_SPEC = [
          ("B22010", 2, "Household received Food Stamps/SNAP")),
     Spec("pct_unemployed", "pct", "B23025", [5], ("B23025", [3], []),
          ("B23025", 5, "Unemployed")),
+    # Household income distribution: B19001's 16 published brackets,
+    # collapsed to 7 shares. Published at every summary level this catalog
+    # uses, block groups included (measured against the cached .dat file).
+    Spec("pct_income_under_25k", "pct", "B19001", [2, 3, 4, 5],
+         ("B19001", [1], []), ("B19001", 2, "Less than $10,000")),
+    Spec("pct_income_25_50k", "pct", "B19001", [6, 7, 8, 9, 10],
+         ("B19001", [1], []), ("B19001", 6, "$25,000 to $29,999")),
+    Spec("pct_income_50_75k", "pct", "B19001", [11, 12],
+         ("B19001", [1], []), ("B19001", 11, "$50,000 to $59,999")),
+    Spec("pct_income_75_100k", "pct", "B19001", [13],
+         ("B19001", [1], []), ("B19001", 13, "$75,000 to $99,999")),
+    Spec("pct_income_100_150k", "pct", "B19001", [14, 15],
+         ("B19001", [1], []), ("B19001", 14, "$100,000 to $124,999")),
+    Spec("pct_income_150_200k", "pct", "B19001", [16],
+         ("B19001", [1], []), ("B19001", 16, "$150,000 to $199,999")),
+    Spec("pct_income_200k_plus", "pct", "B19001", [17],
+         ("B19001", [1], []), ("B19001", 17, "$200,000 or more")),
+    Spec("median_earnings", "median", "B20002", [1], None,
+         ("B20002", 1, "Total:"), cv=True),
+    # Gini index of income inequality. Not published for block groups —
+    # measured against the cached .dat file, see INCOME_SPEC_BG below — so
+    # this Spec is in the full INCOME_SPEC only.
+    Spec("gini_index", "median", "B19083", [1], None,
+         ("B19083", 1, "Gini Index")),
+    # Poverty by age. Also not published for block groups; see
+    # INCOME_SPEC_BG.
+    Spec("pct_below_poverty_under_18", "pct", "B17001", POV_CHILD_BELOW,
+         ("B17001", POV_CHILD_TOTAL, []), ("B17001", 4, "Under 5 years")),
+    Spec("pct_below_poverty_65_plus", "pct", "B17001", POV_SENIOR_BELOW,
+         ("B17001", POV_SENIOR_TOTAL, []), ("B17001", 15, "65 to 74 years")),
 ]
+
+# Block groups carry a restricted ACS table set: B19083 (Gini index) and
+# B17001 (poverty by age) are not published at block-group level (measured
+# against staging/census-cache/acsdt5y2024-b19083.dat and -b17001.dat: both
+# files carry every summary-level prefix this catalog uses EXCEPT
+# 1500000US, the block-group prefix — checked 2026-11-15). Household income
+# bands (B19001) and median earnings (B20002) ARE published at block-group
+# level, so only the three columns below are held back. See the bg-income
+# collection's known_issues for this.
+_BG_OMIT = {"gini_index", "pct_below_poverty_under_18",
+           "pct_below_poverty_65_plus"}
+INCOME_SPEC_BG = [s for s in INCOME_SPEC if s.name not in _BG_OMIT]
 
 PEOPLE_SPEC = [
     Spec("median_age", "median", "B01002", [1], None,
@@ -232,7 +301,7 @@ class Collection(NamedTuple):
 
 
 COLLECTIONS = [
-    Collection("block-groups", "bg-income", "bg", INCOME_SPEC),
+    Collection("block-groups", "bg-income", "bg", INCOME_SPEC_BG),
     Collection("block-groups", "bg-people", "bg", PEOPLE_SPEC),
     Collection("block-groups", "bg-housing", "bg", HOUSING_SPEC),
     Collection("block-groups", "bg-connectivity", "bg", CONNECTIVITY_SPEC),
@@ -345,6 +414,28 @@ def age_lines(labels: list[str]) -> list[int]:
     return out
 
 
+def poverty_lines(labels: list[str]) -> tuple[list[int], list[int]]:
+    """(below-poverty lines, total/denominator lines) for B17001 age labels.
+
+    B17001's labels are not unique substrings of each other ("5 years" is a
+    substring of "75 years and over"), so this matches on exact label text
+    against `shells()` directly rather than `shell_lines`'s substring
+    search. Each label occurs 4 times — below-poverty male, below-poverty
+    female, at-or-above male, at-or-above female, in ascending line order —
+    so the first two are the numerator and all four are the denominator.
+    """
+    below, total = [], []
+    for lab in labels:
+        found = sorted(line for t, line, label in shells()
+                       if t == "B17001" and label == lab)
+        if len(found) != 4:
+            raise RuntimeError(f"B17001 {lab!r}: expected 4 lines, got "
+                               f"{found}")
+        below += found[:2]
+        total += found
+    return sorted(below), sorted(total)
+
+
 def resolve_lines(spec_lines, table: str) -> list[int]:
     """Expand the named line groups that are derived from the shells."""
     if spec_lines == "UNDER18":
@@ -378,6 +469,22 @@ def check_all_shells() -> list[tuple[str, int, str]]:
     for group, table in (("UNDER18", "B01001"), ("OVER65", "B01001"),
                          ("NOINS", "B27001"), ("DISAB", "B18101")):
         resolve_lines(group, table)
+    # The B17001 poverty-by-age line lists are literals (Spec.den must be a
+    # plain tuple at import time), so re-derive them from the live shells
+    # and fail loudly if a vintage renumbered a line instead of silently
+    # publishing a wrong child- or senior-poverty rate.
+    child_below, child_total = poverty_lines(POV_CHILD_LABELS)
+    if (child_below, child_total) != (POV_CHILD_BELOW, POV_CHILD_TOTAL):
+        raise RuntimeError(
+            f"B17001 child-poverty lines moved: shells give "
+            f"below={child_below} total={child_total}, specs.py has "
+            f"below={POV_CHILD_BELOW} total={POV_CHILD_TOTAL}")
+    senior_below, senior_total = poverty_lines(POV_SENIOR_LABELS)
+    if (senior_below, senior_total) != (POV_SENIOR_BELOW, POV_SENIOR_TOTAL):
+        raise RuntimeError(
+            f"B17001 senior-poverty lines moved: shells give "
+            f"below={senior_below} total={senior_total}, specs.py has "
+            f"below={POV_SENIOR_BELOW} total={POV_SENIOR_TOTAL}")
     return pins
 
 

@@ -45,8 +45,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from specs import (ACS_RELEASE, BUILD, CACHE, COLLECTIONS, CONTEXT_SPEC,
-                   JAM, LEVELS, ROOT, STATE_USPS, Z90, check_all_shells,
-                   out_columns, resolve_lines, tables)
+                   JAM, LEVELS, ROOT, STATE_USPS, WIDE_IDS, Z90,
+                   check_all_shells, out_columns, resolve_lines, tables)
 
 CATALOG = ROOT / "catalog"
 GEO = ROOT / "staging" / "geo"
@@ -405,9 +405,26 @@ def state_expr(level: str) -> str:
     return "CAST(NULL AS VARCHAR)" if level == "zcta" else "u.usps"
 
 
+def out_dir_for(coll) -> Path:
+    """Directory holding a collection's parquet (and pmtiles).
+
+    A wide all-indicators table (specs.WIDE_IDS) keeps its collection.json
+    in catalog/<group>/<id>/ but its parquet one directory up at
+    catalog/<group>/<id>.parquet, so every published data URL survives the
+    group-restructure that moved the metadata but not the data — see
+    docs/runbook.md, "The wide tables moved, their data did not", and
+    make_stac.data_dir(), which encodes the same rule for the href side.
+    """
+    if coll.id in WIDE_IDS:
+        return CATALOG / coll.group
+    if coll.group:
+        return CATALOG / coll.group / coll.id
+    return CATALOG / coll.id
+
+
 def assemble(coll, con) -> dict:
     level = coll.level
-    out_dir = CATALOG / coll.group / coll.id if coll.group else CATALOG / coll.id
+    out_dir = out_dir_for(coll)
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"{coll.id}.parquet"
     tmp = BUILD / f"{coll.id}.duckdb.parquet"
@@ -514,9 +531,7 @@ def validate(only: set[str] | None = None) -> int:
     for coll in COLLECTIONS:
         if only and coll.id not in only:
             continue
-        out_dir = (CATALOG / coll.group / coll.id if coll.group
-                   else CATALOG / coll.id)
-        path = out_dir / f"{coll.id}.parquet"
+        path = out_dir_for(coll) / f"{coll.id}.parquet"
         if not path.exists():
             problems.append(f"{coll.id}: not built")
             continue
@@ -634,9 +649,7 @@ def validate(only: set[str] | None = None) -> int:
     for coll in COLLECTIONS:
         if only and coll.id not in only:
             continue
-        out_dir = (CATALOG / coll.group / coll.id if coll.group
-                   else CATALOG / coll.id)
-        path = out_dir / f"{coll.id}.parquet"
+        path = out_dir_for(coll) / f"{coll.id}.parquet"
         if not path.exists():
             continue
         cols = (["population", "pop_density"]

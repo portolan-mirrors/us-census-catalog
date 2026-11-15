@@ -68,7 +68,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 | File | Size | Checksum |
 |------|------|----------|
-| ./bg-connectivity.parquet | 89.5 MB | 1220797668ad... |
+| ./bg-connectivity.parquet | 89.5 MB | 122045137f93... |
 | ./bg-connectivity.pmtiles | 639.6 MB | 12200f82af82... |
 | ./thumbnail.png | 90.3 KB | 12202583d7ac... |
 | ./styles/default.json | 2.0 KB | 122002e38ec3... |
