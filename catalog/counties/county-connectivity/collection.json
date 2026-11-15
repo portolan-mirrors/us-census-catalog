@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/counties/county-connectivity/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "county-connectivity"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/counties/county-connectivity/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Commuting & Connectivity — Counties (GeoParquet, national)",
       "file:size": 12979251,
       "file:checksum": "1220357bd72f4188df8bf3e5b3e094166c033f7d3bdd40b43afd365fd386e1a7c6fa"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Commuting & Connectivity — Counties rendered with the default style",
+      "file:size": 101488,
+      "file:checksum": "12205e18c91815bc3b97858501d4a106582ba03da11e77d31153dcc8b6d641b23838"
     },
     "styles/default": {
       "href": "./styles/default.json",

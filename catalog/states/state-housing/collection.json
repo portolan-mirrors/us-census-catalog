@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/states/state-housing/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "state-housing"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/states/state-housing/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Housing & Rent — States (GeoParquet, national)",
       "file:size": 4073213,
       "file:checksum": "1220a12d8fb66e12171767906ba2c45bb7cd0b30b6079e26d9d2e9547a30722c7c9f"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Housing & Rent — States rendered with the default style",
+      "file:size": 26233,
+      "file:checksum": "12207680ab99d4f55469d266a46550408aaee5160ae122d71ecbe353656a242b150a"
     },
     "styles/default": {
       "href": "./styles/default.json",

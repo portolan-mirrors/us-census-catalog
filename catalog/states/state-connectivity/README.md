@@ -72,6 +72,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./state-connectivity.pmtiles | 1.6 MB | 1220545546c5... |
 | ./state-connectivity.parquet | 3.9 MB | 1220070c3f52... |
+| ./thumbnail.png | 25.4 KB | 12208799deca... |
 | ./styles/default.json | 2.2 KB | 1220ca502e91... |
 | ./styles/no-vehicle.json | 2.2 KB | 12201d5c9a7b... |
 | ./styles/transit-commute.json | 2.3 KB | 122048316562... |

@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-people/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "zcta-people"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-people/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "People & Education — ZIP Code Tabulation Areas (GeoParquet, national)",
       "file:size": 69568044,
       "file:checksum": "1220ccad7005e85eef7c6ef89d6d6679b924d2ca9cbc3572214437866421eb9730e0"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "People & Education — ZIP Code Tabulation Areas rendered with the default style",
+      "file:size": 93095,
+      "file:checksum": "1220833f0a8f3c2c0b14ba97e8695bd5242c8c0fdb7601268f203d0ce029d7ac2f33"
     },
     "styles/default": {
       "href": "./styles/default.json",

@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/counties/county-wellbeing/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "county-wellbeing"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/counties/county-wellbeing/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Health, Disability & Income by Race — Counties (GeoParquet, national)",
       "file:size": 13002446,
       "file:checksum": "122074e641a27a70a8bf4ec84337703e68ccd710500988b53902a1f84a1b50329d71"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Health, Disability & Income by Race — Counties rendered with the default style",
+      "file:size": 99651,
+      "file:checksum": "12209ecf9d2d4e2573b056e932a25597f44e02e8221184670b8c50d35f55e076c30b"
     },
     "styles/default": {
       "href": "./styles/default.json",

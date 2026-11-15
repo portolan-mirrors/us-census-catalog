@@ -72,6 +72,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./county-connectivity.pmtiles | 20.4 MB | 1220962879e4... |
 | ./county-connectivity.parquet | 12.4 MB | 1220357bd72f... |
+| ./thumbnail.png | 99.1 KB | 12205e18c918... |
 | ./styles/default.json | 2.2 KB | 122071305abc... |
 | ./styles/no-vehicle.json | 2.2 KB | 1220133c389a... |
 | ./styles/transit-commute.json | 2.1 KB | 1220c33191f7... |

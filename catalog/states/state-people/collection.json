@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/states/state-people/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "state-people"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/states/state-people/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "People & Education — States (GeoParquet, national)",
       "file:size": 4068829,
       "file:checksum": "12203ee2e25bbfc0e3d91fe8519b4ac4155f3a445bf35d5d09d16784d1714389849f"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "People & Education — States rendered with the default style",
+      "file:size": 26404,
+      "file:checksum": "1220425b8b0e404affb1fb2f3f5d45f086c16311e3d1e9b4fb0ce1ebbcaf56407176"
     },
     "styles/default": {
       "href": "./styles/default.json",

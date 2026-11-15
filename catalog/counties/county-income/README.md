@@ -65,6 +65,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./county-income.pmtiles | 18.0 MB | 122073db7592... |
 | ./county-income.parquet | 12.3 MB | 122053260d3e... |
+| ./thumbnail.png | 97.6 KB | 1220d031d6ea... |
 | ./styles/default.json | 2.3 KB | 1220d58c164b... |
 | ./styles/poverty.json | 2.2 KB | 1220c1de6309... |
 | ./styles/snap.json | 1.7 KB | 1220fbdbba18... |

@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/cd-people/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "cd-people"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/cd-people/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "People & Education — Congressional Districts (119th Congress) (GeoParquet, national)",
       "file:size": 8875880,
       "file:checksum": "122024b76fbfe6822a430ed40cadedfe41fea5dab3abb58e19a8544351a37a438e14"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "People & Education — Congressional Districts (119th Congress) rendered with the default style",
+      "file:size": 52343,
+      "file:checksum": "12206f07f9ba1ae86880627db2dce4b34ebd02fb01fa4d422d2f614e64aa7bd258db"
     },
     "styles/default": {
       "href": "./styles/default.json",

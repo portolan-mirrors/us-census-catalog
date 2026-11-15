@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-wellbeing/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "zcta-wellbeing"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-wellbeing/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Health, Disability & Income by Race — ZIP Code Tabulation Areas (GeoParquet, national)",
       "file:size": 69676429,
       "file:checksum": "122020863dec9ec6fb9a456bbf17c1777a450ee2386205339d623ca8308139ea4f2a"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Health, Disability & Income by Race — ZIP Code Tabulation Areas rendered with the default style",
+      "file:size": 92496,
+      "file:checksum": "12207f654c10dc2e5c06e49c265fd9c72502bb62adeeb664e8ef5a324e47fa4bac36"
     },
     "styles/default": {
       "href": "./styles/default.json",

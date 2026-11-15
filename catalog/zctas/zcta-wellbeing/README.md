@@ -76,6 +76,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./zcta-wellbeing.pmtiles | 209.8 MB | 122072da0b7f... |
 | ./zcta-wellbeing.parquet | 66.4 MB | 122020863dec... |
+| ./thumbnail.png | 90.3 KB | 12207f654c10... |
 | ./styles/default.json | 2.0 KB | 1220b361dcd6... |
 | ./styles/disability.json | 2.2 KB | 12208a31f132... |
 | ./styles/foreign-born.json | 1.8 KB | 12204bf4c64e... |

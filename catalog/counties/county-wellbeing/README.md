@@ -76,6 +76,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./county-wellbeing.pmtiles | 22.0 MB | 1220745b9f13... |
 | ./county-wellbeing.parquet | 12.4 MB | 122074e641a2... |
+| ./thumbnail.png | 97.3 KB | 12209ecf9d2d... |
 | ./styles/default.json | 2.2 KB | 122061dd45af... |
 | ./styles/disability.json | 2.2 KB | 1220df2853f3... |
 | ./styles/foreign-born.json | 1.8 KB | 122066ed7c4b... |

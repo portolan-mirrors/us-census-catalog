@@ -71,6 +71,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./cd-people.pmtiles | 9.7 MB | 1220790d8aed... |
 | ./cd-people.parquet | 8.5 MB | 122024b76fbf... |
+| ./thumbnail.png | 51.1 KB | 12206f07f9ba... |
 | ./styles/default.json | 1.8 KB | 122085fc3530... |
 | ./styles/education.json | 1.8 KB | 1220d130e18b... |
 | ./styles/people-of-color.json | 1.8 KB | 1220f16c687d... |

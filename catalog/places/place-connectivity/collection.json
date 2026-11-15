@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/places/place-connectivity/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "place-connectivity"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/places/place-connectivity/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Commuting & Connectivity — Places & CDPs (GeoParquet, national)",
       "file:size": 29240899,
       "file:checksum": "1220c21ce4f750d8277f271bf2f221ec68da5b7c04a42a13f27940296a5dd4010f0c"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Commuting & Connectivity — Places & CDPs rendered with the default style",
+      "file:size": 91648,
+      "file:checksum": "1220dbd23130745db670794527bb2eea45995bc9be0b2faeec10451fe18d5cf58d49"
     },
     "styles/default": {
       "href": "./styles/default.json",

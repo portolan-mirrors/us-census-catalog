@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/places/place-wellbeing/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "place-wellbeing"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/places/place-wellbeing/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Health, Disability & Income by Race — Places & CDPs (GeoParquet, national)",
       "file:size": 29180009,
       "file:checksum": "12204a9440ef5879817dce4dea2fbb0aa8eb9eaa75339eb23bd29723f4acad72b570"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Health, Disability & Income by Race — Places & CDPs rendered with the default style",
+      "file:size": 90499,
+      "file:checksum": "1220098d731cd94d743b1637bcdba86dc4b0b4078101000aaf5e3e679db1c415a5e8"
     },
     "styles/default": {
       "href": "./styles/default.json",

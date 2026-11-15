@@ -65,6 +65,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./zcta-income.pmtiles | 185.2 MB | 122009fee481... |
 | ./zcta-income.parquet | 66.2 MB | 122046dbfeed... |
+| ./thumbnail.png | 92.2 KB | 12206ce1d681... |
 | ./styles/default.json | 2.7 KB | 12207364ab0c... |
 | ./styles/poverty.json | 2.0 KB | 122012fc571a... |
 | ./styles/snap.json | 1.8 KB | 122052f573ed... |

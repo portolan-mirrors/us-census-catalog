@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/cd-housing/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "cd-housing"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/cd-housing/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Housing & Rent — Congressional Districts (119th Congress) (GeoParquet, national)",
       "file:size": 8882514,
       "file:checksum": "12200ce140367d18bbd715f47275fea137431eb324697601e6485081c8d346bc0b5f"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Housing & Rent — Congressional Districts (119th Congress) rendered with the default style",
+      "file:size": 52457,
+      "file:checksum": "122061e3e337f0c74826590367954a37888124d9de5a9ba70a8f4a8dd79e77b36b83"
     },
     "styles/default": {
       "href": "./styles/default.json",

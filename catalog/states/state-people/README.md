@@ -71,6 +71,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./state-people.pmtiles | 1.5 MB | 12205b151f32... |
 | ./state-people.parquet | 3.9 MB | 12203ee2e25b... |
+| ./thumbnail.png | 25.8 KB | 1220425b8b0e... |
 | ./styles/default.json | 2.2 KB | 1220e4d7476a... |
 | ./styles/education.json | 2.2 KB | 122039ab9d69... |
 | ./styles/people-of-color.json | 2.2 KB | 1220acdb1670... |

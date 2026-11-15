@@ -74,6 +74,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./zcta-housing.pmtiles | 219.4 MB | 12203ae3b4b2... |
 | ./zcta-housing.parquet | 66.7 MB | 1220c4245268... |
+| ./thumbnail.png | 92.2 KB | 1220338f0196... |
 | ./styles/default.json | 2.7 KB | 1220bfe04b84... |
 | ./styles/ownership.json | 1.8 KB | 1220e0a2b20c... |
 | ./styles/pre-1940.json | 1.8 KB | 1220eb25dcb7... |

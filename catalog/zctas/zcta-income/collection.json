@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-income/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "zcta-income"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-income/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Income & Poverty — ZIP Code Tabulation Areas (GeoParquet, national)",
       "file:size": 69418807,
       "file:checksum": "122046dbfeed9f8e3cd4a6bf852f4dcb9508db21d3b58fb16ef0934cbbd6a3cec667"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Income & Poverty — ZIP Code Tabulation Areas rendered with the default style",
+      "file:size": 94418,
+      "file:checksum": "12206ce1d681e9d362de923e41d1abd157734edf8546618be27be6f22391b1d285c4"
     },
     "styles/default": {
       "href": "./styles/default.json",

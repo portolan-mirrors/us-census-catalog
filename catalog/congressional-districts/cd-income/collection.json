@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/cd-income/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "cd-income"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/cd-income/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Income & Poverty — Congressional Districts (119th Congress) (GeoParquet, national)",
       "file:size": 8868131,
       "file:checksum": "1220e5ba7f1ed7b78cd5a745ce3fc4a22fbbf1a50472e9861f31eae29f7074de5adb"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Income & Poverty — Congressional Districts (119th Congress) rendered with the default style",
+      "file:size": 54623,
+      "file:checksum": "12208441943d9c2c8bca6b82b2ab2b3e98a7c10bd1f0ec3d1217624f3cefda4b51df"
     },
     "styles/default": {
       "href": "./styles/default.json",

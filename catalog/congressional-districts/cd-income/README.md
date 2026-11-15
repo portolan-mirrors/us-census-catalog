@@ -65,6 +65,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./cd-income.pmtiles | 9.2 MB | 1220c9931c93... |
 | ./cd-income.parquet | 8.5 MB | 1220e5ba7f1e... |
+| ./thumbnail.png | 53.3 KB | 12208441943d... |
 | ./styles/default.json | 1.9 KB | 1220046660f6... |
 | ./styles/poverty.json | 1.8 KB | 1220b00fa61e... |
 | ./styles/snap.json | 1.7 KB | 12200e7c4a98... |

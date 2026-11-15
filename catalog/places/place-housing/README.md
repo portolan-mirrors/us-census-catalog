@@ -74,6 +74,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./place-housing.pmtiles | 94.7 MB | 1220d88ae319... |
 | ./place-housing.parquet | 28.2 MB | 122053122e8e... |
+| ./thumbnail.png | 91.9 KB | 12203f56567f... |
 | ./styles/default.json | 2.6 KB | 1220b9841022... |
 | ./styles/ownership.json | 1.8 KB | 1220e29cabbf... |
 | ./styles/pre-1940.json | 1.8 KB | 122059eb1643... |

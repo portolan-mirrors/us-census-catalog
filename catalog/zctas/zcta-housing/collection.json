@@ -17,6 +17,12 @@
       "title": "Collection README"
     },
     {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-housing/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -60,12 +66,6 @@
       "pmtiles:layers": [
         "zcta-housing"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-housing/collection.json",
-      "type": "text/html",
-      "title": "Open in the Portolan Browser (interactive map)"
     }
   ],
   "stac_extensions": [
@@ -142,6 +142,16 @@
       "title": "Housing & Rent — ZIP Code Tabulation Areas (GeoParquet, national)",
       "file:size": 69944559,
       "file:checksum": "1220c4245268934017c27304d14f6be1cac57ce7c9a6ceaf8aeb41674c7f13f24aa0"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Housing & Rent — ZIP Code Tabulation Areas rendered with the default style",
+      "file:size": 94453,
+      "file:checksum": "1220338f01962a347828593dde16159924d43c9edb87ade72c71a9486344e2ea393c"
     },
     "styles/default": {
       "href": "./styles/default.json",
