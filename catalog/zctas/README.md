@@ -154,7 +154,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./zctas.pmtiles | 455.9 MB | 12201552af02... |
 | ./zctas.parquet | 71.7 MB | 122045e7bd0d... |
-| ./thumbnail.png | 71.3 KB | 122075a3d2e9... |
+| ./thumbnail.png | 92.2 KB | 12206ce1d681... |
 | ./styles/default.json | 2.6 KB | 122029ff610b... |
 | ./styles/density.json | 1.8 KB | 1220ed33e661... |
 | ./styles/home-value.json | 2.6 KB | 1220d9d0c496... |

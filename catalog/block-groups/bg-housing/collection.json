@@ -325,8 +325,8 @@
         "thumbnail"
       ],
       "title": "Housing & Rent — Block Groups rendered with the default style",
-      "file:size": 71685,
-      "file:checksum": "122006aad866795051ad2e7b51d49620d7e8b0e3d370c28c5c0fa80906acdd27c632"
+      "file:size": 93919,
+      "file:checksum": "1220f9ba8530a09377ada50a209a5a5ad5d38a79ed922767d8f5738267674dcf124b"
     },
     "styles/default": {
       "href": "./styles/default.json",

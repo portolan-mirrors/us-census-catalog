@@ -335,8 +335,8 @@
         "thumbnail"
       ],
       "title": "Health, Disability & Income by Race — Census Tracts rendered with the default style",
-      "file:size": 64326,
-      "file:checksum": "1220a4933186ff0e04b2a169e97110b26750fa239f0d9fd9995945dedd48ee0bbed6"
+      "file:size": 90641,
+      "file:checksum": "1220f0a28b117291951d406f2eccbaa7dbcaf3b4131a565b2ec3d22b53406bd9f8aa"
     },
     "styles/default": {
       "href": "./styles/default.json",

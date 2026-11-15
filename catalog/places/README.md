@@ -154,7 +154,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./places.pmtiles | 197.0 MB | 1220c7c9e138... |
 | ./places.parquet | 32.9 MB | 1220f1f1d496... |
-| ./thumbnail.png | 75.6 KB | 12203b84a9b1... |
+| ./thumbnail.png | 90.4 KB | 122009888932... |
 | ./styles/default.json | 2.6 KB | 1220121597ce... |
 | ./styles/density.json | 1.8 KB | 1220855d7c77... |
 | ./styles/home-value.json | 2.6 KB | 1220c62fffce... |

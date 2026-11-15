@@ -310,8 +310,8 @@
         "thumbnail"
       ],
       "title": "People & Education — Census Tracts rendered with the default style",
-      "file:size": 71347,
-      "file:checksum": "12201818e92d7c9a4aa0b7beca953bda6b0a5bf2cb20d749d4fd96673d9997c54e5d"
+      "file:size": 82322,
+      "file:checksum": "1220be4637ca78a104095acb9833168980e6867ea150b23be7b0cab80e4ee27300c6"
     },
     "styles/default": {
       "href": "./styles/default.json",

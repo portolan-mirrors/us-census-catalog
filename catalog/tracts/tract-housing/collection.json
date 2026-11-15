@@ -138,8 +138,8 @@
         "thumbnail"
       ],
       "title": "Housing & Rent — Census Tracts rendered with the default style",
-      "file:size": 68861,
-      "file:checksum": "12204105767a9942bd4b4141c5a38f6649ba7ec4463a0b8a5289d9dcbfe3b16e0894"
+      "file:size": 93274,
+      "file:checksum": "12207ec15f3145ab4b9d2d97bdfe6499a83485656565b3beb9babb820945f5cc0fec"
     },
     "tract-housing-tiles": {
       "href": "./tract-housing.pmtiles",

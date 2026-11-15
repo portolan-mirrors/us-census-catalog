@@ -280,8 +280,8 @@
         "thumbnail"
       ],
       "title": "Income & Poverty — Census Tracts rendered with the default style",
-      "file:size": 66582,
-      "file:checksum": "1220d4a5c0897720ee8f165af7f7e60ba9ed1ee1393a3193b292ff931fd1c6816ddd"
+      "file:size": 90848,
+      "file:checksum": "1220670e8a71d7a52e7d84b95aa5a7b1e01ae93ce1b8d39781091cf1de0262da6920"
     },
     "styles/default": {
       "href": "./styles/default.json",

@@ -138,8 +138,8 @@
         "thumbnail"
       ],
       "title": "Commuting & Connectivity — Census Tracts rendered with the default style",
-      "file:size": 65039,
-      "file:checksum": "1220970789e27ffa2cb7c2613644ea68d0ee20d2514a5717562538670ac26cb185cd"
+      "file:size": 92449,
+      "file:checksum": "12202583d7ac489e2e8dadf3d4f9843d6d242481b1875c0f2eb71738bf6da455b504"
     },
     "tract-connectivity-tiles": {
       "href": "./tract-connectivity.pmtiles",

@@ -138,8 +138,8 @@
         "thumbnail"
       ],
       "title": "Income & Poverty — Block Groups rendered with the default style",
-      "file:size": 70276,
-      "file:checksum": "1220cd4ef01809579e1af68c9e867a56be4f12fbbc3be16c373f4faf9b5195ab6680"
+      "file:size": 90978,
+      "file:checksum": "1220dff528dea69cc274b828696dbe509e1cad4ac82d84779cf7538fdde049c3f444"
     },
     "bg-income-tiles": {
       "href": "./bg-income.pmtiles",

@@ -70,7 +70,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./bg-connectivity.parquet | 89.5 MB | 1220797668ad... |
 | ./bg-connectivity.pmtiles | 639.6 MB | 12200f82af82... |
-| ./thumbnail.png | 65.2 KB | 12209fdfc3e1... |
+| ./thumbnail.png | 90.3 KB | 12202583d7ac... |
 | ./styles/default.json | 2.0 KB | 122002e38ec3... |
 | ./styles/no-vehicle.json | 2.0 KB | 122030a7b741... |
 | ./styles/transit-commute.json | 2.3 KB | 12206a8f7861... |

@@ -69,7 +69,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./tract-people.parquet | 53.2 MB | 12204c23de26... |
 | ./tract-people.pmtiles | 217.2 MB | 12205b75c779... |
-| ./thumbnail.png | 69.7 KB | 12201818e92d... |
+| ./thumbnail.png | 80.4 KB | 1220be4637ca... |
 | ./styles/default.json | 1.9 KB | 122096667d82... |
 | ./styles/education.json | 1.8 KB | 1220c963c0e1... |
 | ./styles/people-of-color.json | 1.8 KB | 122035bb1ded... |

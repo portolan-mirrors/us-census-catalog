@@ -63,7 +63,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 | File | Size | Checksum |
 |------|------|----------|
-| ./thumbnail.png | 68.6 KB | 1220cd4ef018... |
+| ./thumbnail.png | 88.8 KB | 1220dff528de... |
 | ./bg-income.pmtiles | 598.5 MB | 1220b87f92ff... |
 | ./bg-income.parquet | 89.2 MB | 12209693f4da... |
 | ./styles/default.json | 2.6 KB | 1220a4e438c5... |

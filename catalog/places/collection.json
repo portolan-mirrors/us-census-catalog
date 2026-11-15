@@ -161,8 +161,8 @@
         "thumbnail"
       ],
       "title": "All Indicators — Places & CDPs rendered with the default style",
-      "file:size": 77373,
-      "file:checksum": "12203b84a9b17514cff365103a141cf198ee14360d977f4d15a1fe78416030281dac"
+      "file:size": 92561,
+      "file:checksum": "12200988893273101ac8a0366ee7723cb0e2f0351698419971a254650b38d326e2e4"
     },
     "styles/default": {
       "href": "./styles/default.json",

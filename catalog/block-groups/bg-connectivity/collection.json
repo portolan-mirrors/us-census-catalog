@@ -315,8 +315,8 @@
         "thumbnail"
       ],
       "title": "Commuting & Connectivity — Block Groups rendered with the default style",
-      "file:size": 66804,
-      "file:checksum": "12209fdfc3e184660d073fe8852f626bc9f1d47156ee6a2eda20ca22257b908e3e15"
+      "file:size": 92449,
+      "file:checksum": "12202583d7ac489e2e8dadf3d4f9843d6d242481b1875c0f2eb71738bf6da455b504"
     },
     "styles/default": {
       "href": "./styles/default.json",

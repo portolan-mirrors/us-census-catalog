@@ -63,7 +63,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 |------|------|----------|
 | ./tract-income.parquet | 53.0 MB | 122033058c93... |
 | ./tract-income.pmtiles | 211.9 MB | 122077aafe19... |
-| ./thumbnail.png | 65.0 KB | 1220d4a5c089... |
+| ./thumbnail.png | 88.7 KB | 1220670e8a71... |
 | ./styles/default.json | 2.3 KB | 12202fa6e1eb... |
 | ./styles/poverty.json | 2.0 KB | 12201e432775... |
 | ./styles/snap.json | 1.7 KB | 1220cc829a8e... |

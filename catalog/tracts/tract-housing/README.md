@@ -70,7 +70,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 | File | Size | Checksum |
 |------|------|----------|
-| ./thumbnail.png | 67.2 KB | 12204105767a... |
+| ./thumbnail.png | 91.1 KB | 12207ec15f31... |
 | ./tract-housing.pmtiles | 255.2 MB | 1220c0231814... |
 | ./tract-housing.parquet | 54.1 MB | 122097f82b99... |
 | ./styles/default.json | 2.2 KB | 122064e466fe... |
