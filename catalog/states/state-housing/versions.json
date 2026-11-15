@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:55.281600Z",
+      "breaking": false,
+      "assets": {
+        "state-housing.parquet": {
+          "sha256": "a12d8fb66e12171767906ba2c45bb7cd0b30b6079e26d9d2e9547a30722c7c9f",
+          "size_bytes": 4073213,
+          "href": "states/state-housing/state-housing.parquet",
+          "source_mtime": 1794742542.8511624,
+          "mtime": 1794742542.8511624,
+          "feature_count": 56,
+          "schema_fingerprint": "b18041770030df74"
+        },
+        "state-housing.pmtiles": {
+          "sha256": "2e489ce3749b107fa0f226941c7f2a8ea4beaf3f72d12950220b4a54dc110b83",
+          "size_bytes": 1692560,
+          "href": "states/state-housing/state-housing.pmtiles",
+          "mtime": 1794742627.9203577
+        }
+      },
+      "changes": [
+        "state-housing.parquet",
+        "state-housing.pmtiles"
+      ]
+    }
+  ]
+}

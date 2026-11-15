@@ -106,7 +106,7 @@ PMTiles coarse zooms are a different census geography from this collection's: be
 - [`tracts/tract-connectivity`](../tract-connectivity/collection.json) — Commuting & Connectivity, same geography. Same `geoid`, joins 1:1.
 - [`tracts/tract-wellbeing`](../tract-wellbeing/collection.json) — Health, Disability & Income by Race, same geography. Same `geoid`, joins 1:1.
 - [`block-groups/bg-income`](../../block-groups/bg-income/collection.json) — the same theme one geography down, with wider margins of error.
-- [`counties`](../../counties/collection.json) and [`states`](../../states/collection.json) — every indicator in one wide table per geography.
+- [`counties`](../../counties/counties/collection.json) and [`states`](../../states/states/collection.json) — every indicator in one wide table per geography; each is also a group of five themed chunks matching these ([counties/](../../counties/AGENTS.md), [states/](../../states/AGENTS.md)).
 - [`blocks`](../../blocks/collection.json) — 2020 Decennial counts at block level. Different survey, different vintage, no margins of error.
 
 ## Example queries

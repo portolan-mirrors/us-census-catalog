@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "People with a disability",
+  "metadata": {
+    "description": "Share of the civilian non-institutionalized population reporting a disability, pale pink to deep magenta. Measured over all 437 districts with a published value: 6 classes with breaks at 11%/12%/14%/15%/17%, which fall at the 22nd/34th/60th/73rd/91st percentile of the national distribution.",
+    "portolan:column": "pct_with_disability",
+    "portolan:breaks": [
+      11,
+      12,
+      14,
+      15,
+      17
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-wellbeing",
+      "filter": [
+        "has",
+        "pct_with_disability"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_with_disability"
+          ],
+          "#feebe2",
+          11,
+          "#fcc5c0",
+          12,
+          "#fa9fb5",
+          14,
+          "#f768a1",
+          15,
+          "#dd3497",
+          17,
+          "#7a0177"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-wellbeing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

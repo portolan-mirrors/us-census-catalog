@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:56.908757Z",
+      "breaking": false,
+      "assets": {
+        "state-wellbeing.parquet": {
+          "sha256": "121b9051a16a6fe2d575f0358bb067cb7cc9f689578c5fe91a926f145268018a",
+          "size_bytes": 4074179,
+          "href": "states/state-wellbeing/state-wellbeing.parquet",
+          "source_mtime": 1794742542.9108427,
+          "mtime": 1794742542.9108427,
+          "feature_count": 56,
+          "schema_fingerprint": "9b93151a98bdb1ca"
+        },
+        "state-wellbeing.pmtiles": {
+          "sha256": "891b7fce51ec69eb8d0c0c6d83cf780d77a155368848a751ba04a4a1905e03fb",
+          "size_bytes": 1776251,
+          "href": "states/state-wellbeing/state-wellbeing.pmtiles",
+          "mtime": 1794742628.3921723
+        }
+      },
+      "changes": [
+        "state-wellbeing.parquet",
+        "state-wellbeing.pmtiles"
+      ]
+    }
+  ]
+}

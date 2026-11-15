@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "People without health insurance",
+  "metadata": {
+    "description": "Share of the civilian non-institutionalized population with no health insurance coverage, pale yellow to deep red. Measured over all 437 districts with a published value: 6 classes with breaks at 5%/6.5%/8.5%/11%/14%, which fall at the 22nd/43rd/59th/80th/91st percentile of the national distribution.",
+    "portolan:column": "pct_uninsured",
+    "portolan:breaks": [
+      5,
+      6.5,
+      8.5,
+      11,
+      14
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-wellbeing",
+      "filter": [
+        "has",
+        "pct_uninsured"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_uninsured"
+          ],
+          "#fff2b0",
+          5,
+          "#fed976",
+          6.5,
+          "#feb24c",
+          8.5,
+          "#fd8d3c",
+          11,
+          "#f03b20",
+          14,
+          "#bd0026"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-wellbeing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Residents 65 and over",
+  "metadata": {
+    "description": "Share of residents aged 65 or older, pale apricot to burnt orange. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at 17%/18%/19%/20%/21%, which fall at the 37th/58th/77th/83rd/90th percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_65_plus",
+    "portolan:breaks": [
+      17,
+      18,
+      19,
+      20,
+      21
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../state-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-people",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_65_plus"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-people",
+      "filter": [
+        "has",
+        "pct_65_plus"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_65_plus"
+          ],
+          "#feedde",
+          17,
+          "#fdd0a2",
+          18,
+          "#fdae6b",
+          19,
+          "#fd8d3c",
+          20,
+          "#e6550d",
+          21,
+          "#a63603"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "state-people",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

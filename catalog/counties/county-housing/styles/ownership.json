@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Owner-occupied homes",
+  "metadata": {
+    "description": "Share of occupied housing units lived in by their owner, pale to deep green. Measured over all 3,222 counties with a published value: 7 classes with breaks at 62%/70%/75%/78%/82%/85%, which fall at the 10th/29th/52nd/70th/89th/96th percentile of the national distribution.",
+    "portolan:column": "pct_owner_occupied",
+    "portolan:breaks": [
+      62,
+      70,
+      75,
+      78,
+      82,
+      85
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-housing",
+      "filter": [
+        "has",
+        "pct_owner_occupied"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_owner_occupied"
+          ],
+          "#edf8e9",
+          62,
+          "#c7e9c0",
+          70,
+          "#a1d99b",
+          75,
+          "#74c476",
+          78,
+          "#41ab5d",
+          82,
+          "#238b45",
+          85,
+          "#005a32"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-housing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

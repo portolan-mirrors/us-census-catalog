@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:56.155349Z",
+      "breaking": false,
+      "assets": {
+        "state-connectivity.parquet": {
+          "sha256": "070c3f526d5fcb3b7ba80a0c29fc3305b2d7bc197eafa817dad9b9c0566d8fbe",
+          "size_bytes": 4072448,
+          "href": "states/state-connectivity/state-connectivity.parquet",
+          "source_mtime": 1794742542.8782732,
+          "mtime": 1794742542.8782732,
+          "feature_count": 56,
+          "schema_fingerprint": "2fe74dd59d5df73c"
+        },
+        "state-connectivity.pmtiles": {
+          "sha256": "545546c58d15a69818bebe4badab6ab6c9219521d19e20caef54fd68ac2cef3b",
+          "size_bytes": 1668304,
+          "href": "states/state-connectivity/state-connectivity.pmtiles",
+          "mtime": 1794742628.3443017
+        }
+      },
+      "changes": [
+        "state-connectivity.parquet",
+        "state-connectivity.pmtiles"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Median income, white non-Hispanic households",
+  "metadata": {
+    "description": "Median household income for white, non-Hispanic householders (ACS table B19013H), on the same scale as the Black-household style. Measured over all 29,708 ZIP Code Tabulation Areas with a published value: 6 classes with breaks at $50k/$65k/$80k/$100k/$130k, which fall at the 10th/32nd/57th/78th/92nd percentile of the national distribution. Same breaks, ramp and opacity rule as the Black-household style \u2014 neither fades its noisy estimates, because fading only one of the pair would make the gap look like a difference in confidence. 12.08% have no published value and draw in neutral gray rather than as a low value. 11.05% of ZIP Code Tabulation Areas have a coefficient of variation above 0.3; this style does not fade them, so read median_hh_income_white_nh_moe in the GeoParquet before drawing a conclusion from any single ZCTA.",
+    "portolan:column": "median_hh_income_white_nh",
+    "portolan:breaks": [
+      50000,
+      65000,
+      80000,
+      100000,
+      130000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-wellbeing",
+      "filter": [
+        "!",
+        [
+          "has",
+          "median_hh_income_white_nh"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-wellbeing",
+      "filter": [
+        "has",
+        "median_hh_income_white_nh"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_hh_income_white_nh"
+          ],
+          "#00224e",
+          50000,
+          "#35456c",
+          65000,
+          "#666970",
+          80000,
+          "#958f5f",
+          100000,
+          "#cab969",
+          130000,
+          "#fee838"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-wellbeing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

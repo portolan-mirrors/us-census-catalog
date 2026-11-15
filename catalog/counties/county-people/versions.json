@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:49.517736Z",
+      "breaking": false,
+      "assets": {
+        "county-people.parquet": {
+          "sha256": "0d8b537d0b274330ff6494731223fa88df38384b95f2a7c80ebf58aad1cb108a",
+          "size_bytes": 12917841,
+          "href": "counties/county-people/county-people.parquet",
+          "source_mtime": 1794742542.4370906,
+          "mtime": 1794742542.4370906,
+          "feature_count": 3235,
+          "schema_fingerprint": "aa13af3e1bbb88cb"
+        },
+        "county-people.pmtiles": {
+          "sha256": "602c1b1ccfa4cc354267ea52e43339ef2ade9e17908cdc98b6aa0a268cd666b9",
+          "size_bytes": 19596578,
+          "href": "counties/county-people/county-people.pmtiles",
+          "mtime": 1794742626.5789907
+        }
+      },
+      "changes": [
+        "county-people.parquet",
+        "county-people.pmtiles"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "People with a disability",
+  "metadata": {
+    "description": "Share of the civilian non-institutionalized population reporting a disability, pale pink to deep magenta. Measured over all 31,808 places with a published value: 6 classes with breaks at 9.5%/13%/17%/22%/29%, which fall at the 20th/38th/59th/78th/91st percentile of the national distribution. 36.21% of places have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_with_disability_moe in the GeoParquet before drawing a conclusion from any single place.",
+    "portolan:column": "pct_with_disability",
+    "portolan:breaks": [
+      9.5,
+      13,
+      17,
+      22,
+      29
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-wellbeing",
+      "filter": [
+        "has",
+        "pct_with_disability"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_with_disability"
+          ],
+          "#feebe2",
+          9.5,
+          "#fcc5c0",
+          13,
+          "#fa9fb5",
+          17,
+          "#f768a1",
+          22,
+          "#dd3497",
+          29,
+          "#7a0177"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-wellbeing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

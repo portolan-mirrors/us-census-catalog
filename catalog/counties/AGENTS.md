@@ -1,380 +1,306 @@
-# Agent guide — All Indicators (Counties)
+# Agent guide — Counties
 
-Guidance for AI agents and automated clients working with this collection.
+Guidance for AI agents and automated clients working with this geography.
 
-**Every claim in this file is quoted from a source or measured from the data.** The catalog-level [AGENTS.md](../AGENTS.md) covers what spans collections; this file covers this collection. If you cannot point at where a fact came from, it does not belong here — an agent acting on an invented column name produces a confident wrong answer that nothing downstream catches.
+**Every claim in this file is quoted from a source or measured from the data.**
+The catalog-level [AGENTS.md](../AGENTS.md) covers what spans geographies, and
+each collection's own `AGENTS.md` carries its columns, NULL rates and tested
+queries. This file covers what the six collections share. If you cannot point
+at where a fact came from, it does not belong here.
 
-## What this is
+## What this geography is
 
-Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance and disability and nativity, and median household income by race and ethnicity. The block-group and tract levels split these into themed chunks because a national block-group file is large; at this size width costs nothing, so nothing is split.
+A county is **the coarsest geography most questions are actually asked at** and
+the most reliable level in this catalog below states. It is where a national
+ranking survives its own margins of error — the median `median_hh_income_cv` is
+**0.042** here against 0.125 at tract level and 0.202 at block group
+(measured) — and where a race-and-income question becomes answerable at all,
+because the race-iteration medians are published far more often here than
+below: the Black-householder median covers 60.53% of counties against 38.57% of
+tracts, and the Asian-householder median 46.37% against 28.73% (measured).
 
-**3,235 rows**, one per county, ACS 2020–2024 5-year estimates, geometry from the 2024 cartographic boundary files.
+**3,235 rows** per collection, one per county or county equivalent in the
+United States, Puerto Rico and the island areas, ACS 2020–2024 5-year
+estimates, geometry from the 2024 cartographic boundary files.
 
-## Where it lives
+Two sharp edges to carry into every query at this geography:
 
-- **GeoParquet** (use this for statistics): `https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet`
-- **PMTiles** (use this for maps): `https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.pmtiles`, layer `counties`
-- **STAC collection**: `https://data.source.coop/portolan-mirrors/us-census-catalog/counties/collection.json` — carries a full description for every column
+- **`population_moe` is NULL on 3,103 of the 3,235 rows** (measured). Only 132
+  small rural counties carry a margin on `population` — 28 in Texas, 26 in
+  Nebraska, 14 in South Dakota, 13 in Montana, … Nine more margins are NULL on
+  exactly the same rows; see [Shared quirks](#shared-quirks).
+- **13 county equivalents carry geometry and no ACS values at all** — the
+  island areas (American Samoa 5, Guam 1, Northern Mariana Islands 4, U.S.
+  Virgin Islands 3, measured). They have 2024 cartographic boundaries and no
+  ACS 5-year estimates, so they publish with NULL values rather than being
+  dropped. That is the 0.40% floor under every missingness rate in this group.
 
-## Source tables
+## Six collections, one geography
 
-| table | title | universe |
+The same five themed collections as [tracts](../tracts/AGENTS.md), plus the
+whole table as a sixth:
+
+| collection | theme | headline columns |
 |---|---|---|
-| [B01001](https://data.census.gov/table/ACSDT5Y2024.B01001) | Sex by Age | Total population |
-| [B01002](https://data.census.gov/table/ACSDT5Y2024.B01002) | Median Age by Sex | Total population |
-| [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) | Total Population | Total population |
-| [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) | Hispanic or Latino Origin by Race | Total population |
-| [B05002](https://data.census.gov/table/ACSDT5Y2024.B05002) | Place of Birth by Nativity and Citizenship Status | Total population |
-| [B08301](https://data.census.gov/table/ACSDT5Y2024.B08301) | Means of Transportation to Work | Workers 16 years and over |
-| [B08303](https://data.census.gov/table/ACSDT5Y2024.B08303) | Travel Time to Work | Workers 16 years and over who did not work from home |
-| [B15003](https://data.census.gov/table/ACSDT5Y2024.B15003) | Educational Attainment for the Population 25 Years and Over | Population 25 years and over |
-| [B17020B](https://data.census.gov/table/ACSDT5Y2024.B17020B) | Poverty Status in the Past 12 Months by Age (Black or African American Alone) | Black or African American alone population for whom poverty status is determined |
-| [B18101](https://data.census.gov/table/ACSDT5Y2024.B18101) | Sex by Age by Disability Status | Civilian noninstitutionalized population |
-| [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013) | Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) | Households |
-| [B19013B](https://data.census.gov/table/ACSDT5Y2024.B19013B) | Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Black or African American Alone Householder) | Households with a householder who is Black or African American alone |
-| [B19013D](https://data.census.gov/table/ACSDT5Y2024.B19013D) | Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Asian Alone Householder) | Households with a householder who is Asian alone |
-| [B19013H](https://data.census.gov/table/ACSDT5Y2024.B19013H) | Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (White Alone, Not Hispanic or Latino Householder) | Households with a householder who is White alone, not Hispanic or Latino |
-| [B19013I](https://data.census.gov/table/ACSDT5Y2024.B19013I) | Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Hispanic or Latino Householder) | Households with a householder who is Hispanic or Latino |
-| [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301) | Per Capita Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) | Total population |
-| [B22010](https://data.census.gov/table/ACSDT5Y2024.B22010) | Receipt of Food Stamps/SNAP in the Past 12 Months by Disability Status for Households | Households |
-| [B23025](https://data.census.gov/table/ACSDT5Y2024.B23025) | Employment Status for the Population 16 Years and Over | Population 16 years and over |
-| [B25002](https://data.census.gov/table/ACSDT5Y2024.B25002) | Occupancy Status | Housing units |
-| [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003) | Tenure | Occupied housing units |
-| [B25024](https://data.census.gov/table/ACSDT5Y2024.B25024) | Units in Structure | Housing units |
-| [B25034](https://data.census.gov/table/ACSDT5Y2024.B25034) | Year Structure Built | Housing units |
-| [B25044](https://data.census.gov/table/ACSDT5Y2024.B25044) | Tenure by Vehicles Available | Occupied housing units |
-| [B25064](https://data.census.gov/table/ACSDT5Y2024.B25064) | Median Gross Rent (Dollars) | Renter-occupied housing units paying cash rent |
-| [B25070](https://data.census.gov/table/ACSDT5Y2024.B25070) | Gross Rent as a Percentage of Household Income in the Past 12 Months | Renter-occupied housing units |
-| [B25077](https://data.census.gov/table/ACSDT5Y2024.B25077) | Median Value (Dollars) | Owner-occupied housing units |
-| [B26001](https://data.census.gov/table/ACSDT5Y2024.B26001) | Group Quarters Population | Population in group quarters |
-| [B27001](https://data.census.gov/table/ACSDT5Y2024.B27001) | Health Insurance Coverage Status by Sex by Age | Civilian noninstitutionalized population |
-| [B28001](https://data.census.gov/table/ACSDT5Y2024.B28001) | Types of Computers in Household | Households |
-| [B28002](https://data.census.gov/table/ACSDT5Y2024.B28002) | Presence and Types of Internet Subscriptions in Household | Households |
-| [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) | Ratio of Income to Poverty Level in the Past 12 Months | Population for whom poverty status is determined |
+| [county-income](county-income/collection.json) ([agent guide](county-income/AGENTS.md)) | Income & Poverty, 23 columns | `median_hh_income`, `per_capita_income`, `pct_below_poverty`, `pct_below_2x_poverty`, `pct_snap`, `pct_unemployed` |
+| [county-people](county-people/collection.json) ([agent guide](county-people/AGENTS.md)) | People & Education, 29 columns | `median_age`, `pct_under_18`, `pct_65_plus`, `pct_white_nh`, `pct_black`, `pct_native`, `pct_asian`, `pct_hispanic`, `pct_people_of_color`, `pct_bachelors_plus` |
+| [county-housing](county-housing/collection.json) ([agent guide](county-housing/AGENTS.md)) | Housing & Rent, 32 columns | `housing_units`, `households`, `pct_vacant_units`, `pct_owner_occupied`, `median_gross_rent`, `median_home_value`, `pct_rent_burdened`, `pct_single_family` |
+| [county-connectivity](county-connectivity/collection.json) ([agent guide](county-connectivity/AGENTS.md)) | Commuting & Connectivity, 30 columns | `hh_no_vehicle`, the four B08301 commute-mode shares, `pct_commute_45min_plus`, `pct_no_internet`, `pct_no_computer` |
+| [county-wellbeing](county-wellbeing/collection.json) ([agent guide](county-wellbeing/AGENTS.md)) | Health, Disability & Income by Race, 34 columns | `pct_uninsured`, `pct_with_disability`, `pct_foreign_born`, `group_quarters_pop`, `median_hh_income_{black,white_nh,asian,hispanic}`, `pct_below_poverty_black` |
+| [counties](counties/collection.json) ([agent guide](counties/AGENTS.md)) | All Indicators, 112 columns | every column above, in one table |
 
-## Schema
+Column counts measured against the files as built. Every chunk carries the same
+seven context columns — `geoid`, `name`, `state`, `population`,
+`population_moe`, `aland_sqkm`, `pop_density` — plus `geometry` and the `bbox`
+covering struct, so a single-theme question never needs a join.
 
-`geoid` is 5 characters and is the join key: `substr(geoid, 1, 2)` → state FIPS; tracts and block groups join back on their own first 5 characters.
+**The wide table's data files sit one directory up.** This is the one asymmetry
+in the layout and it is worth getting right:
 
-| column | type | what it is |
-|---|---|---|
-| `geoid` | string | 5-character county GEOID: state 2 + county 3. |
-| `name` | string | Human-readable name, assembled from the boundary files' name parts (block group, tract, county, state as applicable). |
-| `state` | string | Two-letter USPS state or territory code. |
-| `population` | int64 | Total population. |
-| `population_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `population`. |
-| `aland_sqkm` | double | Land area in km² (water excluded), 3 decimals. |
-| `pop_density` | double | People per square kilometre of land area, rounded to 1 decimal: `population / aland_sqkm`. |
-| `median_hh_income` | double | Median household income in the past 12 months, in 2024 inflation-adjusted dollars. |
-| `median_hh_income_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `median_hh_income`. |
-| `median_hh_income_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `median_hh_income`. |
-| `per_capita_income` | double | Per capita income in the past 12 months, in 2024 inflation-adjusted dollars — aggregate income divided by total population, so children and people with no income are in the denominator. |
-| `per_capita_income_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `per_capita_income`. |
-| `pct_below_poverty` | double | Percent of the population below the federal poverty level — an income-to-poverty ratio under 1.00. |
-| `pct_below_poverty_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_below_poverty`. |
-| `pct_below_poverty_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `pct_below_poverty`. |
-| `pct_below_2x_poverty` | double | Percent of the population with an income-to-poverty ratio under 2.00 — a common proxy for low income rather than deep poverty. |
-| `pct_below_2x_poverty_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_below_2x_poverty`. |
-| `pct_snap` | double | Percent of households that received Food Stamps/SNAP benefits at any time in the past 12 months. |
-| `pct_snap_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_snap`. |
-| `pct_unemployed` | double | Unemployment rate: unemployed people as a percent of the civilian labor force. |
-| `pct_unemployed_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_unemployed`. |
-| `median_age` | double | Median age in years. |
-| `median_age_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `median_age`. |
-| `pct_under_18` | double | Percent of the population under 18 years old. |
-| `pct_under_18_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_under_18`. |
-| `pct_65_plus` | double | Percent of the population 65 years and over. |
-| `pct_65_plus_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_65_plus`. |
-| `pct_white_nh` | double | Percent of the population that is White alone and not Hispanic or Latino. |
-| `pct_white_nh_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_white_nh`. |
-| `pct_black` | double | Percent of the population that is Black or African American alone and not Hispanic or Latino. |
-| `pct_black_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_black`. |
-| `pct_native` | double | Percent of the population that is American Indian and Alaska Native alone and not Hispanic or Latino. |
-| `pct_native_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_native`. |
-| `pct_asian` | double | Percent of the population that is Asian alone and not Hispanic or Latino. |
-| `pct_asian_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_asian`. |
-| `pct_hispanic` | double | Percent of the population that is Hispanic or Latino, of any race. |
-| `pct_hispanic_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_hispanic`. |
-| `pct_people_of_color` | double | Percent of the population that is not White-alone non-Hispanic: `100 − pct_white_nh`. |
-| `pct_people_of_color_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_people_of_color`. |
-| `pct_bachelors_plus` | double | Percent of adults 25 and over whose highest attainment is a bachelor's degree or more. |
-| `pct_bachelors_plus_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_bachelors_plus`. |
-| `housing_units` | int64 | Total housing units, occupied and vacant. |
-| `housing_units_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `housing_units`. |
-| `pct_vacant_units` | double | Percent of housing units that are vacant. |
-| `pct_vacant_units_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_vacant_units`. |
-| `households` | int64 | Households — occupied housing units. |
-| `households_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `households`. |
-| `pct_owner_occupied` | double | Percent of occupied housing units that are owner-occupied. |
-| `pct_owner_occupied_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_owner_occupied`. |
-| `median_gross_rent` | double | Median gross rent in dollars per month — contract rent plus the estimated average monthly cost of utilities and fuels. |
-| `median_gross_rent_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `median_gross_rent`. |
-| `median_gross_rent_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `median_gross_rent`. |
-| `pct_rent_burdened` | double | Percent of renter households paying 30% or more of household income on gross rent — the standard affordability threshold. |
-| `pct_rent_burdened_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_rent_burdened`. |
-| `pct_rent_burdened_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `pct_rent_burdened`. |
-| `pct_severely_rent_burdened` | double | Percent of renter households paying 50% or more of household income on gross rent. |
-| `pct_severely_rent_burdened_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_severely_rent_burdened`. |
-| `median_home_value` | double | Median value of owner-occupied housing units, in dollars — the owner's estimate of what the property would sell for, not an assessment or a sale price. |
-| `median_home_value_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `median_home_value`. |
-| `median_home_value_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `median_home_value`. |
-| `pct_built_pre_1940` | double | Percent of housing units built in 1939 or earlier. |
-| `pct_built_pre_1940_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_built_pre_1940`. |
-| `pct_single_family` | double | Percent of housing units in single-family structures. |
-| `pct_single_family_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_single_family`. |
-| `hh_no_vehicle` | int64 | Occupied housing units with no vehicle available, owner- and renter-occupied combined. |
-| `hh_no_vehicle_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `hh_no_vehicle`. |
-| `pct_hh_no_vehicle` | double | Percent of occupied housing units with no vehicle available. |
-| `pct_hh_no_vehicle_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_hh_no_vehicle`. |
-| `pct_hh_no_vehicle_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `pct_hh_no_vehicle`. |
-| `pct_commute_drive_alone` | double | Percent of workers who drove alone to work in a car, truck or van. |
-| `pct_commute_drive_alone_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_commute_drive_alone`. |
-| `pct_commute_transit` | double | Percent of workers who commuted by public transportation. |
-| `pct_commute_transit_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_commute_transit`. |
-| `pct_commute_transit_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `pct_commute_transit`. |
-| `pct_commute_walk_bike` | double | Percent of workers who walked or bicycled to work. |
-| `pct_commute_walk_bike_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_commute_walk_bike`. |
-| `pct_work_from_home` | double | Percent of workers who worked from home. |
-| `pct_work_from_home_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_work_from_home`. |
-| `pct_commute_45min_plus` | double | Percent of commuters whose one-way travel time to work is 45 minutes or more. |
-| `pct_commute_45min_plus_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_commute_45min_plus`. |
-| `pct_no_internet` | double | Percent of households with no internet access of any kind. |
-| `pct_no_internet_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_no_internet`. |
-| `pct_no_internet_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `pct_no_internet`. |
-| `pct_no_computer` | double | Percent of households with no computing device — no desktop or laptop, no smartphone, no tablet, no other computer. |
-| `pct_no_computer_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_no_computer`. |
-| `pct_uninsured` | double | Percent of the civilian noninstitutionalized population with no health insurance coverage. |
-| `pct_uninsured_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_uninsured`. |
-| `pct_uninsured_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `pct_uninsured`. |
-| `pct_with_disability` | double | Percent of the civilian noninstitutionalized population with a disability, as the ACS's six-question sequence defines it (hearing, vision, cognitive, ambulatory, self-care, independent living). |
-| `pct_with_disability_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_with_disability`. |
-| `pct_with_disability_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `pct_with_disability`. |
-| `pct_foreign_born` | double | Percent of the population that is foreign-born — anyone not a U.S. citizen at birth, naturalized citizens included. |
-| `pct_foreign_born_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_foreign_born`. |
-| `group_quarters_pop` | int64 | Population living in group quarters — correctional facilities, nursing facilities, college and university housing, military quarters, group homes, shelters. |
-| `group_quarters_pop_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `group_quarters_pop`. |
-| `median_hh_income_black` | double | Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Black or African American alone. |
-| `median_hh_income_black_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `median_hh_income_black`. |
-| `median_hh_income_black_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `median_hh_income_black`. |
-| `median_hh_income_white_nh` | double | Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is White alone, not Hispanic or Latino. |
-| `median_hh_income_white_nh_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `median_hh_income_white_nh`. |
-| `median_hh_income_white_nh_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `median_hh_income_white_nh`. |
-| `median_hh_income_asian` | double | Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Asian alone. |
-| `median_hh_income_asian_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `median_hh_income_asian`. |
-| `median_hh_income_asian_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `median_hh_income_asian`. |
-| `median_hh_income_hispanic` | double | Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Hispanic or Latino, of any race. |
-| `median_hh_income_hispanic_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `median_hh_income_hispanic`. |
-| `median_hh_income_hispanic_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `median_hh_income_hispanic`. |
-| `pct_below_poverty_black` | double | Percent of the Black or African American alone population below the poverty level. |
-| `pct_below_poverty_black_moe` | double | Margin of error, 90% confidence (the level the Bureau publishes). For `pct_below_poverty_black`. |
-| `pct_below_poverty_black_cv` | double | Coefficient of variation, `moe / 1.645 / estimate`: under 0.12 reliable, 0.12–0.40 caution, over 0.40 unreliable. For `pct_below_poverty_black`. |
-| `geometry` | binary | Boundary polygon, WKB, EPSG:4326 / OGC:CRS84. |
-| `bbox` | struct<xmin, ymin, xmax, ymax: double> | GeoParquet 1.1 covering struct for the row's geometry, with row-group statistics. |
+```
+counties/counties/collection.json   <- the wide table's STAC document
+counties/counties.parquet           <- the wide table's DATA, one level up
+counties/counties.pmtiles
+counties/county-income/county-income.parquet    <- a themed child: both together
+counties/county-income/county-income.pmtiles
+```
 
-## Field notes
+So the wide table is
+`https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet`
+— unchanged by the restructure — while each themed child is
+`.../counties/<cid>/<cid>.parquet`. Every child's STAC document, the wide one
+included, is at `.../counties/<cid>/collection.json`, and this group's
+sub-catalog is `.../counties/catalog.json`.
 
-- **`population_moe` is the one exception to the rule below: it is NULL on
-  3,103 of 3,235 counties** (measured — only 132 small rural counties carry
-  one, and all 56 rows in [`states`](../states/collection.json) carry none).
-  Read `population` at this geography as a count to use rather than an
-  estimate to put an interval on, and check for NULLs before putting
-  `population_moe` into a quadrature sum. Every other `*_moe` column here is
-  populated normally.
-- **Every other estimate has a `<name>_moe`**, at the 90% confidence level — the
-  level the Census Bureau publishes. To compare two geographies, check
-  whether their margins overlap before calling a difference real. To sum
-  estimates across geographies, add the margins in quadrature
-  (`sqrt(sum(moe*moe))`). **Never sum or average a median**: a median of a
-  region is not derivable from the medians of its parts.
-- **Headline columns also have a `<name>_cv`** = `moe / 1.645 / estimate`.
-  Rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40
-  unreliable. Filtering or greying out by CV is the intended use.
-- **Jam values are already NULL.** The ACS publishes sentinels (-666666666
-  and friends) where an estimate cannot be computed; anything at or below
-  -111111111 became NULL in the build, so no jam filtering is needed — but
-  NULLs reduce the row count of an aggregate, and `avg()` silently skips
-  them.
-- **Percentages are 0–100, not 0–1**, rounded to 2 decimals. Their margins
-  are on the same scale.
-- **`population` is the ACS 5-year estimate** (B01003), not a 2020 Decennial
-  count. It will not match the `blocks` collection's `pop_total` summed over
-  the same area, and neither number is wrong.
-- **`pct_unemployed` divides by the civilian labor force** (B23025 line 3), not by the population 16 and over. That is what makes it an unemployment rate.
-- **The rent-burden columns divide by renter households *excluding* those whose rent-to-income ratio the Bureau could not compute** (B25070 line 1 minus line 11, "Not computed"). Including them would understate the burden.
-- **`pct_commute_45min_plus` divides by workers who did not work from home** (B08303's own universe), while every other commute share divides by all workers 16+ (B08301). The two denominators differ, so the shares do not sum across tables.
-- **`pct_people_of_color` is a complement** (`100 − pct_white_nh`) and carries `pct_white_nh`'s margin of error unchanged.
-- **`pct_uninsured` and `pct_with_disability` are shares of the civilian noninstitutionalized population**, not of everyone: people on active duty and people in institutions are outside the universe.
-- **The race-iteration medians are classified by the householder's race**, not by every member's, and each has its own universe (households with a householder who is …). They are not shares of a common total and cannot be averaged together.
-- **`pct_below_poverty_black` has a race-specific denominator** (the Black alone population for whom poverty status is determined), so it is not comparable to `pct_below_poverty`'s denominator.
-- **The five race shares are all non-Hispanic**, drawn from B03002's "Not Hispanic or Latino" branch, so they and `pct_hispanic` are mutually exclusive and do not double-count.
+Prefer a themed chunk when the question sits inside one theme: it is a third of
+the columns over the same rows. Prefer `counties` when a question crosses three
+or more themes, or when you do not yet know which columns you need — at this
+many features width costs little, and a five-way join costs more than reading
+one wider file.
 
-## Data quality
+## The chunks join 1:1 on `geoid`
 
-Columns with notable missingness at this geography (rates counted by the build's validation pass, not estimated):
-
-| column | missingness |
-|---|---|
-| `population` | NULL on 0.40% of counties — the 13 island-area county equivalents (AS 5, GU 1, MP 4, VI 3), which have cartographic boundaries but no ACS 5-year estimates. |
-| `median_hh_income_black` | NULL on 39.47% of counties, wherever the group has too few households for a published median. |
-| `median_hh_income_white_nh` | NULL on 2.38% of counties. |
-| `median_hh_income_asian` | NULL on 53.63% of counties. |
-| `median_hh_income_hispanic` | NULL on 19.60% of counties. |
-| `pct_below_poverty_black` | NULL on 5.87% of counties (measured). |
-
-Island areas carry geometry but no ACS data. American Samoa, Guam, the Northern Mariana Islands and the U.S. Virgin Islands have 2024 cartographic boundaries but no ACS 5-year estimates, so their rows publish with NULL values rather than being dropped: 4 states, 13 county equivalents, 126 tracts, 405 block groups.
-
-Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
-
-The PMTiles carry real geometries at every zoom — the features are few enough to tile directly, so there is no coarser-geography band at coarse zooms (the catalog's finer collections switch to counties and tracts there). Statistics still come from the GeoParquet.
-
-## Related collections
-
-- [`states`](../states/collection.json) — the same 112 columns at the other coarse geography.
-- [`block-groups/`](../block-groups/catalog.json) and [`tracts/`](../tracts/catalog.json) — the same indicators split into themed chunks at finer geographies.
-- [`blocks`](../blocks/collection.json) — 2020 Decennial counts at block level. Different survey, different vintage, no margins of error.
-
-## Example queries
-
-Every query here was run against the published URLs with DuckDB 1.4.1
-immediately before it was written down, and its real output is quoted beside
-it. This file is 13 MB and 3,235 rows: everything here is seconds, and nothing
-needs a filter to be affordable.
-
-### 1. What does a county's median household income look like?
+All six hold the same 3,235 `geoid` values with the same geometry. Measured:
 
 ```sql
 INSTALL httpfs; LOAD httpfs;
-SELECT count(*)                                   AS counties,
-       count(median_hh_income)                    AS with_data,
-       quantile_cont(median_hh_income, 0.10)::int AS p10,
-       quantile_cont(median_hh_income, 0.50)::int AS p50,
-       quantile_cont(median_hh_income, 0.90)::int AS p90,
-       max(pct_below_poverty)                     AS worst_poverty_rate
-FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet';
+SELECT (SELECT count(*) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-income/county-income.parquet')             AS income,
+       (SELECT count(*) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-people/county-people.parquet')             AS people,
+       (SELECT count(*) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-housing/county-housing.parquet')           AS housing,
+       (SELECT count(*) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-connectivity/county-connectivity.parquet') AS connectivity,
+       (SELECT count(*) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-wellbeing/county-wellbeing.parquet')       AS wellbeing,
+       (SELECT count(*) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet')                                AS all_indicators;
 ```
 
-→ `3235 | 3221 | 46875 | 65346 | 89168 | 63.65`, in **3.0 s**. Count the gap
-carefully: 3,222 counties carry ACS data at all (the 13 missing are the
-island-area county equivalents, which have 2024 boundaries and no ACS
-estimates), and 3,221 of those have a publishable income median. The single
-county with data but no median is De Baca County, New Mexico (`35011`),
-population 1,576 — measured.
+→ `3235 | 3235 | 3235 | 3235 | 3235 | 3235`.
 
-One state is `WHERE state = 'CA'`:
+Equal counts are necessary but not sufficient, so the GEOIDs themselves were
+intersected:
 
 ```sql
 LOAD httpfs;
-SELECT geoid, name, median_hh_income::int AS income, round(median_hh_income_cv, 3) AS cv
-FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet'
-WHERE state = 'CA'
-ORDER BY median_hh_income DESC LIMIT 5;
+SELECT count(*) AS geoids_present_in_all_six FROM (
+  SELECT geoid FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-income/county-income.parquet'
+  INTERSECT SELECT geoid FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-people/county-people.parquet'
+  INTERSECT SELECT geoid FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-housing/county-housing.parquet'
+  INTERSECT SELECT geoid FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-connectivity/county-connectivity.parquet'
+  INTERSECT SELECT geoid FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-wellbeing/county-wellbeing.parquet'
+  INTERSECT SELECT geoid FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet');
 ```
 
-→ `06085 | Santa Clara County, California | 164281 | 0.007`, `06081 | San Mateo
-County, California | 158855 | 0.011`, `06041 | Marin County, California |
-149091 | 0.018`, `06075 | San Francisco County, California | 140970 | 0.011`,
-`06001 | Alameda County, California | 129367 | 0.006`. 5.5 s.
+→ `3235` — all 3,235, so `JOIN … USING (geoid)` loses nothing in any direction.
 
-### 2. Each county against its own state (GEOID prefix join)
+Both queries were run with DuckDB 1.4.1 against these files as built,
+immediately before this was written down, with the local `catalog/` paths
+swapped in for the URLs above: the five themed collections had not yet been
+uploaded to the mirror when the queries were run, so no wall-clock timings are
+quoted here. Each themed file is 12.3–12.4 MB over 3,235 rows and the wide file
+is 13.0 MB, most of it geometry.
+
+A full profile of one county is one query across the five themed chunks:
 
 ```sql
 LOAD httpfs;
-SELECT c.name, c.median_hh_income::int AS county_income,
-       s.median_hh_income::int         AS state_income,
-       round(100.0*c.median_hh_income/s.median_hh_income - 100, 1) AS pct_vs_state
-FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet' c
-JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet' s
-  ON substr(c.geoid, 1, 2) = s.geoid
-WHERE c.state = 'NY' AND c.median_hh_income_cv < 0.10
-ORDER BY pct_vs_state DESC LIMIT 5;
+SELECT i.geoid, i.name, i.median_hh_income::int AS income, i.pct_below_poverty AS poverty,
+       p.median_age, p.pct_bachelors_plus AS degree, h.median_gross_rent::int AS rent,
+       c.pct_commute_transit AS transit, w.pct_uninsured AS uninsured
+FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-income/county-income.parquet' i
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-people/county-people.parquet'             p USING (geoid)
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-housing/county-housing.parquet'           h USING (geoid)
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-connectivity/county-connectivity.parquet' c USING (geoid)
+JOIN 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-wellbeing/county-wellbeing.parquet'       w USING (geoid)
+WHERE i.geoid = '26163';
 ```
 
-→ `Nassau County, New York | 146202 | 85974 | 70.1`, `Suffolk County, New York
-| 130686 | 85974 | 52.0`, `Putnam County, New York | 126257 | 85974 | 46.9`,
-`Westchester County, New York | 118976 | 85974 | 38.4`, `Rockland County, New
-York | 109959 | 85974 | 27.9`. 6.1 s.
+→ `26163 | Wayne County, Michigan | 60539 | 20.8 | 37.9 | 27.58 | 1132 | 1.76 |
+5.61`.
 
-`substr(geoid, 1, 2)` is the whole join: a county GEOID is state FIPS + county
-FIPS, so the first two characters *are* the state row's `geoid`. The same
-prefix trick reaches down as well as up — `substr(tract_geoid, 1, 5)` is a
-county.
+That is five files for one row. The same nine values come out of
+[`counties`](counties/collection.json) in a single-file query with no join at
+all — which is exactly what the sixth sibling is for.
 
-### 3. Is a difference between two counties real? (margins, not estimates)
+GEOIDs nest by prefix: `substr(geoid, 1, 2)` is the state FIPS code, and `state`
+is also a column with the USPS code. A county's tracts are the 11-character
+GEOIDs whose first 5 characters match, and its block groups the 12-character
+ones. **One trap:** Connecticut's county equivalents in the 2024 vintage are
+the 9 planning regions (`09110`–`09190`, measured), not the 8 historical
+counties, so a 2020-vintage Connecticut block or tract GEOID's 5-character
+prefix does not match any row here.
 
-```sql
-LOAD httpfs;
-SELECT name, median_hh_income::int AS income, median_hh_income_moe::int AS moe,
-       (median_hh_income - median_hh_income_moe)::int AS lo,
-       (median_hh_income + median_hh_income_moe)::int AS hi
-FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet'
-WHERE geoid IN ('06075', '06081');
-```
+## When to step up or down a geography
 
-→ `San Francisco County, California | 140970 | 2593 | 138377 | 143563`,
-`San Mateo County, California | 158855 | 2851 | 156004 | 161706`. 3.7 s.
+This is usually the right level. Here is the measured case for it.
 
-The two 90% intervals do not overlap, so San Mateo really is richer than San
-Francisco. Do this before reporting any pair. Counties are the geography where
-most comparisons survive — the median CV on `median_hh_income` is 0.042 here
-against 0.125 at tract level (measured) — but "most" is not "all".
+Suppression, the same columns at the three steps below state:
 
-### 4. Summing across counties: margins add in quadrature
+| column | NULL at block group | NULL at tract | NULL at county |
+|---|---|---|---|
+| `median_hh_income` | 7.69% | 1.59% | 0.43% |
+| `median_gross_rent` | 29.68% | 5.92% | 0.62% |
+| `median_home_value` | 10.03% | 3.55% | 0.56% |
+| `median_hh_income_white_nh` | not published | 10.04% | 2.38% |
+| `median_hh_income_hispanic` | not published | 44.43% | 19.60% |
+| `median_hh_income_black` | not published | 61.43% | 39.47% |
+| `median_hh_income_asian` | not published | 71.27% | 53.63% |
 
-```sql
-LOAD httpfs;
-SELECT (SELECT sum(households) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet' WHERE state='NY') AS county_sum,
-       (SELECT round(sqrt(sum(households_moe*households_moe))) FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet' WHERE state='NY') AS quadrature_moe,
-       (SELECT households     FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet'   WHERE state='NY') AS state_row,
-       (SELECT households_moe FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/states.parquet'   WHERE state='NY') AS state_moe;
-```
+Reliability, measured: the median `median_hh_income_cv` is **0.042** at county
+against 0.125 at tract and 0.202 at block group, and **0.1%** of county income
+medians are over the 0.40 "unreliable" line against 1.5% of tracts and 11.8% of
+block groups. At county level exactly 2 of the 3,221 published medians are
+above 0.40, maximum 0.53.
 
-→ `7722646 | 8003 | 7722646 | 12717`. 5.5 s.
+- **Step down to [tracts](../tracts/AGENTS.md)** when the question is about
+  variation *inside* a county — which is most of what counties hide. 85,184
+  rows against 3,235, at five times the rent-median suppression and three times
+  the median CV. Tracts are also the finest geography the
+  `county-wellbeing` columns exist at: health insurance, disability, nativity
+  and income by race are published for tracts and not below.
+- **Step down to [block groups](../block-groups/AGENTS.md)** only when the
+  question is genuinely sub-tract, and accept that nearly three block groups in
+  ten have no rent median and one income median in eight is unreliable. There
+  are only four themed collections there — no block-group twin for
+  `county-wellbeing` — so an equity or health question cannot step down that
+  far at all.
+- **Stay here** for national rankings, for anything that will be quoted as a
+  single number for a named place, for a race-and-income comparison, and for
+  any claim that has to survive a margin-overlap test. The
+  [`county-income`](county-income/AGENTS.md) guide works through a national
+  top-six ranking where the first four ranks hold and the fifth and sixth are a
+  statistical tie — that test is only affordable at this geography and above.
+- **Step up to [states](../states/AGENTS.md)** when even county margins are
+  too wide for the question. 56 rows, 52 with ACS data, and the median
+  `median_hh_income_cv` is **0.004** (measured). It is also the only geography
+  where all four race-iteration medians are published for every row that has
+  data — 52 of 52, measured — so a race-and-income comparison that needs
+  complete coverage belongs there, not here. The price is that a state is not a
+  place anyone lives in.
+- **[Blocks](../blocks/AGENTS.md)** carry 2020 Decennial counts only — a
+  different survey and vintage, not a finer version of these numbers.
+- **Not a step up or down:** [ZCTAs](../zctas/AGENTS.md),
+  [places](../places/AGENTS.md) and
+  [congressional districts](../congressional-districts/AGENTS.md) are parallel
+  geographies, not levels. ZCTAs nest in nothing, places nest in a state but
+  not in a county, and relating a district to counties is a spatial operation.
+  None of them joins to these rows by prefix.
 
-Two things worth keeping. First, the counties **sum exactly** to the state row,
-7,722,646 either way: counts are additive and the geographies nest, so this is
-a usable consistency check on any rollup you write. Second, the quadrature
-margin (±8,003) is *not* the state's published margin (±12,717) — the Bureau
-estimates the state directly rather than by adding counties, so its margin is
-its own. `sqrt(sum(moe*moe))` is the right way to put a margin on *your* sum;
-it does not reproduce the Bureau's.
+## Shared quirks
 
-**Never do this with a median.** `sum()` and quadrature apply to counts and to
-estimates of counts. A region's median household income is not derivable from
-its counties' medians at all, with or without margins.
+- **`population_moe` is NULL on 3,103 of the 3,235 rows** (measured). Read
+  `population` here as a count to use rather than an estimate to put an
+  interval on.
+- **Nine more margins are NULL on exactly those same rows.** Measured, and
+  verified row by row — all 3,235 rows agree: `pct_under_18_moe`,
+  `pct_65_plus_moe`, `pct_white_nh_moe`, `pct_black_moe`, `pct_native_moe`,
+  `pct_asian_moe`, `pct_hispanic_moe`, `pct_people_of_color_moe` and
+  `pct_foreign_born_moe` stand or fall with `population_moe`. Those are
+  precisely the shares denominated on a total-population line (`B01001` line 1,
+  `B03002` line 1, `B05002` line 1, as `tools/column_docs.py` records). The
+  **estimates** are complete on all 3,222 rows with ACS data; it is the
+  interval that is unavailable, so a significance test on an age share, a race
+  share or the foreign-born share is not possible here for 96% of rows. Ask it
+  at state level, or present point values and say so. Run
+  `count(<col>_moe)` before writing any significance test against these files.
+- **Never write `sqrt(sum(moe*moe))` over one of those columns** without a NULL
+  check — quadrature over a NULL-bearing column returns NULL.
+- Every other estimate carries `<name>_moe` at the **90%** confidence level.
+  Headline columns also carry `<name>_cv` = `moe / 1.645 / estimate`: under 0.12
+  reliable, 0.12–0.40 caution, over 0.40 unreliable. `county-people` has **no
+  `_cv` columns at all** — use `median_age_moe` or `pct_bachelors_plus_moe`
+  there, the only two of its margins that are populated.
+- **Never sum or average a median.** A region's median is not derivable from
+  its parts'. To sum counts, add margins in quadrature (`sqrt(sum(moe*moe))`) —
+  and note that counties *do* sum exactly to their state row for counts, which
+  makes it a usable consistency check on a rollup (measured, in
+  [county-housing](county-housing/AGENTS.md)).
+- **`pct_commute_transit` is the one column that still needs a reliability gate
+  at this geography.** It publishes a `_cv` for only 2,417 of 3,235 counties —
+  the other 818 are 13 island areas plus 805 whose estimate is exactly 0.0 —
+  and 69.9% of those 2,417 are above 0.40 (measured). Most counties have too
+  little transit commuting to estimate a share precisely, which is a finding
+  rather than a defect.
+- In `county-wellbeing` the NULLs are part of the subject: the four
+  race-iteration medians are published on 97.62% / 80.40% / 60.53% / 46.37% of
+  counties (white_nh / hispanic / black / asian, measured). A blank is "not
+  published here", never "low income", and quoting a racial income gap without
+  its denominator overstates the coverage — 1,910 counties publish both the
+  Black and non-Hispanic White medians, 1,193 of them at a CV under 0.20
+  (measured).
+- Jam values are already NULL. No jam filtering is needed, but NULLs reduce the
+  row count of an aggregate and `avg()` skips them silently. A `_cv` that is
+  NULL where the estimate exists usually means the estimate is exactly 0.
+- Percentages are 0–100, not 0–1, and their margins are on the same scale.
+- `pct_people_of_color` is a complement (`100 − pct_white_nh`) and adds no
+  information; the four non-Hispanic race shares plus `pct_hispanic` sum to a
+  median of 96.09, not 100, because B03002's remaining non-Hispanic lines are
+  not carried (measured).
+- `population` is the ACS 5-year estimate (B01003), not a 2020 Decennial count,
+  and it is not a household count — join `households` from
+  [county-housing](county-housing/collection.json) for household-denominated
+  work.
+- 13 island-area county equivalents carry geometry and NULL ACS values (AS 5,
+  GU 1, MP 4, VI 3, measured). `35011` De Baca County, New Mexico, population
+  1,576, is the one county with ACS data and no publishable income median.
+- Connecticut's county equivalents are the 9 planning regions `09110`–`09190`
+  in the 2024 vintage (measured), so a 2020-vintage GEOID prefix will not
+  match.
+- Geometry is the 500k cartographic boundary files, shoreline-clipped,
+  EPSG:4326 — good for mapping and point-in-polygon, not for area measurement.
+  `aland_sqkm` comes from the boundary file's own `ALAND`, not from the
+  polygon.
+- **PMTiles here are real county polygons at every zoom** — the band is
+  `0-10:geom`, there are few enough features to draw them all at a national
+  zoom, so these archives need none of the coarser-geography coarse-zoom bands
+  the tract, block-group, ZCTA and place collections carry. These are in fact
+  the polygons those collections' coarse zooms are built from. `*_moe` columns
+  are excluded from every tile at every zoom; `*_cv` columns are kept, so one
+  style can grey out an unreliable value at any zoom. Statistics come from the
+  GeoParquet, always.
 
-### 5. `population_moe` is NULL on 3,103 of 3,235 counties
+## Where to look next
 
-```sql
-LOAD httpfs;
-SELECT count(*) AS counties, count(population) AS with_population,
-       count(population_moe) AS with_a_population_margin
-FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet';
-```
+- Per-collection schemas, NULL stories and 4–5 tested recipes each:
+  [county-income](county-income/AGENTS.md), [county-people](county-people/AGENTS.md),
+  [county-housing](county-housing/AGENTS.md),
+  [county-connectivity](county-connectivity/AGENTS.md),
+  [county-wellbeing](county-wellbeing/AGENTS.md), and the wide
+  [counties](counties/AGENTS.md).
+- Whether a national ranking survives its margins of error, worked through on
+  the top six counties by income: [county-income](county-income/AGENTS.md).
+- Which margins actually exist at this geography, and the query to check:
+  [county-people](county-people/AGENTS.md) and [counties](counties/AGENTS.md).
+- Quoting a racial income gap with its denominator:
+  [county-wellbeing](county-wellbeing/AGENTS.md).
+- The counties-sum-to-the-state consistency check, and quadrature margins:
+  [county-housing](county-housing/AGENTS.md) and [counties](counties/AGENTS.md).
+- Looking inside a county: [tracts](../tracts/AGENTS.md) and
+  [block groups](../block-groups/AGENTS.md). Stepping up:
+  [states](../states/AGENTS.md).
+- Cross-collection showcases spanning geographies:
+  [catalog AGENTS.md](../AGENTS.md).
 
-→ `3235 | 3222 | 132`. 3.1 s.
+## License
 
-Measured, and it contradicts the general rule that every estimate here carries
-a margin: only 132 counties have a `population_moe`, and all 56 rows in
-[`states`](../states/collection.json) have none. The 132 are small rural
-counties (28 in Texas, 26 in Nebraska, 14 in South Dakota, …, measured by
-grouping on `state`). Every other `*_moe` column in this collection is
-populated normally; it is `population` specifically that arrives without a
-margin at these coarse geographies. Treat `population` at county and state
-level as a count to use and not as an estimate to put an interval on, and do
-not write `population_moe` into a quadrature sum without checking for NULLs
-first — `sqrt(sum(moe*moe))` over a NULL-bearing column returns NULL.
-
-### Related recipes elsewhere
-
-- Top counties nationally, the poorest tract inside the richest county, and
-  density against car ownership: [`catalog/AGENTS.md`](../AGENTS.md).
-- The race-iteration medians, which are published far more often here than at
-  tract level: [`tracts/tract-wellbeing/AGENTS.md`](../tracts/tract-wellbeing/AGENTS.md).
-- Looking inside a county: [`tracts/`](../tracts/AGENTS.md) and
-  [`block-groups/`](../block-groups/AGENTS.md).
-
-Statistics come from the GeoParquet. The county PMTiles archive is real
-polygons at every zoom — it needs no coarser-geography band at coarse zooms,
-and it is the file the finer collections' own coarse zooms are built from —
-but it carries no `*_moe` columns, so no test above that reads a margin of
-error can be reproduced from tiles.
+CC0-1.0. Census Bureau data is a U.S. Government work in the public domain;
+this mirror adds nothing proprietary. [data.census.gov](https://data.census.gov/)
+is authoritative and nothing here is an official Census Bureau product — cite
+the U.S. Census Bureau when you use the numbers.

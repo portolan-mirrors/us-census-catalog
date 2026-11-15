@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Bachelor's degree or higher",
+  "metadata": {
+    "description": "Share of adults 25 and over holding a bachelor's degree or more, pale aqua to deep teal. Measured over all 3,222 counties with a published value: 7 classes with breaks at 14%/19%/22%/27%/36%/45%, which fall at the 9th/32nd/49th/69th/87th/95th percentile of the national distribution.",
+    "portolan:column": "pct_bachelors_plus",
+    "portolan:breaks": [
+      14,
+      19,
+      22,
+      27,
+      36,
+      45
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-people",
+      "filter": [
+        "has",
+        "pct_bachelors_plus"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_bachelors_plus"
+          ],
+          "#e5f5f9",
+          14,
+          "#ccece6",
+          19,
+          "#99d8c9",
+          22,
+          "#66c2a4",
+          27,
+          "#41ae76",
+          36,
+          "#238b45",
+          45,
+          "#005824"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-people",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

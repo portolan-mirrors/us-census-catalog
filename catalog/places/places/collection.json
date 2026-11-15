@@ -1,0 +1,1240 @@
+{
+  "type": "Collection",
+  "id": "places/places",
+  "stac_version": "1.1.0",
+  "description": "Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance and disability and nativity, and median household income by race and ethnicity. At this many features width costs little, so the whole 112-column table is published here as well as a theme at a time in the five themed chunks beside it — a cross-theme question needs no join.\n\nCurated indicators for all **32,612** incorporated places and census designated places in the United States, Puerto Rico and the island areas, from the U.S. Census Bureau's [American Community Survey](https://www.census.gov/programs-surveys/acs.html) **2020–2024 5-year estimates** (`acsdt5y2024`, the table-based [Summary File](https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/)). The Census Bureau calls the ACS \"the premier source of detailed information about the nation's people and housing\". The Bureau publishes 1-year estimates only for places of 65,000 people or more, so the 5-year release is the only one that covers all 32,612 of them ([areas published](https://www.census.gov/programs-surveys/acs/geography-acs/areas-published.html)).\n\nEvery estimate ships with its margin of error — `<column>_moe`, at the 90% confidence level, the level the Census Bureau publishes — and the headline statistics also carry a coefficient of variation (`<column>_cv` = `moe / 1.645 / estimate`) so small-area noise can be flagged rather than mapped as if certain. Derived percentages propagate error with the Census Bureau's own formulas from [ACS Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf): sums add in quadrature, proportions use the subset formula with the ratio formula as fallback. ACS jam values for suppressed or unestimable cells are NULL here, never numbers, and medians are published as the Bureau publishes them — a median cannot be aggregated to a larger area. Each column's description names its ACS table, its exact universe, and the lines summed to make it.\n\nMost of the 32,612 rows are small: the file holds every incorporated place and every [census designated place](https://www.census.gov/programs-surveys/bas/information/cdp.html) the Census Bureau delineates, from New York city to villages of 40 people, and the suppression rates follow — `median_gross_rent` is NULL for **31.32%** of places, `median_home_value` for **12.78%** and `median_hh_income` for **12.71%**. Filter on `population` before drawing conclusions from a place-level distribution. A place is also not a partition of the country: the land between places is not in this file at all, so place rows do not sum to a state.\n\nGeometries are the Census Bureau's [2024 cartographic boundary files](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) for incorporated places and census designated places (GENZ2024, 1:500,000), reprojected to EPSG:4326 and joined on `GEOID`. Cartographic rather than TIGER/Line because TIGER extends census geographies into open water while the cartographic files clip to the shoreline, which is what a choropleth wants. The boundary vintage matches the estimate vintage.\n\nThe join is driven by geometry, so a geography with 2024 boundaries but no ACS tabulation keeps its row with NULL values instead of disappearing: 279 places (MP 135, AS 77, GU 57, VI 10) in the island areas, which have cartographic boundaries but no ACS 5-year estimates because the Island Areas run a separate decennial-only program. Two more, Brentwood CDP and Wyandanch CDP, have boundaries and no matching ACS row, both in Suffolk County, New York — the county whose 2024 re-delineation also leaves 14 tracts and 39 block groups without ACS rows elsewhere in this catalog. One more: `2148000` Louisville city, Kentucky, which the boundary file still carries and the ACS tabulates as the consolidated `2148006` Louisville/Jefferson County metro government (balance) instead — so the Louisville you want is `2148006`. Keeping these rows means a national map has no holes and a consumer can see the absence; dropping them would make \"every US geography\" quietly mean something narrower.\n\n**This is the full table** — all 112 columns on every row, the file to read when a question crosses themes or when you want one row with everything on it. The same rows are also published as five themed chunks of 23–34 columns each — [Income & Poverty](../place-income/collection.json), [People & Education](../place-people/collection.json), [Housing & Rent](../place-housing/collection.json), [Commuting & Connectivity](../place-connectivity/collection.json) and [Health, Disability & Income by Race](../place-wellbeing/collection.json) — for a consumer who wants one theme and not the rest; each carries the same `geoid`, the same geometry and the same seven context columns, so it joins 1:1 back to this table. This collection's metadata sits beside those chunks, but its GeoParquet and PMTiles stay one directory up at `places/places.parquet` and `places/places.pmtiles`, which is where they have always been. A place nests in a state but not in a county — a place can straddle a county line — so `substr(geoid, 1, 2)` reaches the state row and nothing else joins by prefix. Every other geography in this catalog is organized the same way — [block groups](../../block-groups/catalog.json), [census tracts](../../tracts/catalog.json), [counties](../../counties/catalog.json), [states](../../states/catalog.json), [ZCTAs](../../zctas/catalog.json) and [congressional districts](../../congressional-districts/catalog.json) — and the [blocks](../../blocks/collection.json) collection carries 2020 Decennial counts, a different survey and vintage rather than a finer version of these numbers.\n\nThe PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons carrying the Census Bureau's own published county estimates, and z6–z12 are the places themselves. Places do not nest inside counties — a place can cross a county line — so the county band is orientation at national zooms, not a roll-up of these features. Thinning this many polygons down to a national zoom would show a biased subset (small urban geographies drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead of a thinned sample of this one. Every band carries the same column names, so one style expression classifies every zoom — but below z6 you are looking at counties, not places, and the values there are the Bureau's official estimates for those geographies, with their own meaning, rather than a visualization-only average: clicking a coarse feature identifies a real county by `geoid` and `name`. The `*_moe` columns are excluded from the tiles at every zoom — a margin of error is computed for one specific geography and cannot be carried across bands — while the `*_cv` columns are kept. Statistics come from the GeoParquet, never from the tiles.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/places/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Places & CDPs"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "../places.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "All Indicators — Places & CDPs (vector tiles)",
+      "pmtiles:layers": [
+        "places"
+      ]
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/places/places/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "MultiPolygon",
+  "geoparquet:feature_count": 32612,
+  "pmtiles:min_zoom": 0,
+  "pmtiles:max_zoom": 12,
+  "pmtiles:tile_type": "mvt",
+  "pmtiles:center": [
+    0.0,
+    29.7779489,
+    6
+  ],
+  "pmtiles:layers": [
+    "places"
+  ],
+  "title": "All Indicators — Places & CDPs",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -176.696678,
+          17.950739,
+          -65.290424,
+          71.33971
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-01-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "places-tiles": {
+      "href": "../places.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 206610280,
+      "file:checksum": "1220c7c9e138c79c66d1ec93f35eb19a85fd27bb5ec6c56775805f28a8ff707ff6ab",
+      "roles": [
+        "data"
+      ],
+      "title": "All Indicators — Places & CDPs (PMTiles)",
+      "pmtiles:layers": [
+        "places"
+      ]
+    },
+    "places": {
+      "href": "../places.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "All Indicators — Places & CDPs (GeoParquet, national)",
+      "file:size": 34516595,
+      "file:checksum": "1220f1f1d49603125b11f7442af0cab12e7f95a385ab72003f26eb5d471316a5c6cb"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "All Indicators — Places & CDPs rendered with the default style",
+      "file:size": 92561,
+      "file:checksum": "12200988893273101ac8a0366ee7723cb0e2f0351698419971a254650b38d326e2e4"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Median household income",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "Median household income by place, viridis dark purple (low) to yellow (high). Measured over all 28,468 places with a published value: 7 classes with breaks at $40k/$55k/$67k/$84k/$115k/$150k, which fall at the 10th/30th/50th/70th/88th/95th percentile of the national distribution. 12.71% have no published value and draw in neutral gray rather than as a low value. 15.41% have a coefficient of variation above 0.3 and render faded — the estimate is real but its margin of error swamps it.",
+      "file:size": 2674,
+      "file:checksum": "1220121597ce05a76893b31b3abcd0834017e57e3fc12838c6652d92c3ac25df88b4"
+    },
+    "styles/density": {
+      "href": "./styles/density.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Population density",
+      "roles": [
+        "style"
+      ],
+      "description": "People per square kilometre on roughly logarithmic steps, pale cream to deep plum. Measured over all 32,330 places with a published value: 7 classes with breaks at 50/125/250/500/1,000/2,000 people per km², which fall at the 15th/30th/47th/70th/87th/96th percentile of the national distribution.",
+      "file:size": 1849,
+      "file:checksum": "1220855d7c778caf5581f07cd53a5551d3d8cc4ac811a9053ca86cb22abe1bb45ba0"
+    },
+    "styles/home-value": {
+      "href": "./styles/home-value.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Median home value",
+      "roles": [
+        "style"
+      ],
+      "description": "Median value of owner-occupied homes, pale amber to burnt brown. Measured over all 28,443 places with a published value: 7 classes with breaks at $85k/$130k/$190k/$290k/$450k/$750k, which fall at the 11th/30th/50th/70th/85th/95th percentile of the national distribution. 12.78% have no published value and draw in neutral gray rather than as a low value. 10.29% have a coefficient of variation above 0.3 and render faded — the estimate is real but its margin of error swamps it.",
+      "file:size": 2669,
+      "file:checksum": "1220c62fffce0c2375be304f62947dab9cd55b34d7663c804577be35d382ddfaf099"
+    },
+    "styles/poverty": {
+      "href": "./styles/poverty.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "People below the poverty line",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents with income below the federal poverty line, pale yellow to deep red. Measured over all 31,778 places with a published value: 6 classes with breaks at 5%/9%/14%/20%/30%, which fall at the 23rd/42nd/61st/76th/90th percentile of the national distribution. 56.69% of places have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_below_poverty_moe in the GeoParquet before drawing a conclusion from any single place.",
+      "file:size": 2009,
+      "file:checksum": "122028d281b0c69d8d30a055a808124f660e698537032e47b54fd00040b8180e127a"
+    },
+    "source-b01001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01001 — Sex by Age",
+      "description": "The upstream file this collection's B01001 columns were read from: one pipe-delimited row per geography, estimate (`B01001_E###`) and margin of error (`B01001_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01001](https://data.census.gov/table/ACSDT5Y2024.B01001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 200356282,
+      "file:checksum": "12201637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e"
+    },
+    "source-b01002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01002 — Median Age by Sex",
+      "description": "The upstream file this collection's B01002 columns were read from: one pipe-delimited row per geography, estimate (`B01002_E###`) and margin of error (`B01002_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01002](https://data.census.gov/table/ACSDT5Y2024.B01002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 26666521,
+      "file:checksum": "122004784637609550868d9da7321e7a947b34e0a10b654dbf6d344599f97f8de7f8"
+    },
+    "source-b01003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01003 — Total Population",
+      "description": "The upstream file this collection's B01003 columns were read from: one pipe-delimited row per geography, estimate (`B01003_E###`) and margin of error (`B01003_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18313708,
+      "file:checksum": "122038d1a992bb058d184009b10b9b34987279aee575e4323165cfb5706c69b6ca90"
+    },
+    "source-b03002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b03002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B03002 — Hispanic or Latino Origin by Race",
+      "description": "The upstream file this collection's B03002 columns were read from: one pipe-delimited row per geography, estimate (`B03002_E###`) and margin of error (`B03002_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 83256772,
+      "file:checksum": "1220ef1a9310905393bf477820de8edb2935c1e9bdb356be65b5ee5fb6fceda911c1"
+    },
+    "source-b05002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b05002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B05002 — Place of Birth by Nativity and Citizenship Status",
+      "description": "The upstream file this collection's B05002 columns were read from: one pipe-delimited row per geography, estimate (`B05002_E###`) and margin of error (`B05002_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B05002](https://data.census.gov/table/ACSDT5Y2024.B05002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 57767821,
+      "file:checksum": "12207c97161f6a299ba213b54acad4fc869bd993f438ca70287a61d5b857d98ba295"
+    },
+    "source-b08301": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b08301.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B08301 — Means of Transportation to Work",
+      "description": "The upstream file this collection's B08301 columns were read from: one pipe-delimited row per geography, estimate (`B08301_E###`) and margin of error (`B08301_M###`) side by side, for every summary level in one national file. Universe: Workers 16 years and over. Served by census.gov, not by this mirror; see [B08301](https://data.census.gov/table/ACSDT5Y2024.B08301) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 88492616,
+      "file:checksum": "1220552b24c135b6e7c566910914a861cda6fc798ba0cd47801b1eb64295a128c2ee"
+    },
+    "source-b08303": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b08303.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B08303 — Travel Time to Work",
+      "description": "The upstream file this collection's B08303 columns were read from: one pipe-delimited row per geography, estimate (`B08303_E###`) and margin of error (`B08303_M###`) side by side, for every summary level in one national file. Universe: Workers 16 years and over who did not work from home. Served by census.gov, not by this mirror; see [B08303](https://data.census.gov/table/ACSDT5Y2024.B08303) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 64154309,
+      "file:checksum": "12201b9b9243afe6656fa8d760830b0b760e7de759752b49510175fd1853e1c016de"
+    },
+    "source-b15003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b15003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B15003 — Educational Attainment for the Population 25 Years and Over",
+      "description": "The upstream file this collection's B15003 columns were read from: one pipe-delimited row per geography, estimate (`B15003_E###`) and margin of error (`B15003_M###`) side by side, for every summary level in one national file. Universe: Population 25 years and over. Served by census.gov, not by this mirror; see [B15003](https://data.census.gov/table/ACSDT5Y2024.B15003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 92292840,
+      "file:checksum": "1220d0c8609e958022459215c8a31d7452ef7528ee8dd70fbb6f9a99de0f491f42d7"
+    },
+    "source-b17020b": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b17020b.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B17020B — Poverty Status in the Past 12 Months by Age (Black or African American Alone)",
+      "description": "The upstream file this collection's B17020B columns were read from: one pipe-delimited row per geography, estimate (`B17020B_E###`) and margin of error (`B17020B_M###`) side by side, for every summary level in one national file. Universe: Black or African American alone population for whom poverty status is determined. Served by census.gov, not by this mirror; see [B17020B](https://data.census.gov/table/ACSDT5Y2024.B17020B) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 34700797,
+      "file:checksum": "1220cc2cc99c52cb72f4f7d02af6a7630a06edb1e274e411f2f236181bd7d93031e7"
+    },
+    "source-b18101": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b18101.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B18101 — Sex by Age by Disability Status",
+      "description": "The upstream file this collection's B18101 columns were read from: one pipe-delimited row per geography, estimate (`B18101_E###`) and margin of error (`B18101_M###`) side by side, for every summary level in one national file. Universe: Civilian noninstitutionalized population. Served by census.gov, not by this mirror; see [B18101](https://data.census.gov/table/ACSDT5Y2024.B18101) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 86298310,
+      "file:checksum": "1220efd8f4945ac4c4986b9a7b9478b7b831e83cc1430e0ead22b2d1f47eae8d4ec4"
+    },
+    "source-b19013": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013 — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The upstream file this collection's B19013 columns were read from: one pipe-delimited row per geography, estimate (`B19013_E###`) and margin of error (`B19013_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17917916,
+      "file:checksum": "1220b25a176b0e6c339b6f3a2a0d3d8446bf06f5f080b4395993ec9a8313efb1c229"
+    },
+    "source-b19013b": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013b.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013B — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Black or African American Alone Householder)",
+      "description": "The upstream file this collection's B19013B columns were read from: one pipe-delimited row per geography, estimate (`B19013B_E###`) and margin of error (`B19013B_M###`) side by side, for every summary level in one national file. Universe: Households with a householder who is Black or African American alone. Served by census.gov, not by this mirror; see [B19013B](https://data.census.gov/table/ACSDT5Y2024.B19013B) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 11123180,
+      "file:checksum": "12200d0ad5b366e22a2445516122612cc71b7feca316538c54389d59206d56d7b1ad"
+    },
+    "source-b19013d": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013d.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013D — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Asian Alone Householder)",
+      "description": "The upstream file this collection's B19013D columns were read from: one pipe-delimited row per geography, estimate (`B19013D_E###`) and margin of error (`B19013D_M###`) side by side, for every summary level in one national file. Universe: Households with a householder who is Asian alone. Served by census.gov, not by this mirror; see [B19013D](https://data.census.gov/table/ACSDT5Y2024.B19013D) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 11426298,
+      "file:checksum": "12207f9af08358370f2f4bda551aedb604184faaa0c47e0984105d86e7ec1236635d"
+    },
+    "source-b19013h": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013h.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013H — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (White Alone, Not Hispanic or Latino Householder)",
+      "description": "The upstream file this collection's B19013H columns were read from: one pipe-delimited row per geography, estimate (`B19013H_E###`) and margin of error (`B19013H_M###`) side by side, for every summary level in one national file. Universe: Households with a householder who is White alone, not Hispanic or Latino. Served by census.gov, not by this mirror; see [B19013H](https://data.census.gov/table/ACSDT5Y2024.B19013H) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 9545492,
+      "file:checksum": "1220827fd88b8d0cb1d741d2151b2f55073dc7c32d5c2d9f32201abfab7ea97afc65"
+    },
+    "source-b19013i": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013i.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013I — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Hispanic or Latino Householder)",
+      "description": "The upstream file this collection's B19013I columns were read from: one pipe-delimited row per geography, estimate (`B19013I_E###`) and margin of error (`B19013I_M###`) side by side, for every summary level in one national file. Universe: Households with a householder who is Hispanic or Latino. Served by census.gov, not by this mirror; see [B19013I](https://data.census.gov/table/ACSDT5Y2024.B19013I) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 10738686,
+      "file:checksum": "12204e171f70f9ffabeb904a4a16a029a30c330aa1dbc2c3500a71d6e365244681df"
+    },
+    "source-b19301": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19301.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19301 — Per Capita Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The upstream file this collection's B19301 columns were read from: one pipe-delimited row per geography, estimate (`B19301_E###`) and margin of error (`B19301_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17123907,
+      "file:checksum": "12209fc107e98fee7fa49bb8314560205569184fad65fb64b80adb5c5bdd83ccc409"
+    },
+    "source-b22010": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b22010.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B22010 — Receipt of Food Stamps/SNAP in the Past 12 Months by Disability Status for Households",
+      "description": "The upstream file this collection's B22010 columns were read from: one pipe-delimited row per geography, estimate (`B22010_E###`) and margin of error (`B22010_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B22010](https://data.census.gov/table/ACSDT5Y2024.B22010) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 38153126,
+      "file:checksum": "1220728f19fa9b33bfa2a800f998cd263de6ab8ac2c18154ee4d12db72e2b903a3fb"
+    },
+    "source-b23025": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b23025.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B23025 — Employment Status for the Population 16 Years and Over",
+      "description": "The upstream file this collection's B23025 columns were read from: one pipe-delimited row per geography, estimate (`B23025_E###`) and margin of error (`B23025_M###`) side by side, for every summary level in one national file. Universe: Population 16 years and over. Served by census.gov, not by this mirror; see [B23025](https://data.census.gov/table/ACSDT5Y2024.B23025) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 39968046,
+      "file:checksum": "1220264a5bd9367c5f58d9773fa4966fa94fe1e02f9c7106bc2ab39168d6de7c3e4a"
+    },
+    "source-b25002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25002 — Occupancy Status",
+      "description": "The upstream file this collection's B25002 columns were read from: one pipe-delimited row per geography, estimate (`B25002_E###`) and margin of error (`B25002_M###`) side by side, for every summary level in one national file. Universe: Housing units. Served by census.gov, not by this mirror; see [B25002](https://data.census.gov/table/ACSDT5Y2024.B25002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 23400695,
+      "file:checksum": "1220eb98debfe8e8533e9a8e647a8c5dca5dbe11401c4de4e4449b4a2ba7dc75620f"
+    },
+    "source-b25003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25003 — Tenure",
+      "description": "The upstream file this collection's B25003 columns were read from: one pipe-delimited row per geography, estimate (`B25003_E###`) and margin of error (`B25003_M###`) side by side, for every summary level in one national file. Universe: Occupied housing units. Served by census.gov, not by this mirror; see [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 26901770,
+      "file:checksum": "122068e963e1ed60fcf6b0658579cefc6498b7a9eb780b9f3e87fd1b9775c4d4ac6c"
+    },
+    "source-b25024": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25024.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25024 — Units in Structure",
+      "description": "The upstream file this collection's B25024 columns were read from: one pipe-delimited row per geography, estimate (`B25024_E###`) and margin of error (`B25024_M###`) side by side, for every summary level in one national file. Universe: Housing units. Served by census.gov, not by this mirror; see [B25024](https://data.census.gov/table/ACSDT5Y2024.B25024) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 47866463,
+      "file:checksum": "122026ff26c645d1abc55c3b47998931cea45af40600a6e8d36228d3ed7493add2ef"
+    },
+    "source-b25034": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25034.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25034 — Year Structure Built",
+      "description": "The upstream file this collection's B25034 columns were read from: one pipe-delimited row per geography, estimate (`B25034_E###`) and margin of error (`B25034_M###`) side by side, for every summary level in one national file. Universe: Housing units. Served by census.gov, not by this mirror; see [B25034](https://data.census.gov/table/ACSDT5Y2024.B25034) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 50103592,
+      "file:checksum": "1220806d6cb18e8e6c0855e065eca99164b07334cc32f521899aa45a4415ef7d380e"
+    },
+    "source-b25044": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25044.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25044 — Tenure by Vehicles Available",
+      "description": "The upstream file this collection's B25044 columns were read from: one pipe-delimited row per geography, estimate (`B25044_E###`) and margin of error (`B25044_M###`) side by side, for every summary level in one national file. Universe: Occupied housing units. Served by census.gov, not by this mirror; see [B25044](https://data.census.gov/table/ACSDT5Y2024.B25044) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 63372481,
+      "file:checksum": "1220db636e7d249d1f5c83aae67589b47f199827e2969ba6128cae101ac0d1c3e86e"
+    },
+    "source-b25064": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25064.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25064 — Median Gross Rent (Dollars)",
+      "description": "The upstream file this collection's B25064 columns were read from: one pipe-delimited row per geography, estimate (`B25064_E###`) and margin of error (`B25064_M###`) side by side, for every summary level in one national file. Universe: Renter-occupied housing units paying cash rent. Served by census.gov, not by this mirror; see [B25064](https://data.census.gov/table/ACSDT5Y2024.B25064) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17272062,
+      "file:checksum": "1220b36e6dc1fcef36b8b307d31b37517b64c80d8b9c70d48c9b1894242860f42eb0"
+    },
+    "source-b25070": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25070.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25070 — Gross Rent as a Percentage of Household Income in the Past 12 Months",
+      "description": "The upstream file this collection's B25070 columns were read from: one pipe-delimited row per geography, estimate (`B25070_E###`) and margin of error (`B25070_M###`) side by side, for every summary level in one national file. Universe: Renter-occupied housing units. Served by census.gov, not by this mirror; see [B25070](https://data.census.gov/table/ACSDT5Y2024.B25070) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 46466758,
+      "file:checksum": "1220862ccc17d913305d11e6f802ce4518d76b30585ea0b05b251cd8cf21f8661386"
+    },
+    "source-b25077": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25077.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25077 — Median Value (Dollars)",
+      "description": "The upstream file this collection's B25077 columns were read from: one pipe-delimited row per geography, estimate (`B25077_E###`) and margin of error (`B25077_M###`) side by side, for every summary level in one national file. Universe: Owner-occupied housing units. Served by census.gov, not by this mirror; see [B25077](https://data.census.gov/table/ACSDT5Y2024.B25077) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18496426,
+      "file:checksum": "122089eb2153764a2330b23959d8bbc29b3a8f3016f087b990f2a8ea0d5096d9a816"
+    },
+    "source-b26001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b26001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B26001 — Group Quarters Population",
+      "description": "The upstream file this collection's B26001 columns were read from: one pipe-delimited row per geography, estimate (`B26001_E###`) and margin of error (`B26001_M###`) side by side, for every summary level in one national file. Universe: Population in group quarters. Served by census.gov, not by this mirror; see [B26001](https://data.census.gov/table/ACSDT5Y2024.B26001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 7328564,
+      "file:checksum": "12207c2991c91ec5de57bbe79c589e27f7f5f1cd753dbb540adb8662fb8d97aec726"
+    },
+    "source-b27001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b27001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B27001 — Health Insurance Coverage Status by Sex by Age",
+      "description": "The upstream file this collection's B27001 columns were read from: one pipe-delimited row per geography, estimate (`B27001_E###`) and margin of error (`B27001_M###`) side by side, for every summary level in one national file. Universe: Civilian noninstitutionalized population. Served by census.gov, not by this mirror; see [B27001](https://data.census.gov/table/ACSDT5Y2024.B27001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 119572124,
+      "file:checksum": "1220af9b1cad8178ebc85fa96a32b615a3f7a5f98ead7afabc68922614c68eb976ad"
+    },
+    "source-b28001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b28001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B28001 — Types of Computers in Household",
+      "description": "The upstream file this collection's B28001 columns were read from: one pipe-delimited row per geography, estimate (`B28001_E###`) and margin of error (`B28001_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B28001](https://data.census.gov/table/ACSDT5Y2024.B28001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 51500223,
+      "file:checksum": "1220c9a43c129ebd109e810fbdcfbf3f8c8eecdf3e71400c169337d011e5827c682b"
+    },
+    "source-b28002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b28002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B28002 — Presence and Types of Internet Subscriptions in Household",
+      "description": "The upstream file this collection's B28002 columns were read from: one pipe-delimited row per geography, estimate (`B28002_E###`) and margin of error (`B28002_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B28002](https://data.census.gov/table/ACSDT5Y2024.B28002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 58063218,
+      "file:checksum": "122012446ff0691b8818f5908cdc398817361772c5b3078c506d0409adc9c841840b"
+    },
+    "source-c17002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-c17002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table C17002 — Ratio of Income to Poverty Level in the Past 12 Months",
+      "description": "The upstream file this collection's C17002 columns were read from: one pipe-delimited row per geography, estimate (`C17002_E###`) and margin of error (`C17002_M###`) side by side, for every summary level in one national file. Universe: Population for whom poverty status is determined. Served by census.gov, not by this mirror; see [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 42027042,
+      "file:checksum": "1220dc3dc675113683ec3ff2a0e29a840f43e03268151d7f14b922658d7306da5187"
+    },
+    "source-table-shells": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 5-year table shells",
+      "description": "`Table ID|Line|Indent|Unique ID|Label|Title|Universe|Type` for every table in the release. Two jobs here: every line number the build reads is pinned against this file and a vintage that renumbers a line fails the build, and every universe quoted in the column descriptions is this file's own `Universe` field. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 5622840,
+      "file:checksum": "12205b46f4af873744a415c4974204010db976e2a61ff916674732f81c496a6b517d"
+    },
+    "source-cartographic-boundaries": {
+      "href": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_place_500k.zip",
+      "type": "application/zip",
+      "title": "2024 cartographic boundary file — incorporated places and census designated places (1:500,000, national)",
+      "description": "The geometry this collection joins onto, shoreline-clipped and generalized for mapping. Only the join key, the name parts and the land-area field are kept; reprojected from NAD83 to EPSG:4326 with ogr2ogr. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 22957701,
+      "file:checksum": "12202be68094759b710979f41afd1996cf0132eec78350dfef45566a65478a6944b3"
+    },
+    "doc-geo-tallies": {
+      "href": "https://www2.census.gov/geo/docs/maps-data/data/geo_tallies2020/Natl_Geographic_Tallies_2020.txt",
+      "type": "text/plain",
+      "title": "2020 Census national geographic entity tallies",
+      "description": "The published count of every geographic entity type, which this collection's row count is checked against: 33,791 ZCTAs (33,642 US + 132 Puerto Rico + 17 island areas), 19,734 incorporated places and 12,454 census designated places, 441 congressional districts (436 US including the DC delegate + 1 Puerto Rico + 4 island areas). Index page: https://www.census.gov/geographies/reference-files/time-series/geo/tallies.html.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1746,
+      "file:checksum": "122006db85a152a3e7de71ec15f3c225d0e4ea466b34bcab4cb443bfa1aebc244d80"
+    },
+    "doc-cdp-about": {
+      "href": "https://www.census.gov/programs-surveys/bas/information/cdp.html",
+      "type": "text/html",
+      "title": "Census Designated Places (CDPs) — Census Bureau",
+      "description": "How the Bureau delineates the unincorporated communities that make up roughly two fifths of the rows here, and how a CDP differs from an incorporated place.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-handbook": {
+      "href": "https://www.census.gov/programs-surveys/acs/library/handbooks/general.html",
+      "type": "text/html",
+      "title": "Understanding and Using American Community Survey Data — Census Bureau handbooks",
+      "description": "The Bureau's own guidance on what ACS estimates can and cannot support: 1-year versus 5-year releases, margins of error, comparing across vintages, and small-area reliability. Read it before drawing a conclusion from a single block group.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-accuracy": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf",
+      "type": "application/pdf",
+      "title": "ACS Accuracy of the Data (2024, multiyear estimates)",
+      "description": "The source of every margin-of-error formula this build applies: quadrature for sums, the proportion formula and its ratio fallback for percentages, and the definition of the published 90% confidence level.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 387987,
+      "file:checksum": "12204d3258202e02828c55e95312573f48c83e2fee26f5967fcf817c273b154741ad"
+    },
+    "doc-acs-subject-definitions": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf",
+      "type": "application/pdf",
+      "title": "ACS 2024 Subject Definitions",
+      "description": "The Census Bureau's definitions of the concepts behind these columns — household, householder, gross rent, poverty status determined, group quarters, means of transportation to work, disability. Where a column description here says what a universe is, this is the document it is saying it from.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1170567,
+      "file:checksum": "12206e0c5b1a5d3ebf7e300e583ac6424cbd5f09de50d69e7ef03aa6d070d9c4a7a8"
+    },
+    "doc-geo-glossary": {
+      "href": "https://www.census.gov/programs-surveys/geography/about/glossary.html",
+      "type": "text/html",
+      "title": "Census Bureau geography program glossary",
+      "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "ACS",
+    "American Community Survey",
+    "demographics",
+    "United States",
+    "margins of error",
+    "income",
+    "poverty",
+    "housing",
+    "commuting",
+    "internet access",
+    "health insurance",
+    "race",
+    "education",
+    "places",
+    "cities",
+    "towns",
+    "census designated places",
+    "CDP",
+    "municipalities"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/acs.html",
+      "concepts": [
+        {
+          "id": "acs5",
+          "title": "American Community Survey 5-year estimates"
+        }
+      ]
+    }
+  ],
+  "table:row_count": 32612,
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "7-character place GEOID — state FIPS (2) + place FIPS (5), e.g. `0644000` for Los Angeles city. `substr(geoid, 1, 2)` is the state FIPS code, which is the only prefix join a place supports: places nest in states but not in counties (a place can straddle a county line) and a place is not a census-tract aggregate. Matches `GEOID` in the 2024 cartographic boundary place file; the ACS `1600000US` prefix is stripped."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Human-readable name from the cartographic boundary place file: `NAMELSAD`, `STATE_NAME` — \"Los Angeles city, California\", \"Brentwood CDP, New York\". `NAMELSAD` carries the legal/statistical descriptor, so the name itself says whether a place is a city, town, village, borough or CDP."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Two-letter USPS state or territory code (`MO`, `PR`, `GU`). Carried on every collection from the `STATEFP → USPS` lookup embedded in `tools/specs.py` rather than read off the boundary files, because the 2024 cartographic boundary block-group file has no `STUSPS` column while the tract, county and state files do."
+    },
+    {
+      "name": "population",
+      "type": "int64",
+      "description": "Total population. Universe: total population. The single line of [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) (Total Population), published as an integer. Carried on every ACS collection so a rate can be weighted or sanity-checked without a second download. NULL on 0.86% of places — the 282 places with 2024 boundaries but no ACS row: 279 in the island areas (MP 135, AS 77, GU 57, VI 10), Brentwood CDP and Wyandanch CDP in Suffolk County, New York, and Louisville city, Kentucky, whose ACS tabulation is the consolidated `2148006` Louisville/Jefferson County metro government (balance)."
+    },
+    {
+      "name": "population_moe",
+      "type": "double",
+      "description": "Margin of error for `population` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND / 1e6` from the cartographic boundary file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+    },
+    {
+      "name": "pop_density",
+      "type": "double",
+      "description": "People per square kilometre of land area, rounded to 1 decimal: `population / aland_sqkm`. NULL where `ALAND` is 0 or `population` is NULL."
+    },
+    {
+      "name": "median_hh_income",
+      "type": "double",
+      "description": "Median household income in the past 12 months, in 2024 inflation-adjusted dollars. Universe: households. Line 1 of [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013), published as the Census Bureau publishes it. A median cannot be aggregated: there is no way to combine the medians of two block groups into the median of their union. **NULL on 12.71% of places.** Thousands of places in the file are villages and CDPs of a few hundred people, which is where the Census Bureau's suppression bites; the population-weighted coverage is far better than the row-weighted rate suggests."
+    },
+    {
+      "name": "median_hh_income_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "per_capita_income",
+      "type": "double",
+      "description": "Per capita income in the past 12 months, in 2024 inflation-adjusted dollars — aggregate income divided by total population, so children and people with no income are in the denominator. Universe: total population. Line 1 of [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301)."
+    },
+    {
+      "name": "per_capita_income_moe",
+      "type": "double",
+      "description": "Margin of error for `per_capita_income` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "pct_below_poverty",
+      "type": "double",
+      "description": "Percent of the population below the federal poverty level — an income-to-poverty ratio under 1.00. Universe: population for whom poverty status is determined, which excludes institutionalized people, people in military group quarters and in college dormitories, and unrelated individuals under 15. Lines 2 (\"Under .50\") + 3 (\".50 to .99\") of [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) over line 1."
+    },
+    {
+      "name": "pct_below_poverty_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_poverty` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_below_poverty_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_below_poverty`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_below_2x_poverty",
+      "type": "double",
+      "description": "Percent of the population with an income-to-poverty ratio under 2.00 — a common proxy for low income rather than deep poverty. Universe: population for whom poverty status is determined. Lines 2–7 of [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) over line 1 (equivalently, everyone not in line 8, \"2.00 and over\")."
+    },
+    {
+      "name": "pct_below_2x_poverty_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_2x_poverty` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_snap",
+      "type": "double",
+      "description": "Percent of households that received Food Stamps/SNAP benefits at any time in the past 12 months. Universe: households. Line 2 of [B22010](https://data.census.gov/table/ACSDT5Y2024.B22010) over line 1. Receipt by the household, not by individuals, and not a measure of current enrollment."
+    },
+    {
+      "name": "pct_snap_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_snap` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_unemployed",
+      "type": "double",
+      "description": "Unemployment rate: unemployed people as a percent of the civilian labor force. Universe for the table is the population 16 years and over, but the denominator here is line 3, \"Civilian labor force\" — the labor force, not the whole population 16+, because that is what an unemployment rate divides by. Line 5 (\"Unemployed\") over line 3 of [B23025](https://data.census.gov/table/ACSDT5Y2024.B23025). Members of the Armed Forces and people not in the labor force are excluded from both parts."
+    },
+    {
+      "name": "pct_unemployed_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_unemployed` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "median_age",
+      "type": "double",
+      "description": "Median age in years. Universe: total population. Line 1 of [B01002](https://data.census.gov/table/ACSDT5Y2024.B01002) (Median Age by Sex); the male and female medians on lines 2 and 3 are not published here. Like every median, not aggregable."
+    },
+    {
+      "name": "median_age_moe",
+      "type": "double",
+      "description": "Margin of error for `median_age` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "pct_under_18",
+      "type": "double",
+      "description": "Percent of the population under 18 years old. Universe: total population. The under-18 lines of [B01001](https://data.census.gov/table/ACSDT5Y2024.B01001) (Sex by Age) over line 1. The components are resolved from the table shells by label — \"Under 5 years\", \"5 to 9 years\", \"10 to 14 years\", \"15 to 17 years\", once per sex, 8 lines for this vintage — so a renumbered line fails the build instead of silently shifting."
+    },
+    {
+      "name": "pct_under_18_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_under_18` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_65_plus",
+      "type": "double",
+      "description": "Percent of the population 65 years and over. Universe: total population. The 65-and-over lines of [B01001](https://data.census.gov/table/ACSDT5Y2024.B01001) over line 1, resolved from the shells by label (\"65 and 66 years\" through \"85 years and over\", once per sex, 12 lines for this vintage)."
+    },
+    {
+      "name": "pct_65_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_65_plus` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_white_nh",
+      "type": "double",
+      "description": "Percent of the population that is White alone and not Hispanic or Latino. Universe: total population. Line 3 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1 — line 3 sits under line 2, \"Not Hispanic or Latino\", so this is the non-Hispanic branch."
+    },
+    {
+      "name": "pct_white_nh_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_white_nh` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_black",
+      "type": "double",
+      "description": "Percent of the population that is Black or African American alone and not Hispanic or Latino. Universe: total population. Line 4 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1 (the \"Not Hispanic or Latino\" branch, so this share and `pct_hispanic` do not overlap)."
+    },
+    {
+      "name": "pct_black_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_black` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_native",
+      "type": "double",
+      "description": "Percent of the population that is American Indian and Alaska Native alone and not Hispanic or Latino. Universe: total population. Line 5 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1. Small everywhere outside Indian Country and reservations, and at block-group scale usually within its own margin of error."
+    },
+    {
+      "name": "pct_native_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_native` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_asian",
+      "type": "double",
+      "description": "Percent of the population that is Asian alone and not Hispanic or Latino. Universe: total population. Line 6 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1."
+    },
+    {
+      "name": "pct_asian_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_asian` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_hispanic",
+      "type": "double",
+      "description": "Percent of the population that is Hispanic or Latino, of any race. Universe: total population. Line 12 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1. Hispanic origin is asked separately from race, which is why this crosses every race category; here it is disjoint from the five race shares because those are all drawn from the non-Hispanic branch."
+    },
+    {
+      "name": "pct_hispanic_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_hispanic` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_people_of_color",
+      "type": "double",
+      "description": "Percent of the population that is **not** White-alone non-Hispanic: `100 − pct_white_nh`. Universe: total population. Derived from [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002). A complement, so it carries `pct_white_nh`'s own margin of error unchanged — a share and its complement have the same sampling error."
+    },
+    {
+      "name": "pct_people_of_color_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_people_of_color` at the 90% confidence level, the level the Census Bureau publishes. A complement carries the margin of error of the share it was taken from, unchanged — `100 − p` has the same sampling error as `p`."
+    },
+    {
+      "name": "pct_bachelors_plus",
+      "type": "double",
+      "description": "Percent of adults 25 and over whose highest attainment is a bachelor's degree or more. Universe: population 25 years and over. Lines 22–25 of [B15003](https://data.census.gov/table/ACSDT5Y2024.B15003) (Bachelor's, Master's, Professional school, Doctorate) over line 1. Associate's degrees (line 21) are deliberately excluded."
+    },
+    {
+      "name": "pct_bachelors_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_bachelors_plus` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "housing_units",
+      "type": "int64",
+      "description": "Total housing units, occupied and vacant. Universe: housing units. Line 1 of [B25002](https://data.census.gov/table/ACSDT5Y2024.B25002) (Occupancy Status), published as an integer."
+    },
+    {
+      "name": "housing_units_moe",
+      "type": "double",
+      "description": "Margin of error for `housing_units` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "pct_vacant_units",
+      "type": "double",
+      "description": "Percent of housing units that are vacant. Universe: housing units. Line 3 (\"Vacant\") over line 1 of [B25002](https://data.census.gov/table/ACSDT5Y2024.B25002). The ACS counts for-sale, for-rent, seasonal and migrant-worker units as vacant, so this is not a measure of abandonment."
+    },
+    {
+      "name": "pct_vacant_units_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_vacant_units` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "households",
+      "type": "int64",
+      "description": "Households — occupied housing units. One household per occupied unit, by definition. Universe: occupied housing units. Line 1 of [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003) (Tenure), published as an integer."
+    },
+    {
+      "name": "households_moe",
+      "type": "double",
+      "description": "Margin of error for `households` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "pct_owner_occupied",
+      "type": "double",
+      "description": "Percent of occupied housing units that are owner-occupied. Universe: occupied housing units. Line 2 (\"Owner occupied\") over line 1 of [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003). The homeownership rate of households, not of people, and vacant units are outside the universe entirely."
+    },
+    {
+      "name": "pct_owner_occupied_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_owner_occupied` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "median_gross_rent",
+      "type": "double",
+      "description": "Median gross rent in dollars per month — contract rent plus the estimated average monthly cost of utilities and fuels. Universe: renter-occupied housing units **paying cash rent**, so units occupied rent-free are excluded. Line 1 of [B25064](https://data.census.gov/table/ACSDT5Y2024.B25064). **NULL on 31.32% of places** — a third of them, mostly small places with few cash-renting households."
+    },
+    {
+      "name": "median_gross_rent_moe",
+      "type": "double",
+      "description": "Margin of error for `median_gross_rent` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_gross_rent_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_gross_rent`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_rent_burdened",
+      "type": "double",
+      "description": "Percent of renter households paying 30% or more of household income on gross rent — the standard affordability threshold. Universe: renter-occupied housing units, less those whose ratio the Census could not compute. Lines 7–10 (30.0–34.9, 35.0–39.9, 40.0–49.9, 50.0 percent or more) of [B25070](https://data.census.gov/table/ACSDT5Y2024.B25070) over line 1 minus line 11 (\"Not computed\" — no cash rent, or no income). Including the not-computed units in the denominator would understate the burden. NULL on 14.60% of places, where the denominator (renter households whose rent-to-income ratio could be computed) came out at or below 0."
+    },
+    {
+      "name": "pct_rent_burdened_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_rent_burdened` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_rent_burdened_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_rent_burdened`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_severely_rent_burdened",
+      "type": "double",
+      "description": "Percent of renter households paying 50% or more of household income on gross rent. Universe: renter-occupied housing units, less those whose ratio could not be computed. Line 10 of [B25070](https://data.census.gov/table/ACSDT5Y2024.B25070) over line 1 minus line 11. A subset of `pct_rent_burdened`."
+    },
+    {
+      "name": "pct_severely_rent_burdened_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_severely_rent_burdened` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "median_home_value",
+      "type": "double",
+      "description": "Median value of owner-occupied housing units, in dollars — the owner's estimate of what the property would sell for, not an assessment or a sale price. Universe: owner-occupied housing units. Line 1 of [B25077](https://data.census.gov/table/ACSDT5Y2024.B25077). NULL on 12.78% of places."
+    },
+    {
+      "name": "median_home_value_moe",
+      "type": "double",
+      "description": "Margin of error for `median_home_value` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_home_value_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_home_value`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_built_pre_1940",
+      "type": "double",
+      "description": "Percent of housing units built in 1939 or earlier. Universe: housing units. Line 11 of [B25034](https://data.census.gov/table/ACSDT5Y2024.B25034) (Year Structure Built) over line 1. The oldest bucket the table publishes, and a standard screening proxy for lead-paint risk."
+    },
+    {
+      "name": "pct_built_pre_1940_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_built_pre_1940` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_single_family",
+      "type": "double",
+      "description": "Percent of housing units in single-family structures. Universe: housing units. Lines 2 (\"1, detached\") + 3 (\"1, attached\") over line 1 of [B25024](https://data.census.gov/table/ACSDT5Y2024.B25024) (Units in Structure). Attached single-family — rowhouses, townhouses — is included; a duplex (line 4) is not."
+    },
+    {
+      "name": "pct_single_family_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_single_family` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "hh_no_vehicle",
+      "type": "int64",
+      "description": "Occupied housing units with no vehicle available, owner- and renter-occupied combined. Universe: occupied housing units. Lines 3 + 10 of [B25044](https://data.census.gov/table/ACSDT5Y2024.B25044) (Tenure by Vehicles Available) — the \"No vehicle available\" line under each tenure — which is what makes this a tenure-blind count. Published as an integer; the two margins of error add in quadrature."
+    },
+    {
+      "name": "hh_no_vehicle_moe",
+      "type": "double",
+      "description": "Margin of error for `hh_no_vehicle` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "pct_hh_no_vehicle",
+      "type": "double",
+      "description": "Percent of occupied housing units with no vehicle available. Universe: occupied housing units. Lines 3 + 10 over line 1 of [B25044](https://data.census.gov/table/ACSDT5Y2024.B25044). Households, not people: a car-free household of four counts once."
+    },
+    {
+      "name": "pct_hh_no_vehicle_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_hh_no_vehicle` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_hh_no_vehicle_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_hh_no_vehicle`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_commute_drive_alone",
+      "type": "double",
+      "description": "Percent of workers who drove alone to work in a car, truck or van. Universe: workers 16 years and over. Line 3 (\"Drove alone\", under \"Car, truck, or van\") over line 1 of [B08301](https://data.census.gov/table/ACSDT5Y2024.B08301) (Means of Transportation to Work). The ACS asks about the usual means of transportation in the reference week, so a hybrid commuter reports one mode."
+    },
+    {
+      "name": "pct_commute_drive_alone_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_commute_drive_alone` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_commute_transit",
+      "type": "double",
+      "description": "Percent of workers who commuted by public transportation. Universe: workers 16 years and over. Line 10 (\"Public transportation\") over line 1 of [B08301](https://data.census.gov/table/ACSDT5Y2024.B08301), which covers bus, subway and elevated rail, light rail, commuter rail and ferryboat. Taxi and ride-hailing (line 16) are a separate category in this vintage and are **not** included."
+    },
+    {
+      "name": "pct_commute_transit_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_commute_transit` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_commute_transit_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_commute_transit`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_commute_walk_bike",
+      "type": "double",
+      "description": "Percent of workers who walked or bicycled to work. Universe: workers 16 years and over. Lines 18 (\"Bicycle\") + 19 (\"Walked\") over line 1 of [B08301](https://data.census.gov/table/ACSDT5Y2024.B08301)."
+    },
+    {
+      "name": "pct_commute_walk_bike_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_commute_walk_bike` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_work_from_home",
+      "type": "double",
+      "description": "Percent of workers who worked from home. Universe: workers 16 years and over. Line 21 (\"Worked from home\") over line 1 of [B08301](https://data.census.gov/table/ACSDT5Y2024.B08301). In a 2020–2024 5-year estimate this averages over the pandemic shift and its partial reversal, so it is not a reading of any single year."
+    },
+    {
+      "name": "pct_work_from_home_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_work_from_home` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_commute_45min_plus",
+      "type": "double",
+      "description": "Percent of commuters whose one-way travel time to work is 45 minutes or more. Universe: workers 16 years and over **who did not work from home** — the table's own universe, which is why work-from-home does not deflate this share. Lines 11 + 12 + 13 (45 to 59 minutes, 60 to 89, 90 or more) over line 1 of [B08303](https://data.census.gov/table/ACSDT5Y2024.B08303) (Travel Time to Work)."
+    },
+    {
+      "name": "pct_commute_45min_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_commute_45min_plus` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_no_internet",
+      "type": "double",
+      "description": "Percent of households with no internet access of any kind. Universe: households. Line 13 (\"No Internet access\") over line 1 of [B28002](https://data.census.gov/table/ACSDT5Y2024.B28002). Households that use the internet without paying for a subscription (line 12) are counted as having access, so this is the floor of the digital divide, not its full extent."
+    },
+    {
+      "name": "pct_no_internet_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_no_internet` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_no_internet_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_no_internet`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_no_computer",
+      "type": "double",
+      "description": "Percent of households with no computing device — no desktop or laptop, no smartphone, no tablet, no other computer. Universe: households. Line 11 (\"No Computer\") over line 1 of [B28001](https://data.census.gov/table/ACSDT5Y2024.B28001) (Types of Computers in Household)."
+    },
+    {
+      "name": "pct_no_computer_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_no_computer` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_uninsured",
+      "type": "double",
+      "description": "Percent of the civilian noninstitutionalized population with no health insurance coverage. Universe: civilian noninstitutionalized population — people on active duty and people in institutions are outside it. The \"No health insurance coverage\" lines of [B27001](https://data.census.gov/table/ACSDT5Y2024.B27001) over line 1, resolved from the table shells by label (9 age groups × 2 sexes = 18 lines for this vintage) rather than hardcoded. Not published for block groups, which is why there is no block-group twin of this collection."
+    },
+    {
+      "name": "pct_uninsured_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_uninsured` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_uninsured_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_uninsured`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_with_disability",
+      "type": "double",
+      "description": "Percent of the civilian noninstitutionalized population with a disability, as the ACS's six-question sequence defines it (hearing, vision, cognitive, ambulatory, self-care, independent living). Universe: civilian noninstitutionalized population. The \"With a disability\" lines of [B18101](https://data.census.gov/table/ACSDT5Y2024.B18101) over line 1, resolved from the shells by label (6 age groups × 2 sexes = 12 lines for this vintage)."
+    },
+    {
+      "name": "pct_with_disability_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_with_disability` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_with_disability_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_with_disability`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_foreign_born",
+      "type": "double",
+      "description": "Percent of the population that is foreign-born — anyone not a U.S. citizen at birth, naturalized citizens included. Universe: total population. Line 13 (\"Foreign-born\") over line 1 of [B05002](https://data.census.gov/table/ACSDT5Y2024.B05002) (Place of Birth by Nativity and Citizenship Status). People born abroad to American parents (line 12) are native-born and are not in this share."
+    },
+    {
+      "name": "pct_foreign_born_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_foreign_born` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "group_quarters_pop",
+      "type": "int64",
+      "description": "Population living in group quarters — correctional facilities, nursing facilities, college and university housing, military quarters, group homes, shelters. Universe: population in group quarters. Line 1 of [B26001](https://data.census.gov/table/ACSDT5Y2024.B26001), published as an integer. A large value next to a small household population usually explains an odd median: a prison or a dorm dominates the geography."
+    },
+    {
+      "name": "group_quarters_pop_moe",
+      "type": "double",
+      "description": "Margin of error for `group_quarters_pop` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "median_hh_income_black",
+      "type": "double",
+      "description": "Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Black or African American alone. Universe: households with a householder who is Black or African American alone. Line 1 of [B19013B](https://data.census.gov/table/ACSDT5Y2024.B19013B), the B race iteration of [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013). Classified by the householder's race, not by every member's. **NULL on 79.24% of places.**"
+    },
+    {
+      "name": "median_hh_income_black_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income_black` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_black_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income_black`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "median_hh_income_white_nh",
+      "type": "double",
+      "description": "Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is White alone, not Hispanic or Latino. Universe: households with a householder who is White alone, not Hispanic or Latino. Line 1 of [B19013H](https://data.census.gov/table/ACSDT5Y2024.B19013H) (the H iteration). NULL on 17.62% of places."
+    },
+    {
+      "name": "median_hh_income_white_nh_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income_white_nh` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_white_nh_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income_white_nh`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "median_hh_income_asian",
+      "type": "double",
+      "description": "Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Asian alone. Universe: households with a householder who is Asian alone. Line 1 of [B19013D](https://data.census.gov/table/ACSDT5Y2024.B19013D) (the D iteration). **NULL on 85.80% of places** — the sparsest column in the catalog."
+    },
+    {
+      "name": "median_hh_income_asian_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income_asian` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_asian_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income_asian`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "median_hh_income_hispanic",
+      "type": "double",
+      "description": "Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Hispanic or Latino, of any race. Universe: households with a householder who is Hispanic or Latino. Line 1 of [B19013I](https://data.census.gov/table/ACSDT5Y2024.B19013I) (the I iteration). **NULL on 69.35% of places.**"
+    },
+    {
+      "name": "median_hh_income_hispanic_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income_hispanic` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_hispanic_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income_hispanic`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_below_poverty_black",
+      "type": "double",
+      "description": "Percent of the Black or African American alone population below the poverty level. Universe: Black or African American alone population for whom poverty status is determined — a race-specific universe, so this is not comparable to `pct_below_poverty`'s denominator. Line 2 (\"Income in the past 12 months below poverty level\") over line 1 of [B17020B](https://data.census.gov/table/ACSDT5Y2024.B17020B). NULL on 46.72% of places: no Black-alone population for whom poverty status is determined, so no rate."
+    },
+    {
+      "name": "pct_below_poverty_black_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_poverty_black` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_below_poverty_black_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_below_poverty_black`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2024 cartographic boundary place file (GENZ2024, 1:500,000), which clips to the shoreline — TIGER/Line would extend the place into open water. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z"
+}

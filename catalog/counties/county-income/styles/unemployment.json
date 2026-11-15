@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Unemployment rate",
+  "metadata": {
+    "description": "Unemployed share of the civilian labor force, pale lilac to deep purple. Measured over all 3,222 counties with a published value: 6 classes with breaks at 3%/4%/5%/6%/8%, which fall at the 21st/40th/61st/78th/91st percentile of the national distribution.",
+    "portolan:column": "pct_unemployed",
+    "portolan:breaks": [
+      3,
+      4,
+      5,
+      6,
+      8
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-income",
+      "filter": [
+        "has",
+        "pct_unemployed"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_unemployed"
+          ],
+          "#f2f0f7",
+          3,
+          "#dadaeb",
+          4,
+          "#bcbddc",
+          5,
+          "#9e9ac8",
+          6,
+          "#756bb1",
+          8,
+          "#54278f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-income",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

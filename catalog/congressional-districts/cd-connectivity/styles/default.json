@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "No home internet",
+  "metadata": {
+    "description": "Share of households with no internet subscription of any kind, pale to deep blue. Measured over all 437 districts with a published value: 6 classes with breaks at 4%/5.5%/7%/8.5%/10%, which fall at the 17th/41st/61st/78th/89th percentile of the national distribution.",
+    "portolan:column": "pct_no_internet",
+    "portolan:breaks": [
+      4,
+      5.5,
+      7,
+      8.5,
+      10
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-connectivity",
+      "filter": [
+        "has",
+        "pct_no_internet"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_no_internet"
+          ],
+          "#ebf4fb",
+          4,
+          "#d0d1e6",
+          5.5,
+          "#a6bddb",
+          7,
+          "#74a9cf",
+          8.5,
+          "#2b8cbe",
+          10,
+          "#045a8d"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-connectivity",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

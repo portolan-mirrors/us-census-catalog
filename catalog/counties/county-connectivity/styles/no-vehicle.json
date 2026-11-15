@@ -1,0 +1,106 @@
+{
+  "version": 8,
+  "name": "Households without a vehicle",
+  "metadata": {
+    "description": "Share of households with no vehicle available, pale yellow through teal to navy. Measured over all 3,222 counties with a published value: 6 classes with breaks at 3.5%/5%/6%/7.5%/10%, which fall at the 18th/42nd/59th/77th/90th percentile of the national distribution. 14.71% have a coefficient of variation above 0.3 and render faded \u2014 the estimate is real but its margin of error swamps it.",
+    "portolan:column": "pct_hh_no_vehicle",
+    "portolan:breaks": [
+      3.5,
+      5,
+      6,
+      7.5,
+      10
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-connectivity",
+      "filter": [
+        "has",
+        "pct_hh_no_vehicle"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_hh_no_vehicle"
+          ],
+          "#f7f8c8",
+          3.5,
+          "#c7e9b4",
+          5,
+          "#7fcdbb",
+          6,
+          "#41b6c4",
+          7.5,
+          "#2c7fb8",
+          10,
+          "#253494"
+        ],
+        "fill-opacity": [
+          "case",
+          [
+            ">",
+            [
+              "coalesce",
+              [
+                "get",
+                "pct_hh_no_vehicle_cv"
+              ],
+              0
+            ],
+            0.3
+          ],
+          0.35,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-connectivity",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

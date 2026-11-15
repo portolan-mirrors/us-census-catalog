@@ -54,6 +54,17 @@ Three families of recipe, all built with `tylertoo pyramid --generalize`
                    districts): few enough features that every zoom can
                    carry the real polygons. Unchanged by this rebuild.
 
+  themed children  Since the 2026-11-15 restructure each of the five wide
+                   levels is a group with five themed children (county-*,
+                   state-*, zcta-*, place-*, cd-*), built from the pruned
+                   parquets tools/build_wide_themes.py writes. A child
+                   reuses its LEVEL's recipe with the themed parquet and
+                   the themed layer name swapped in: county-*/state-*/cd-*
+                   are geometry-only like their parents, zcta-*/place-*
+                   take the census pyramid with the county band read from
+                   staging/agg/<theme>-county.parquet. The wide parents'
+                   own archives are not rebuilt or moved.
+
   blocks pyramid   2020 Decennial counts, no margins of error, no CVs, its
                    own three-band split:
 
@@ -142,7 +153,16 @@ def build_bg_cmd(group, cid, theme):
     return cmd, out
 
 
-def build_tract_cmd(group, cid, theme):
+def build_themed_pyramid_cmd(group, cid, theme):
+    """county band + the collection's own features: tract-* and, since the
+    2026-11-15 restructure, the themed zcta-*/place-* children.
+
+    One recipe because the band plan is the same one: the Census Bureau's own
+    county estimates pruned to this theme's exact schema at z0-5
+    (staging/agg/<theme>-county.parquet), the collection's own polygons at
+    z6-12. The command lines it emits for the five tract archives are
+    unchanged, byte for byte, from staging/tiles-logs/tract-*.pyramid.log.
+    """
     d = coll_dir(group, cid)
     out = f"{d}/{cid}.pmtiles"
     tract_path = f"{d}/{cid}.parquet"
@@ -186,8 +206,8 @@ GEOM_ONLY = [
 ]
 
 
-def build_geom_cmd(cid, band, max_tile):
-    d = coll_dir(None, cid)
+def build_geom_cmd(cid, band, max_tile, group=None):
+    d = coll_dir(group, cid)
     path, out = f"{d}/{cid}.parquet", f"{d}/{cid}.pmtiles"
     cmd = [TT, "tiles", path, out, "--band", band]
     if max_tile:
@@ -196,6 +216,41 @@ def build_geom_cmd(cid, band, max_tile):
         cmd += ["--exclude-property", c]
     cmd += ["-f"]
     return cmd, out
+
+
+# ===== the themed children of the five wide levels (2026-11-15) =============
+# Every wide level became a group with five themed children mirroring the
+# tract set (tools/specs.py COLLECTIONS), built from the themed parquets
+# tools/build_wide_themes.py prunes out of the level's wide table. A child
+# carries its parent's geometry exactly, so each one reuses its LEVEL's
+# existing recipe with the themed parquet and the themed layer name swapped
+# in — nothing about the band plan is new, and the wide parent's own parquet
+# and pmtiles are not touched.
+#
+#   county-*, state-*, cd-*   geometry only, the level's own band and cap:
+#                             few enough features to carry real polygons at
+#                             every zoom. The 2M compressed-tile cap is kept
+#                             from the counties/cd recipes even though a
+#                             themed child is a quarter the width — the cap
+#                             is a ceiling, and keeping it means the child
+#                             and the parent cannot diverge on a z0 tile.
+#   zcta-*, place-*           the census pyramid, county band at z0-5 from
+#                             staging/agg/<theme>-county.parquet. The wide
+#                             zctas/places archives point that band at
+#                             counties.parquet itself, which they can
+#                             because its 112 columns are exactly their own;
+#                             a themed child needs the theme's 23-34 column
+#                             pruning, which is the staging file every
+#                             bg-*/tract-* archive already bands on.
+THEMES = ["income", "people", "housing", "connectivity", "wellbeing"]
+# group -> (collection-id prefix, band, max compressed tile size)
+GEOM_LEVELS = [
+    ("counties", "county", "0-10:geom", "2M"),
+    ("states", "state", "0-8:geom", None),
+    ("congressional-districts", "cd", "0-10:geom", "2M"),
+]
+# group -> collection-id prefix, for the levels that need the county band
+PYRAMID_LEVELS = [("zctas", "zcta"), ("places", "place")]
 
 
 # ===== blocks: 2020 Decennial counts, 8.17M features, its own 3-band plan ===
@@ -220,11 +275,22 @@ def recipes():
     for group, cid, theme in BG_CHUNKS:
         out[cid] = (lambda g=group, c=cid, t=theme: build_bg_cmd(g, c, t))
     for group, cid, theme in TRACT_CHUNKS:
-        out[cid] = (lambda g=group, c=cid, t=theme: build_tract_cmd(g, c, t))
+        out[cid] = (lambda g=group, c=cid, t=theme:
+                    build_themed_pyramid_cmd(g, c, t))
     for cid in WAVE3:
         out[cid] = (lambda c=cid: build_wave3_cmd(c))
     for cid, band, cap in GEOM_ONLY:
         out[cid] = (lambda c=cid, b=band, p=cap: build_geom_cmd(c, b, p))
+    for group, prefix, band, cap in GEOM_LEVELS:
+        for theme in THEMES:
+            cid = f"{prefix}-{theme}"
+            out[cid] = (lambda g=group, c=cid, b=band, p=cap:
+                        build_geom_cmd(c, b, p, group=g))
+    for group, prefix in PYRAMID_LEVELS:
+        for theme in THEMES:
+            cid = f"{prefix}-{theme}"
+            out[cid] = (lambda g=group, c=cid, t=theme:
+                        build_themed_pyramid_cmd(g, c, t))
     out["blocks"] = build_blocks_cmd
     return out
 

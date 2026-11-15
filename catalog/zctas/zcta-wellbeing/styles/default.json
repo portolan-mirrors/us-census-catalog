@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "People without health insurance",
+  "metadata": {
+    "description": "Share of the civilian non-institutionalized population with no health insurance coverage, pale yellow to deep red. Measured over all 33,037 ZIP Code Tabulation Areas with a published value: 6 classes with breaks at 2.5%/4.5%/7.5%/11%/18%, which fall at the 20th/38th/60th/77th/92nd percentile of the national distribution. 43.78% of ZIP Code Tabulation Areas have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_uninsured_moe in the GeoParquet before drawing a conclusion from any single ZCTA.",
+    "portolan:column": "pct_uninsured",
+    "portolan:breaks": [
+      2.5,
+      4.5,
+      7.5,
+      11,
+      18
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-wellbeing",
+      "filter": [
+        "has",
+        "pct_uninsured"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_uninsured"
+          ],
+          "#fff2b0",
+          2.5,
+          "#fed976",
+          4.5,
+          "#feb24c",
+          7.5,
+          "#fd8d3c",
+          11,
+          "#f03b20",
+          18,
+          "#bd0026"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-wellbeing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

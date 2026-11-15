@@ -1,0 +1,110 @@
+{
+  "version": 8,
+  "name": "Renters paying 30%+ of income",
+  "metadata": {
+    "description": "Share of renter households spending 30% or more of income on gross rent \u2014 the federal definition of rent-burdened \u2014 pale mauve to deep magenta. Measured over all 27,852 places with a published value: 7 classes with breaks at 1%/32%/45%/55%/72%/99%, which fall at the 11th/29th/50th/69th/88th/94th percentile of the national distribution. 14.6% have no published value and draw in neutral gray rather than as a low value. 48.41% of places have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_rent_burdened_moe in the GeoParquet before drawing a conclusion from any single place.",
+    "portolan:column": "pct_rent_burdened",
+    "portolan:breaks": [
+      1,
+      32,
+      45,
+      55,
+      72,
+      99
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-housing",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_rent_burdened"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-housing",
+      "filter": [
+        "has",
+        "pct_rent_burdened"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_rent_burdened"
+          ],
+          "#f1eef6",
+          1,
+          "#d4b9da",
+          32,
+          "#c994c7",
+          45,
+          "#df65b0",
+          55,
+          "#e7298a",
+          72,
+          "#ce1256",
+          99,
+          "#91003f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-housing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

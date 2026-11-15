@@ -1,0 +1,109 @@
+{
+  "version": 8,
+  "name": "Renters paying 30%+ of income",
+  "metadata": {
+    "description": "Share of renter households spending 30% or more of income on gross rent \u2014 the federal definition of rent-burdened \u2014 pale mauve to deep magenta. Measured over all 3,222 counties with a published value: 7 classes with breaks at 30%/40%/45%/50%/55%/58%, which fall at the 9th/29th/51st/72nd/89th/95th percentile of the national distribution. 7.85% have a coefficient of variation above 0.3 and render faded \u2014 the estimate is real but its margin of error swamps it.",
+    "portolan:column": "pct_rent_burdened",
+    "portolan:breaks": [
+      30,
+      40,
+      45,
+      50,
+      55,
+      58
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-housing",
+      "filter": [
+        "has",
+        "pct_rent_burdened"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_rent_burdened"
+          ],
+          "#f1eef6",
+          30,
+          "#d4b9da",
+          40,
+          "#c994c7",
+          45,
+          "#df65b0",
+          50,
+          "#e7298a",
+          55,
+          "#ce1256",
+          58,
+          "#91003f"
+        ],
+        "fill-opacity": [
+          "case",
+          [
+            ">",
+            [
+              "coalesce",
+              [
+                "get",
+                "pct_rent_burdened_cv"
+              ],
+              0
+            ],
+            0.3
+          ],
+          0.35,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-housing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

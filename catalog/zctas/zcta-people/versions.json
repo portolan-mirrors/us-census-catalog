@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:58.966186Z",
+      "breaking": false,
+      "assets": {
+        "zcta-people.parquet": {
+          "sha256": "ccad7005e85eef7c6ef89d6d6679b924d2ca9cbc3572214437866421eb9730e0",
+          "size_bytes": 69568044,
+          "href": "zctas/zcta-people/zcta-people.parquet",
+          "source_mtime": 1794742543.612916,
+          "mtime": 1794742543.612916,
+          "feature_count": 33791,
+          "schema_fingerprint": "95e022a52af06bf4"
+        },
+        "zcta-people.pmtiles": {
+          "sha256": "ee7f0a04501fa71463773142b09802559d6b02165b252bc2bb14f7abebf7a027",
+          "size_bytes": 200409607,
+          "href": "zctas/zcta-people/zcta-people.pmtiles",
+          "mtime": 1794742704.0809884
+        }
+      },
+      "changes": [
+        "zcta-people.parquet",
+        "zcta-people.pmtiles"
+      ]
+    }
+  ]
+}

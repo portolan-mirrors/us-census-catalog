@@ -8,9 +8,31 @@ deliberate.
 Each collection is one geography × one theme (income, people, housing,
 connectivity, wellbeing), with its own GeoParquet and PMTiles. A chunk's
 PMTiles carries ~10–20 related statistics — small enough to browse nationally,
-coherent enough that its map styles all belong to the theme. Counties and
-states are small (3,144 / 56 rows), so they carry all indicators in one
-collection each.
+coherent enough that its map styles all belong to the theme.
+
+The five coarse-or-sparse levels — counties, states, ZCTAs, places,
+congressional districts — shipped first as a single wide 112-column table
+each, on the reasoning that at 3,235 / 56 / 33,791 / 32,612 / 441 rows width
+costs nothing. **Revised 2026-11-15:** every one of them became a group with
+the same five themed children as tracts, plus the original wide table as a
+sixth child. Two reasons. The catalog now reads uniformly — the same five
+theme ids under every geography, so an agent that has learned one geography
+has learned them all — and a themed chunk is 23–34 columns against 112, which
+is what a consumer who wants median income should have to read even when the
+file is small. The wide table stays because a cross-theme profile of one row
+is a real question and at this size it needs no join.
+
+The wide table keeps its id and its data files: its `collection.json`,
+`README.md` and `styles/` moved into `catalog/<group>/<id>/` beside the themed
+children, while its parquet and pmtiles stayed at
+`catalog/<group>/<id>.parquet`, referenced from the moved `collection.json`
+with `../` hrefs. Every data URL this catalog has published keeps working;
+`tools/collection_meta.py`'s `data_url()` is the one place that knows.
+
+The themed children are **column-pruned from the wide table**
+(`tools/build_wide_themes.py`), not a second pass over the ACS `.dat` files,
+so every value in a chunk is identical to the wide table's — verified by an
+`EXCEPT` over every column of all 25 chunks: 0 rows differing.
 
 ## Geography levels and what exists at each
 
@@ -34,9 +56,17 @@ coarse zooms step up to a **coarser census geography** instead, via
 | --- | --- | --- | --- |
 | `bg-income`, `-people`, `-housing`, `-connectivity` | counties | z6–z7 tracts | z8–z13 block groups |
 | `tract-*` | counties | — | z6–z12 tracts |
-| `zctas`, `places` | counties | — | z6–z12 own features |
+| `zctas`, `zcta-*`, `places`, `place-*` | counties | — | z6–z12 own features |
 | `blocks` | counties | z6–z9 tracts | z10–z14 blocks |
-| `counties`, `states`, `congressional-districts` | real polygons at every zoom | | |
+| `counties`, `county-*`, `states`, `state-*`, `congressional-districts`, `cd-*` | real polygons at every zoom | | |
+
+A themed child carries its parent's geometry exactly, so it reuses its
+level's recipe with the themed parquet and the themed layer name swapped in —
+nothing about the band plan is new. The one difference: the wide `zctas` and
+`places` archives point their county band at `counties.parquet` itself, which
+they can because its 112 columns are exactly their own, while a themed child
+bands on `staging/agg/<theme>-county.parquet`, the same pruned staging file
+every `bg-*` and `tract-*` archive already uses.
 
 For the ACS archives the county and tract bands are **the Census Bureau's own
 county and tract estimates** — `staging/agg/<theme>-county.parquet` is

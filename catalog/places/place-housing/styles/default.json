@@ -1,0 +1,126 @@
+{
+  "version": 8,
+  "name": "Median home value",
+  "metadata": {
+    "description": "Median value of owner-occupied homes, pale amber to burnt brown. Measured over all 28,443 places with a published value: 7 classes with breaks at $85k/$130k/$190k/$290k/$450k/$750k, which fall at the 11th/30th/50th/70th/85th/95th percentile of the national distribution. 12.78% have no published value and draw in neutral gray rather than as a low value. 10.29% have a coefficient of variation above 0.3 and render faded \u2014 the estimate is real but its margin of error swamps it.",
+    "portolan:column": "median_home_value",
+    "portolan:breaks": [
+      85000,
+      130000,
+      190000,
+      290000,
+      450000,
+      750000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-housing",
+      "filter": [
+        "!",
+        [
+          "has",
+          "median_home_value"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-housing",
+      "filter": [
+        "has",
+        "median_home_value"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_home_value"
+          ],
+          "#fff3c0",
+          85000,
+          "#fee391",
+          130000,
+          "#fec44f",
+          190000,
+          "#fe9929",
+          290000,
+          "#ec7014",
+          450000,
+          "#cc4c02",
+          750000,
+          "#8c2d04"
+        ],
+        "fill-opacity": [
+          "case",
+          [
+            ">",
+            [
+              "coalesce",
+              [
+                "get",
+                "median_home_value_cv"
+              ],
+              0
+            ],
+            0.3
+          ],
+          0.35,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-housing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

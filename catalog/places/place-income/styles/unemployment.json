@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Unemployment rate",
+  "metadata": {
+    "description": "Unemployed share of the civilian labor force, pale lilac to deep purple. Measured over all 31,481 places with a published value: 6 classes with breaks at 0.5%/2.5%/4.5%/7.5%/12%, which fall at the 23rd/38th/58th/79th/91st percentile of the national distribution.",
+    "portolan:column": "pct_unemployed",
+    "portolan:breaks": [
+      0.5,
+      2.5,
+      4.5,
+      7.5,
+      12
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-income",
+      "filter": [
+        "has",
+        "pct_unemployed"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_unemployed"
+          ],
+          "#f2f0f7",
+          0.5,
+          "#dadaeb",
+          2.5,
+          "#bcbddc",
+          4.5,
+          "#9e9ac8",
+          7.5,
+          "#756bb1",
+          12,
+          "#54278f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-income",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

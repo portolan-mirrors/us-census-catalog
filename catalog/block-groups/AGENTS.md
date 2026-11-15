@@ -27,7 +27,7 @@ sixty columns and 242,298 rows:
 | collection | theme | headline columns |
 |---|---|---|
 | [bg-income](bg-income/collection.json) ([agent guide](bg-income/AGENTS.md)) | Income & Poverty | `median_hh_income`, `per_capita_income`, `pct_below_poverty`, `pct_snap`, `pct_unemployed` |
-| [bg-people](bg-people/collection.json) ([agent guide](bg-people/AGENTS.md)) | People & Education | `median_age`, `pct_under_18`, `pct_65_plus`, the five non-Hispanic race shares, `pct_hispanic`, `pct_bachelors_plus` |
+| [bg-people](bg-people/collection.json) ([agent guide](bg-people/AGENTS.md)) | People & Education | `median_age`, `pct_under_18`, `pct_65_plus`, the four non-Hispanic race shares, `pct_hispanic`, `pct_bachelors_plus` |
 | [bg-housing](bg-housing/collection.json) ([agent guide](bg-housing/AGENTS.md)) | Housing & Rent | `housing_units`, `households`, `pct_owner_occupied`, `median_gross_rent`, `median_home_value`, `pct_rent_burdened` |
 | [bg-connectivity](bg-connectivity/collection.json) ([agent guide](bg-connectivity/AGENTS.md)) | Commuting & Connectivity | `hh_no_vehicle`, the B08301 commute-mode shares, `pct_commute_45min_plus`, `pct_no_internet`, `pct_no_computer` |
 
@@ -152,8 +152,11 @@ So:
 - The digital divide by income quintile:
   [bg-connectivity](bg-connectivity/AGENTS.md).
 - One geography up: [tracts](../tracts/AGENTS.md). One down:
-  [blocks](../blocks/AGENTS.md). Whole-country tables:
-  [counties](../counties/AGENTS.md), [states](../states/AGENTS.md).
+  [blocks](../blocks/AGENTS.md). Coarser geographies, each carrying these
+  same themed chunks plus a sixth wide all-indicator table:
+  [counties](../counties/AGENTS.md), [states](../states/AGENTS.md),
+  [ZCTAs](../zctas/AGENTS.md), [places](../places/AGENTS.md),
+  [congressional districts](../congressional-districts/AGENTS.md).
 - Cross-collection showcase queries: [catalog AGENTS.md](../AGENTS.md).
 
 ## License

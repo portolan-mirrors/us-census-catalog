@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Renters paying 30%+ of income",
+  "metadata": {
+    "description": "Share of renter households spending 30% or more of income on gross rent \u2014 the federal definition of rent-burdened \u2014 pale mauve to deep magenta. Measured over all 437 districts with a published value: 7 classes with breaks at 45%/48%/50%/55%/58%/60%, which fall at the 14th/33rd/48th/77th/89th/95th percentile of the national distribution.",
+    "portolan:column": "pct_rent_burdened",
+    "portolan:breaks": [
+      45,
+      48,
+      50,
+      55,
+      58,
+      60
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-housing",
+      "filter": [
+        "has",
+        "pct_rent_burdened"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_rent_burdened"
+          ],
+          "#f1eef6",
+          45,
+          "#d4b9da",
+          48,
+          "#c994c7",
+          50,
+          "#df65b0",
+          55,
+          "#e7298a",
+          58,
+          "#ce1256",
+          60,
+          "#91003f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-housing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

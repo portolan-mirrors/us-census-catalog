@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:12.269545Z",
+      "breaking": false,
+      "assets": {
+        "place-connectivity.parquet": {
+          "sha256": "c21ce4f750d8277f271bf2f221ec68da5b7c04a42a13f27940296a5dd4010f0c",
+          "size_bytes": 29240899,
+          "href": "places/place-connectivity/place-connectivity.parquet",
+          "source_mtime": 1794742545.3623326,
+          "mtime": 1794742545.3623326,
+          "feature_count": 32612,
+          "schema_fingerprint": "c3d0c6cd9ee2395a"
+        },
+        "place-connectivity.pmtiles": {
+          "sha256": "50f1bd724ac6fcc4c077130b4f4ad0207281fe28f52119e6811f272d1f8bba4b",
+          "size_bytes": 92826255,
+          "href": "places/place-connectivity/place-connectivity.pmtiles",
+          "mtime": 1794742732.0177927
+        }
+      },
+      "changes": [
+        "place-connectivity.parquet",
+        "place-connectivity.pmtiles"
+      ]
+    }
+  ]
+}

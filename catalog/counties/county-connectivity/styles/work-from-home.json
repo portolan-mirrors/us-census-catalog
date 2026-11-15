@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Work from home",
+  "metadata": {
+    "description": "Share of workers whose usual commute is none \u2014 they worked from home \u2014 pale lilac to deep purple. Measured over all 3,222 counties with a published value: 6 classes with breaks at 5.5%/7.5%/9.5%/12%/17%, which fall at the 21st/39th/58th/75th/92nd percentile of the national distribution.",
+    "portolan:column": "pct_work_from_home",
+    "portolan:breaks": [
+      5.5,
+      7.5,
+      9.5,
+      12,
+      17
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-connectivity",
+      "filter": [
+        "has",
+        "pct_work_from_home"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_work_from_home"
+          ],
+          "#f2f0f7",
+          5.5,
+          "#dadaeb",
+          7.5,
+          "#bcbddc",
+          9.5,
+          "#9e9ac8",
+          12,
+          "#756bb1",
+          17,
+          "#54278f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-connectivity",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

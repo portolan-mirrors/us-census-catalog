@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:52.836854Z",
+      "breaking": false,
+      "assets": {
+        "county-wellbeing.parquet": {
+          "sha256": "74e641a27a70a8bf4ec84337703e68ccd710500988b53902a1f84a1b50329d71",
+          "size_bytes": 13002446,
+          "href": "counties/county-wellbeing/county-wellbeing.parquet",
+          "source_mtime": 1794742542.7077763,
+          "mtime": 1794742542.7077763,
+          "feature_count": 3235,
+          "schema_fingerprint": "9b93151a98bdb1ca"
+        },
+        "county-wellbeing.pmtiles": {
+          "sha256": "745b9f13bf7e5b4ac2d3943943bb22d7eeee278eef64a6f89bf22565f69af787",
+          "size_bytes": 23042543,
+          "href": "counties/county-wellbeing/county-wellbeing.pmtiles",
+          "mtime": 1794742627.9738667
+        }
+      },
+      "changes": [
+        "county-wellbeing.parquet",
+        "county-wellbeing.pmtiles"
+      ]
+    }
+  ]
+}

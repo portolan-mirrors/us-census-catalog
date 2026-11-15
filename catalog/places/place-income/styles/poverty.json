@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "People below the poverty line",
+  "metadata": {
+    "description": "Share of residents with income below the federal poverty line, pale yellow to deep red. Measured over all 31,778 places with a published value: 6 classes with breaks at 5%/9%/14%/20%/30%, which fall at the 23rd/42nd/61st/76th/90th percentile of the national distribution. 56.69% of places have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_below_poverty_moe in the GeoParquet before drawing a conclusion from any single place.",
+    "portolan:column": "pct_below_poverty",
+    "portolan:breaks": [
+      5,
+      9,
+      14,
+      20,
+      30
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-income",
+      "filter": [
+        "has",
+        "pct_below_poverty"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_below_poverty"
+          ],
+          "#fff2b0",
+          5,
+          "#fed976",
+          9,
+          "#feb24c",
+          14,
+          "#fd8d3c",
+          20,
+          "#f03b20",
+          30,
+          "#bd0026"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-income",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

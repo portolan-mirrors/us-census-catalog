@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:08.536543Z",
+      "breaking": false,
+      "assets": {
+        "place-people.pmtiles": {
+          "sha256": "e266a103f3ceaf132eddc60808ec2297ec1dac26765b71a44865d16fda2c809e",
+          "size_bytes": 86879716,
+          "href": "places/place-people/place-people.pmtiles",
+          "mtime": 1794742725.4525645
+        },
+        "place-people.parquet": {
+          "sha256": "f110518744a2cd74d1da458ec298e36e8ca1490df09beade7ac1f7161ca368ab",
+          "size_bytes": 29240838,
+          "href": "places/place-people/place-people.parquet",
+          "source_mtime": 1794742544.968867,
+          "mtime": 1794742544.968867,
+          "feature_count": 32612,
+          "schema_fingerprint": "4df7d68b6088b157"
+        },
+        "place-people.thumb.jpg": {
+          "sha256": "941c2f77e5ae82766b548513fb4d9ff3c4aa38299715fa342878bbe974a35a38",
+          "size_bytes": 2802,
+          "href": "places/place-people/place-people.thumb.jpg",
+          "mtime": 1794743350.4771597
+        }
+      },
+      "changes": [
+        "place-people.pmtiles",
+        "place-people.parquet",
+        "place-people.thumb.jpg"
+      ]
+    }
+  ]
+}

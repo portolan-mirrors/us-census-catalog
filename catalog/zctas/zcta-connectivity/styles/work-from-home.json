@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Work from home",
+  "metadata": {
+    "description": "Share of workers whose usual commute is none \u2014 they worked from home \u2014 pale lilac to deep purple. Measured over all 32,798 ZIP Code Tabulation Areas with a published value: 6 classes with breaks at 4%/8%/12%/17%/25%, which fall at the 20th/41st/61st/78th/91st percentile of the national distribution.",
+    "portolan:column": "pct_work_from_home",
+    "portolan:breaks": [
+      4,
+      8,
+      12,
+      17,
+      25
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-connectivity",
+      "filter": [
+        "has",
+        "pct_work_from_home"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_work_from_home"
+          ],
+          "#f2f0f7",
+          4,
+          "#dadaeb",
+          8,
+          "#bcbddc",
+          12,
+          "#9e9ac8",
+          17,
+          "#756bb1",
+          25,
+          "#54278f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-connectivity",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

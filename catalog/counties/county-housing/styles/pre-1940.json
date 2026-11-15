@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Homes built before 1940",
+  "metadata": {
+    "description": "Share of housing units built in 1939 or earlier, pale parchment to dark sepia. Measured over all 3,222 counties with a published value: 6 classes with breaks at 4%/7.5%/14%/23%/32%, which fall at the 19th/40th/60th/79th/92nd percentile of the national distribution.",
+    "portolan:column": "pct_built_pre_1940",
+    "portolan:breaks": [
+      4,
+      7.5,
+      14,
+      23,
+      32
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-housing",
+      "filter": [
+        "has",
+        "pct_built_pre_1940"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_built_pre_1940"
+          ],
+          "#f4ecdf",
+          4,
+          "#e2d0a8",
+          7.5,
+          "#c8a97a",
+          14,
+          "#a67c52",
+          23,
+          "#7d5636",
+          32,
+          "#4e3220"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-housing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

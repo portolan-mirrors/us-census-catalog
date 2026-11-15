@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:59.909138Z",
+      "breaking": false,
+      "assets": {
+        "zcta-housing.parquet": {
+          "sha256": "c4245268934017c27304d14f6be1cac57ce7c9a6ceaf8aeb41674c7f13f24aa0",
+          "size_bytes": 69944559,
+          "href": "zctas/zcta-housing/zcta-housing.parquet",
+          "source_mtime": 1794742543.9306686,
+          "mtime": 1794742543.9306686,
+          "feature_count": 33791,
+          "schema_fingerprint": "38e4d0e548126817"
+        },
+        "zcta-housing.pmtiles": {
+          "sha256": "3ae3b4b2a4ccdbc3e6bba3ea61e2f034eed931754219119f8724dd0fdcea9053",
+          "size_bytes": 230089371,
+          "href": "zctas/zcta-housing/zcta-housing.pmtiles",
+          "mtime": 1794742718.1209543
+        }
+      },
+      "changes": [
+        "zcta-housing.parquet",
+        "zcta-housing.pmtiles"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "People without health insurance",
+  "metadata": {
+    "description": "Share of the civilian non-institutionalized population with no health insurance coverage, pale yellow to deep red. Measured over all 31,808 places with a published value: 6 classes with breaks at 2%/4.5%/7.5%/12%/19%, which fall at the 21st/41st/60th/78th/91st percentile of the national distribution. 61.01% of places have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_uninsured_moe in the GeoParquet before drawing a conclusion from any single place.",
+    "portolan:column": "pct_uninsured",
+    "portolan:breaks": [
+      2,
+      4.5,
+      7.5,
+      12,
+      19
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-wellbeing",
+      "filter": [
+        "has",
+        "pct_uninsured"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_uninsured"
+          ],
+          "#fff2b0",
+          2,
+          "#fed976",
+          4.5,
+          "#feb24c",
+          7.5,
+          "#fd8d3c",
+          12,
+          "#f03b20",
+          19,
+          "#bd0026"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-wellbeing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Vacant housing units",
+  "metadata": {
+    "description": "Share of housing units vacant, cream to dark red; seasonal and recreational housing drives the high end as much as abandonment does. Measured over all 3,222 counties with a published value: 6 classes with breaks at 8%/12%/16%/22%/30%, which fall at the 19th/39th/58th/78th/91st percentile of the national distribution.",
+    "portolan:column": "pct_vacant_units",
+    "portolan:breaks": [
+      8,
+      12,
+      16,
+      22,
+      30
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-housing",
+      "filter": [
+        "has",
+        "pct_vacant_units"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_vacant_units"
+          ],
+          "#fef0d9",
+          8,
+          "#fdd49e",
+          12,
+          "#fdbb84",
+          16,
+          "#fc8d59",
+          22,
+          "#e34a33",
+          30,
+          "#b30000"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-housing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

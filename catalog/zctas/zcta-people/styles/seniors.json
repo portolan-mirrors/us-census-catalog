@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Residents 65 and over",
+  "metadata": {
+    "description": "Share of residents aged 65 or older, pale apricot to burnt orange. Measured over all 33,174 ZIP Code Tabulation Areas with a published value: 6 classes with breaks at 14%/18%/21%/26%/35%, which fall at the 21st/42nd/58th/78th/91st percentile of the national distribution.",
+    "portolan:column": "pct_65_plus",
+    "portolan:breaks": [
+      14,
+      18,
+      21,
+      26,
+      35
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-people",
+      "filter": [
+        "has",
+        "pct_65_plus"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_65_plus"
+          ],
+          "#feedde",
+          14,
+          "#fdd0a2",
+          18,
+          "#fdae6b",
+          21,
+          "#fd8d3c",
+          26,
+          "#e6550d",
+          35,
+          "#a63603"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-people",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

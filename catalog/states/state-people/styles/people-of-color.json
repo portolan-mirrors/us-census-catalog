@@ -1,0 +1,110 @@
+{
+  "version": 8,
+  "name": "People of color",
+  "metadata": {
+    "description": "Share of residents who are not non-Hispanic white alone, pale blue through violet to deep purple. Measured over all 52 states and state equivalents with a published value: 7 classes with breaks at 18%/25%/35%/42%/55%/65%, which fall at the 12th/33rd/50th/69th/87th/94th percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_people_of_color",
+    "portolan:breaks": [
+      18,
+      25,
+      35,
+      42,
+      55,
+      65
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../state-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-people",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_people_of_color"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-people",
+      "filter": [
+        "has",
+        "pct_people_of_color"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_people_of_color"
+          ],
+          "#e8eff6",
+          18,
+          "#bfd3e6",
+          25,
+          "#9ebcda",
+          35,
+          "#8c96c6",
+          42,
+          "#8c6bb1",
+          55,
+          "#88419d",
+          65,
+          "#6e016b"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "state-people",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

@@ -8,13 +8,17 @@ Nationwide United States census statistics as cloud-native GeoParquet and
 PMTiles with STAC metadata, at every census geography from states down to
 the 242,298 block groups and 8,174,955 blocks of the 2020 Census, plus the
 33,791 ZIP Code Tabulation Areas, 32,612 places and 441 congressional
-districts of the 119th Congress. Fourteen
-collections carry curated [American Community Survey](https://www.census.gov/programs-surveys/acs.html)
+districts of the 119th Congress. Thirty-nine collections carry curated
+[American Community Survey](https://www.census.gov/programs-surveys/acs.html)
 2020–2024 5-year indicators — income, poverty, age, race and ethnicity,
 education, housing cost and tenure, vehicles, commuting, internet access,
 health insurance, disability, nativity — every estimate with its margin of
 error at the 90% confidence level and the headline statistics with a
-coefficient of variation. One collection carries 2020 Decennial Census
+coefficient of variation. Every geography is a sub-catalog of themed
+collections (income, people, housing, connectivity, wellbeing), and the
+five coarse-or-sparse geographies — counties, states, ZCTAs, places,
+congressional districts — add a sixth collection carrying all 112 columns
+in one wide table. One further collection carries 2020 Decennial Census
 P.L. 94-171 counts at block level, hive-partitioned by state.
 [data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and
 every collection links the exact upstream census.gov files it was built
@@ -26,26 +30,6 @@ from.
 
 2020 Decennial Census counts for all **8,174,955** census blocks in the 50 states, the District of Columbia and Puerto Rico — the smallest geography the Census Bureau publishes anything for. From t...
 
-### [All Indicators — Congressional Districts (119th Congress)](https://source.coop/portolan-mirrors/us-census-catalog/congressional-districts)
-
-Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
-
-### [All Indicators — Counties](https://source.coop/portolan-mirrors/us-census-catalog/counties)
-
-Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
-
-### [All Indicators — Places & CDPs](https://source.coop/portolan-mirrors/us-census-catalog/places)
-
-Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
-
-### [All Indicators — States](https://source.coop/portolan-mirrors/us-census-catalog/states)
-
-Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
-
-### [All Indicators — ZIP Code Tabulation Areas](https://source.coop/portolan-mirrors/us-census-catalog/zctas)
-
-Every indicator in this catalog's ACS column set, in one table: income and poverty, age and race and education, housing cost and tenure, vehicles and commuting and internet access, health insurance...
-
 ## Coverage
 
 **Spatial Extent**
@@ -54,7 +38,7 @@ Every indicator in this catalog's ACS column set, in one table: income and pover
 
 **Temporal Extent**
 
-- 2020-01-01 to 2024-12-31
+- 2020-04-01 to 2020-04-01
 
 ## Source
 

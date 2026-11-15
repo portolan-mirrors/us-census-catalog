@@ -1,0 +1,110 @@
+{
+  "version": 8,
+  "name": "Renters paying 30%+ of income",
+  "metadata": {
+    "description": "Share of renter households spending 30% or more of income on gross rent \u2014 the federal definition of rent-burdened \u2014 pale mauve to deep magenta. Measured over all 30,087 ZIP Code Tabulation Areas with a published value: 7 classes with breaks at 8.5%/34%/45%/55%/68%/88%, which fall at the 10th/29th/49th/71st/89th/95th percentile of the national distribution. 10.96% have no published value and draw in neutral gray rather than as a low value. 39.44% of ZIP Code Tabulation Areas have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_rent_burdened_moe in the GeoParquet before drawing a conclusion from any single ZCTA.",
+    "portolan:column": "pct_rent_burdened",
+    "portolan:breaks": [
+      8.5,
+      34,
+      45,
+      55,
+      68,
+      88
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-housing",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_rent_burdened"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-housing",
+      "filter": [
+        "has",
+        "pct_rent_burdened"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_rent_burdened"
+          ],
+          "#f1eef6",
+          8.5,
+          "#d4b9da",
+          34,
+          "#c994c7",
+          45,
+          "#df65b0",
+          55,
+          "#e7298a",
+          68,
+          "#ce1256",
+          88,
+          "#91003f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-housing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

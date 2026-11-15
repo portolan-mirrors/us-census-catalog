@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:52.042270Z",
+      "breaking": false,
+      "assets": {
+        "county-connectivity.parquet": {
+          "sha256": "357bd72f4188df8bf3e5b3e094166c033f7d3bdd40b43afd365fd386e1a7c6fa",
+          "size_bytes": 12979251,
+          "href": "counties/county-connectivity/county-connectivity.parquet",
+          "source_mtime": 1794742542.6146853,
+          "mtime": 1794742542.6146853,
+          "feature_count": 3235,
+          "schema_fingerprint": "2fe74dd59d5df73c"
+        },
+        "county-connectivity.pmtiles": {
+          "sha256": "962879e42c3c29c754bf1b90740604a51baa2ef7d8951f0d5193047d9e3a7b49",
+          "size_bytes": 21430701,
+          "href": "counties/county-connectivity/county-connectivity.pmtiles",
+          "mtime": 1794742627.9738667
+        }
+      },
+      "changes": [
+        "county-connectivity.parquet",
+        "county-connectivity.pmtiles"
+      ]
+    }
+  ]
+}

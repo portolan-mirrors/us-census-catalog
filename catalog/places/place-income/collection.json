@@ -1,0 +1,499 @@
+{
+  "type": "Collection",
+  "id": "places/place-income",
+  "stac_version": "1.1.0",
+  "description": "Income, poverty and employment: median household income and per capita income ([B19013](https://data.census.gov/table/ACSDT5Y2024.B19013), [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301)), the share of people below the poverty line and below twice it ([C17002](https://data.census.gov/table/ACSDT5Y2024.C17002)), the share of households receiving SNAP ([B22010](https://data.census.gov/table/ACSDT5Y2024.B22010)), and the unemployment rate as a share of the civilian labor force ([B23025](https://data.census.gov/table/ACSDT5Y2024.B23025)), plus total population ([B01003](https://data.census.gov/table/ACSDT5Y2024.B01003)) and population density for context.\n\nCurated indicators for all **32,612** incorporated places and census designated places in the United States, Puerto Rico and the island areas, from the U.S. Census Bureau's [American Community Survey](https://www.census.gov/programs-surveys/acs.html) **2020–2024 5-year estimates** (`acsdt5y2024`, the table-based [Summary File](https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/)). The Census Bureau calls the ACS \"the premier source of detailed information about the nation's people and housing\". The Bureau publishes 1-year estimates only for places of 65,000 people or more, so the 5-year release is the only one that covers all 32,612 of them ([areas published](https://www.census.gov/programs-surveys/acs/geography-acs/areas-published.html)).\n\nEvery estimate ships with its margin of error — `<column>_moe`, at the 90% confidence level, the level the Census Bureau publishes — and the headline statistics also carry a coefficient of variation (`<column>_cv` = `moe / 1.645 / estimate`) so small-area noise can be flagged rather than mapped as if certain. Derived percentages propagate error with the Census Bureau's own formulas from [ACS Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf): sums add in quadrature, proportions use the subset formula with the ratio formula as fallback. ACS jam values for suppressed or unestimable cells are NULL here, never numbers, and medians are published as the Bureau publishes them — a median cannot be aggregated to a larger area. Each column's description names its ACS table, its exact universe, and the lines summed to make it.\n\nMost of the 32,612 rows are small: the file holds every incorporated place and every [census designated place](https://www.census.gov/programs-surveys/bas/information/cdp.html) the Census Bureau delineates, from New York city to villages of 40 people, so filter on `population` before reading a place-level distribution as if every row were a city. A place is also not a partition of the country: the land between places is not in this file at all, so place rows do not sum to a county or a state. `median_hh_income` is NULL for **12.71%** of places and `per_capita_income` for **4.28%**, and the median coefficient of variation on `median_hh_income` is **0.139** (measured) — **7.3%** of the places that publish one are above the 0.40 \"unreliable\" line.\n\nGeometries are the Census Bureau's [2024 cartographic boundary files](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) for incorporated places and census designated places (GENZ2024, 1:500,000), reprojected to EPSG:4326 and joined on `GEOID`. Cartographic rather than TIGER/Line because TIGER extends census geographies into open water while the cartographic files clip to the shoreline, which is what a choropleth wants. The boundary vintage matches the estimate vintage.\n\nThe join is driven by geometry, so a geography with 2024 boundaries but no ACS tabulation keeps its row with NULL values instead of disappearing: 279 places (MP 135, AS 77, GU 57, VI 10) in the island areas, which have cartographic boundaries but no ACS 5-year estimates because the Island Areas run a separate decennial-only program. Two more, Brentwood CDP and Wyandanch CDP, have boundaries and no matching ACS row, both in Suffolk County, New York — the county whose 2024 re-delineation also leaves 14 tracts and 39 block groups without ACS rows elsewhere in this catalog. One more: `2148000` Louisville city, Kentucky, which the boundary file still carries and the ACS tabulates as the consolidated `2148006` Louisville/Jefferson County metro government (balance) instead — so the Louisville you want is `2148006`. Keeping these rows means a national map has no holes and a consumer can see the absence; dropping them would make \"every US geography\" quietly mean something narrower.\n\nThis is one themed chunk of six at this geography. The other themes are [People & Education](../place-people/collection.json), [Housing & Rent](../place-housing/collection.json), [Commuting & Connectivity](../place-connectivity/collection.json) and [Health, Disability & Income by Race](../place-wellbeing/collection.json), split that way so a consumer who wants one theme reads one file. Chunks at the same geography hold the same rows and the same geometry, so they join 1:1 on `geoid`. A sixth collection, [All Indicators](../places/collection.json), carries all 112 columns on the same rows in one wide table — at this many features width costs little, so take that one if a question crosses themes. A place nests in a state but not in a county — a place can straddle a county line — so `substr(geoid, 1, 2)` reaches the state row and nothing else joins by prefix. Every other geography in this catalog is organized the same way — [block groups](../../block-groups/catalog.json), [census tracts](../../tracts/catalog.json), [counties](../../counties/catalog.json), [states](../../states/catalog.json), [ZCTAs](../../zctas/catalog.json) and [congressional districts](../../congressional-districts/catalog.json) — and the [blocks](../../blocks/collection.json) collection carries 2020 Decennial counts, a different survey and vintage rather than a finer version of these numbers.\n\nThe PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons carrying the Census Bureau's own published county estimates, and z6–z12 are the places themselves. Places do not nest inside counties — a place can cross a county line — so the county band is orientation at national zooms, not a roll-up of these features. Thinning this many polygons down to a national zoom would show a biased subset (small urban geographies drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead of a thinned sample of this one. Every band carries the same column names, so one style expression classifies every zoom — but below z6 you are looking at counties, not places, and the values there are the Bureau's official estimates for those geographies, with their own meaning, rather than a visualization-only average: clicking a coarse feature identifies a real county by `geoid` and `name`. The `*_moe` columns are excluded from the tiles at every zoom — a margin of error is computed for one specific geography and cannot be carried across bands — while the `*_cv` columns are kept. Statistics come from the GeoParquet, never from the tiles.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Places & CDPs"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./place-income.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Income & Poverty — Places & CDPs (vector tiles)",
+      "pmtiles:layers": [
+        "place-income"
+      ]
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/places/place-income/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "MultiPolygon",
+  "geoparquet:feature_count": 32612,
+  "table:row_count": 32612,
+  "table:primary_geometry": "geometry",
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "7-character place GEOID — state FIPS (2) + place FIPS (5), e.g. `0644000` for Los Angeles city. `substr(geoid, 1, 2)` is the state FIPS code, which is the only prefix join a place supports: places nest in states but not in counties (a place can straddle a county line) and a place is not a census-tract aggregate. Matches `GEOID` in the 2024 cartographic boundary place file; the ACS `1600000US` prefix is stripped."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Human-readable name from the cartographic boundary place file: `NAMELSAD`, `STATE_NAME` — \"Los Angeles city, California\", \"Brentwood CDP, New York\". `NAMELSAD` carries the legal/statistical descriptor, so the name itself says whether a place is a city, town, village, borough or CDP."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Two-letter USPS state or territory code (`MO`, `PR`, `GU`). Carried on every collection from the `STATEFP → USPS` lookup embedded in `tools/specs.py` rather than read off the boundary files, because the 2024 cartographic boundary block-group file has no `STUSPS` column while the tract, county and state files do."
+    },
+    {
+      "name": "population",
+      "type": "int64",
+      "description": "Total population. Universe: total population. The single line of [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) (Total Population), published as an integer. Carried on every ACS collection so a rate can be weighted or sanity-checked without a second download. NULL on 0.86% of places — the 282 places with 2024 boundaries but no ACS row: 279 in the island areas (MP 135, AS 77, GU 57, VI 10), Brentwood CDP and Wyandanch CDP in Suffolk County, New York, and Louisville city, Kentucky, whose ACS tabulation is the consolidated `2148006` Louisville/Jefferson County metro government (balance)."
+    },
+    {
+      "name": "population_moe",
+      "type": "double",
+      "description": "Margin of error for `population` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND / 1e6` from the cartographic boundary file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+    },
+    {
+      "name": "pop_density",
+      "type": "double",
+      "description": "People per square kilometre of land area, rounded to 1 decimal: `population / aland_sqkm`. NULL where `ALAND` is 0 or `population` is NULL."
+    },
+    {
+      "name": "median_hh_income",
+      "type": "double",
+      "description": "Median household income in the past 12 months, in 2024 inflation-adjusted dollars. Universe: households. Line 1 of [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013), published as the Census Bureau publishes it. A median cannot be aggregated: there is no way to combine the medians of two block groups into the median of their union. **NULL on 12.71% of places.** Thousands of places in the file are villages and CDPs of a few hundred people, which is where the Census Bureau's suppression bites; the population-weighted coverage is far better than the row-weighted rate suggests."
+    },
+    {
+      "name": "median_hh_income_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "per_capita_income",
+      "type": "double",
+      "description": "Per capita income in the past 12 months, in 2024 inflation-adjusted dollars — aggregate income divided by total population, so children and people with no income are in the denominator. Universe: total population. Line 1 of [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301)."
+    },
+    {
+      "name": "per_capita_income_moe",
+      "type": "double",
+      "description": "Margin of error for `per_capita_income` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "pct_below_poverty",
+      "type": "double",
+      "description": "Percent of the population below the federal poverty level — an income-to-poverty ratio under 1.00. Universe: population for whom poverty status is determined, which excludes institutionalized people, people in military group quarters and in college dormitories, and unrelated individuals under 15. Lines 2 (\"Under .50\") + 3 (\".50 to .99\") of [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) over line 1."
+    },
+    {
+      "name": "pct_below_poverty_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_poverty` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_below_poverty_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_below_poverty`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_below_2x_poverty",
+      "type": "double",
+      "description": "Percent of the population with an income-to-poverty ratio under 2.00 — a common proxy for low income rather than deep poverty. Universe: population for whom poverty status is determined. Lines 2–7 of [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) over line 1 (equivalently, everyone not in line 8, \"2.00 and over\")."
+    },
+    {
+      "name": "pct_below_2x_poverty_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_2x_poverty` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_snap",
+      "type": "double",
+      "description": "Percent of households that received Food Stamps/SNAP benefits at any time in the past 12 months. Universe: households. Line 2 of [B22010](https://data.census.gov/table/ACSDT5Y2024.B22010) over line 1. Receipt by the household, not by individuals, and not a measure of current enrollment."
+    },
+    {
+      "name": "pct_snap_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_snap` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_unemployed",
+      "type": "double",
+      "description": "Unemployment rate: unemployed people as a percent of the civilian labor force. Universe for the table is the population 16 years and over, but the denominator here is line 3, \"Civilian labor force\" — the labor force, not the whole population 16+, because that is what an unemployment rate divides by. Line 5 (\"Unemployed\") over line 3 of [B23025](https://data.census.gov/table/ACSDT5Y2024.B23025). Members of the Armed Forces and people not in the labor force are excluded from both parts."
+    },
+    {
+      "name": "pct_unemployed_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_unemployed` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2024 cartographic boundary place file (GENZ2024, 1:500,000), which clips to the shoreline — TIGER/Line would extend the place into open water. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    }
+  ],
+  "title": "Income & Poverty — Places & CDPs",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -176.696678,
+          17.950739,
+          -65.290424,
+          71.33971
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-01-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "place-income": {
+      "href": "./place-income.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 29088554,
+      "file:checksum": "12202332f3e6a8820504c5732ded62ec4d7c54076aaf0bbb55785c006e8968b82a0c",
+      "roles": [
+        "data"
+      ],
+      "title": "Income & Poverty — Places & CDPs (GeoParquet, national)"
+    },
+    "thumbnail": {
+      "href": "./place-income.thumb.jpg",
+      "type": "image/jpeg",
+      "roles": [
+        "thumbnail"
+      ],
+      "file:size": 2802,
+      "file:checksum": "1220941c2f77e5ae82766b548513fb4d9ff3c4aa38299715fa342878bbe974a35a38"
+    },
+    "place-income-tiles": {
+      "href": "./place-income.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "roles": [
+        "visual"
+      ],
+      "title": "Income & Poverty — Places & CDPs (PMTiles)",
+      "pmtiles:layers": [
+        "place-income"
+      ],
+      "file:size": 84626294,
+      "file:checksum": "122070dfea5673228020283d5de333370504dde5d815f1c1100b07b2c9158df9ac48"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Median household income",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "Median household income, viridis dark purple (low) through teal and green to yellow (high). Measured over all 28,468 places with a published value: 7 classes with breaks at $40k/$55k/$67k/$84k/$115k/$150k, which fall at the 10th/30th/50th/70th/88th/95th percentile of the national distribution. 12.71% have no published value and draw in neutral gray rather than as a low value. 15.41% have a coefficient of variation above 0.3 and render faded — the estimate is real but its margin of error swamps it.",
+      "file:size": 2712,
+      "file:checksum": "1220770a498427b30d1ee8ea19ee0721395e49abc06399ea9baf4e270e2e5fad338f"
+    },
+    "styles/poverty": {
+      "href": "./styles/poverty.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "People below the poverty line",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents with income below the federal poverty line, pale yellow to deep red. Measured over all 31,778 places with a published value: 6 classes with breaks at 5%/9%/14%/20%/30%, which fall at the 23rd/42nd/61st/76th/90th percentile of the national distribution. 56.69% of places have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_below_poverty_moe in the GeoParquet before drawing a conclusion from any single place.",
+      "file:size": 2027,
+      "file:checksum": "1220b820857f1a279989ea4cca56002fc1e2888a99dcd3311875684afbbf8ca4c4fc"
+    },
+    "styles/snap": {
+      "href": "./styles/snap.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Households receiving SNAP",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of households that received SNAP (food stamps) in the past 12 months, cream to dark red. Measured over all 31,711 places with a published value: 6 classes with breaks at 2.5%/7.5%/13%/21%/32%, which fall at the 20th/39th/58th/78th/91st percentile of the national distribution.",
+      "file:size": 1792,
+      "file:checksum": "122098bcc1a913b5e93c60917dd7c9bfb20456aef53957997e0858b5fd04dcec4799"
+    },
+    "styles/unemployment": {
+      "href": "./styles/unemployment.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Unemployment rate",
+      "roles": [
+        "style"
+      ],
+      "description": "Unemployed share of the civilian labor force, pale lilac to deep purple. Measured over all 31,481 places with a published value: 6 classes with breaks at 0.5%/2.5%/4.5%/7.5%/12%, which fall at the 23rd/38th/58th/79th/91st percentile of the national distribution.",
+      "file:size": 1786,
+      "file:checksum": "1220dd7fca816e97b26207b7d6e104e966df334d5d6d15ae3ed39d8e82296847d751"
+    },
+    "source-b01003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01003 — Total Population",
+      "description": "The upstream file this collection's B01003 columns were read from: one pipe-delimited row per geography, estimate (`B01003_E###`) and margin of error (`B01003_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18313708,
+      "file:checksum": "122038d1a992bb058d184009b10b9b34987279aee575e4323165cfb5706c69b6ca90"
+    },
+    "source-b19013": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013 — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The upstream file this collection's B19013 columns were read from: one pipe-delimited row per geography, estimate (`B19013_E###`) and margin of error (`B19013_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17917916,
+      "file:checksum": "1220b25a176b0e6c339b6f3a2a0d3d8446bf06f5f080b4395993ec9a8313efb1c229"
+    },
+    "source-b19301": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19301.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19301 — Per Capita Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The upstream file this collection's B19301 columns were read from: one pipe-delimited row per geography, estimate (`B19301_E###`) and margin of error (`B19301_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17123907,
+      "file:checksum": "12209fc107e98fee7fa49bb8314560205569184fad65fb64b80adb5c5bdd83ccc409"
+    },
+    "source-b22010": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b22010.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B22010 — Receipt of Food Stamps/SNAP in the Past 12 Months by Disability Status for Households",
+      "description": "The upstream file this collection's B22010 columns were read from: one pipe-delimited row per geography, estimate (`B22010_E###`) and margin of error (`B22010_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B22010](https://data.census.gov/table/ACSDT5Y2024.B22010) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 38153126,
+      "file:checksum": "1220728f19fa9b33bfa2a800f998cd263de6ab8ac2c18154ee4d12db72e2b903a3fb"
+    },
+    "source-b23025": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b23025.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B23025 — Employment Status for the Population 16 Years and Over",
+      "description": "The upstream file this collection's B23025 columns were read from: one pipe-delimited row per geography, estimate (`B23025_E###`) and margin of error (`B23025_M###`) side by side, for every summary level in one national file. Universe: Population 16 years and over. Served by census.gov, not by this mirror; see [B23025](https://data.census.gov/table/ACSDT5Y2024.B23025) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 39968046,
+      "file:checksum": "1220264a5bd9367c5f58d9773fa4966fa94fe1e02f9c7106bc2ab39168d6de7c3e4a"
+    },
+    "source-c17002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-c17002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table C17002 — Ratio of Income to Poverty Level in the Past 12 Months",
+      "description": "The upstream file this collection's C17002 columns were read from: one pipe-delimited row per geography, estimate (`C17002_E###`) and margin of error (`C17002_M###`) side by side, for every summary level in one national file. Universe: Population for whom poverty status is determined. Served by census.gov, not by this mirror; see [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 42027042,
+      "file:checksum": "1220dc3dc675113683ec3ff2a0e29a840f43e03268151d7f14b922658d7306da5187"
+    },
+    "source-table-shells": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 5-year table shells",
+      "description": "`Table ID|Line|Indent|Unique ID|Label|Title|Universe|Type` for every table in the release. Two jobs here: every line number the build reads is pinned against this file and a vintage that renumbers a line fails the build, and every universe quoted in the column descriptions is this file's own `Universe` field. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 5622840,
+      "file:checksum": "12205b46f4af873744a415c4974204010db976e2a61ff916674732f81c496a6b517d"
+    },
+    "source-cartographic-boundaries": {
+      "href": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_place_500k.zip",
+      "type": "application/zip",
+      "title": "2024 cartographic boundary file — incorporated places and census designated places (1:500,000, national)",
+      "description": "The geometry this collection joins onto, shoreline-clipped and generalized for mapping. Only the join key, the name parts and the land-area field are kept; reprojected from NAD83 to EPSG:4326 with ogr2ogr. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 22957701,
+      "file:checksum": "12202be68094759b710979f41afd1996cf0132eec78350dfef45566a65478a6944b3"
+    },
+    "doc-geo-tallies": {
+      "href": "https://www2.census.gov/geo/docs/maps-data/data/geo_tallies2020/Natl_Geographic_Tallies_2020.txt",
+      "type": "text/plain",
+      "title": "2020 Census national geographic entity tallies",
+      "description": "The published count of every geographic entity type, which this collection's row count is checked against: 33,791 ZCTAs (33,642 US + 132 Puerto Rico + 17 island areas), 19,734 incorporated places and 12,454 census designated places, 441 congressional districts (436 US including the DC delegate + 1 Puerto Rico + 4 island areas). Index page: https://www.census.gov/geographies/reference-files/time-series/geo/tallies.html.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1746,
+      "file:checksum": "122006db85a152a3e7de71ec15f3c225d0e4ea466b34bcab4cb443bfa1aebc244d80"
+    },
+    "doc-cdp-about": {
+      "href": "https://www.census.gov/programs-surveys/bas/information/cdp.html",
+      "type": "text/html",
+      "title": "Census Designated Places (CDPs) — Census Bureau",
+      "description": "How the Bureau delineates the unincorporated communities that make up roughly two fifths of the rows here, and how a CDP differs from an incorporated place.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-handbook": {
+      "href": "https://www.census.gov/programs-surveys/acs/library/handbooks/general.html",
+      "type": "text/html",
+      "title": "Understanding and Using American Community Survey Data — Census Bureau handbooks",
+      "description": "The Bureau's own guidance on what ACS estimates can and cannot support: 1-year versus 5-year releases, margins of error, comparing across vintages, and small-area reliability. Read it before drawing a conclusion from a single block group.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-accuracy": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf",
+      "type": "application/pdf",
+      "title": "ACS Accuracy of the Data (2024, multiyear estimates)",
+      "description": "The source of every margin-of-error formula this build applies: quadrature for sums, the proportion formula and its ratio fallback for percentages, and the definition of the published 90% confidence level.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 387987,
+      "file:checksum": "12204d3258202e02828c55e95312573f48c83e2fee26f5967fcf817c273b154741ad"
+    },
+    "doc-acs-subject-definitions": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf",
+      "type": "application/pdf",
+      "title": "ACS 2024 Subject Definitions",
+      "description": "The Census Bureau's definitions of the concepts behind these columns — household, householder, gross rent, poverty status determined, group quarters, means of transportation to work, disability. Where a column description here says what a universe is, this is the document it is saying it from.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1170567,
+      "file:checksum": "12206e0c5b1a5d3ebf7e300e583ac6424cbd5f09de50d69e7ef03aa6d070d9c4a7a8"
+    },
+    "doc-geo-glossary": {
+      "href": "https://www.census.gov/programs-surveys/geography/about/glossary.html",
+      "type": "text/html",
+      "title": "Census Bureau geography program glossary",
+      "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "ACS",
+    "American Community Survey",
+    "demographics",
+    "United States",
+    "margins of error",
+    "income",
+    "poverty",
+    "SNAP",
+    "unemployment",
+    "equity",
+    "places",
+    "cities",
+    "towns",
+    "census designated places",
+    "CDP",
+    "municipalities"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/acs.html",
+      "concepts": [
+        {
+          "id": "acs5",
+          "title": "American Community Survey 5-year estimates"
+        }
+      ]
+    }
+  ],
+  "updated": "2026-11-12T00:00:00Z"
+}

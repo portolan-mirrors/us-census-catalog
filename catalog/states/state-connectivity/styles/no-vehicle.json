@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Households without a vehicle",
+  "metadata": {
+    "description": "Share of households with no vehicle available, pale yellow through teal to navy. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at 5.5%/6%/7%/8.5%/11%, which fall at the 29th/42nd/62nd/79th/90th percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_hh_no_vehicle",
+    "portolan:breaks": [
+      5.5,
+      6,
+      7,
+      8.5,
+      11
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../state-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_hh_no_vehicle"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "filter": [
+        "has",
+        "pct_hh_no_vehicle"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_hh_no_vehicle"
+          ],
+          "#f7f8c8",
+          5.5,
+          "#c7e9b4",
+          6,
+          "#7fcdbb",
+          7,
+          "#41b6c4",
+          8.5,
+          "#2c7fb8",
+          11,
+          "#253494"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

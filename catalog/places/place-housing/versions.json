@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:11.396799Z",
+      "breaking": false,
+      "assets": {
+        "place-housing.parquet": {
+          "sha256": "53122e8e3de8d40d6e8d0a00a313a5c29db9748b5872eaa0042779d692d671ec",
+          "size_bytes": 29535232,
+          "href": "places/place-housing/place-housing.parquet",
+          "source_mtime": 1794742545.1815603,
+          "mtime": 1794742545.1815603,
+          "feature_count": 32612,
+          "schema_fingerprint": "f89a3a9fd91a56f2"
+        },
+        "place-housing.pmtiles": {
+          "sha256": "d88ae319716c98c3c6b8125f029b92b87483520dfd0dde934d7e36d9c9952b03",
+          "size_bytes": 99324458,
+          "href": "places/place-housing/place-housing.pmtiles",
+          "mtime": 1794742728.477259
+        }
+      },
+      "changes": [
+        "place-housing.parquet",
+        "place-housing.pmtiles"
+      ]
+    }
+  ]
+}

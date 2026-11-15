@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Foreign-born residents",
+  "metadata": {
+    "description": "Share of residents born outside the United States, pale green to deep blue. Measured over all 437 districts with a published value: 6 classes with breaks at 5%/8%/14%/22%/32%, which fall at the 20th/39th/61st/78th/91st percentile of the national distribution.",
+    "portolan:column": "pct_foreign_born",
+    "portolan:breaks": [
+      5,
+      8,
+      14,
+      22,
+      32
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-wellbeing",
+      "filter": [
+        "has",
+        "pct_foreign_born"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_foreign_born"
+          ],
+          "#f0f9e8",
+          5,
+          "#ccebc5",
+          8,
+          "#a8ddb5",
+          14,
+          "#7bccc4",
+          22,
+          "#43a2ca",
+          32,
+          "#0868ac"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-wellbeing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

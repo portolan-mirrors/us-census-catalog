@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "People of color",
+  "metadata": {
+    "description": "Share of residents who are not non-Hispanic white alone, pale blue through violet to deep purple. Measured over all 33,174 ZIP Code Tabulation Areas with a published value: 7 classes with breaks at 2.5%/8%/17%/32%/62%/85%, which fall at the 11th/29th/51st/69th/88th/95th percentile of the national distribution.",
+    "portolan:column": "pct_people_of_color",
+    "portolan:breaks": [
+      2.5,
+      8,
+      17,
+      32,
+      62,
+      85
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-people",
+      "filter": [
+        "has",
+        "pct_people_of_color"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_people_of_color"
+          ],
+          "#e8eff6",
+          2.5,
+          "#bfd3e6",
+          8,
+          "#9ebcda",
+          17,
+          "#8c96c6",
+          32,
+          "#8c6bb1",
+          62,
+          "#88419d",
+          85,
+          "#6e016b"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-people",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

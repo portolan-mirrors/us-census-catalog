@@ -14,11 +14,47 @@ U.S. Census Bureau demographics as GeoParquet + PMTiles, rooted at
 `https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json`.
 ACS 2020–2024 5-year indicators at block group, tract, county, state, ZCTA,
 place and congressional-district level, plus 2020 Decennial counts at block
-level. Block groups and tracts are split into themed collections (income,
-people, housing, connectivity, and wellbeing at tracts only); the other five
-geographies carry all 112 columns in one wide table each. Each collection's
-own `AGENTS.md` documents its columns and carries tested queries; this file
-covers what spans collections.
+level. Each collection's own `AGENTS.md` documents its columns and carries
+tested queries; this file covers what spans collections.
+
+## Shape: seven geographies, five themes
+
+**Every ACS geography is a sub-catalog of themed collections**, and the
+themes are the same everywhere: income, people, housing, connectivity,
+wellbeing. One theme is one file, so a consumer who wants median income
+reads 23 columns rather than 112.
+
+| sub-catalog | themed collections | wide table | rows |
+|---|---|---|---|
+| [block-groups/](block-groups/AGENTS.md) | `bg-{income,people,housing,connectivity}` | — | 242,298 |
+| [tracts/](tracts/AGENTS.md) | `tract-{income,people,housing,connectivity,wellbeing}` | — | 85,184 |
+| [counties/](counties/AGENTS.md) | `county-{income,people,housing,connectivity,wellbeing}` | `counties` | 3,235 |
+| [states/](states/AGENTS.md) | `state-…` | `states` | 56 |
+| [zctas/](zctas/AGENTS.md) | `zcta-…` | `zctas` | 33,791 |
+| [places/](places/AGENTS.md) | `place-…` | `places` | 32,612 |
+| [congressional-districts/](congressional-districts/AGENTS.md) | `cd-…` | `congressional-districts` | 441 |
+| [blocks](blocks/AGENTS.md) | — (2020 Decennial, hive-partitioned by state) | — | 8,174,955 |
+
+The five coarse-or-sparse geographies add a sixth collection carrying **all
+112 columns** on the same rows: at 441 to 33,791 features width costs little,
+so a cross-theme question there needs no join. Block groups and tracts have
+no wide table — a 112-column file over 242,298 rows would make every
+consumer download all of it — and block groups have no wellbeing chunk,
+because the Census Bureau does not publish health insurance, disability,
+nativity or income by race below tract.
+
+**The URL patterns, which differ for the wide tables:**
+
+```
+<base>/<group>/<cid>/<cid>.parquet        every themed chunk
+<base>/<group>/<group>.parquet            the five wide tables — NOT <group>/<group>/
+```
+
+A wide table's `collection.json`, `README.md` and `styles/` sit in
+`<group>/<group>/` beside the themed chunks, but its GeoParquet and PMTiles
+stayed one directory up, so every data URL this catalog has published keeps
+working. `counties/counties.parquet` is right;
+`counties/counties/counties.parquet` is a 404.
 
 ## Join keys
 
@@ -56,11 +92,27 @@ Three geographies break the prefix rule, and each breaks it differently:
 - Jam values (e.g. `-666666666`) in Census files mean "no estimate"; they
   are already `NULL` here. A query that averages a column needs no jam
   filtering, but remember NULLs reduce the row count.
-- **`population_moe` is the one estimate that often has no margin.** Measured:
-  NULL on all 56 rows of `states` and on 3,103 of 3,235 rows of `counties`
-  (only small rural counties carry one), and populated normally at the finer
-  geographies. `sqrt(sum(moe*moe))` over a NULL-bearing column returns NULL,
-  so check before putting it in a quadrature sum.
+- **At county, state and district level a whole family of margins is NULL,
+  not just `population_moe`.** Measured: `population_moe` and the margins of
+  `pct_under_18`, `pct_65_plus`, the four non-Hispanic race shares,
+  `pct_hispanic`, `pct_people_of_color` and `pct_foreign_born` are NULL on
+  **all 56 rows** at state level (`group_quarters_pop_moe` too), carried on
+  only **132 of 3,235** counties, and carried on **423 of 441** districts.
+  Every column in that list comes from a total-population table (B01001,
+  B01003, B03002, B05002, plus B26001 at state level), and the NULL is
+  upstream rather than suppression: the release's own `.dat` carries
+  `-555555555` there, the **controlled-MOE** jam value a controlled estimate
+  gets in place of a sampling margin (`0500000US01001|59947|-555555555` in
+  `acsdt5y2024-b01003.dat`, read 2026-11-15), and the build turns it into
+  NULL instead of publishing it as a number. The rows that do keep a margin
+  are the ones too small to be controlled — all 132 such counties have a
+  population under 7,000 (measured) — and at ZCTA, place, tract and
+  block-group level the whole family is populated normally (33,161 of 33,791
+  ZCTAs, 31,755 of 32,612 places, 84,419 of 85,184 tracts). Every chunk at a
+  geography carries the same margins, so this is a property of the geography,
+  not of a theme. `sqrt(sum(moe*moe))` over a NULL-bearing column returns
+  NULL, so check before putting one in a quadrature sum — and an interval you
+  cannot draw is not the same as a difference that is not real.
 - **`median_hh_income` is bottom-coded at 2,499 and top-coded at 250,001**,
   and `median_home_value` at 2,000,001. Those are published ceilings and
   floors, not jam values, so they are not NULL — and at block-group level the
@@ -77,10 +129,12 @@ Three geographies break the prefix rule, and each breaks it differently:
   that. In the ACS archives those bands carry the Census Bureau's own county
   and tract estimates under the same column names — official values, not an
   aggregation of the file — so a feature clicked at a coarse zoom is a real
-  county or tract with its own `geoid` and `name`. `counties`, `states` and
-  `congressional-districts` are real polygons at every zoom. `*_moe` columns
-  are excluded from every tile; use the GeoParquet, not tiles, for
-  statistics.
+  county or tract with its own `geoid` and `name`. The county, state and
+  congressional-district archives — the wide tables and their themed chunks
+  alike — are real polygons at every zoom and need no such band, while the
+  `zcta-*` and `place-*` chunks take the same county band at z0–z5 as their
+  wide parents. `*_moe` columns are excluded from every tile; use the
+  GeoParquet, not tiles, for statistics.
 - Geometries are the Census cartographic boundary files (500k, shoreline-
   clipped), in EPSG:4326 — good for mapping and point-in-polygon, not for
   legal-boundary or area-measurement work. Blocks use TIGER/Line (not
@@ -88,10 +142,15 @@ Three geographies break the prefix rule, and each breaks it differently:
 
 ## Example queries
 
-Four cross-collection recipes, each run against the published URLs with DuckDB
-1.4.1 immediately before it was written down, with its real output quoted
-beside it. Each collection's own `AGENTS.md` carries 4–5 more that go deeper
-into that collection; these are the ones that span collections.
+Five cross-collection recipes, each run with DuckDB 1.4.1 immediately before
+it was written down, with its real output quoted beside it. Recipes 1–4 were
+run against the published URLs, and their numbers were re-verified against
+the same files on 2026-11-15. Recipe 5 reads the themed chunks at the coarse
+geographies, which had not been uploaded to the mirror when it was run, so it
+was run against the local build with the `catalog/` paths swapped in and
+quotes no wall-clock time. Each collection's own `AGENTS.md` carries 4–5 more
+that go deeper into that collection; these are the ones that span
+collections.
 
 Start every session with `INSTALL httpfs; LOAD httpfs;` (and `LOAD spatial;`
 for geometry). Nothing below downloads a file — DuckDB range-reads the columns
@@ -219,16 +278,75 @@ income of $79,583 — above the national tract median of $77,004 (measured in
 by GEOID prefix. Carry the `_cv` all the way down, because it grows as the
 geography shrinks — the county's was 0.011, these tracts' run to 0.15.
 
+### 5. One theme at all seven geographies, and where it stops meaning anything
+
+```sql
+LOAD httpfs;
+WITH q AS (
+  SELECT 'states' AS geography, 1 AS ord, pct_rent_burdened AS v, pct_rent_burdened_cv AS cv
+    FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/states/state-housing/state-housing.parquet'
+  UNION ALL SELECT 'congressional districts', 2, pct_rent_burdened, pct_rent_burdened_cv
+    FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/congressional-districts/cd-housing/cd-housing.parquet'
+  UNION ALL SELECT 'counties', 3, pct_rent_burdened, pct_rent_burdened_cv
+    FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-housing/county-housing.parquet'
+  UNION ALL SELECT 'ZCTAs', 4, pct_rent_burdened, pct_rent_burdened_cv
+    FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-housing/zcta-housing.parquet'
+  UNION ALL SELECT 'places', 5, pct_rent_burdened, pct_rent_burdened_cv
+    FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/places/place-housing/place-housing.parquet'
+  UNION ALL SELECT 'tracts', 6, pct_rent_burdened, pct_rent_burdened_cv
+    FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/tract-housing.parquet'
+  UNION ALL SELECT 'block groups', 7, pct_rent_burdened, pct_rent_burdened_cv
+    FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-housing/bg-housing.parquet')
+SELECT geography, count(v) AS published,
+       round(quantile_cont(v, 0.10), 1) AS p10,
+       round(quantile_cont(v, 0.50), 1) AS p50,
+       round(quantile_cont(v, 0.90), 1) AS p90,
+       round(quantile_cont(cv, 0.50), 3) AS median_cv
+FROM q GROUP BY geography, ord ORDER BY ord;
+```
+
+→
+
+```
+states                  |     52 | 44.0 | 48.7 | 52.9 | 0.008
+congressional districts |    437 | 43.9 | 50.2 | 58.0 | 0.021
+counties                |   3222 | 30.9 | 44.8 | 55.6 | 0.103
+ZCTAs                   |  30087 |  8.4 | 45.4 | 69.4 | 0.242
+places                  |  27852 |  0.0 | 45.1 | 77.1 | 0.338
+tracts                  |  83901 | 23.7 | 49.4 | 73.1 | 0.256
+block groups            | 223130 |  0.0 | 48.7 | 90.3 | 0.419
+```
+
+The same column, the same theme file, the same seven column names at every
+geography — that is what the themed split buys you. The median barely moves
+(44.8 to 50.2 across all seven); the **spread** goes from 44.0–52.9 at state
+level to 0.0–90.3 at block group, and the median coefficient of variation
+from 0.008 to 0.419. Choose the geography by what you intend to say: a
+ranking of block groups by rent burden is a ranking of noise, and a ranking
+of states hides every neighbourhood.
+
+The ordering is not monotonic in unit size, which is the other lesson. ZCTAs
+and places spread wider than tracts because a ZCTA or a place can be a
+handful of renter households, while every tract holds 1,200–8,000 people —
+those two geographies are population-sorted by nothing at all. Note also how
+many rows drop out: `pct_rent_burdened` is published on 27,852 of 32,612
+places.
+
 ### Where to go from here
 
-| question | collection |
+Every geography is a sub-catalog whose own `AGENTS.md` covers what its six
+collections share, and each collection's `AGENTS.md` carries its schema,
+NULL rates and tested recipes.
+
+| question | where |
 |---|---|
-| one number for a state or county | [states](states/AGENTS.md), [counties](counties/AGENTS.md) — all 112 columns in one wide table |
-| a city, town or CDP | [places](places/AGENTS.md) — and never sum them to a total |
-| a congressional district | [congressional-districts](congressional-districts/AGENTS.md) — 119th Congress |
-| a ZIP code | [zctas](zctas/AGENTS.md) — read the ZCTA≠ZIP caveat first |
-| inside a city or county | [tracts](tracts/AGENTS.md), then [block-groups](block-groups/AGENTS.md) |
-| health, disability, income by race | [tracts/tract-wellbeing](tracts/tract-wellbeing/AGENTS.md) — not published below tract |
+| one number for a state or county | [states/](states/AGENTS.md), [counties/](counties/AGENTS.md) — pick a theme, or the wide table for all 112 columns |
+| a city, town or CDP | [places/](places/AGENTS.md) — and never sum them to a total |
+| a congressional district | [congressional-districts/](congressional-districts/AGENTS.md) — 119th Congress, and not comparable to an earlier one |
+| a ZIP code | [zctas/](zctas/AGENTS.md) — read the ZCTA≠ZIP caveat first |
+| inside a city or county | [tracts/](tracts/AGENTS.md), then [block-groups/](block-groups/AGENTS.md) |
+| health, disability, income by race | any geography's `*-wellbeing` chunk — [tract](tracts/tract-wellbeing/AGENTS.md), [county](counties/county-wellbeing/AGENTS.md), [state](states/state-wellbeing/AGENTS.md), [ZCTA](zctas/zcta-wellbeing/AGENTS.md), [place](places/place-wellbeing/AGENTS.md), [district](congressional-districts/cd-wellbeing/AGENTS.md) — never below tract |
+| a cross-theme profile of one row | the wide table at [counties](counties/counties/AGENTS.md), [states](states/states/AGENTS.md), [ZCTAs](zctas/zctas/AGENTS.md), [places](places/places/AGENTS.md) or [districts](congressional-districts/congressional-districts/AGENTS.md) |
 | an exact count for a small area | [blocks](blocks/AGENTS.md) — 2020 Decennial, no margins of error |
 
 ## Structure

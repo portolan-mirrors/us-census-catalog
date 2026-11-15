@@ -113,42 +113,56 @@ ATTRIBUTION = "U.S. Census Bureau"
 # The catalog's shape
 # --------------------------------------------------------------------------
 
-GROUPS = {
-    "block-groups": ["bg-income", "bg-people", "bg-housing",
-                     "bg-connectivity"],
-    "tracts": ["tract-income", "tract-people", "tract-housing",
-               "tract-connectivity", "tract-wellbeing"],
-}
+# Group (catalog subdirectory) -> its collections, derived from
+# `specs.COLLECTIONS` so this module cannot drift from the build's contract.
+# Every ACS geography is a group as of the 2026-11-15 restructure: five themed
+# chunks in theme order, plus — at the five coarse-or-sparse levels — the wide
+# all-indicator table last, sharing its id with the group directory.
+GROUPS: dict[str, list[str]] = {}
+for _c in specs.COLLECTIONS:
+    if _c.group:
+        GROUPS.setdefault(_c.group, []).append(_c.id)
 GROUP_OF = {cid: g for g, ids in GROUPS.items() for cid in ids}
 
-# Collection id -> directory, relative to catalog/. Ungrouped collections sit
-# at the catalog root, which is also their STAC id.
+# The wide all-indicator tables (`specs.WIDE_IDS`): counties, states, zctas,
+# places, congressional-districts. Their collection.json sits in
+# catalog/<group>/<id>/ with the themed children, but their parquet and
+# pmtiles stay one directory up at catalog/<group>/<id>.parquet, so every
+# published data URL survives the restructure. `data_url()` is the only place
+# that knows this.
+WIDE_IDS = set(specs.WIDE_IDS)
+
+# The five groups whose themed children are column-pruned from a wide table
+# that already shipped, rather than built per theme from the .dat files.
+PRUNED_GROUPS = [g for g, ids in GROUPS.items() if set(ids) & WIDE_IDS]
+
+# Collection id -> directory, relative to catalog/. Every collection except
+# `blocks` now lives two levels down, in its group's directory.
 COLL_REL = dict(
     {cid: f"{g}/{cid}" for g, ids in GROUPS.items() for cid in ids},
-    counties="counties", states="states", blocks="blocks",
-    zctas="zctas", places="places",
-    **{"congressional-districts": "congressional-districts"})
+    blocks="blocks")
 
-# The three wave-3 collections: coarse-or-sparse levels the ACS publishes the
-# whole column set for, each a single wide table like counties and states.
+# The three wave-3 levels: ZCTAs, places and congressional districts, added
+# after counties and states. Named by their wide table's id, which is also
+# their group directory.
 WAVE3 = ["zctas", "places", "congressional-districts"]
 
-ALL_COLLECTIONS = (GROUPS["block-groups"] + GROUPS["tracts"]
-                   + ["counties", "states"] + WAVE3 + ["blocks"])
+# In `specs.COLLECTIONS` order, with blocks (a different survey) last.
+ALL_COLLECTIONS = [c.id for c in specs.COLLECTIONS] + ["blocks"]
 
 LEVEL_OF = dict(cd.LEVEL_OF)
 
 # Feature counts as the build measured them (docs/acs-build-notes.md,
-# docs/blocks-build-notes.md). `make_stac.py` overrides each with the count it
+# docs/blocks-build-notes.md). One count per geography level: a themed chunk
+# is the same rows as its level's wide table with fewer columns, so it cannot
+# have a different count. `make_stac.py` overrides each with the count it
 # reads out of the published file.
-FEATURES = {
-    "bg-income": 242298, "bg-people": 242298, "bg-housing": 242298,
-    "bg-connectivity": 242298,
-    "tract-income": 85184, "tract-people": 85184, "tract-housing": 85184,
-    "tract-connectivity": 85184, "tract-wellbeing": 85184,
-    "counties": 3235, "states": 56, "blocks": 8174955,
-    "zctas": 33791, "places": 32612, "congressional-districts": 441,
+LEVEL_FEATURES = {
+    "bg": 242298, "tract": 85184, "county": 3235, "state": 56,
+    "zcta": 33791, "place": 32612, "cd": 441, "block": 8174955,
 }
+FEATURES = {c.id: LEVEL_FEATURES[c.level] for c in specs.COLLECTIONS}
+FEATURES["blocks"] = LEVEL_FEATURES["block"]
 
 ACS_INTERVAL = ["2020-01-01T00:00:00Z", "2024-12-31T23:59:59Z"]
 BLOCKS_INTERVAL = ["2020-04-01T00:00:00Z", "2020-04-01T00:00:00Z"]
@@ -167,28 +181,37 @@ LEVEL_PLURAL = {
 # Titles
 # --------------------------------------------------------------------------
 
-TITLES = {
-    "bg-income": "Income & Poverty — Block Groups",
-    "bg-people": "People & Education — Block Groups",
-    "bg-housing": "Housing & Rent — Block Groups",
-    "bg-connectivity": "Commuting & Connectivity — Block Groups",
-    "tract-income": "Income & Poverty — Census Tracts",
-    "tract-people": "People & Education — Census Tracts",
-    "tract-housing": "Housing & Rent — Census Tracts",
-    "tract-connectivity": "Commuting & Connectivity — Census Tracts",
-    "tract-wellbeing": "Health, Disability & Income by Race — Census Tracts",
-    "counties": "All Indicators — Counties",
-    "states": "All Indicators — States",
-    "zctas": "All Indicators — ZIP Code Tabulation Areas",
-    "places": "All Indicators — Places & CDPs",
-    "congressional-districts":
-        f"All Indicators — Congressional Districts ({CONGRESS}th Congress)",
-    "blocks": "2020 Census Counts — Blocks",
+# `<theme> — <geography>` for every ACS collection, composed rather than
+# listed so a new themed chunk cannot arrive with a hand-typed title that
+# disagrees with its siblings. `_siblings_para` splits these on " — ", so
+# neither half may contain one.
+LEVEL_TITLE = {
+    "bg": "Block Groups",
+    "tract": "Census Tracts",
+    "county": "Counties",
+    "state": "States",
+    "zcta": "ZIP Code Tabulation Areas",
+    "place": "Places & CDPs",
+    "cd": f"Congressional Districts ({CONGRESS}th Congress)",
+}
+THEME_TITLE = {
+    "income": "Income & Poverty",
+    "people": "People & Education",
+    "housing": "Housing & Rent",
+    "connectivity": "Commuting & Connectivity",
+    "wellbeing": "Health, Disability & Income by Race",
+    "all": "All Indicators",
 }
 
+# A group's title is its geography's, because a group holds one geography.
 GROUP_TITLES = {
-    "block-groups": "Block Groups",
-    "tracts": "Census Tracts",
+    "block-groups": LEVEL_TITLE["bg"],
+    "tracts": LEVEL_TITLE["tract"],
+    "counties": LEVEL_TITLE["county"],
+    "states": LEVEL_TITLE["state"],
+    "zctas": LEVEL_TITLE["zcta"],
+    "places": LEVEL_TITLE["place"],
+    "congressional-districts": LEVEL_TITLE["cd"],
 }
 
 # --------------------------------------------------------------------------
@@ -224,11 +247,17 @@ _KW_LEVEL = {
 
 
 def theme_of(cid: str) -> str:
-    if cid in ("counties", "states") or cid in WAVE3:
+    """The theme a collection carries. A wide table's theme is "all"."""
+    if cid in WIDE_IDS:
         return "all"
     if cid == "blocks":
         return "blocks"
     return cid.split("-", 1)[1]
+
+
+TITLES = {c.id: f"{THEME_TITLE[theme_of(c.id)]} — {LEVEL_TITLE[c.level]}"
+          for c in specs.COLLECTIONS}
+TITLES["blocks"] = "2020 Census Counts — Blocks"
 
 
 def keywords(cid: str) -> list[str]:
@@ -263,9 +292,11 @@ THEME_LEAD = {
         f"({_t('B01003')}) and population density for context."),
     "people": (
         "Who lives here: median age and the shares under 18 and 65 or over "
-        f"({_t('B01002')}, {_t('B01001')}), the five mutually exclusive "
-        "non-Hispanic race shares plus Hispanic or Latino of any race and "
-        f"their complement, people of color ({_t('B03002')}), and the share "
+        f"({_t('B01002')}, {_t('B01001')}), the four mutually exclusive "
+        "non-Hispanic race shares this catalog carries — White, Black or "
+        "African American, American Indian and Alaska Native, Asian — plus "
+        "Hispanic or Latino of any race and its complement, people of color "
+        f"({_t('B03002')}), and the share "
         "of adults 25 and over holding a bachelor's degree or higher "
         f"({_t('B15003')})."),
     "housing": (
@@ -300,9 +331,10 @@ THEME_LEAD = {
         "income and poverty, age and race and education, housing cost and "
         "tenure, vehicles and commuting and internet access, health "
         "insurance and disability and nativity, and median household income "
-        "by race and ethnicity. The block-group and tract levels split these "
-        "into themed chunks because a national block-group file is large; at "
-        "this size width costs nothing, so nothing is split."),
+        "by race and ethnicity. At this many features width costs little, so "
+        "the whole 112-column table is published here as well as a theme at "
+        "a time in the five themed chunks beside it — a cross-theme question "
+        "needs no join."),
 }
 
 # A sentence or two per collection about its own sharpest edge, from the
@@ -349,8 +381,9 @@ THEME_CAVEAT = {
         f"also not a partition of the country: the land between places is "
         f"not in this file at all, so place rows do not sum to a state."),
     "congressional-districts": (
-        f"Districts are equal-population by construction — roughly 770,000 "
-        f"people each, 546,488 to 1,021,191 in this file — so the "
+        f"Districts are equal-population by construction — 546,488 to "
+        f"1,021,191 people across the 435 voting districts, 771,301 at the "
+        f"median of all 437 rows with data (measured) — so the "
         f"distribution of every rate here is far tighter than at any other "
         f"geography, and the map styles' class breaks are measured "
         f"accordingly. These are the districts of the **{CONGRESS}th "
@@ -359,6 +392,203 @@ THEME_CAVEAT = {
         f"congresses, so do not join these GEOIDs to an earlier congress's "
         f"districts of the same number."),
 }
+
+# The themed chunks at the five coarse-or-sparse levels (2026-11-15). A
+# consumer may read exactly one of them and nothing else, so each carries its
+# geography's defining edge as well as its own theme's measured suppression
+# and reliability. Every number below was counted with DuckDB over the
+# published wide table these chunks are pruned from, 2026-11-15.
+_LEVEL_EDGE = {
+    "county": (
+        "Counties are the coarsest geography most questions are actually "
+        "asked at, and the most reliable in this catalog below state level: "
+        "the median coefficient of variation on `median_hh_income` is "
+        "**0.042** here against 0.125 at tract level (measured). One context "
+        "column breaks the catalog's own rule — `population_moe` is NULL on "
+        "**3,103 of the 3,235 rows**, only 132 small rural counties carrying "
+        "a margin on `population` — so read `population` here as a count to "
+        "use rather than an estimate to put an interval on."),
+    "state": (
+        "Fifty-six rows: the 50 states, the District of Columbia, Puerto Rico "
+        "and the four island areas. The island-area rows carry geometry and "
+        "no ACS estimates, so every value column is NULL on 4 of 56 rows "
+        "(**7.14%**), and the 52 rows that do carry data are the most "
+        "reliable estimates in this catalog — no headline column has a median "
+        "coefficient of variation above **0.037** (measured). "
+        "`population_moe` is NULL on all 56 rows, so `population` here is a "
+        "count to use rather than an estimate to put an interval on."),
+    "zcta": (
+        f"A ZIP Code Tabulation Area [is not a ZIP code]({ZCTA_ABOUT}) — it "
+        f"is the Census Bureau's block-built approximation of a USPS 5-digit "
+        f"delivery area — and it nests in nothing, so `state` is NULL on "
+        f"every row and there is no prefix join to counties or tracts. "
+        f"Relating ZCTAs to other geographies is a spatial operation."),
+    "place": (
+        f"Most of the 32,612 rows are small: the file holds every "
+        f"incorporated place and every "
+        f"[census designated place]({CDP_ABOUT}) the Census Bureau "
+        f"delineates, from New York city to villages of 40 people, so filter "
+        f"on `population` before reading a place-level distribution as if "
+        f"every row were a city. A place is also not a partition of the "
+        f"country: the land between places is not in this file at all, so "
+        f"place rows do not sum to a county or a state."),
+    "cd": (
+        f"Districts are equal-population by construction — 546,488 to "
+        f"1,021,191 people across the 435 voting districts, 771,301 at the "
+        f"median of all 437 rows with data (measured) — so "
+        f"the distribution of every rate here is far tighter than at any "
+        f"other geography, and the map styles' class breaks are measured "
+        f"accordingly. These are the districts of the **{CONGRESS}th "
+        f"Congress** ([the vintage this ACS release tabulates]"
+        f"({ACS_BOUNDARY_VINTAGE})); district numbers are not stable across "
+        f"congresses, so do not join these GEOIDs to an earlier congress's "
+        f"districts of the same number."),
+}
+
+_THEME_EDGE = {
+    ("county", "income"): (
+        "`median_hh_income` is published for 3,221 of the 3,235 rows — NULL "
+        "on **0.43%**, against 1.59% of tracts and 7.69% of block groups."),
+    ("county", "people"): (
+        "Nothing in this chunk is suppressed beyond the island areas: every "
+        "column is NULL on exactly the **0.40%** of rows (13 county "
+        "equivalents) that have boundaries and no ACS tabulation."),
+    ("county", "housing"): (
+        "`median_gross_rent` is NULL on **0.62%** of counties and "
+        "`median_home_value` on **0.56%** — against 5.92% and 3.55% at tract "
+        "level and 29.68% and 10.03% at block group."),
+    ("county", "connectivity"): (
+        "`pct_commute_transit` is the column to handle with care: only 2,417 "
+        "of the 3,235 counties publish a coefficient of variation for it at "
+        "all, and **69.9%** of those are above 0.40 (measured). Most "
+        "counties have too little transit commuting to estimate a share "
+        "precisely, and that is a finding rather than a defect."),
+    ("county", "wellbeing"): (
+        "The four race-iteration medians are sparse wherever the group has "
+        "few households: `median_hh_income_asian` is NULL on **53.63%** of "
+        "counties, `median_hh_income_black` on **39.47%**, "
+        "`median_hh_income_hispanic` on **19.60%** and "
+        "`median_hh_income_white_nh` on **2.38%** — against 71.27% / 61.43% "
+        "/ 44.43% / 10.04% at tract level, which is the reason to answer a "
+        "race-and-income question here."),
+    ("state", "income"): (
+        "Nothing is suppressed beyond the island areas, and the margins are "
+        "tiny: the median coefficient of variation is **0.004** on "
+        "`median_hh_income` and **0.010** on `pct_below_poverty` (measured)."),
+    ("state", "people"): (
+        "Nothing is suppressed beyond the island areas, so a state ranking "
+        "on any column here is a complete ranking of the 52 rows with data."),
+    ("state", "housing"): (
+        "Nothing is suppressed beyond the island areas: `median_gross_rent` "
+        "and `median_home_value` are published for all 52 rows that carry "
+        "ACS data, with median coefficients of variation of **0.004** and "
+        "**0.003** (measured)."),
+    ("state", "connectivity"): (
+        "Nothing is suppressed beyond the island areas, and even "
+        "`pct_commute_transit` — the noisiest column in this catalog at every "
+        "finer geography — has a median coefficient of variation of **0.037** "
+        "here and a maximum of **0.197** (measured)."),
+    ("state", "wellbeing"): (
+        "All four race-iteration medians are published for every one of the "
+        "52 rows with ACS data, which is true at no other geography in this "
+        "catalog: their median coefficients of variation run **0.005** "
+        "(`median_hh_income_white_nh`) to **0.025** "
+        "(`median_hh_income_asian`), measured."),
+    ("zcta", "income"): (
+        "The medians thin out: `median_hh_income` is NULL for **9.60%** of "
+        "ZCTAs and `per_capita_income` for **3.26%**, because a ZCTA with few "
+        "households has no publishable median."),
+    ("zcta", "people"): (
+        "Beyond the 19 polygons with no ACS row at all, suppression here is "
+        "small: `median_age` is NULL on **2.87%** of ZCTAs and "
+        "`pct_bachelors_plus` on **2.04%** (measured)."),
+    ("zcta", "housing"): (
+        "`median_gross_rent` is NULL for **23.79%** of ZCTAs, "
+        "`median_home_value` for **10.45%** and `pct_rent_burdened` for "
+        "**10.96%**: a ZCTA with few renter or owner households has no "
+        "publishable median."),
+    ("zcta", "connectivity"): (
+        "These are the noisiest columns at this geography: "
+        "`pct_commute_transit` publishes a coefficient of variation for only "
+        "13,378 of the 33,791 rows and **69.4%** of those are above 0.40, "
+        "while `pct_hh_no_vehicle` has a median coefficient of variation of "
+        "**0.395** (measured). Carry the `*_cv` columns into any map of "
+        "them."),
+    ("zcta", "wellbeing"): (
+        "The race-iteration medians are sparse by construction: "
+        "`median_hh_income_asian` is NULL for **76.59%** of ZCTAs, "
+        "`median_hh_income_black` for **69.25%**, "
+        "`median_hh_income_hispanic` for **58.55%** and "
+        "`median_hh_income_white_nh` for **12.08%** (measured). A map of one "
+        "of these columns is as much a map of where the group lives as of "
+        "its income."),
+    ("place", "income"): (
+        "`median_hh_income` is NULL for **12.71%** of places and "
+        "`per_capita_income` for **4.28%**, and the median coefficient of "
+        "variation on `median_hh_income` is **0.139** (measured) — **7.3%** "
+        "of the places that publish one are above the 0.40 \"unreliable\" "
+        "line."),
+    ("place", "people"): (
+        "The mildest suppression in this group: `median_age` is NULL on "
+        "**3.77%** of places and `pct_bachelors_plus` on **2.50%** "
+        "(measured)."),
+    ("place", "housing"): (
+        "`median_gross_rent` is NULL for **31.32%** of places, "
+        "`median_home_value` for **12.78%** and `pct_rent_burdened` for "
+        "**14.60%** — most rows are places too small to have a publishable "
+        "rent median."),
+    ("place", "connectivity"): (
+        "These are the noisiest estimates in this group: "
+        "`pct_hh_no_vehicle` has a median coefficient of variation of "
+        "**0.526**, and `pct_commute_transit` **0.691** over the 8,538 "
+        "places that publish one at all (measured)."),
+    ("place", "wellbeing"): (
+        "The race-iteration medians are the sparsest in the catalog: "
+        "`median_hh_income_asian` is NULL for **85.80%** of places, "
+        "`median_hh_income_black` for **79.24%**, "
+        "`median_hh_income_hispanic` for **69.35%** and "
+        "`median_hh_income_white_nh` for **17.62%** (measured)."),
+    ("cd", "income"): (
+        "Nothing is suppressed beyond the four island-area delegate "
+        "districts: `median_hh_income` is published for 437 of the 441 rows, "
+        "with a median coefficient of variation of **0.010** (measured)."),
+    ("cd", "people"): (
+        "Nothing is suppressed beyond the four island-area delegate "
+        "districts, which are NULL on every column (**0.91%** of rows)."),
+    ("cd", "housing"): (
+        "Nothing is suppressed beyond the four island-area delegate "
+        "districts, and `median_gross_rent` and `median_home_value` carry "
+        "median coefficients of variation of **0.008** and **0.007** "
+        "(measured)."),
+    ("cd", "connectivity"): (
+        "Nothing is suppressed beyond the four island-area delegate "
+        "districts, and of this collection's three `*_cv` columns only "
+        "`pct_commute_transit` has even one district above 0.30 — exactly "
+        "one, at 0.304, against maxima of 0.080 for `pct_hh_no_vehicle` and "
+        "0.089 for `pct_no_internet` (measured). Elsewhere in this geography "
+        "`median_hh_income_black_cv` reaches 0.480 and "
+        "`pct_below_poverty_black_cv` 0.305, both in "
+        "[cd-wellbeing](../cd-wellbeing/collection.json)."),
+    ("cd", "wellbeing"): (
+        "All four race-iteration medians are published for 436 or 437 of the "
+        "441 rows — only `median_hh_income_asian` loses a fifth district "
+        "(**1.13%** NULL) — which makes this the finest geography in the "
+        "catalog where a race-and-income comparison is close to complete. "
+        "Three districts carry a `median_hh_income_black_cv` above 0.40 "
+        "(maximum 0.480, measured)."),
+}
+
+for _g in PRUNED_GROUPS:
+    for _cid in GROUPS[_g]:
+        if _cid in WIDE_IDS:
+            continue  # the wide table keeps its own hand-written caveat
+        _lvl = LEVEL_OF[_cid]
+        THEME_CAVEAT[_cid] = (f"{_LEVEL_EDGE[_lvl]} "
+                              f"{_THEME_EDGE[(_lvl, theme_of(_cid))]}")
+
+# The two wide tables that had no caveat of their own get their geography's.
+THEME_CAVEAT.setdefault("counties", _LEVEL_EDGE["county"])
+THEME_CAVEAT.setdefault("states", _LEVEL_EDGE["state"])
 
 STATS_PARA = (
     "Every estimate ships with its margin of error — `<column>_moe`, at the "
@@ -440,7 +670,13 @@ BLOCKS_TILES_PARA = (
 # aggregated (counties `--band 0-10:geom`, states `0-8:geom`, congressional
 # districts `0-10:geom` — see staging/tiles-logs/ and tools/make_tiles.py).
 # Saying "the coarse zooms are a coarser geography" of these would be false.
-GEOM_ONLY_TILES = {"counties", "states", "congressional-districts"}
+# Keyed by level, not by id: a themed chunk holds exactly the same features as
+# its level's wide table, so it is tiled the same way. Only `zcta` and `place`
+# among the coarse levels need a pyramid — 33,791 and 32,612 features are too
+# many to draw at a national zoom, and `PYRAMID` has a band plan for each.
+GEOM_ONLY_LEVELS = {"county", "state", "cd"}
+GEOM_ONLY_TILES = {c.id for c in specs.COLLECTIONS
+                   if c.level in GEOM_ONLY_LEVELS}
 
 GEOM_TILES_PARA = (
     "The PMTiles archive carries the same columns as the GeoParquet, minus "
@@ -565,66 +801,120 @@ def _gap_para(level: str) -> str:
     return text
 
 
+# How a geography's GEOID relates to the rest of the catalog. Repeated in
+# every chunk at that geography, because a consumer may read exactly one.
+NESTS = {
+    "bg": "GEOIDs nest by prefix: `substr(geoid, 1, 11)` is the tract, "
+          "`substr(geoid, 1, 5)` the county and `substr(geoid, 1, 2)` the "
+          "state.",
+    "tract": "GEOIDs nest by prefix: `substr(geoid, 1, 5)` is the county and "
+             "`substr(geoid, 1, 2)` the state, and a tract's block groups are "
+             "the 12-character GEOIDs whose first 11 characters match it.",
+    "county": "GEOIDs nest by prefix: `substr(geoid, 1, 2)` is the state, and "
+              "tracts and block groups join back on their own first 5 "
+              "characters.",
+    "state": "GEOIDs nest by prefix: the first 2 characters of every county, "
+             "tract, block-group, place and district GEOID in this catalog "
+             "are its state's `geoid`.",
+    "zcta": "A ZCTA nests in nothing: it can cross county and state lines, so "
+            "there is no prefix join from `geoid` to any other collection "
+            "here, and `state` is NULL on every row. Relating ZCTAs to "
+            "counties or tracts is a spatial operation (or a Census "
+            "relationship file), not a string operation.",
+    "place": "A place nests in a state but not in a county — a place can "
+             "straddle a county line — so `substr(geoid, 1, 2)` reaches the "
+             "state row and nothing else joins by prefix.",
+    "cd": "A district nests in a state, so `substr(geoid, 1, 2)` reaches the "
+          "state row; nothing finer joins by prefix, because district "
+          "boundaries follow 2020 census blocks rather than counties or "
+          "tracts.",
+}
+
+# Group -> the phrase that names it in prose, for the "every other geography"
+# sentence. Lower case, because it appears mid-sentence.
+GROUP_PHRASE = {
+    "block-groups": "block groups",
+    "tracts": "census tracts",
+    "counties": "counties",
+    "states": "states",
+    "zctas": "ZCTAs",
+    "places": "places and CDPs",
+    "congressional-districts": "congressional districts",
+}
+
+
+_NUM = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+        7: "seven"}
+
+
+def _other_groups_clause(group: str) -> str:
+    """Links to every geography's sub-catalog except this one's."""
+    others = [g for g in GROUPS if g != group]
+    links = [f"[{GROUP_PHRASE[g]}](../../{g}/catalog.json)" for g in others]
+    return ", ".join(links[:-1]) + f" and {links[-1]}"
+
+
 def _siblings_para(cid: str) -> str:
     level = LEVEL_OF[cid]
     group = GROUP_OF.get(cid)
-    if group:
-        others = [c for c in GROUPS[group] if c != cid]
-        names = [f"[{TITLES[c].split(' — ')[0]}](../{c}/collection.json)"
-                 for c in others]
-        links = ", ".join(names[:-1]) + f" and {names[-1]}"
+    if group is None:  # blocks, which has no siblings and its own prose
+        return ""
+    themed = [c for c in GROUPS[group] if c not in WIDE_IDS]
+    wide = next((c for c in GROUPS[group] if c in WIDE_IDS), None)
+    elsewhere = (
+        f"Every other geography in this catalog is organized the same way — "
+        f"{_other_groups_clause(group)} — and the "
+        f"[blocks](../../blocks/collection.json) collection carries 2020 "
+        f"Decennial counts, a different survey and vintage rather than a "
+        f"finer version of these numbers.")
+
+    if cid in WIDE_IDS:
+        links = [f"[{THEME_TITLE[theme_of(c)]}](../{c}/collection.json)"
+                 for c in themed]
+        joined = ", ".join(links[:-1]) + f" and {links[-1]}"
         return (
-            f"This is one themed chunk of {len(GROUPS[group])} at this "
-            f"geography — the others are {links} — split that way because a "
-            f"single wide national table would make a consumer who wanted "
-            f"one column download all of them. Collections at the same "
-            f"geography join 1:1 on `geoid`. The same indicators are "
-            f"published for "
-            f"[counties](../../counties/collection.json) and "
-            f"[states](../../states/collection.json) as single wide tables.")
-    if cid in ("counties", "states"):
-        return (
-            "Finer geographies are published as themed chunks: "
-            "[block groups](../block-groups/catalog.json) carry income, "
-            "people, housing and connectivity, and "
-            "[census tracts](../tracts/catalog.json) add a wellbeing chunk. "
-            "GEOIDs nest by prefix, so `substr(geoid, 1, 5)` on a tract row "
-            "is its county and `substr(geoid, 1, 2)` its state. The same "
-            "wide column set is also published for "
-            "[ZCTAs](../zctas/collection.json), "
-            "[places](../places/collection.json) and "
-            "[congressional districts]"
-            "(../congressional-districts/collection.json).")
-    if cid in WAVE3:
-        nests = {
-            "zctas": (
-                "A ZCTA nests in nothing: it can cross county and state "
-                "lines, so there is no prefix join from `geoid` to any other "
-                "collection here, and `state` is NULL. Relating ZCTAs to "
-                "counties or tracts is a spatial operation (or a Census "
-                "relationship file), not a string operation."),
-            "places": (
-                "A place nests in a state but not in a county — a place can "
-                "straddle a county line — so `substr(geoid, 1, 2)` joins "
-                "[states](../states/collection.json) and nothing else joins "
-                "by prefix."),
-            "congressional-districts": (
-                "A district nests in a state, so `substr(geoid, 1, 2)` joins "
-                "[states](../states/collection.json); nothing finer joins by "
-                "prefix, because district boundaries follow 2020 census "
-                "blocks rather than counties or tracts."),
-        }[cid]
-        siblings = ", ".join(
-            f"[{TITLES[c].split(' — ')[1]}](../{c}/collection.json)"
-            for c in ("counties", "states") + tuple(
-                w for w in WAVE3 if w != cid))
-        return (
-            f"{nests} The same 112-column wide table is published at the "
-            f"catalog's other coarse geographies — {siblings} — and the finer "
-            f"geographies split the indicators into themed chunks: "
-            f"[block groups](../block-groups/catalog.json) and "
-            f"[census tracts](../tracts/catalog.json).")
-    return ""
+            f"**This is the full table** — all 112 columns on every row, the "
+            f"file to read when a question crosses themes or when you want "
+            f"one row with everything on it. The same rows are also published "
+            f"as {_NUM[len(themed)]} themed chunks of 23–34 columns each — "
+            f"{joined} — for a consumer who wants one theme and not the rest; "
+            f"each carries the same `geoid`, the same geometry and the same "
+            f"seven context columns, so it joins 1:1 back to this table. This "
+            f"collection's metadata sits beside those chunks, but its "
+            f"GeoParquet and PMTiles stay one directory up at "
+            f"`{group}/{cid}.parquet` and `{group}/{cid}.pmtiles`, which is "
+            f"where they have always been. {NESTS[level]} {elsewhere}")
+
+    others = [c for c in themed if c != cid]
+    links = [f"[{THEME_TITLE[theme_of(c)]}](../{c}/collection.json)"
+             for c in others]
+    joined = ", ".join(links[:-1]) + f" and {links[-1]}"
+    if wide:
+        wide_clause = (
+            f" A sixth collection, "
+            f"[{THEME_TITLE['all']}](../{wide}/collection.json), carries all "
+            f"112 columns on the same rows in one wide table — at this many "
+            f"features width costs little, so take that one if a question "
+            f"crosses themes.")
+    elif level == "bg":
+        wide_clause = (
+            " The wellbeing tables — health insurance, disability, nativity "
+            "and income by race — are not published at this geography at all; "
+            "they start at [census tracts](../../tracts/catalog.json).")
+    else:
+        wide_clause = (
+            " There is no wide all-indicator table at this geography: a "
+            "112-column file over this many rows would make every consumer "
+            "download all of it. A question that crosses themes either joins "
+            "the chunks on `geoid` or steps up to "
+            "[counties](../../counties/counties/collection.json).")
+    return (
+        f"This is one themed chunk of {_NUM[len(GROUPS[group])]} at this "
+        f"geography. "
+        f"The other themes are {joined}, split that way so a consumer who "
+        f"wants one theme reads one file. Chunks at the same geography hold "
+        f"the same rows and the same geometry, so they join 1:1 on `geoid`."
+        f"{wide_clause} {NESTS[level]} {elsewhere}")
 
 
 def _mirror_para(cid: str) -> str:
@@ -796,6 +1086,114 @@ GROUP_DESCRIPTIONS = {
         "are substantially narrower than block-group margins (median "
         "household income is NULL on 1.59% of tracts against 7.69% of block "
         f"groups). [data.census.gov]({DATA_CENSUS}) is authoritative."),
+    "counties": (
+        f"American Community Survey 2020–2024 5-year indicators for all "
+        f"3,235 counties and county equivalents in the United States, Puerto "
+        f"Rico and the island areas — the coarsest geography most questions "
+        f"are actually asked at, and the most reliable in this catalog below "
+        f"state level: the median coefficient of variation on median "
+        f"household income is 0.042 here against 0.125 at tract level "
+        f"(measured). Six collections share these rows. Five are the themed "
+        f"chunks the finer geographies carry — "
+        f"[income](./county-income/collection.json), "
+        f"[people](./county-people/collection.json), "
+        f"[housing](./county-housing/collection.json), "
+        f"[connectivity](./county-connectivity/collection.json) and "
+        f"[wellbeing](./county-wellbeing/collection.json), 23–34 columns each "
+        f"— and the sixth, [all indicators](./counties/collection.json), is "
+        f"the wide 112-column table, whose GeoParquet and PMTiles stay at "
+        f"`counties/counties.parquet` and `counties/counties.pmtiles`. All "
+        f"six hold the same `geoid` and the same geometry and join 1:1. One "
+        f"quirk to carry: `population_moe` is NULL on 3,103 of the 3,235 "
+        f"rows (measured). [data.census.gov]({DATA_CENSUS}) is "
+        f"authoritative."),
+    "states": (
+        f"American Community Survey 2020–2024 5-year indicators for all 56 "
+        f"states and state equivalents — the 50 states, the District of "
+        f"Columbia, Puerto Rico and the four island areas, whose rows carry "
+        f"geometry and no ACS estimates. The 52 rows that do carry data hold "
+        f"the most reliable estimates in this catalog: no headline column has "
+        f"a median coefficient of variation above 0.037 (measured). Six "
+        f"collections share these rows — "
+        f"[income](./state-income/collection.json), "
+        f"[people](./state-people/collection.json), "
+        f"[housing](./state-housing/collection.json), "
+        f"[connectivity](./state-connectivity/collection.json), "
+        f"[wellbeing](./state-wellbeing/collection.json) and the wide "
+        f"112-column [all indicators](./states/collection.json) table, whose "
+        f"GeoParquet and PMTiles stay at `states/states.parquet` and "
+        f"`states/states.pmtiles`. All six hold the same `geoid` and the same "
+        f"geometry and join 1:1; `population_moe` is NULL on all 56 rows "
+        f"(measured). [data.census.gov]({DATA_CENSUS}) is authoritative."),
+    "zctas": (
+        f"American Community Survey 2020–2024 5-year indicators for all "
+        f"33,791 ZIP Code Tabulation Areas. A ZCTA "
+        f"[is not a ZIP code]({ZCTA_ABOUT}) — it is the Census Bureau's "
+        f"block-built approximation of a USPS 5-digit delivery area — and it "
+        f"nests in nothing, so `state` is NULL on every row and there is no "
+        f"prefix join to counties or tracts. Six collections share these "
+        f"rows: [income](./zcta-income/collection.json), "
+        f"[people](./zcta-people/collection.json), "
+        f"[housing](./zcta-housing/collection.json), "
+        f"[connectivity](./zcta-connectivity/collection.json), "
+        f"[wellbeing](./zcta-wellbeing/collection.json) and the wide "
+        f"112-column [all indicators](./zctas/collection.json) table, whose "
+        f"GeoParquet and PMTiles stay at `zctas/zctas.parquet` and "
+        f"`zctas/zctas.pmtiles`. All six hold the same `geoid` and the same "
+        f"geometry and join 1:1. The medians thin out at this geography — "
+        f"`median_gross_rent` is NULL on 23.79% of ZCTAs and "
+        f"`median_hh_income` on 9.60% (measured) — so read each collection's "
+        f"`*_cv` columns and its AGENTS.md before mapping. "
+        f"[data.census.gov]({DATA_CENSUS}) is authoritative."),
+    "places": (
+        f"American Community Survey 2020–2024 5-year indicators for all "
+        f"32,612 incorporated places and "
+        f"[census designated places]({CDP_ABOUT}) — every city, town, "
+        f"village, borough and named unincorporated community the Census "
+        f"Bureau delineates, from New York city to villages of 40 people. "
+        f"Places do not tile the country: the land between them is not in "
+        f"these files at all, so place rows never sum to a county or a state. "
+        f"Six collections share these rows: "
+        f"[income](./place-income/collection.json), "
+        f"[people](./place-people/collection.json), "
+        f"[housing](./place-housing/collection.json), "
+        f"[connectivity](./place-connectivity/collection.json), "
+        f"[wellbeing](./place-wellbeing/collection.json) and the wide "
+        f"112-column [all indicators](./places/collection.json) table, whose "
+        f"GeoParquet and PMTiles stay at `places/places.parquet` and "
+        f"`places/places.pmtiles`. All six hold the same `geoid` and the same "
+        f"geometry and join 1:1. Most rows are small, so the suppression "
+        f"rates are high (`median_gross_rent` NULL on 31.32% of places, "
+        f"`median_hh_income` on 12.71%, measured): filter on `population` "
+        f"before reading a place-level distribution as if every row were a "
+        f"city. [data.census.gov]({DATA_CENSUS}) is authoritative."),
+    "congressional-districts": (
+        f"American Community Survey 2020–2024 5-year indicators for all 441 "
+        f"congressional districts of the **{CONGRESS}th Congress** — the 435 "
+        f"voting districts, the District of Columbia delegate district, "
+        f"Puerto Rico's Resident Commissioner district and the four "
+        f"island-area delegate districts, which carry geometry and no ACS "
+        f"estimates. This is "
+        f"[the vintage the 2024 ACS release tabulates]"
+        f"({ACS_BOUNDARY_VINTAGE}); district numbers are not stable across "
+        f"congresses, so these GEOIDs must not be joined to an earlier "
+        f"congress's districts of the same number. Six collections share "
+        f"these rows: [income](./cd-income/collection.json), "
+        f"[people](./cd-people/collection.json), "
+        f"[housing](./cd-housing/collection.json), "
+        f"[connectivity](./cd-connectivity/collection.json), "
+        f"[wellbeing](./cd-wellbeing/collection.json) and the wide "
+        f"112-column [all indicators]"
+        f"(./congressional-districts/collection.json) table, whose "
+        f"GeoParquet and PMTiles stay at "
+        f"`congressional-districts/congressional-districts.parquet` and "
+        f"`….pmtiles`. All six hold the same `geoid` and the same geometry "
+        f"and join 1:1. Districts are equal-population by construction "
+        f"(546,488–1,021,191 people across the 435 voting districts), so "
+        f"every rate's distribution is "
+        f"far tighter than at any other geography and the margins are the "
+        f"narrowest in this catalog. [data.census.gov]({DATA_CENSUS}) is "
+        f"authoritative."),
 }
 
 # --------------------------------------------------------------------------
@@ -1099,6 +1497,8 @@ def processing_notes(cid: str) -> str:
     level = LEVEL_OF[cid]
     tables = ", ".join(tables_for(cid))
     return "\n\n".join([
+        _pruned_para(cid),
+
         f"Built {EXTRACTED} from the ACS 2020–2024 5-year table-based "
         f"Summary File ({ACS_5YR_DATA}), downloaded the same day over plain "
         f"HTTPS — the summary file needs no API key. Tables read for this "
@@ -1146,6 +1546,30 @@ def processing_notes(cid: str) -> str:
     ])
 
 
+def _pruned_para(cid: str) -> str:
+    """How a themed chunk at a coarse level came to exist (2026-11-15).
+
+    These five levels shipped as wide tables first. The themed chunks are
+    those files with columns removed — not a second pass over the `.dat`
+    files — so every value in a chunk is byte-identical to the wide table's,
+    and the paragraphs below about the ACS read, the MOE formulas and the
+    validation describe the build they were cut from.
+    """
+    group = GROUP_OF.get(cid)
+    if cid in WIDE_IDS or group not in PRUNED_GROUPS:
+        return ""
+    wide = next(c for c in GROUPS[group] if c in WIDE_IDS)
+    n = len(cd.columns_for(cid))
+    return (
+        f"This collection is a themed cut of "
+        f"[{TITLES[wide]}](../{wide}/collection.json), the wide 112-column "
+        f"table at this geography: the same rows, the same geometry and the "
+        f"same seven context columns, with {n} columns kept and the other "
+        f"themes' dropped. Nothing is recomputed — every value here is the "
+        f"value in the wide file — so the build notes below describe the "
+        f"single ACS read both were made from.")
+
+
 def _wave3_validation(cid: str) -> str:
     """What the validation pass counted for a wave-3 collection."""
     return {
@@ -1176,7 +1600,145 @@ def _wave3_validation(cid: str) -> str:
             f"0–100, population 546,488–1,021,191 across the 435 voting "
             f"districts. Spot-checked: CA-12 median household income "
             f"$108,648, NY-12 $147,775, AL-01 $66,291."),
-    }.get(cid, "")
+        # Keyed by group, so a themed chunk pruned from one of these wide
+        # tables reports the same validation — it is the same build.
+    }.get(GROUP_OF.get(cid, cid), "")
+
+
+# The Census Bureau's own median suppressions, by level, as a share of the
+# collection's rows. The block-group and tract rates are the build's
+# validation-pass counts (docs/acs-build-notes.md); the five coarse levels
+# were counted with DuckDB over the published wide tables on 2026-11-15, the
+# day the themed chunks were cut from them. Insertion order is the order they
+# are listed in, overall medians before race iterations.
+SUPPRESSED_MEDIANS = {
+    "bg": {"median_hh_income": "7.69%", "median_gross_rent": "29.68%",
+           "median_home_value": "10.03%"},
+    "tract": {"median_hh_income": "1.59%", "median_gross_rent": "5.92%",
+              "median_home_value": "3.55%",
+              "median_hh_income_white_nh": "10.04%",
+              "median_hh_income_hispanic": "44.43%",
+              "median_hh_income_black": "61.43%",
+              "median_hh_income_asian": "71.27%"},
+    "county": {"median_hh_income": "0.43%", "median_gross_rent": "0.62%",
+               "median_home_value": "0.56%",
+               "median_hh_income_white_nh": "2.38%",
+               "median_hh_income_hispanic": "19.60%",
+               "median_hh_income_black": "39.47%",
+               "median_hh_income_asian": "53.63%"},
+    # At state level every value column is NULL on exactly the four
+    # island-area rows, so there is nothing level-specific to report here;
+    # the description's caveat says it once.
+    "state": {},
+    "zcta": {"median_hh_income": "9.60%", "median_gross_rent": "23.79%",
+             "median_home_value": "10.45%",
+             "median_hh_income_white_nh": "12.08%",
+             "median_hh_income_hispanic": "58.55%",
+             "median_hh_income_black": "69.25%",
+             "median_hh_income_asian": "76.59%"},
+    "place": {"median_hh_income": "12.71%", "median_gross_rent": "31.32%",
+              "median_home_value": "12.78%",
+              "median_hh_income_white_nh": "17.62%",
+              "median_hh_income_hispanic": "69.35%",
+              "median_hh_income_black": "79.24%",
+              "median_hh_income_asian": "85.80%"},
+    # Districts are big enough that every median is published everywhere the
+    # ACS tabulates one: the only non-island gap is a single district with no
+    # `median_hh_income_asian`.
+    "cd": {"median_hh_income_asian": "1.13%"},
+}
+
+# The columns whose margin of error is NULL at county, state and
+# congressional-district level: the total-population tables behind them
+# (B01001, B01003, B03002, B05002, and B26001 at state level) publish no
+# margin at these geographies, and the build propagates the NULL rather than
+# inventing one. Counted with DuckDB over the published wide tables,
+# 2026-11-15; at ZCTA, place, tract and block-group level the same columns
+# carry margins normally.
+MOE_GAP_COLUMNS = [
+    "population", "pct_under_18", "pct_65_plus", "pct_white_nh", "pct_black",
+    "pct_native", "pct_asian", "pct_hispanic", "pct_people_of_color",
+    "pct_foreign_born",
+]
+MOE_GAP_TABLE = {
+    "population": "B01003", "pct_under_18": "B01001",
+    "pct_65_plus": "B01001", "pct_white_nh": "B03002",
+    "pct_black": "B03002", "pct_native": "B03002", "pct_asian": "B03002",
+    "pct_hispanic": "B03002", "pct_people_of_color": "B03002",
+    "pct_foreign_born": "B05002", "group_quarters_pop": "B26001",
+}
+MOE_GAP_CARRIED = {
+    "county": "132 of the 3,235 rows",
+    "state": "none of the 56 rows",
+    "cd": "423 of the 441 rows",
+}
+# `group_quarters_pop_moe` joins the family at state level only: 0 of 56
+# rows, against 3,221 of 3,235 counties and 429 of 441 districts.
+MOE_GAP_EXTRA = {"state": ["group_quarters_pop"]}
+
+# Which rows do and do not carry one. Measured: at county level every one of
+# the 132 has a population under 7,000; at congressional-district level the
+# 18 without are the four island-area delegate districts (no ACS data at
+# all), the six at-large districts, the DC delegate and Puerto Rico
+# districts, all four of Iowa's and both of West Virginia's.
+MOE_GAP_WHICH = {
+    "county": "The 132 that carry one are the smallest counties in the "
+              "country: every one has a population under 7,000 (measured).",
+    "state": "",
+    "cd": "The 18 without one are the four island-area delegate districts, "
+          "which carry no ACS data at all, plus the six at-large districts, "
+          "the District of Columbia delegate and Puerto Rico districts, all "
+          "four of Iowa's and both of West Virginia's (measured).",
+}
+
+# Outside that family, the columns whose margin is NULL on rows where the
+# estimate is published. Counted with DuckDB over the published wide tables,
+# 2026-11-15: at state and congressional-district level there are none at
+# all, and at county level there are these four.
+MOE_RAGGED = {
+    "county": {"pct_bachelors_plus": 99, "median_hh_income_black": 22,
+               "median_hh_income_asian": 42,
+               "median_hh_income_hispanic": 10},
+    "state": {},
+    "cd": {},
+}
+
+
+def _moe_source_phrase(n: int) -> str:
+    return ("each column in the list above comes" if n > 1
+            else "the column comes")
+
+
+def _moe_elsewhere(n: int) -> str:
+    return ("the same columns carry margins" if n > 1
+            else "the same column carries a margin")
+
+
+def _moe_exceptions(level: str, here: set) -> str:
+    """Whether every other `*_moe` here is populated where its estimate is."""
+    ragged = [(c, n) for c, n in MOE_RAGGED[level].items() if c in here]
+    if not ragged:
+        return ("Every other `*_moe` column in this collection is populated "
+                "on every row where its estimate is — measured, with no "
+                "exceptions.")
+    listed = ", ".join(f"`{c}` on {n} rows" for c, n in ragged)
+    return (f"Every other `*_moe` column in this collection is populated on "
+            f"every row where its estimate is, except {listed} (measured).")
+
+
+MEDIAN_SUPPRESSION_LEAD = {
+    "bg": "Block-group medians are sparse where the sample is thin:",
+    "tract": "Medians are suppressed where the sample behind them is too "
+             "thin, and the race iterations are sparse by construction:",
+    "county": "Medians are published for nearly every county; the race "
+              "iterations are the exception:",
+    "state": "",
+    "zcta": "Medians thin out at this geography, because a ZCTA with few "
+            "households, renter households or owner households has no "
+            "publishable median:",
+    "place": "Most rows are places too small for a published median:",
+    "cd": "One gap, and it is the only median suppression at this geography:",
+}
 
 
 def known_issues(cid: str) -> str:
@@ -1238,7 +1800,7 @@ def known_issues(cid: str) -> str:
         "county equivalents, 126 tracts, 405 block groups, 17 ZCTAs, 279 "
         "places and 4 delegate districts.",
     ]
-    if cid == "zctas":
+    if level == "zcta":
         items.append(
             f"**A ZCTA is not a ZIP code.** ZIP Code Tabulation Areas are "
             f"the Census Bureau's approximation of USPS 5-digit ZIP "
@@ -1260,18 +1822,12 @@ def known_issues(cid: str) -> str:
             "collections. Assign ZCTAs to states spatially (and expect "
             "ties), or use a Census relationship file.")
         items.append(
-            "Medians thin out at this geography: `median_gross_rent` is NULL "
-            "on 23.79% of ZCTAs, `median_home_value` on 10.45%, "
-            "`median_hh_income` on 9.60%, and the race-iteration medians on "
-            "58–77% (measured). These are the Census Bureau's own "
-            "suppressions, reported rather than patched.")
-        items.append(
             "Two ZCTAs — 11717 and 11798, in Suffolk County, New York — have "
             "2020 boundaries but no row in this ACS tabulation and publish "
             "with NULL values; they are the same two communities (Brentwood "
             "and Wyandanch) that the re-delineated Suffolk County tracts and "
             "block groups show up in elsewhere in this catalog.")
-    if cid == "places":
+    if level == "place":
         items.append(
             f"Places do not tile the country. A place is a settlement — an "
             f"incorporated city, town, village or borough, or a "
@@ -1282,12 +1838,9 @@ def known_issues(cid: str) -> str:
             f"can straddle a county line, which is why there is no "
             f"county-prefix join.")
         items.append(
-            "Most rows are small places, so the suppression rates are high: "
-            "`median_gross_rent` is NULL on 31.32% of places, "
-            "`median_home_value` on 12.78%, `median_hh_income` on 12.71%, "
-            "and the race-iteration medians on 69–86% (measured). Filter on "
-            "`population` before reading a place-level distribution as if "
-            "every row were a city.")
+            "Most rows are small places. Filter on `population` before "
+            "reading a place-level distribution as if every row were a city, "
+            "and expect the suppression rates below.")
         items.append(
             "Three non-island places carry geometry and no ACS row: "
             "Brentwood CDP (`3608026`) and Wyandanch CDP (`3683294`) in "
@@ -1295,7 +1848,7 @@ def known_issues(cid: str) -> str:
             "(`2148000`), whose ACS tabulation is the consolidated "
             "`2148006` Louisville/Jefferson County metro government "
             "(balance) — if you want Louisville, use `2148006`.")
-    if cid == "congressional-districts":
+    if level == "cd":
         items.append(
             f"**These are the districts of the {CONGRESS}th Congress**, "
             f"which is the vintage the ACS 2020–2024 5-year release "
@@ -1327,7 +1880,9 @@ def known_issues(cid: str) -> str:
             "row here.")
         items.append(
             "Districts are equal-population by design (546,488–1,021,191 "
-            "here, around 770,000 at the median), so the spread of every "
+            "across the 435 voting districts, 771,301 at the median of all "
+            "437 rows with data — Puerto Rico's single Resident Commissioner "
+            "district is the outlier at 3,234,309), so the spread of every "
             "rate is much narrower than at any other geography in this "
             "catalog. Class breaks measured at county or tract level will "
             "put almost every district in one or two classes; the styles "
@@ -1348,44 +1903,101 @@ def known_issues(cid: str) -> str:
             "so the dropped population is exactly 0 — this is why the tract "
             "collections hold 85,184 rows against 85,382 in the ACS "
             "release.")
-    if level == "bg":
-        # Only the medians this collection actually carries: a known-issues
-        # list that names a column the file does not have is noise at best.
-        here = set(cd.columns_for(cid))
-        sparse = [(c, r) for c, r in (("median_hh_income", "7.69%"),
-                                      ("median_gross_rent", "29.68%"),
-                                      ("median_home_value", "10.03%"))
-                  if c in here]
-        if sparse:
-            listed = ", ".join(f"`{c}` on {r} of rows" for c, r in sparse)
-            items.append(
-                f"Block-group medians are sparse where the sample is thin: "
-                f"NULL for {listed}. These are the Census Bureau's own "
-                f"suppressions, reported rather than patched.")
-        if "per_capita_income" in here:
-            items.append(
-                "`per_capita_income` is incomplete upstream: B19301 "
-                "publishes 242,069 block-group rows against 242,297 for "
-                "B01003, and the missing 228 come through as NULL.")
-    if cid == "tract-wellbeing":
+    here = set(cd.columns_for(cid))
+    if level in MOE_GAP_CARRIED:
+        gap = [c for c in MOE_GAP_COLUMNS + MOE_GAP_EXTRA.get(level, [])
+               if c in here]
+        tables = ", ".join(sorted({MOE_GAP_TABLE[c] for c in gap}))
+        carried = MOE_GAP_CARRIED[level]
+        if len(gap) == 1:
+            how = ("every row" if level == "state"
+                   else "almost every row" if level == "county"
+                   else "4.08% of rows")
+            head = (f"**`population_moe` is NULL on {how} at this "
+                    f"geography.** Measured: carried on {carried}.")
+        else:
+            listed = ", ".join(f"`{c}_moe`" for c in gap[:-1])
+            head = (f"**A family of margins is NULL at this geography, and "
+                    f"`population_moe` is only the visible one.** Measured: "
+                    f"{listed} and `{gap[-1]}_moe` are carried on "
+                    f"{carried}.")
         items.append(
-            "The race-iteration medians are NULL wherever that group has too "
-            "few households in the tract for a published median: "
-            "`median_hh_income_asian` 71.27% of tracts, "
-            "`median_hh_income_black` 61.43%, `median_hh_income_hispanic` "
-            "44.43%, `median_hh_income_white_nh` 10.04%. A map of one of "
-            "these columns is partly a map of where the group lives.")
-    if cid == "congressional-districts":
-        # Measured: no styled column has a single district with a CV above
-        # 0.30 (docs/style-breaks.json). Reusing the small-area warning here
-        # would be false modesty about the most reliable file in the catalog.
+            f"{head} {MOE_GAP_WHICH[level]}"
+            f"{' ' if MOE_GAP_WHICH[level] else ''}"
+            f"`sqrt(sum(moe*moe))` over a "
+            f"NULL-bearing column returns NULL, so check before putting one "
+            f"in a quadrature sum, and read "
+            f"{'these estimates' if len(gap) > 1 else 'this count'} as "
+            f"something to use rather than as an estimate to put an interval "
+            f"on. {_moe_exceptions(level, here)}")
         items.append(
-            "Margins of error are the narrowest in this catalog — a district "
-            "is ~770,000 people — and no styled column has a single district "
-            "with a coefficient of variation above 0.30 (measured). They are "
-            "still margins: check whether two districts' margins overlap "
-            "before calling a difference real, and never aggregate a "
-            "median.")
+            f"That NULL is upstream, and it is not suppression: "
+            f"{_moe_source_phrase(len(gap))}"
+            f" from a total-population table ({tables}), and in the "
+            f"release's own `.dat` files those rows carry the estimate "
+            f"beside `-555555555`, the **controlled-MOE** jam value a "
+            f"controlled estimate gets in place of a sampling margin. The "
+            f"build turns it into NULL rather than publishing it as a number "
+            f"— `0500000US01001|59947|-555555555` in "
+            f"`acsdt5y2024-b01003.dat`, read 2026-11-15. "
+            f"{_moe_elsewhere(len(gap)).capitalize()} normally at the finer "
+            f"geographies, where the estimates are not controlled this way: "
+            f"`population_moe` is carried on 33,759 of 33,791 ZCTAs and on "
+            f"all 241,854 populated block groups (measured).")
+    if level == "bg" and "per_capita_income" in here:
+        items.append(
+            "`per_capita_income` is incomplete upstream: B19301 "
+            "publishes 242,069 block-group rows against 242,297 for "
+            "B01003, and the missing 228 come through as NULL.")
+    # Only the medians this collection actually carries: a known-issues list
+    # that names a column the file does not have is noise at best.
+    sparse = [(c, r) for c, r in SUPPRESSED_MEDIANS[level].items()
+              if c in here]
+    if sparse:
+        listed = ", ".join(f"`{c}` on {r} of rows" for c, r in sparse)
+        text = (f"{MEDIAN_SUPPRESSION_LEAD[level]} NULL for {listed} "
+                f"(measured). These are the Census Bureau's own suppressions, "
+                f"reported rather than patched.")
+        if any(c.startswith("median_hh_income_") for c, _ in sparse):
+            text += (" A map of a race-iteration median is as much a map of "
+                     "where that group lives as of its income, and quoting a "
+                     "racial income gap without its denominator overstates "
+                     "the coverage.")
+        items.append(text)
+    if level == "cd":
+        # Measured over this file: the highest median coefficient of
+        # variation on any `*_cv` column at this geography is 0.101
+        # (`pct_commute_transit`). Reusing the small-area warning here would
+        # be false modesty about the most reliable file in the catalog — but
+        # "no district above 0.30" holds only for the wide table's styled
+        # columns (docs/style-breaks.json): `cd-connectivity` has one
+        # district above it on `pct_commute_transit` and `cd-wellbeing`
+        # three on `median_hh_income_black`.
+        text = ("Margins of error are the narrowest in this catalog — a "
+                "district is ~770,000 people — and every `*_cv` column at "
+                "this geography has a median coefficient of variation below "
+                "0.11 (measured).")
+        if cid in WIDE_IDS:
+            text += (" No styled column has a single district with a "
+                     "coefficient of variation above 0.30.")
+        items.append(
+            text + " They are still margins: check whether two districts' "
+            "margins overlap before calling a difference real, and never "
+            "aggregate a median.")
+    elif level == "state":
+        # Measured: the widest median coefficient of variation on any column
+        # here is 0.037 (`pct_commute_transit`) and the widest single value
+        # 0.213 (`pct_below_poverty_black`). The small-area warning the finer
+        # collections carry would be false on this file.
+        items.append(
+            "Margins of error are negligible at this geography — no column "
+            "has a median coefficient of variation above 0.037, and no "
+            "single value above 0.213 (measured), so nothing here needs a "
+            "reliability filter. They are still margins: check whether two "
+            "states' margins overlap before calling a difference real, and "
+            "never aggregate a median. A state's value is estimated directly "
+            "by the Census Bureau and is not the sum or the average of its "
+            "counties.")
     else:
         items.append(
             "Margins of error at this geography can be large relative to "
@@ -1426,12 +2038,25 @@ def _block(key: str, text: str) -> str:
     return "\n".join(lines)
 
 
+def data_url(cid: str, ext: str = "parquet") -> str:
+    """The published URL of a collection's data file.
+
+    The one place that knows the wide tables' files did not move when their
+    metadata did: `catalog/<group>/<id>/collection.json` describes bytes that
+    sit at `catalog/<group>/<id>.parquet`, one directory up, so every data URL
+    this catalog has ever published keeps working. Everything else — themed
+    chunks at every geography — is `<group>/<id>/<id>.<ext>`.
+    """
+    if cid == "blocks":
+        return f"{PUBLIC_BASE}/blocks/state_fips=*/*.parquet"
+    if cid in WIDE_IDS:
+        return f"{PUBLIC_BASE}/{GROUP_OF[cid]}/{cid}.{ext}"
+    return f"{PUBLIC_BASE}/{COLL_REL[cid]}/{cid}.{ext}"
+
+
 def metadata_yaml(cid: str) -> str:
     """`.portolan/metadata.yaml` for one collection."""
-    rel = COLL_REL[cid]
-    data_href = (f"{PUBLIC_BASE}/{rel}/state_fips=*/*.parquet"
-                 if cid == "blocks" else
-                 f"{PUBLIC_BASE}/{rel}/{cid}.parquet")
+    data_href = data_url(cid)
     example = (
         "INSTALL httpfs; LOAD httpfs; SET s3_region='us-west-2';\n"
         "SELECT geoid, pop_total, housing_units FROM read_parquet("
@@ -1467,13 +2092,17 @@ description: |
   PMTiles with STAC metadata, at every census geography from states down to
   the 242,298 block groups and 8,174,955 blocks of the 2020 Census, plus the
   33,791 ZIP Code Tabulation Areas, 32,612 places and 441 congressional
-  districts of the 119th Congress. Fourteen
-  collections carry curated [American Community Survey]({ACS_PROGRAM})
+  districts of the 119th Congress. Thirty-nine collections carry curated
+  [American Community Survey]({ACS_PROGRAM})
   2020–2024 5-year indicators — income, poverty, age, race and ethnicity,
   education, housing cost and tenure, vehicles, commuting, internet access,
   health insurance, disability, nativity — every estimate with its margin of
   error at the 90% confidence level and the headline statistics with a
-  coefficient of variation. One collection carries 2020 Decennial Census
+  coefficient of variation. Every geography is a sub-catalog of themed
+  collections (income, people, housing, connectivity, wellbeing), and the
+  five coarse-or-sparse geographies — counties, states, ZCTAs, places,
+  congressional districts — add a sixth collection carrying all 112 columns
+  in one wide table. One further collection carries 2020 Decennial Census
   P.L. 94-171 counts at block level, hive-partitioned by state.
   [data.census.gov]({DATA_CENSUS}) is authoritative; this is a mirror, and
   every collection links the exact upstream census.gov files it was built
@@ -1526,8 +2155,11 @@ def write_metadata(only: set[str] | None = None) -> None:
             continue
         coll_dir = CATALOG / COLL_REL[cid]
         if not coll_dir.exists():
-            print(f"✗ missing collection directory: {COLL_REL[cid]}")
-            continue
+            # A collection whose data is still being built: write the
+            # metadata anyway, so `portolan add` has it the moment the
+            # parquet lands. Creating the directory is the whole cost.
+            print(f"+ creating collection directory: {COLL_REL[cid]}")
+            coll_dir.mkdir(parents=True)
         (coll_dir / ".portolan").mkdir(exist_ok=True)
         (coll_dir / ".portolan" / "metadata.yaml").write_text(
             metadata_yaml(cid))

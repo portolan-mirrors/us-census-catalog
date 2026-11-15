@@ -1,0 +1,106 @@
+{
+  "version": 8,
+  "name": "People with a disability",
+  "metadata": {
+    "description": "Share of the civilian non-institutionalized population reporting a disability, pale pink to deep magenta. Measured over all 3,222 counties with a published value: 6 classes with breaks at 13%/15%/17%/20%/23%, which fall at the 22nd/40th/58th/79th/91st percentile of the national distribution. 0.47% have a coefficient of variation above 0.3 and render faded \u2014 the estimate is real but its margin of error swamps it.",
+    "portolan:column": "pct_with_disability",
+    "portolan:breaks": [
+      13,
+      15,
+      17,
+      20,
+      23
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-wellbeing",
+      "filter": [
+        "has",
+        "pct_with_disability"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_with_disability"
+          ],
+          "#feebe2",
+          13,
+          "#fcc5c0",
+          15,
+          "#fa9fb5",
+          17,
+          "#f768a1",
+          20,
+          "#dd3497",
+          23,
+          "#7a0177"
+        ],
+        "fill-opacity": [
+          "case",
+          [
+            ">",
+            [
+              "coalesce",
+              [
+                "get",
+                "pct_with_disability_cv"
+              ],
+              0
+            ],
+            0.3
+          ],
+          0.35,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-wellbeing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

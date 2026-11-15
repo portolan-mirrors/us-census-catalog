@@ -63,7 +63,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 | File | Size | Checksum |
 |------|------|----------|
 | ./state_fips=*/*.parquet | - | - |
-| ./items.parquet | 50.4 KB | 12209fad0824... |
+| ./items.parquet | 82.8 KB | 122044b9f849... |
 | ./thumbnail.png | 87.9 KB | 122015b68f91... |
 | ./blocks.pmtiles | 6.6 GB | 12202a415c37... |
 | ./styles/black-share.json | 2.1 KB | 122033e39965... |

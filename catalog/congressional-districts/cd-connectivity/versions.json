@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:16.384804Z",
+      "breaking": false,
+      "assets": {
+        "cd-connectivity.pmtiles": {
+          "sha256": "767d0002605a976cf6171dd8ddca395ce97cd3cf2853a2fc85c85f26061afc9d",
+          "size_bytes": 11103013,
+          "href": "congressional-districts/cd-connectivity/cd-connectivity.pmtiles",
+          "mtime": 1794742631.3008814
+        },
+        "cd-connectivity.parquet": {
+          "sha256": "a9089de768595d01fd7afa1d0655db3beb35215712373bdb66aa9e89bc2631f7",
+          "size_bytes": 8880200,
+          "href": "congressional-districts/cd-connectivity/cd-connectivity.parquet",
+          "source_mtime": 1794742545.7386558,
+          "mtime": 1794742545.7386558,
+          "feature_count": 441,
+          "schema_fingerprint": "2fe74dd59d5df73c"
+        },
+        "cd-connectivity.thumb.jpg": {
+          "sha256": "f3a1b1f864b4b45360c4c0b7017b2574cb5464ff266eeed4d0ce2103ec132fe3",
+          "size_bytes": 2876,
+          "href": "congressional-districts/cd-connectivity/cd-connectivity.thumb.jpg",
+          "mtime": 1794743356.9706373
+        }
+      },
+      "changes": [
+        "cd-connectivity.pmtiles",
+        "cd-connectivity.parquet",
+        "cd-connectivity.thumb.jpg"
+      ]
+    }
+  ]
+}

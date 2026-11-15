@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Median income, white non-Hispanic households",
+  "metadata": {
+    "description": "Median household income for white, non-Hispanic householders (ACS table B19013H), on the same scale as the Black-household style. Measured over all 437 districts with a published value: 6 classes with breaks at $55k/$70k/$80k/$95k/$115k, which fall at the 0th/12th/38th/60th/85th percentile of the national distribution. Same breaks, ramp and opacity rule as the Black-household style \u2014 neither fades its noisy estimates, because fading only one of the pair would make the gap look like a difference in confidence.",
+    "portolan:column": "median_hh_income_white_nh",
+    "portolan:breaks": [
+      55000,
+      70000,
+      80000,
+      95000,
+      115000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-wellbeing",
+      "filter": [
+        "has",
+        "median_hh_income_white_nh"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_hh_income_white_nh"
+          ],
+          "#00224e",
+          55000,
+          "#35456c",
+          70000,
+          "#666970",
+          80000,
+          "#958f5f",
+          95000,
+          "#cab969",
+          115000,
+          "#fee838"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-wellbeing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

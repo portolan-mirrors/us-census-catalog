@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Homes built before 1940",
+  "metadata": {
+    "description": "Share of housing units built in 1939 or earlier, pale parchment to dark sepia. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at 4%/8%/15%/19%/25%, which fall at the 17th/40th/63rd/79th/92nd percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_built_pre_1940",
+    "portolan:breaks": [
+      4,
+      8,
+      15,
+      19,
+      25
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../state-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-housing",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_built_pre_1940"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-housing",
+      "filter": [
+        "has",
+        "pct_built_pre_1940"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_built_pre_1940"
+          ],
+          "#f4ecdf",
+          4,
+          "#e2d0a8",
+          8,
+          "#c8a97a",
+          15,
+          "#a67c52",
+          19,
+          "#7d5636",
+          25,
+          "#4e3220"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "state-housing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

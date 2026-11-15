@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:05.775049Z",
+      "breaking": false,
+      "assets": {
+        "place-income.pmtiles": {
+          "sha256": "70dfea5673228020283d5de333370504dde5d815f1c1100b07b2c9158df9ac48",
+          "size_bytes": 84626294,
+          "href": "places/place-income/place-income.pmtiles",
+          "mtime": 1794742721.5238278
+        },
+        "place-income.parquet": {
+          "sha256": "2332f3e6a8820504c5732ded62ec4d7c54076aaf0bbb55785c006e8968b82a0c",
+          "size_bytes": 29088554,
+          "href": "places/place-income/place-income.parquet",
+          "source_mtime": 1794742544.7925582,
+          "mtime": 1794742544.7925582,
+          "feature_count": 32612,
+          "schema_fingerprint": "b40824fd8eb88781"
+        },
+        "place-income.thumb.jpg": {
+          "sha256": "941c2f77e5ae82766b548513fb4d9ff3c4aa38299715fa342878bbe974a35a38",
+          "size_bytes": 2802,
+          "href": "places/place-income/place-income.thumb.jpg",
+          "mtime": 1794743347.6082227
+        }
+      },
+      "changes": [
+        "place-income.pmtiles",
+        "place-income.parquet",
+        "place-income.thumb.jpg"
+      ]
+    }
+  ]
+}

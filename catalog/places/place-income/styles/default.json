@@ -1,0 +1,126 @@
+{
+  "version": 8,
+  "name": "Median household income",
+  "metadata": {
+    "description": "Median household income, viridis dark purple (low) through teal and green to yellow (high). Measured over all 28,468 places with a published value: 7 classes with breaks at $40k/$55k/$67k/$84k/$115k/$150k, which fall at the 10th/30th/50th/70th/88th/95th percentile of the national distribution. 12.71% have no published value and draw in neutral gray rather than as a low value. 15.41% have a coefficient of variation above 0.3 and render faded \u2014 the estimate is real but its margin of error swamps it.",
+    "portolan:column": "median_hh_income",
+    "portolan:breaks": [
+      40000,
+      55000,
+      67000,
+      84000,
+      115000,
+      150000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-income",
+      "filter": [
+        "!",
+        [
+          "has",
+          "median_hh_income"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-income",
+      "filter": [
+        "has",
+        "median_hh_income"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_hh_income"
+          ],
+          "#440154",
+          40000,
+          "#443983",
+          55000,
+          "#31688e",
+          67000,
+          "#21918c",
+          84000,
+          "#35b779",
+          115000,
+          "#90d743",
+          150000,
+          "#fde725"
+        ],
+        "fill-opacity": [
+          "case",
+          [
+            ">",
+            [
+              "coalesce",
+              [
+                "get",
+                "median_hh_income_cv"
+              ],
+              0
+            ],
+            0.3
+          ],
+          0.35,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-income",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

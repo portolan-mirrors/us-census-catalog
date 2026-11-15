@@ -77,6 +77,10 @@ import sys
 from datetime import date
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import specs  # noqa: E402
+
 ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "catalog"
 BREAKS_JSON = ROOT / "docs" / "style-breaks.json"
@@ -233,96 +237,114 @@ class S:
 # -- income: ACS 2020-2024, block groups and tracts -------------------------
 # Same breaks at both geographies on purpose: tract values are block-group
 # values pooled, so a shared scale lets the two maps be compared directly.
-def income_styles():
+#
+# `breaks` overrides a style's class breaks by file name, and nothing else
+# about it. The five themed children of each wide level (county-*, state-*,
+# zcta-*, place-*, cd-*) are these same style sets on their own measured
+# breaks: averaging over a whole county or state collapses the national
+# spread, so block-group breaks there would leave the top classes with a
+# handful of features. The numbers are in WIDE_THEME_BREAKS below, and the
+# quantiles behind each one are in docs/style-breaks.json.
+def _b(breaks, file, default):
+    return (breaks or {}).get(file, default)
+
+
+def income_styles(breaks=None):
     return [
         S("default", "Median household income", "median_hh_income",
-          [40000, 55000, 70000, 90000, 120000, 160000], "viridis7",
+          _b(breaks, "default", [40000, 55000, 70000, 90000, 120000, 160000]),
+          "viridis7",
           "Median household income, viridis dark purple (low) through teal "
           "and green to yellow (high)", fmt="usd", default=True),
         S("poverty", "People below the poverty line", "pct_below_poverty",
-          [5, 10, 20, 30, 40], "ylorrd6",
+          _b(breaks, "poverty", [5, 10, 20, 30, 40]), "ylorrd6",
           "Share of residents with income below the federal poverty line, "
           "pale yellow to deep red"),
         S("snap", "Households receiving SNAP", "pct_snap",
-          [3, 8, 15, 25, 40], "orrd6",
+          _b(breaks, "snap", [3, 8, 15, 25, 40]), "orrd6",
           "Share of households that received SNAP (food stamps) in the past "
           "12 months, cream to dark red"),
         S("unemployment", "Unemployment rate", "pct_unemployed",
-          [2, 4, 6, 9, 14], "purples6",
+          _b(breaks, "unemployment", [2, 4, 6, 9, 14]), "purples6",
           "Unemployed share of the civilian labor force, pale lilac to deep "
           "purple"),
     ]
 
 
 # -- people -----------------------------------------------------------------
-def people_styles():
+def people_styles(breaks=None):
     return [
         S("default", "Population density", "pop_density",
-          [25, 100, 400, 1000, 2500, 6000], "magma7",
+          _b(breaks, "default", [25, 100, 400, 1000, 2500, 6000]), "magma7",
           "People per square kilometre of land area on roughly logarithmic "
           "steps, pale cream (empty) to deep plum (dense)",
           fmt="dens", default=True),
         S("people-of-color", "People of color", "pct_people_of_color",
-          [10, 20, 35, 55, 75, 90], "bupu7",
+          _b(breaks, "people-of-color", [10, 20, 35, 55, 75, 90]), "bupu7",
           "Share of residents who are not non-Hispanic white alone, pale "
           "blue through violet to deep purple"),
         S("seniors", "Residents 65 and over", "pct_65_plus",
-          [8, 13, 18, 24, 32], "oranges6",
+          _b(breaks, "seniors", [8, 13, 18, 24, 32]), "oranges6",
           "Share of residents aged 65 or older, pale apricot to burnt "
           "orange"),
         S("education", "Bachelor's degree or higher",
-          "pct_bachelors_plus", [10, 18, 28, 40, 55, 70], "bugn7",
+          "pct_bachelors_plus",
+          _b(breaks, "education", [10, 18, 28, 40, 55, 70]), "bugn7",
           "Share of adults 25 and over holding a bachelor's degree or more, "
           "pale aqua to deep teal"),
     ]
 
 
 # -- housing ----------------------------------------------------------------
-def housing_styles():
+def housing_styles(breaks=None):
     return [
         S("default", "Median home value", "median_home_value",
-          [125000, 200000, 275000, 375000, 550000, 850000], "amber7",
+          _b(breaks, "default",
+             [125000, 200000, 275000, 375000, 550000, 850000]), "amber7",
           "Median value of owner-occupied homes, pale amber to burnt brown",
           fmt="usd", default=True),
         S("rent-burden", "Renters paying 30%+ of income",
-          "pct_rent_burdened", [25, 35, 45, 55, 70, 85], "purd7",
+          "pct_rent_burdened",
+          _b(breaks, "rent-burden", [25, 35, 45, 55, 70, 85]), "purd7",
           "Share of renter households spending 30% or more of income on "
           "gross rent — the federal definition of rent-burdened — pale mauve "
           "to deep magenta"),
         S("vacancy", "Vacant housing units", "pct_vacant_units",
-          [3, 7, 12, 18, 30], "orrd6",
+          _b(breaks, "vacancy", [3, 7, 12, 18, 30]), "orrd6",
           "Share of housing units vacant, cream to dark red; seasonal and "
           "recreational housing drives the high end as much as abandonment "
           "does"),
         S("pre-1940", "Homes built before 1940", "pct_built_pre_1940",
-          [2, 8, 20, 35, 55], "sepia6",
+          _b(breaks, "pre-1940", [2, 8, 20, 35, 55]), "sepia6",
           "Share of housing units built in 1939 or earlier, pale parchment "
           "to dark sepia"),
         S("ownership", "Owner-occupied homes", "pct_owner_occupied",
-          [25, 45, 60, 75, 88, 95], "greens7",
+          _b(breaks, "ownership", [25, 45, 60, 75, 88, 95]), "greens7",
           "Share of occupied housing units lived in by their owner, pale to "
           "deep green"),
     ]
 
 
 # -- connectivity -----------------------------------------------------------
-def connectivity_styles():
+def connectivity_styles(breaks=None):
     return [
         S("default", "No home internet", "pct_no_internet",
-          [2, 5, 9, 14, 22], "pubu6",
+          _b(breaks, "default", [2, 5, 9, 14, 22]), "pubu6",
           "Share of households with no internet subscription of any kind, "
           "pale to deep blue", default=True),
         S("no-vehicle", "Households without a vehicle",
-          "pct_hh_no_vehicle", [2, 5, 10, 20, 35], "ylgnbu6",
+          "pct_hh_no_vehicle",
+          _b(breaks, "no-vehicle", [2, 5, 10, 20, 35]), "ylgnbu6",
           "Share of households with no vehicle available, pale yellow "
           "through teal to navy"),
         S("transit-commute", "Commute by public transit",
-          "pct_commute_transit", [0.5, 2, 5, 10, 25], "ylgn6",
+          "pct_commute_transit",
+          _b(breaks, "transit-commute", [0.5, 2, 5, 10, 25]), "ylgn6",
           "Share of workers commuting by public transportation, pale yellow "
           "to dark green; the first class is deliberately narrow because "
           "most of the country has effectively none"),
         S("work-from-home", "Work from home", "pct_work_from_home",
-          [4, 8, 13, 20, 30], "purples6",
+          _b(breaks, "work-from-home", [4, 8, 13, 20, 30]), "purples6",
           "Share of workers whose usual commute is none — they worked from "
           "home — pale lilac to deep purple"),
     ]
@@ -344,38 +366,45 @@ for _theme, _fn in BG_TRACT.items():
 # column invented to hold it. Black-household medians are published for only
 # a minority of tracts, so that style leans on the no-data layer.
 WELLBEING_INCOME = [30000, 45000, 60000, 85000, 120000]
-STYLES["tract-wellbeing"] = [
-    S("default", "People without health insurance", "pct_uninsured",
-      [2, 4, 7, 11, 18], "ylorrd6",
-      "Share of the civilian non-institutionalized population with no health "
-      "insurance coverage, pale yellow to deep red", default=True),
-    S("disability", "People with a disability", "pct_with_disability",
-      [8, 11, 14, 17, 22], "rdpu6",
-      "Share of the civilian non-institutionalized population reporting a "
-      "disability, pale pink to deep magenta"),
-    S("foreign-born", "Foreign-born residents", "pct_foreign_born",
-      [2, 5, 10, 18, 30], "gnbu6",
-      "Share of residents born outside the United States, pale green to "
-      "deep blue"),
-    S("income-black-households", "Median income, Black households",
-      "median_hh_income_black", WELLBEING_INCOME, "cividis6",
-      "Median household income for Black or African American householders "
-      "(ACS table B19013B), cividis navy (low) to gold (high)", fmt="usd",
-      fade=False,
-      note="Shares its breaks and ramp with the white non-Hispanic style, so "
-           "switching between the two shows the gap directly; the Census "
-           "publishes this estimate only where the tract's Black household "
-           "count supports one"),
-    S("income-white-households", "Median income, white non-Hispanic "
-      "households", "median_hh_income_white_nh", WELLBEING_INCOME,
-      "cividis6",
-      "Median household income for white, non-Hispanic householders (ACS "
-      "table B19013H), on the same scale as the Black-household style",
-      fmt="usd", fade=False,
-      note="Same breaks, ramp and opacity rule as the Black-household style — "
-           "neither fades its noisy estimates, because fading only one of the "
-           "pair would make the gap look like a difference in confidence"),
-]
+
+
+def wellbeing_styles(breaks=None, unit="tract"):
+    shared = _b(breaks, "income-pair", WELLBEING_INCOME)
+    return [
+        S("default", "People without health insurance", "pct_uninsured",
+          _b(breaks, "default", [2, 4, 7, 11, 18]), "ylorrd6",
+          "Share of the civilian non-institutionalized population with no "
+          "health insurance coverage, pale yellow to deep red", default=True),
+        S("disability", "People with a disability", "pct_with_disability",
+          _b(breaks, "disability", [8, 11, 14, 17, 22]), "rdpu6",
+          "Share of the civilian non-institutionalized population reporting "
+          "a disability, pale pink to deep magenta"),
+        S("foreign-born", "Foreign-born residents", "pct_foreign_born",
+          _b(breaks, "foreign-born", [2, 5, 10, 18, 30]), "gnbu6",
+          "Share of residents born outside the United States, pale green to "
+          "deep blue"),
+        S("income-black-households", "Median income, Black households",
+          "median_hh_income_black", shared, "cividis6",
+          "Median household income for Black or African American "
+          "householders (ACS table B19013B), cividis navy (low) to gold "
+          "(high)", fmt="usd", fade=False,
+          note="Shares its breaks and ramp with the white non-Hispanic "
+               "style, so switching between the two shows the gap directly; "
+               f"the Census publishes this estimate only where the {unit}'s "
+               "Black household count supports one"),
+        S("income-white-households", "Median income, white non-Hispanic "
+          "households", "median_hh_income_white_nh", shared, "cividis6",
+          "Median household income for white, non-Hispanic householders (ACS "
+          "table B19013H), on the same scale as the Black-household style",
+          fmt="usd", fade=False,
+          note="Same breaks, ramp and opacity rule as the Black-household "
+               "style — neither fades its noisy estimates, because fading "
+               "only one of the pair would make the gap look like a "
+               "difference in confidence"),
+    ]
+
+
+STYLES["tract-wellbeing"] = wellbeing_styles()
 
 # -- counties and states ----------------------------------------------------
 # Averaging over a whole county or state collapses the national spread, so
@@ -473,6 +502,231 @@ STYLES["congressional-districts"] = _wave3_styles(
     [8, 10, 12, 15, 19],
     [185000, 250000, 335000, 450000, 650000, 900000],
     "congressional district")
+
+# -- the themed children of the five wide levels (2026-11-15) ---------------
+# Each wide level is now a group with five themed children mirroring the
+# tract set, so each child carries its theme's style set — county-income gets
+# the tract-income styles, county-people the tract-people styles, and so on,
+# same files, same columns, same ramps, same prose.
+#
+# Only the class breaks differ, and every number below was measured on that
+# child's own parquet (quantiles, class counts and null shares in
+# docs/style-breaks.json): a county is a pooled average of its tracts, so
+# tract breaks here would pile three quarters of the country into the middle
+# class and leave the ends with a handful of features.
+#
+# Breaks were snapped to human numbers near the p10/p30/p50/p70/p88/p95
+# quantiles for a six-break ramp and p20/p40/p60/p78/p91 for a five-break
+# one — the same percentile shape the wave-3 collections' breaks sit on —
+# then checked class by class, because the generator refuses an empty legend
+# swatch. Two deliberate reuses:
+#
+#   * median_hh_income, pop_density, pct_below_poverty and median_home_value
+#     take their level's EXISTING wide-table breaks wherever the ramp width
+#     matches, so the child and its wide parent draw the same map of the same
+#     column. (state-income's default is the exception: the wide states style
+#     has five breaks and this ramp wants six.)
+#   * transit-commute keeps the catalog-wide [0.5, 2, 5, 10, 25] scale at
+#     every level where no class comes out empty, so a transit map reads the
+#     same from block groups to congressional districts. Only states needs
+#     its own ([0.5, 1, 3, 8, 20]): no state reaches the 25% top class, New
+#     York's 21.6% being the national maximum.
+WIDE_THEME_BREAKS = {
+    "county": {
+        "income": {
+            "default": [45000, 55000, 65000, 75000, 90000, 110000],
+            "poverty": [8, 11, 14, 18, 25],
+            "snap": [7, 10, 14, 17, 24],
+            "unemployment": [3, 4, 5, 6, 8],
+        },
+        "people": {
+            "default": [2, 8, 20, 50, 150, 600],
+            "people-of-color": [7, 12, 20, 36, 58, 75],
+            "seniors": [17, 19, 21, 24, 27],
+            "education": [14, 19, 22, 27, 36, 45],
+        },
+        "housing": {
+            "default": [110000, 150000, 200000, 275000, 400000, 650000],
+            "rent-burden": [30, 40, 45, 50, 55, 58],
+            "vacancy": [8, 12, 16, 22, 30],
+            "pre-1940": [4, 7.5, 14, 23, 32],
+            "ownership": [62, 70, 75, 78, 82, 85],
+        },
+        "connectivity": {
+            "default": [6.5, 9, 11, 14, 18],
+            "no-vehicle": [3.5, 5, 6, 7.5, 10],
+            "work-from-home": [5.5, 7.5, 9.5, 12, 17],
+        },
+        "wellbeing": {
+            "default": [5, 6.5, 9, 12, 16],
+            "disability": [13, 15, 17, 20, 23],
+            "foreign-born": [1.25, 2, 4, 6.5, 12],
+            "income-pair": [45000, 60000, 70000, 80000, 95000],
+        },
+    },
+    "state": {
+        "income": {
+            "default": [55000, 65000, 75000, 85000, 95000, 105000],
+            "poverty": [10, 12, 14, 17, 22],
+            "snap": [8.5, 11, 12, 14, 16],
+            "unemployment": [3.5, 4.5, 5, 6, 6.5],
+        },
+        "people": {
+            "default": [5, 15, 40, 80, 150, 400],
+            "people-of-color": [18, 25, 35, 42, 55, 65],
+            "seniors": [17, 18, 19, 20, 21],
+            "education": [28, 32, 35, 38, 42, 45],
+        },
+        "housing": {
+            "default": [175000, 225000, 275000, 350000, 450000, 600000],
+            "rent-burden": [45, 48, 50, 52, 55, 58],
+            "vacancy": [8, 9.5, 12, 13, 15],
+            "pre-1940": [4, 8, 15, 19, 25],
+            "ownership": [60, 64, 67, 70, 72, 74],
+        },
+        "connectivity": {
+            "default": [5.5, 6, 7, 8, 10],
+            "no-vehicle": [5.5, 6, 7, 8.5, 11],
+            # No state reaches 25% transit (NY, 21.6%, is the maximum), so
+            # this is the one level that cannot carry the shared scale.
+            "transit-commute": [0.5, 1, 3, 8, 20],
+            "work-from-home": [9.5, 13, 16, 17, 19],
+        },
+        "wellbeing": {
+            "default": [5.5, 6.5, 8.5, 9.5, 11],
+            "disability": [12, 13, 14, 15, 18],
+            "foreign-born": [4.5, 6, 9.5, 15, 19],
+            # The two state distributions barely overlap — Black-household
+            # medians run 26k-84k, white non-Hispanic 44k-170k — and these
+            # five breaks are the set that leaves no class empty on either
+            # column while still being one shared scale.
+            "income-pair": [45000, 62500, 70000, 75000, 80000],
+        },
+    },
+    "zcta": {
+        "income": {
+            "default": [45000, 60000, 72000, 87000, 120000, 160000],
+            "poverty": [5, 9, 13, 19, 28],
+            "snap": [3, 7, 12, 17, 26],
+            "unemployment": [1, 3, 4.5, 6.5, 10],
+        },
+        "people": {
+            "default": [5, 20, 60, 200, 600, 2000],
+            "people-of-color": [2.5, 8, 17, 32, 62, 85],
+            "seniors": [14, 18, 21, 26, 35],
+            "education": [9, 17, 23, 32, 50, 65],
+        },
+        "housing": {
+            "default": [100000, 160000, 225000, 325000, 500000, 800000],
+            "rent-burden": [8.5, 34, 45, 55, 68, 88],
+            "vacancy": [4.5, 8.5, 14, 23, 38],
+            "pre-1940": [2, 7.5, 17, 29, 42],
+            "ownership": [52, 70, 78, 85, 92, 99],
+        },
+        "connectivity": {
+            "default": [3, 6, 9.5, 14, 22],
+            "no-vehicle": [0.75, 3, 5, 8, 13],
+            "work-from-home": [4, 8, 12, 17, 25],
+        },
+        "wellbeing": {
+            "default": [2.5, 4.5, 7.5, 11, 18],
+            "disability": [10, 13, 16, 20, 26],
+            "foreign-born": [0.25, 1.5, 4, 9.5, 20],
+            "income-pair": [50000, 65000, 80000, 100000, 130000],
+        },
+    },
+    "place": {
+        "income": {
+            "default": [40000, 55000, 67000, 84000, 115000, 150000],
+            "poverty": [5, 9, 14, 20, 30],
+            "snap": [2.5, 7.5, 13, 21, 32],
+            "unemployment": [0.5, 2.5, 4.5, 7.5, 12],
+        },
+        "people": {
+            "default": [50, 125, 250, 500, 1000, 2000],
+            "people-of-color": [1.5, 8.5, 17, 34, 68, 92],
+            "seniors": [13, 17, 21, 27, 38],
+            "education": [5, 14, 21, 30, 50, 65],
+        },
+        "housing": {
+            "default": [85000, 130000, 190000, 290000, 450000, 750000],
+            "rent-burden": [1, 32, 45, 55, 72, 99],
+            "vacancy": [3, 7.5, 13, 21, 36],
+            "pre-1940": [1, 7, 18, 32, 50],
+            "ownership": [50, 65, 75, 85, 97, 99],
+        },
+        "connectivity": {
+            "default": [2, 5.5, 9.5, 15, 24],
+            "no-vehicle": [0.5, 2.5, 5, 8.5, 14],
+            "work-from-home": [1.5, 5.5, 10, 16, 25],
+        },
+        "wellbeing": {
+            "default": [2, 4.5, 7.5, 12, 19],
+            "disability": [9.5, 13, 17, 22, 29],
+            "foreign-born": [0.25, 1, 3.5, 8.5, 19],
+            "income-pair": [50000, 60000, 75000, 100000, 130000],
+        },
+    },
+    "cd": {
+        "income": {
+            "default": [60000, 70000, 79000, 91000, 110000, 130000],
+            "poverty": [8, 10, 12, 15, 19],
+            "snap": [7.5, 10, 13, 15, 20],
+            "unemployment": [4, 5, 5.5, 6, 7],
+        },
+        "people": {
+            "default": [25, 75, 200, 600, 1500, 4000],
+            "people-of-color": [15, 29, 40, 52, 75, 85],
+            "seniors": [14, 16, 18, 20, 21],
+            "education": [23, 29, 34, 40, 50, 55],
+        },
+        "housing": {
+            "default": [185000, 250000, 335000, 450000, 650000, 900000],
+            "rent-burden": [45, 48, 50, 55, 58, 60],
+            "vacancy": [5.5, 8, 10, 13, 17],
+            "pre-1940": [3, 5.5, 11, 19, 29],
+            "ownership": [50, 62, 68, 72, 75, 78],
+        },
+        "connectivity": {
+            "default": [4, 5.5, 7, 8.5, 10],
+            "no-vehicle": [4.5, 5.5, 6.5, 8.5, 13],
+            "work-from-home": [10, 12, 15, 19, 23],
+        },
+        "wellbeing": {
+            "default": [5, 6.5, 8.5, 11, 14],
+            "disability": [11, 12, 14, 15, 17],
+            "foreign-born": [5, 8, 14, 22, 32],
+            "income-pair": [55000, 70000, 80000, 95000, 115000],
+        },
+    },
+}
+
+# (collection-id prefix, catalog group, the noun for one feature)
+WIDE_THEME_LEVELS = [
+    ("county", "counties", ("county", "counties")),
+    ("state", "states", ("state", "states and state equivalents")),
+    ("zcta", "zctas", ("ZCTA", "ZIP Code Tabulation Areas")),
+    ("place", "places", ("place", "places")),
+    ("cd", "congressional-districts", ("district", "districts")),
+]
+THEME_FNS = dict(BG_TRACT, wellbeing=wellbeing_styles)
+
+for _prefix, _group, _unit in WIDE_THEME_LEVELS:
+    for _theme, _fn in THEME_FNS.items():
+        _cid = f"{_prefix}-{_theme}"
+        _breaks = WIDE_THEME_BREAKS[_prefix][_theme]
+        STYLES[_cid] = (_fn(_breaks, unit=_unit[0]) if _theme == "wellbeing"
+                        else _fn(_breaks))
+        SOURCES[_cid] = (f"{_group}/{_cid}", f"{_cid}.parquet")
+        UNIT[_cid] = _unit
+
+# Outlines appear as soon as they can be seen, which is a property of the
+# geography, not of the collection: the coarse levels and their themed
+# children carry a few hundred to a few thousand polygons, so z4.
+COARSE_OUTLINES = {"states", "counties", "congressional-districts"} | {
+    f"{p}-{t}" for p, _, _ in WIDE_THEME_LEVELS
+    for t in THEME_FNS if p != "zcta" and p != "place"}
+
 
 # -- blocks: 2020 Decennial counts, 8.17M features --------------------------
 # Decennial counts are a complete enumeration, so there is no CV to fade.
@@ -715,8 +969,7 @@ def build_style(coll_id, s, stat):
     # Boundaries only once they can be seen: at national zoom 242k block-group
     # outlines are noise, and 8.2M block outlines are a gray sheet.
     zmin = 11 if coll_id == "blocks" else (
-        4 if coll_id in ("states", "counties", "congressional-districts")
-        else 8)
+        4 if coll_id in COARSE_OUTLINES else 8)
     layers.append({
         "id": "outline", "type": "line", "source": "data",
         "source-layer": coll_id, "minzoom": zmin,
@@ -779,7 +1032,14 @@ def main():
             sys.exit(f"✗ {coll_id}: not in docs/style-breaks.json — rerun "
                      f"with --measure")
         rec = m[coll_id]
-        d = CATALOG / SOURCES[coll_id][0] / "styles"
+        # SOURCES names the directory holding the DATA. A wide
+        # all-indicators table's collection.json (and styles/) moved into
+        # catalog/<group>/<group>/ in the 2026-11-15 restructure while its
+        # parquet and pmtiles stayed put, so its styles go one level down.
+        src_dir = SOURCES[coll_id][0]
+        if coll_id in specs.WIDE_IDS:
+            src_dir = f"{src_dir}/{coll_id}"
+        d = CATALOG / src_dir / "styles"
         if not d.parent.exists():
             sys.exit(f"✗ no collection dir: {d.parent}")
         d.mkdir(exist_ok=True)

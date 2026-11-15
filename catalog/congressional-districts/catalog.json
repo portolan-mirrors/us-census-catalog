@@ -1,0 +1,72 @@
+{
+  "type": "Catalog",
+  "id": "congressional-districts",
+  "stac_version": "1.1.0",
+  "title": "Congressional Districts (119th Congress)",
+  "description": "American Community Survey 2020–2024 5-year indicators for all 441 congressional districts of the **119th Congress** — the 435 voting districts, the District of Columbia delegate district, Puerto Rico's Resident Commissioner district and the four island-area delegate districts, which carry geometry and no ACS estimates. This is [the vintage the 2024 ACS release tabulates](https://www.census.gov/programs-surveys/acs/geography-acs/geography-boundaries-by-year/2024.html); district numbers are not stable across congresses, so these GEOIDs must not be joined to an earlier congress's districts of the same number. Six collections share these rows: [income](./cd-income/collection.json), [people](./cd-people/collection.json), [housing](./cd-housing/collection.json), [connectivity](./cd-connectivity/collection.json), [wellbeing](./cd-wellbeing/collection.json) and the wide 112-column [all indicators](./congressional-districts/collection.json) table, whose GeoParquet and PMTiles stay at `congressional-districts/congressional-districts.parquet` and `….pmtiles`. All six hold the same `geoid` and the same geometry and join 1:1. Districts are equal-population by construction (546,488–1,021,191 people across the 435 voting districts), so every rate's distribution is far tighter than at any other geography and the margins are the narrowest in this catalog. [data.census.gov](https://data.census.gov/) is authoritative.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Human-readable documentation"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "child",
+      "href": "./cd-income/collection.json",
+      "type": "application/json",
+      "title": "Income & Poverty — Congressional Districts (119th Congress)"
+    },
+    {
+      "rel": "child",
+      "href": "./cd-people/collection.json",
+      "type": "application/json",
+      "title": "People & Education — Congressional Districts (119th Congress)"
+    },
+    {
+      "rel": "child",
+      "href": "./cd-housing/collection.json",
+      "type": "application/json",
+      "title": "Housing & Rent — Congressional Districts (119th Congress)"
+    },
+    {
+      "rel": "child",
+      "href": "./cd-connectivity/collection.json",
+      "type": "application/json",
+      "title": "Commuting & Connectivity — Congressional Districts (119th Congress)"
+    },
+    {
+      "rel": "child",
+      "href": "./cd-wellbeing/collection.json",
+      "type": "application/json",
+      "title": "Health, Disability & Income by Race — Congressional Districts (119th Congress)"
+    },
+    {
+      "rel": "child",
+      "href": "./congressional-districts/collection.json",
+      "type": "application/json",
+      "title": "All Indicators — Congressional Districts (119th Congress)"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json"
+  ]
+}

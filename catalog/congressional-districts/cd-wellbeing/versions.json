@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:17.764873Z",
+      "breaking": false,
+      "assets": {
+        "cd-wellbeing.pmtiles": {
+          "sha256": "735ac6224b89aecc4a885f262cf28abd9aa622c128b2f666afe815b81e061a20",
+          "size_bytes": 12194733,
+          "href": "congressional-districts/cd-wellbeing/cd-wellbeing.pmtiles",
+          "mtime": 1794742631.2361665
+        },
+        "cd-wellbeing.parquet": {
+          "sha256": "c878696b6347e0f12c3238c3b9de711e13dbe0e4c47502859b69f4399d02263e",
+          "size_bytes": 8887888,
+          "href": "congressional-districts/cd-wellbeing/cd-wellbeing.parquet",
+          "source_mtime": 1794742545.7804413,
+          "mtime": 1794742545.7804413,
+          "feature_count": 441,
+          "schema_fingerprint": "9b93151a98bdb1ca"
+        },
+        "cd-wellbeing.thumb.jpg": {
+          "sha256": "f3a1b1f864b4b45360c4c0b7017b2574cb5464ff266eeed4d0ce2103ec132fe3",
+          "size_bytes": 2876,
+          "href": "congressional-districts/cd-wellbeing/cd-wellbeing.thumb.jpg",
+          "mtime": 1794743358.363402
+        }
+      },
+      "changes": [
+        "cd-wellbeing.pmtiles",
+        "cd-wellbeing.parquet",
+        "cd-wellbeing.thumb.jpg"
+      ]
+    }
+  ]
+}

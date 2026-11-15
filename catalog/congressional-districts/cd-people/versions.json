@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:14.737799Z",
+      "breaking": false,
+      "assets": {
+        "cd-people.parquet": {
+          "sha256": "24b76fbfe6822a430ed40cadedfe41fea5dab3abb58e19a8544351a37a438e14",
+          "size_bytes": 8875880,
+          "href": "congressional-districts/cd-people/cd-people.parquet",
+          "source_mtime": 1794742545.6547413,
+          "mtime": 1794742545.6547413,
+          "feature_count": 441,
+          "schema_fingerprint": "aa13af3e1bbb88cb"
+        },
+        "cd-people.pmtiles": {
+          "sha256": "790d8aeda82dcb75bef7eae59de270879b286d013d76ea1eb86419aa753f9c97",
+          "size_bytes": 10163995,
+          "href": "congressional-districts/cd-people/cd-people.pmtiles",
+          "mtime": 1794742630.154167
+        }
+      },
+      "changes": [
+        "cd-people.parquet",
+        "cd-people.pmtiles"
+      ]
+    }
+  ]
+}

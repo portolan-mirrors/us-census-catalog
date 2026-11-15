@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:54.522749Z",
+      "breaking": false,
+      "assets": {
+        "state-people.parquet": {
+          "sha256": "3ee2e25bbfc0e3d91fe8519b4ac4155f3a445bf35d5d09d16784d1714389849f",
+          "size_bytes": 4068829,
+          "href": "states/state-people/state-people.parquet",
+          "source_mtime": 1794742542.8000998,
+          "mtime": 1794742542.8000998,
+          "feature_count": 56,
+          "schema_fingerprint": "aa13af3e1bbb88cb"
+        },
+        "state-people.pmtiles": {
+          "sha256": "5b151f3296c30d61bfafd5c7fd79e162b8ed078cb2f3e971c4acb3ff82c35446",
+          "size_bytes": 1562518,
+          "href": "states/state-people/state-people.pmtiles",
+          "mtime": 1794742627.485113
+        }
+      },
+      "changes": [
+        "state-people.parquet",
+        "state-people.pmtiles"
+      ]
+    }
+  ]
+}

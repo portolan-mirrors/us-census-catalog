@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:15.529876Z",
+      "breaking": false,
+      "assets": {
+        "cd-housing.parquet": {
+          "sha256": "0ce140367d18bbd715f47275fea137431eb324697601e6485081c8d346bc0b5f",
+          "size_bytes": 8882514,
+          "href": "congressional-districts/cd-housing/cd-housing.parquet",
+          "source_mtime": 1794742545.6966822,
+          "mtime": 1794742545.6966822,
+          "feature_count": 441,
+          "schema_fingerprint": "b18041770030df74"
+        },
+        "cd-housing.pmtiles": {
+          "sha256": "ff920ae465dc5716940d8e94f345a2df02af51bfa08454c0044e67cc4871c1da",
+          "size_bytes": 11385789,
+          "href": "congressional-districts/cd-housing/cd-housing.pmtiles",
+          "mtime": 1794742630.7122715
+        }
+      },
+      "changes": [
+        "cd-housing.parquet",
+        "cd-housing.pmtiles"
+      ]
+    }
+  ]
+}

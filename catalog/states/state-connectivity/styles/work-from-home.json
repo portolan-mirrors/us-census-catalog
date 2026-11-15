@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Work from home",
+  "metadata": {
+    "description": "Share of workers whose usual commute is none \u2014 they worked from home \u2014 pale lilac to deep purple. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at 9.5%/13%/16%/17%/19%, which fall at the 17th/46th/69th/79th/92nd percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_work_from_home",
+    "portolan:breaks": [
+      9.5,
+      13,
+      16,
+      17,
+      19
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../state-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_work_from_home"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "filter": [
+        "has",
+        "pct_work_from_home"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_work_from_home"
+          ],
+          "#f2f0f7",
+          9.5,
+          "#dadaeb",
+          13,
+          "#bcbddc",
+          16,
+          "#9e9ac8",
+          17,
+          "#756bb1",
+          19,
+          "#54278f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

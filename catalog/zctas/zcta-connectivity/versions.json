@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:00.907518Z",
+      "breaking": false,
+      "assets": {
+        "zcta-connectivity.pmtiles": {
+          "sha256": "44b2b864c65a423a02af1e4b420cefb1a50318f108408bad207481cea36054ce",
+          "size_bytes": 216372393,
+          "href": "zctas/zcta-connectivity/zcta-connectivity.pmtiles",
+          "mtime": 1794742717.613718
+        },
+        "zcta-connectivity.parquet": {
+          "sha256": "b8035988380e5dc68b5ecd7bdb404f40861232dcd129e8d92cfe4aef6de9b3c5",
+          "size_bytes": 69643472,
+          "href": "zctas/zcta-connectivity/zcta-connectivity.parquet",
+          "source_mtime": 1794742544.2601202,
+          "mtime": 1794742544.2601202,
+          "feature_count": 33791,
+          "schema_fingerprint": "67a3aea3ccaa6ab9"
+        },
+        "zcta-connectivity.thumb.jpg": {
+          "sha256": "c23d20c088d9012acdf6dc614e60cb5ff7ea571d8c8f7d5ade66fcb4bdbe01c0",
+          "size_bytes": 2910,
+          "href": "zctas/zcta-connectivity/zcta-connectivity.thumb.jpg",
+          "mtime": 1794743344.0306957
+        }
+      },
+      "changes": [
+        "zcta-connectivity.pmtiles",
+        "zcta-connectivity.parquet",
+        "zcta-connectivity.thumb.jpg"
+      ]
+    }
+  ]
+}

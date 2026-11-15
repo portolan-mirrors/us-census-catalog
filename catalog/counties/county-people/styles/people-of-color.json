@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "People of color",
+  "metadata": {
+    "description": "Share of residents who are not non-Hispanic white alone, pale blue through violet to deep purple. Measured over all 3,222 counties with a published value: 7 classes with breaks at 7%/12%/20%/36%/58%/75%, which fall at the 10th/31st/49th/70th/88th/95th percentile of the national distribution.",
+    "portolan:column": "pct_people_of_color",
+    "portolan:breaks": [
+      7,
+      12,
+      20,
+      36,
+      58,
+      75
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-people",
+      "filter": [
+        "has",
+        "pct_people_of_color"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_people_of_color"
+          ],
+          "#e8eff6",
+          7,
+          "#bfd3e6",
+          12,
+          "#9ebcda",
+          20,
+          "#8c96c6",
+          36,
+          "#8c6bb1",
+          58,
+          "#88419d",
+          75,
+          "#6e016b"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-people",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

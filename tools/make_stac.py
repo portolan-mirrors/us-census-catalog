@@ -70,6 +70,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import collection_meta as meta  # noqa: E402
 import column_docs as cd  # noqa: E402
+import specs  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "catalog"
@@ -278,9 +279,26 @@ def duck_type(t: str) -> str:
     return t.lower()
 
 
+def data_dir(cid: str) -> Path:
+    """Directory holding the collection's parquet and pmtiles.
+
+    That is the collection's own directory, except for a wide
+    all-indicators table (specs.WIDE_IDS): its collection.json moved into
+    a subdirectory in the 2026-11-15 group restructure, but its data
+    files stay one level up so every published data URL keeps working.
+    """
+    d = CATALOG / meta.COLL_REL[cid]
+    return d.parent if cid in specs.WIDE_IDS else d
+
+
+def data_prefix(cid: str) -> str:
+    """Relative href prefix from collection.json to the data files."""
+    return "../" if cid in specs.WIDE_IDS else "./"
+
+
 def data_source(cid: str) -> str:
     """The SQL FROM target for a collection's data, or '' if absent."""
-    d = CATALOG / meta.COLL_REL[cid]
+    d = data_dir(cid)
     if cid == "blocks":
         parts = sorted(d.glob("state_fips=*/*.parquet"))
         if not parts:
@@ -380,7 +398,8 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     coll["license"] = meta.LICENSE
     coll["keywords"] = meta.keywords(cid)
 
-    has_pmtiles = (coll_dir / f"{cid}.pmtiles").exists()
+    has_pmtiles = (data_dir(cid) / f"{cid}.pmtiles").exists()
+    dpre = data_prefix(cid)
     ext = set(coll.get("stac_extensions", []))
     ext.update({portolan_schema(), FILE_EXT, TABLE_EXT, THEMES_EXT})
     if has_pmtiles:
@@ -426,9 +445,7 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
         pq_glob = str(CATALOG / "blocks" / "state_fips=*" / "*.parquet")
         ext_sql = "bbox.xmin < 0"
     else:
-        pq_path = (CATALOG / meta.GROUP_OF[cid] / cid / f"{cid}.parquet"
-                   if cid in meta.GROUP_OF
-                   else CATALOG / cid / f"{cid}.parquet")
+        pq_path = data_dir(cid) / f"{cid}.parquet"
         if pq_path.exists():
             pq_glob = str(pq_path)
             # western hemisphere + rows that carry ACS estimates
@@ -496,7 +513,7 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
                     "ACS 2020–2024 5-year table-based Summary File "
                     "(source data)")
     if has_pmtiles:
-        ensure_link(links, "pmtiles", f"./{cid}.pmtiles", PMTILES_TYPE,
+        ensure_link(links, "pmtiles", f"{dpre}{cid}.pmtiles", PMTILES_TYPE,
                     f"{meta.TITLES[cid]} (vector tiles)",
                     **{"pmtiles:layers": [cid]})
     # A human-clickable way into the interactive map from any STAC client.
@@ -519,9 +536,17 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     # GeoParquet, tiles live under <cid>-tiles.
     if assets.get(cid, {}).get("href", "").endswith(".pmtiles"):
         assets[f"{cid}-tiles"] = assets.pop(cid)
-    if (coll_dir / f"{cid}.parquet").exists() and not any(
-            a.get("href", "") == f"./{cid}.parquet" for a in assets.values()):
-        assets[cid] = {"href": f"./{cid}.parquet"}
+    # A wide table's collection.json moved into a subdirectory while its
+    # data files stayed put: repoint any same-dir data hrefs one level up.
+    if dpre == "../":
+        for a in assets.values():
+            if a.get("href", "") in (f"./{cid}.parquet", f"./{cid}.pmtiles",
+                                     f"./items.parquet"):
+                a["href"] = "../" + a["href"][2:]
+    if (data_dir(cid) / f"{cid}.parquet").exists() and not any(
+            a.get("href", "") == f"{dpre}{cid}.parquet"
+            for a in assets.values()):
+        assets[cid] = {"href": f"{dpre}{cid}.parquet"}
         assets.move_to_end(cid, last=False) if hasattr(assets, "move_to_end") \
             else None
 
@@ -540,7 +565,7 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     if has_pmtiles and not any(
             a.get("href", "").endswith(".pmtiles") for a in assets.values()):
         assets[f"{cid}-tiles"] = {
-            "href": f"./{cid}.pmtiles", "type": PMTILES_TYPE,
+            "href": f"{dpre}{cid}.pmtiles", "type": PMTILES_TYPE,
             "roles": ["visual"], "title": f"{meta.TITLES[cid]} (PMTiles)",
             "pmtiles:layers": [cid]}
     if (coll_dir / "thumbnail.png").exists():

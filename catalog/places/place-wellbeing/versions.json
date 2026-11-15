@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:13.149410Z",
+      "breaking": false,
+      "assets": {
+        "place-wellbeing.parquet": {
+          "sha256": "4a9440ef5879817dce4dea2fbb0aa8eb9eaa75339eb23bd29723f4acad72b570",
+          "size_bytes": 29180009,
+          "href": "places/place-wellbeing/place-wellbeing.parquet",
+          "source_mtime": 1794742545.528882,
+          "mtime": 1794742545.528882,
+          "feature_count": 32612,
+          "schema_fingerprint": "3199ee27232d9e6c"
+        },
+        "place-wellbeing.pmtiles": {
+          "sha256": "8eccf6f6f2a2033394e5de65c5604df5635165c296c89d34f3f7b3449132f6aa",
+          "size_bytes": 94463907,
+          "href": "places/place-wellbeing/place-wellbeing.pmtiles",
+          "mtime": 1794742732.1893241
+        }
+      },
+      "changes": [
+        "place-wellbeing.parquet",
+        "place-wellbeing.pmtiles"
+      ]
+    }
+  ]
+}

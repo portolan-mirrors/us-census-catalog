@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:53.777350Z",
+      "breaking": false,
+      "assets": {
+        "state-income.parquet": {
+          "sha256": "f5ae06a7b8c1b86eea661ac9123ae13e7dc775c4b23ca17f90e9af6fb201fd2b",
+          "size_bytes": 4067811,
+          "href": "states/state-income/state-income.parquet",
+          "source_mtime": 1794742542.7579715,
+          "mtime": 1794742542.7579715,
+          "feature_count": 56,
+          "schema_fingerprint": "1c257b0d313f3770"
+        },
+        "state-income.pmtiles": {
+          "sha256": "5ab539259cf4ce5622e82284809677973ee665f615d14438cb7658a00b045239",
+          "size_bytes": 1497675,
+          "href": "states/state-income/state-income.pmtiles",
+          "mtime": 1794742627.2133276
+        }
+      },
+      "changes": [
+        "state-income.parquet",
+        "state-income.pmtiles"
+      ]
+    }
+  ]
+}

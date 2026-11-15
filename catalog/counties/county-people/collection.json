@@ -1,0 +1,484 @@
+{
+  "type": "Collection",
+  "id": "counties/county-people",
+  "stac_version": "1.1.0",
+  "description": "Who lives here: median age and the shares under 18 and 65 or over ([B01002](https://data.census.gov/table/ACSDT5Y2024.B01002), [B01001](https://data.census.gov/table/ACSDT5Y2024.B01001)), the four mutually exclusive non-Hispanic race shares this catalog carries — White, Black or African American, American Indian and Alaska Native, Asian — plus Hispanic or Latino of any race and its complement, people of color ([B03002](https://data.census.gov/table/ACSDT5Y2024.B03002)), and the share of adults 25 and over holding a bachelor's degree or higher ([B15003](https://data.census.gov/table/ACSDT5Y2024.B15003)).\n\nCurated indicators for all **3,235** counties and county equivalents in the United States, Puerto Rico and the island areas, from the U.S. Census Bureau's [American Community Survey](https://www.census.gov/programs-surveys/acs.html) **2020–2024 5-year estimates** (`acsdt5y2024`, the table-based [Summary File](https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/)). The Census Bureau calls the ACS \"the premier source of detailed information about the nation's people and housing\". The Bureau also publishes 1-year estimates at this geography; the 5-year release is used throughout this catalog so every geography in it is the same vintage and directly comparable.\n\nEvery estimate ships with its margin of error — `<column>_moe`, at the 90% confidence level, the level the Census Bureau publishes — and the headline statistics also carry a coefficient of variation (`<column>_cv` = `moe / 1.645 / estimate`) so small-area noise can be flagged rather than mapped as if certain. Derived percentages propagate error with the Census Bureau's own formulas from [ACS Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf): sums add in quadrature, proportions use the subset formula with the ratio formula as fallback. ACS jam values for suppressed or unestimable cells are NULL here, never numbers, and medians are published as the Bureau publishes them — a median cannot be aggregated to a larger area. Each column's description names its ACS table, its exact universe, and the lines summed to make it.\n\nCounties are the coarsest geography most questions are actually asked at, and the most reliable in this catalog below state level: the median coefficient of variation on `median_hh_income` is **0.042** here against 0.125 at tract level (measured). One context column breaks the catalog's own rule — `population_moe` is NULL on **3,103 of the 3,235 rows**, only 132 small rural counties carrying a margin on `population` — so read `population` here as a count to use rather than an estimate to put an interval on. Nothing in this chunk is suppressed beyond the island areas: every column is NULL on exactly the **0.40%** of rows (13 county equivalents) that have boundaries and no ACS tabulation.\n\nGeometries are the Census Bureau's [2024 cartographic boundary files](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) for counties and county equivalents (GENZ2024, 1:500,000), reprojected to EPSG:4326 and joined on `GEOID`. Cartographic rather than TIGER/Line because TIGER extends census geographies into open water while the cartographic files clip to the shoreline, which is what a choropleth wants. The boundary vintage matches the estimate vintage.\n\nThe join is driven by geometry, so a geography with 2024 boundaries but no ACS tabulation keeps its row with NULL values instead of disappearing: 13 county equivalents in the island areas, which have cartographic boundaries but no ACS 5-year estimates because the Island Areas run a separate decennial-only program. Keeping these rows means a national map has no holes and a consumer can see the absence; dropping them would make \"every US geography\" quietly mean something narrower.\n\nThis is one themed chunk of six at this geography. The other themes are [Income & Poverty](../county-income/collection.json), [Housing & Rent](../county-housing/collection.json), [Commuting & Connectivity](../county-connectivity/collection.json) and [Health, Disability & Income by Race](../county-wellbeing/collection.json), split that way so a consumer who wants one theme reads one file. Chunks at the same geography hold the same rows and the same geometry, so they join 1:1 on `geoid`. A sixth collection, [All Indicators](../counties/collection.json), carries all 112 columns on the same rows in one wide table — at this many features width costs little, so take that one if a question crosses themes. GEOIDs nest by prefix: `substr(geoid, 1, 2)` is the state, and tracts and block groups join back on their own first 5 characters. Every other geography in this catalog is organized the same way — [block groups](../../block-groups/catalog.json), [census tracts](../../tracts/catalog.json), [states](../../states/catalog.json), [ZCTAs](../../zctas/catalog.json), [places and CDPs](../../places/catalog.json) and [congressional districts](../../congressional-districts/catalog.json) — and the [blocks](../../blocks/collection.json) collection carries 2020 Decennial counts, a different survey and vintage rather than a finer version of these numbers.\n\nThe PMTiles archive carries the same columns as the GeoParquet, minus the `*_moe` columns, and at every zoom the tiles are the real census geographies — there are few enough features here to draw them all at a national zoom, so this archive needs none of the coarser-geography coarse-zoom bands the catalog's finer collections carry. Built with [tylertoo](https://github.com/geoparquet-io/tylertoo). Statistics still come from the GeoParquet: margins of error are not in the tiles.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Counties"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./county-people.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "People & Education — Counties (vector tiles)",
+      "pmtiles:layers": [
+        "county-people"
+      ]
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/counties/county-people/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "MultiPolygon",
+  "geoparquet:feature_count": 3235,
+  "title": "People & Education — Counties",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.146711,
+          17.88329,
+          -65.221081,
+          71.387815
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-01-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "county-people-tiles": {
+      "href": "./county-people.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 19596578,
+      "file:checksum": "1220602c1b1ccfa4cc354267ea52e43339ef2ade9e17908cdc98b6aa0a268cd666b9",
+      "roles": [
+        "data"
+      ],
+      "title": "People & Education — Counties (PMTiles)",
+      "pmtiles:layers": [
+        "county-people"
+      ]
+    },
+    "county-people": {
+      "href": "./county-people.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "People & Education — Counties (GeoParquet, national)",
+      "file:size": 12917841,
+      "file:checksum": "12200d8b537d0b274330ff6494731223fa88df38384b95f2a7c80ebf58aad1cb108a"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Population density",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "People per square kilometre of land area on roughly logarithmic steps, pale cream (empty) to deep plum (dense). Measured over all 3,222 counties with a published value: 7 classes with breaks at 2/8/20/50/150/600 people per km², which fall at the 12th/29th/53rd/74th/87th/97th percentile of the national distribution.",
+      "file:size": 1875,
+      "file:checksum": "122042ba61b405b13e27dd291f6693b3bc4f5833e06f7075967e2bc9dace2775487e"
+    },
+    "styles/education": {
+      "href": "./styles/education.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Bachelor's degree or higher",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of adults 25 and over holding a bachelor's degree or more, pale aqua to deep teal. Measured over all 3,222 counties with a published value: 7 classes with breaks at 14%/19%/22%/27%/36%/45%, which fall at the 9th/32nd/49th/69th/87th/95th percentile of the national distribution.",
+      "file:size": 1867,
+      "file:checksum": "1220d2903bce1807d32066aa85fe673a328f5244f18d1f9ed531812f9ae417fe30d0"
+    },
+    "styles/people-of-color": {
+      "href": "./styles/people-of-color.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "People of color",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents who are not non-Hispanic white alone, pale blue through violet to deep purple. Measured over all 3,222 counties with a published value: 7 classes with breaks at 7%/12%/20%/36%/58%/75%, which fall at the 10th/31st/49th/70th/88th/95th percentile of the national distribution.",
+      "file:size": 1865,
+      "file:checksum": "1220f69ab35d75d17f5f3de6d390d30660225a0c50cd4d19b92a1548e5369c0fa95b"
+    },
+    "styles/seniors": {
+      "href": "./styles/seniors.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Residents 65 and over",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents aged 65 or older, pale apricot to burnt orange. Measured over all 3,222 counties with a published value: 6 classes with breaks at 17%/19%/21%/24%/27%, which fall at the 22nd/39th/59th/80th/91st percentile of the national distribution.",
+      "file:size": 1765,
+      "file:checksum": "1220c6e2970bd6e9fdedd1d39139d4cd679b2e36d161c67f45b81ca7a9eae1c5cf25"
+    },
+    "source-b01001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01001 — Sex by Age",
+      "description": "The upstream file this collection's B01001 columns were read from: one pipe-delimited row per geography, estimate (`B01001_E###`) and margin of error (`B01001_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01001](https://data.census.gov/table/ACSDT5Y2024.B01001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 200356282,
+      "file:checksum": "12201637b18a96881b81e050df1cd3d5ac38a33208b9b69b40e1dbeb3c4e13718f0e"
+    },
+    "source-b01002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01002 — Median Age by Sex",
+      "description": "The upstream file this collection's B01002 columns were read from: one pipe-delimited row per geography, estimate (`B01002_E###`) and margin of error (`B01002_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01002](https://data.census.gov/table/ACSDT5Y2024.B01002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 26666521,
+      "file:checksum": "122004784637609550868d9da7321e7a947b34e0a10b654dbf6d344599f97f8de7f8"
+    },
+    "source-b01003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01003 — Total Population",
+      "description": "The upstream file this collection's B01003 columns were read from: one pipe-delimited row per geography, estimate (`B01003_E###`) and margin of error (`B01003_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18313708,
+      "file:checksum": "122038d1a992bb058d184009b10b9b34987279aee575e4323165cfb5706c69b6ca90"
+    },
+    "source-b03002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b03002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B03002 — Hispanic or Latino Origin by Race",
+      "description": "The upstream file this collection's B03002 columns were read from: one pipe-delimited row per geography, estimate (`B03002_E###`) and margin of error (`B03002_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 83256772,
+      "file:checksum": "1220ef1a9310905393bf477820de8edb2935c1e9bdb356be65b5ee5fb6fceda911c1"
+    },
+    "source-b15003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b15003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B15003 — Educational Attainment for the Population 25 Years and Over",
+      "description": "The upstream file this collection's B15003 columns were read from: one pipe-delimited row per geography, estimate (`B15003_E###`) and margin of error (`B15003_M###`) side by side, for every summary level in one national file. Universe: Population 25 years and over. Served by census.gov, not by this mirror; see [B15003](https://data.census.gov/table/ACSDT5Y2024.B15003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 92292840,
+      "file:checksum": "1220d0c8609e958022459215c8a31d7452ef7528ee8dd70fbb6f9a99de0f491f42d7"
+    },
+    "source-table-shells": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 5-year table shells",
+      "description": "`Table ID|Line|Indent|Unique ID|Label|Title|Universe|Type` for every table in the release. Two jobs here: every line number the build reads is pinned against this file and a vintage that renumbers a line fails the build, and every universe quoted in the column descriptions is this file's own `Universe` field. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 5622840,
+      "file:checksum": "12205b46f4af873744a415c4974204010db976e2a61ff916674732f81c496a6b517d"
+    },
+    "source-cartographic-boundaries": {
+      "href": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_county_500k.zip",
+      "type": "application/zip",
+      "title": "2024 cartographic boundary file — counties and county equivalents (1:500,000, national)",
+      "description": "The geometry this collection joins onto, shoreline-clipped and generalized for mapping. Only the join key, the name parts and the land-area field are kept; reprojected from NAD83 to EPSG:4326 with ogr2ogr. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 11626066,
+      "file:checksum": "1220da4051717caec55c75e3748c3608c2a3dbde8d1ff401bbaf4f952e3c3fb63ef1"
+    },
+    "doc-acs-handbook": {
+      "href": "https://www.census.gov/programs-surveys/acs/library/handbooks/general.html",
+      "type": "text/html",
+      "title": "Understanding and Using American Community Survey Data — Census Bureau handbooks",
+      "description": "The Bureau's own guidance on what ACS estimates can and cannot support: 1-year versus 5-year releases, margins of error, comparing across vintages, and small-area reliability. Read it before drawing a conclusion from a single block group.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-accuracy": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf",
+      "type": "application/pdf",
+      "title": "ACS Accuracy of the Data (2024, multiyear estimates)",
+      "description": "The source of every margin-of-error formula this build applies: quadrature for sums, the proportion formula and its ratio fallback for percentages, and the definition of the published 90% confidence level.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 387987,
+      "file:checksum": "12204d3258202e02828c55e95312573f48c83e2fee26f5967fcf817c273b154741ad"
+    },
+    "doc-acs-subject-definitions": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf",
+      "type": "application/pdf",
+      "title": "ACS 2024 Subject Definitions",
+      "description": "The Census Bureau's definitions of the concepts behind these columns — household, householder, gross rent, poverty status determined, group quarters, means of transportation to work, disability. Where a column description here says what a universe is, this is the document it is saying it from.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1170567,
+      "file:checksum": "12206e0c5b1a5d3ebf7e300e583ac6424cbd5f09de50d69e7ef03aa6d070d9c4a7a8"
+    },
+    "doc-geo-glossary": {
+      "href": "https://www.census.gov/programs-surveys/geography/about/glossary.html",
+      "type": "text/html",
+      "title": "Census Bureau geography program glossary",
+      "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "ACS",
+    "American Community Survey",
+    "demographics",
+    "United States",
+    "margins of error",
+    "age",
+    "race",
+    "ethnicity",
+    "education",
+    "equity",
+    "counties"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/acs.html",
+      "concepts": [
+        {
+          "id": "acs5",
+          "title": "American Community Survey 5-year estimates"
+        }
+      ]
+    }
+  ],
+  "table:row_count": 3235,
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "5-character county (or county-equivalent) GEOID — state (2) + county (3), e.g. `29510` for St. Louis city. Includes Puerto Rico municipios and the island-area county equivalents. Matches `GEOID` in the 2024 cartographic boundary county file; the ACS `0500000US` prefix is stripped."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Human-readable name from the cartographic boundary county file: `NAMELSAD`, `STATE_NAME` — \"St. Louis city, Missouri\"."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Two-letter USPS state or territory code (`MO`, `PR`, `GU`). Carried on every collection from the `STATEFP → USPS` lookup embedded in `tools/specs.py` rather than read off the boundary files, because the 2024 cartographic boundary block-group file has no `STUSPS` column while the tract, county and state files do."
+    },
+    {
+      "name": "population",
+      "type": "int64",
+      "description": "Total population. Universe: total population. The single line of [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) (Total Population), published as an integer. Carried on every ACS collection so a rate can be weighted or sanity-checked without a second download. NULL on 0.40% of counties — the 13 island-area county equivalents (AS 5, GU 1, MP 4, VI 3), which have cartographic boundaries but no ACS 5-year estimates."
+    },
+    {
+      "name": "population_moe",
+      "type": "double",
+      "description": "Margin of error for `population` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND / 1e6` from the cartographic boundary file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+    },
+    {
+      "name": "pop_density",
+      "type": "double",
+      "description": "People per square kilometre of land area, rounded to 1 decimal: `population / aland_sqkm`. NULL where `ALAND` is 0 or `population` is NULL."
+    },
+    {
+      "name": "median_age",
+      "type": "double",
+      "description": "Median age in years. Universe: total population. Line 1 of [B01002](https://data.census.gov/table/ACSDT5Y2024.B01002) (Median Age by Sex); the male and female medians on lines 2 and 3 are not published here. Like every median, not aggregable."
+    },
+    {
+      "name": "median_age_moe",
+      "type": "double",
+      "description": "Margin of error for `median_age` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "pct_under_18",
+      "type": "double",
+      "description": "Percent of the population under 18 years old. Universe: total population. The under-18 lines of [B01001](https://data.census.gov/table/ACSDT5Y2024.B01001) (Sex by Age) over line 1. The components are resolved from the table shells by label — \"Under 5 years\", \"5 to 9 years\", \"10 to 14 years\", \"15 to 17 years\", once per sex, 8 lines for this vintage — so a renumbered line fails the build instead of silently shifting."
+    },
+    {
+      "name": "pct_under_18_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_under_18` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_65_plus",
+      "type": "double",
+      "description": "Percent of the population 65 years and over. Universe: total population. The 65-and-over lines of [B01001](https://data.census.gov/table/ACSDT5Y2024.B01001) over line 1, resolved from the shells by label (\"65 and 66 years\" through \"85 years and over\", once per sex, 12 lines for this vintage)."
+    },
+    {
+      "name": "pct_65_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_65_plus` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_white_nh",
+      "type": "double",
+      "description": "Percent of the population that is White alone and not Hispanic or Latino. Universe: total population. Line 3 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1 — line 3 sits under line 2, \"Not Hispanic or Latino\", so this is the non-Hispanic branch."
+    },
+    {
+      "name": "pct_white_nh_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_white_nh` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_black",
+      "type": "double",
+      "description": "Percent of the population that is Black or African American alone and not Hispanic or Latino. Universe: total population. Line 4 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1 (the \"Not Hispanic or Latino\" branch, so this share and `pct_hispanic` do not overlap)."
+    },
+    {
+      "name": "pct_black_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_black` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_native",
+      "type": "double",
+      "description": "Percent of the population that is American Indian and Alaska Native alone and not Hispanic or Latino. Universe: total population. Line 5 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1. Small everywhere outside Indian Country and reservations, and at block-group scale usually within its own margin of error."
+    },
+    {
+      "name": "pct_native_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_native` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_asian",
+      "type": "double",
+      "description": "Percent of the population that is Asian alone and not Hispanic or Latino. Universe: total population. Line 6 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1."
+    },
+    {
+      "name": "pct_asian_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_asian` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_hispanic",
+      "type": "double",
+      "description": "Percent of the population that is Hispanic or Latino, of any race. Universe: total population. Line 12 of [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) over line 1. Hispanic origin is asked separately from race, which is why this crosses every race category; here it is disjoint from the five race shares because those are all drawn from the non-Hispanic branch."
+    },
+    {
+      "name": "pct_hispanic_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_hispanic` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_people_of_color",
+      "type": "double",
+      "description": "Percent of the population that is **not** White-alone non-Hispanic: `100 − pct_white_nh`. Universe: total population. Derived from [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002). A complement, so it carries `pct_white_nh`'s own margin of error unchanged — a share and its complement have the same sampling error."
+    },
+    {
+      "name": "pct_people_of_color_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_people_of_color` at the 90% confidence level, the level the Census Bureau publishes. A complement carries the margin of error of the share it was taken from, unchanged — `100 − p` has the same sampling error as `p`."
+    },
+    {
+      "name": "pct_bachelors_plus",
+      "type": "double",
+      "description": "Percent of adults 25 and over whose highest attainment is a bachelor's degree or more. Universe: population 25 years and over. Lines 22–25 of [B15003](https://data.census.gov/table/ACSDT5Y2024.B15003) (Bachelor's, Master's, Professional school, Doctorate) over line 1. Associate's degrees (line 21) are deliberately excluded."
+    },
+    {
+      "name": "pct_bachelors_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_bachelors_plus` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2024 cartographic boundary county file (GENZ2024, 1:500,000), which clips to the shoreline — TIGER/Line would extend the county into open water. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z"
+}

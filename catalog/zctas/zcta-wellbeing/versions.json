@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:49:04.972734Z",
+      "breaking": false,
+      "assets": {
+        "zcta-wellbeing.parquet": {
+          "sha256": "20863dec9ec6fb9a456bbf17c1777a450ee2386205339d623ca8308139ea4f2a",
+          "size_bytes": 69676429,
+          "href": "zctas/zcta-wellbeing/zcta-wellbeing.parquet",
+          "source_mtime": 1794742544.6182945,
+          "mtime": 1794742544.6182945,
+          "feature_count": 33791,
+          "schema_fingerprint": "cbba51da74619446"
+        },
+        "zcta-wellbeing.pmtiles": {
+          "sha256": "72da0b7f6fa071afb89b7674cd83513678b909084a5ecbb6254c28b6ed763c65",
+          "size_bytes": 219943389,
+          "href": "zctas/zcta-wellbeing/zcta-wellbeing.pmtiles",
+          "mtime": 1794742728.2322352
+        }
+      },
+      "changes": [
+        "zcta-wellbeing.parquet",
+        "zcta-wellbeing.pmtiles"
+      ]
+    }
+  ]
+}

@@ -1,32 +1,56 @@
 # US Census Demographics — Cloud-Native Mirror
 
 > Nationwide U.S. Census Bureau statistics as GeoParquet + PMTiles with STAC
-> metadata: ACS 2020–2024 5-year indicators at block group (~242k), tract
-> (~85k), county (3,235) and state level, plus 2020 Decennial Census counts
-> for all 8,174,955 census blocks. Every ACS estimate carries its margin of
-> error (`*_moe`, 90% confidence); headline statistics carry a reliability
-> coefficient of variation (`*_cv`). CC0-1.0; data.census.gov is the
-> authoritative source.
+> metadata: ACS 2020–2024 5-year indicators at block group (242,298), tract
+> (85,184), county (3,235), state (56), ZCTA (33,791), place (32,612) and
+> congressional district (441, 119th Congress) level, plus 2020 Decennial
+> Census counts for all 8,174,955 census blocks. Every ACS estimate carries
+> its margin of error (`*_moe`, 90% confidence); headline statistics carry a
+> reliability coefficient of variation (`*_cv`). CC0-1.0; data.census.gov is
+> the authoritative source.
 
 Base URL: https://data.source.coop/portolan-mirrors/us-census-catalog/
 
 Read [AGENTS.md](https://data.source.coop/portolan-mirrors/us-census-catalog/AGENTS.md)
-first: join keys (GEOIDs nest by prefix: state 2 / county 5 / tract 11 /
-block group 12 / block 15 chars), MOE math, and the quirks that produce
-silently wrong answers. Each collection has its own AGENTS.md with tested
-queries and a README.md documenting every column.
+first: join keys (GEOIDs nest by prefix: state 2 / congressional district 4 /
+county 5 / ZCTA 5 / place 7 / tract 11 / block group 12 / block 15 chars),
+MOE math, and the quirks that produce silently wrong answers. Each geography
+is a sub-catalog with its own AGENTS.md, and each collection has one too,
+with tested queries and a README.md documenting every column.
 
-## Collections (collection.json beside each; data asset named)
+## Shape: seven geographies, five themes
 
-- Block groups (finest geography with income), themed chunks:
-  - block-groups/bg-income/bg-income.parquet — median household & per-capita income, poverty, SNAP, unemployment
-  - block-groups/bg-people/bg-people.parquet — age, race/ethnicity, education, density
-  - block-groups/bg-housing/bg-housing.parquet — tenure, rent, home value, rent burden, vacancy, stock age
-  - block-groups/bg-connectivity/bg-connectivity.parquet — vehicles, commute, internet, computer
-- Tracts, same four chunks plus:
-  - tracts/tract-wellbeing/tract-wellbeing.parquet — health insurance, disability, foreign-born, income & poverty by race
-- counties/counties.parquet and states/states.parquet — all ~35 indicators in one wide table
-- blocks/state_fips=*/<fips>.parquet — 2020 P.L. 94-171 block counts, hive-partitioned by state FIPS
+Every ACS geography is a sub-catalog of themed collections, and the themes are
+the same everywhere — income, people, housing, connectivity, wellbeing — so
+one theme is one file of 23–34 columns instead of 112.
+
+- block-groups/bg-{income,people,housing,connectivity} — no wellbeing chunk:
+  health insurance, disability, nativity and income by race are not published
+  below tract
+- tracts/tract-{income,people,housing,connectivity,wellbeing}
+- counties/county-{income,people,housing,connectivity,wellbeing} + counties
+- states/state-{…} + states
+- zctas/zcta-{…} + zctas
+- places/place-{…} + places
+- congressional-districts/cd-{…} + congressional-districts
+- blocks/state_fips=*/<fips>.parquet — 2020 P.L. 94-171 block counts,
+  hive-partitioned by state FIPS
+
+The five coarse-or-sparse geographies add a sixth collection carrying all 112
+columns on the same rows, for a question that crosses themes.
+
+## Data URLs (the wide tables differ)
+
+    <base>/<group>/<cid>/<cid>.parquet    every themed chunk, e.g.
+                                          counties/county-income/county-income.parquet
+    <base>/<group>/<group>.parquet        the five wide tables, e.g.
+                                          counties/counties.parquet
+
+A wide table's collection.json, README.md and styles/ live in
+`<group>/<group>/`, but its GeoParquet and PMTiles stayed one directory up, so
+every published data URL keeps working. `counties/counties/counties.parquet`
+is a 404. PMTiles sit beside each parquet with the same stem, and the vector
+layer name is always the collection id.
 
 ## Query patterns (DuckDB)
 
@@ -35,10 +59,19 @@ INSTALL spatial; LOAD spatial; INSTALL httpfs; LOAD httpfs;
 SELECT state, median(median_hh_income) FROM
 'https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet'
 GROUP BY 1 ORDER BY 2 DESC;
+-- one theme at a coarse geography (23-34 columns instead of 112):
+SELECT geoid, name, median_hh_income FROM
+'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/county-income/county-income.parquet'
+WHERE state = 'CA' ORDER BY median_hh_income DESC LIMIT 5;
+-- every column of one row, from the wide table (note: no second directory):
+SELECT * EXCLUDE (geometry, bbox) FROM
+'https://data.source.coop/portolan-mirrors/us-census-catalog/counties/counties.parquet'
+WHERE geoid = '06075';
 -- one state's blocks via hive partition (name columns; SELECT * returns raw WKB):
 SELECT geoid, pop_total, housing_units FROM
 'https://data.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=29/29.parquet' LIMIT 5;
--- join chunks 1:1 on geoid; roll blocks up to block groups with substr(geoid,1,12).
+-- chunks at one geography join 1:1 on geoid; roll blocks up to block groups
+-- with substr(geoid,1,12); reach a row's state with substr(geoid,1,2).
 -- all 52 block partitions as one table needs object listing, so use the S3 endpoint
 -- (anonymous) — a state_fips=*/*.parquet glob over https://data.source.coop/ returns 404:
 SET s3_region='us-west-2';
@@ -49,10 +82,15 @@ hive_partitioning=true);
 -- WHERE bbox.xmin < east AND bbox.xmax > west AND bbox.ymin < north AND bbox.ymax > south
 
 Treat `*_cv` > 0.40 as unreliable; never sum medians across geographies; MOEs
-add in quadrature. PMTiles coarse zooms are a coarser census geography, not
-the collection's own — counties at z0–z5, tracts in the middle, carrying the
-Census Bureau's own estimates for those geographies — so use the GeoParquet
-for statistics and check the zoom before reading a tiled feature as a block
-group, tract, ZCTA or place.
+add in quadrature. ZCTAs nest in nothing and `state` is NULL on all 33,791
+rows, so a prefix join from a ZCTA returns wrong rows rather than no rows;
+places do not tile the country and must never be summed to a total;
+congressional districts are the 119th Congress and are not comparable to an
+earlier one. PMTiles coarse zooms are a coarser census geography, not the
+collection's own — counties at z0–z5, tracts in the middle, carrying the
+Census Bureau's own estimates for those geographies — except at county, state
+and congressional-district level, which are real polygons at every zoom. Use
+the GeoParquet for statistics and check the zoom before reading a tiled
+feature as a block group, tract, ZCTA or place.
 
 Source repository: https://github.com/portolan-mirrors/us-census-catalog

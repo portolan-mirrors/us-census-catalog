@@ -1,0 +1,106 @@
+{
+  "version": 8,
+  "name": "Commute by public transit",
+  "metadata": {
+    "description": "Share of workers commuting by public transportation, pale yellow to dark green; the first class is deliberately narrow because most of the country has effectively none. Measured over all 32,798 ZIP Code Tabulation Areas with a published value: 6 classes with breaks at 0.5%/2%/5%/10%/25%, which fall at the 73rd/87th/94th/97th/99th percentile of the national distribution. 32.38% have a coefficient of variation above 0.3 and render faded \u2014 the estimate is real but its margin of error swamps it.",
+    "portolan:column": "pct_commute_transit",
+    "portolan:breaks": [
+      0.5,
+      2,
+      5,
+      10,
+      25
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-connectivity",
+      "filter": [
+        "has",
+        "pct_commute_transit"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_commute_transit"
+          ],
+          "#f2f7b0",
+          0.5,
+          "#d9f0a3",
+          2,
+          "#addd8e",
+          5,
+          "#78c679",
+          10,
+          "#31a354",
+          25,
+          "#006837"
+        ],
+        "fill-opacity": [
+          "case",
+          [
+            ">",
+            [
+              "coalesce",
+              [
+                "get",
+                "pct_commute_transit_cv"
+              ],
+              0
+            ],
+            0.3
+          ],
+          0.35,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-connectivity",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

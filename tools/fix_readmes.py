@@ -67,10 +67,16 @@ def nav_line(rel: str, cid: str | None) -> str:
                 f"[Source repository]({GH}) · "
                 f"[Agent guide]({SC}{'/' + rel if rel else ''}/AGENTS.md) · "
                 f"[STAC root]({DATA}/catalog.json)\n")
-    parquet = (f"{DATA}/{rel}/state_fips=01/01.parquet"
-               if cid == "blocks" else f"{DATA}/{rel}/{cid}.parquet")
-    parquet_label = ("Download one state's GeoParquet (AL)"
-                     if cid == "blocks" else "Download the GeoParquet")
+    if cid == "blocks":
+        parquet = f"{DATA}/{rel}/state_fips=01/01.parquet"
+        parquet_label = "Download one state's GeoParquet (AL)"
+    else:
+        # A wide all-indicators table's parquet lives one level above its
+        # collection.json (the group restructure kept data URLs stable).
+        data_rel = rel if (CATALOG / rel / f"{cid}.parquet").exists() \
+            else rel.rsplit("/", 1)[0]
+        parquet = f"{DATA}/{data_rel}/{cid}.parquet"
+        parquet_label = "Download the GeoParquet"
     return (f"**[🗺️ Open in the data browser]({BROWSER}/{rel}/"
             f"collection.json)** · [{parquet_label}]({parquet}) · "
             f"[Agent guide]({SC}/{rel}/AGENTS.md) · "
@@ -99,18 +105,28 @@ def main() -> None:
         rel = "" if rel == "." else rel
         text = readme.read_text()
 
-        # Strip the generator's wrong prefixes so absolutize() resolves
-        # each link from the README's own directory: the root README
-        # prefixes children with `catalog/`, and a group README prefixes
-        # its children with the group's own directory (sometimes doubled).
-        if rel == "":
-            while "](catalog/" in text:
-                text = text.replace("](catalog/", "](")
-        if rel in ("block-groups", "tracts"):
-            while f"]({rel}/" in text:
-                text = text.replace(f"]({rel}/", "](")
-        text = re.sub(r"### \[(?:block-groups|tracts)/([a-z-]+)\]",
-                      r"### [\1]", text)
+        # The generator writes child links with wrong leading prefixes
+        # (`catalog/` on the root README, the group's own directory on a
+        # group README — doubled since the wide tables moved into
+        # same-named subdirectories). Blind prefix-stripping over-strips
+        # the wide child (`counties/counties/` must become `counties/`,
+        # not ``), so instead drop leading path segments until the target
+        # actually exists relative to the README's own directory.
+        def localize(m: re.Match) -> str:
+            target = m.group(1)
+            if target.startswith(("http://", "https://", "#", "mailto:")):
+                return m.group(0)
+            if (readme.parent / target.split("#")[0].rstrip("/")).exists():
+                return m.group(0)
+            parts = target.split("/")
+            for i in range(1, len(parts)):
+                cand = "/".join(parts[i:])
+                p = cand.split("#")[0].rstrip("/")
+                if p and (readme.parent / p).exists():
+                    return f"]({cand})"
+            return m.group(0)
+        text = LINK.sub(localize, text)
+        text = re.sub(r"### \[(?:[a-z-]+/)+([a-z-]+)\]", r"### [\1]", text)
 
         cid = None
         if (readme.parent / "collection.json").exists():

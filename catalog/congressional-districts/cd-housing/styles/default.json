@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Median home value",
+  "metadata": {
+    "description": "Median value of owner-occupied homes, pale amber to burnt brown. Measured over all 437 districts with a published value: 7 classes with breaks at $185k/$250k/$335k/$450k/$650k/$900k, which fall at the 10th/33rd/50th/71st/86th/96th percentile of the national distribution.",
+    "portolan:column": "median_home_value",
+    "portolan:breaks": [
+      185000,
+      250000,
+      335000,
+      450000,
+      650000,
+      900000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-housing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-housing",
+      "filter": [
+        "has",
+        "median_home_value"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_home_value"
+          ],
+          "#fff3c0",
+          185000,
+          "#fee391",
+          250000,
+          "#fec44f",
+          335000,
+          "#fe9929",
+          450000,
+          "#ec7014",
+          650000,
+          "#cc4c02",
+          900000,
+          "#8c2d04"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-housing",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

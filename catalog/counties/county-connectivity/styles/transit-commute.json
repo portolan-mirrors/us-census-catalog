@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Commute by public transit",
+  "metadata": {
+    "description": "Share of workers commuting by public transportation, pale yellow to dark green; the first class is deliberately narrow because most of the country has effectively none. Measured over all 3,222 counties with a published value: 6 classes with breaks at 0.5%/2%/5%/10%/25%, which fall at the 72nd/94th/98th/99th/100th percentile of the national distribution. 58.69% of counties have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_commute_transit_moe in the GeoParquet before drawing a conclusion from any single county.",
+    "portolan:column": "pct_commute_transit",
+    "portolan:breaks": [
+      0.5,
+      2,
+      5,
+      10,
+      25
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../county-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "county-connectivity",
+      "filter": [
+        "has",
+        "pct_commute_transit"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_commute_transit"
+          ],
+          "#f2f7b0",
+          0.5,
+          "#d9f0a3",
+          2,
+          "#addd8e",
+          5,
+          "#78c679",
+          10,
+          "#31a354",
+          25,
+          "#006837"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "county-connectivity",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

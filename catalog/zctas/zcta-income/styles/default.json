@@ -1,0 +1,126 @@
+{
+  "version": 8,
+  "name": "Median household income",
+  "metadata": {
+    "description": "Median household income, viridis dark purple (low) through teal and green to yellow (high). Measured over all 30,547 ZIP Code Tabulation Areas with a published value: 7 classes with breaks at $45k/$60k/$72k/$87k/$120k/$160k, which fall at the 9th/29th/50th/70th/90th/97th percentile of the national distribution. 9.6% have no published value and draw in neutral gray rather than as a low value. 9.97% have a coefficient of variation above 0.3 and render faded \u2014 the estimate is real but its margin of error swamps it.",
+    "portolan:column": "median_hh_income",
+    "portolan:breaks": [
+      45000,
+      60000,
+      72000,
+      87000,
+      120000,
+      160000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-income",
+      "filter": [
+        "!",
+        [
+          "has",
+          "median_hh_income"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-income",
+      "filter": [
+        "has",
+        "median_hh_income"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_hh_income"
+          ],
+          "#440154",
+          45000,
+          "#443983",
+          60000,
+          "#31688e",
+          72000,
+          "#21918c",
+          87000,
+          "#35b779",
+          120000,
+          "#90d743",
+          160000,
+          "#fde725"
+        ],
+        "fill-opacity": [
+          "case",
+          [
+            ">",
+            [
+              "coalesce",
+              [
+                "get",
+                "median_hh_income_cv"
+              ],
+              0
+            ],
+            0.3
+          ],
+          0.35,
+          0.8
+        ]
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-income",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

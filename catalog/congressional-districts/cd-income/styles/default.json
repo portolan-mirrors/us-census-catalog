@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Median household income",
+  "metadata": {
+    "description": "Median household income, viridis dark purple (low) through teal and green to yellow (high). Measured over all 437 districts with a published value: 7 classes with breaks at $60k/$70k/$79k/$91k/$110k/$130k, which fall at the 8th/29th/51st/70th/88th/95th percentile of the national distribution.",
+    "portolan:column": "median_hh_income",
+    "portolan:breaks": [
+      60000,
+      70000,
+      79000,
+      91000,
+      110000,
+      130000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../cd-income.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "cd-income",
+      "filter": [
+        "has",
+        "median_hh_income"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_hh_income"
+          ],
+          "#440154",
+          60000,
+          "#443983",
+          70000,
+          "#31688e",
+          79000,
+          "#21918c",
+          91000,
+          "#35b779",
+          110000,
+          "#90d743",
+          130000,
+          "#fde725"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "cd-income",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

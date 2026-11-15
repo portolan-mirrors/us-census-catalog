@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "No home internet",
+  "metadata": {
+    "description": "Share of households with no internet subscription of any kind, pale to deep blue. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at 5.5%/6%/7%/8%/10%, which fall at the 23rd/35th/60th/79th/88th percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+    "portolan:column": "pct_no_internet",
+    "portolan:breaks": [
+      5.5,
+      6,
+      7,
+      8,
+      10
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../state-connectivity.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "filter": [
+        "!",
+        [
+          "has",
+          "pct_no_internet"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "filter": [
+        "has",
+        "pct_no_internet"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_no_internet"
+          ],
+          "#ebf4fb",
+          5.5,
+          "#d0d1e6",
+          6,
+          "#a6bddb",
+          7,
+          "#74a9cf",
+          8,
+          "#2b8cbe",
+          10,
+          "#045a8d"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "state-connectivity",
+      "minzoom": 4,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.2,
+          9,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          0.0,
+          6,
+          0.45
+        ]
+      }
+    }
+  ]
+}

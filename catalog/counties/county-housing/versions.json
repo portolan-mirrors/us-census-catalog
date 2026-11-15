@@ -1,0 +1,39 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:50.257713Z",
+      "breaking": false,
+      "assets": {
+        "county-housing.pmtiles": {
+          "sha256": "6df5ff0ff070df5bf70d92f02e287e4bc88cb25e3508767952f17329636d5e32",
+          "size_bytes": 22733425,
+          "href": "counties/county-housing/county-housing.pmtiles",
+          "mtime": 1794742626.5919518
+        },
+        "county-housing.parquet": {
+          "sha256": "1112ad0fd37885aaf8cf2db6e4b3ca214aa4c30fd922d77b664e4cd1b154e5be",
+          "size_bytes": 13008455,
+          "href": "counties/county-housing/county-housing.parquet",
+          "source_mtime": 1794742542.5257146,
+          "mtime": 1794742542.5257146,
+          "feature_count": 3235,
+          "schema_fingerprint": "b18041770030df74"
+        },
+        "county-housing.thumb.jpg": {
+          "sha256": "aa149853ad3b527ae4389cbe2d3b95b91fb13a59d65788e70032d00416355c38",
+          "size_bytes": 2684,
+          "href": "counties/county-housing/county-housing.thumb.jpg",
+          "mtime": 1794743331.2800968
+        }
+      },
+      "changes": [
+        "county-housing.pmtiles",
+        "county-housing.parquet",
+        "county-housing.thumb.jpg"
+      ]
+    }
+  ]
+}

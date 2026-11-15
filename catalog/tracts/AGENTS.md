@@ -30,7 +30,7 @@ plus a fifth that has no block-group twin:
 | collection | theme | headline columns |
 |---|---|---|
 | [tract-income](tract-income/collection.json) ([agent guide](tract-income/AGENTS.md)) | Income & Poverty | `median_hh_income`, `per_capita_income`, `pct_below_poverty`, `pct_snap`, `pct_unemployed` |
-| [tract-people](tract-people/collection.json) ([agent guide](tract-people/AGENTS.md)) | People & Education | `median_age`, `pct_under_18`, `pct_65_plus`, the five non-Hispanic race shares, `pct_hispanic`, `pct_bachelors_plus` |
+| [tract-people](tract-people/collection.json) ([agent guide](tract-people/AGENTS.md)) | People & Education | `median_age`, `pct_under_18`, `pct_65_plus`, the four non-Hispanic race shares, `pct_hispanic`, `pct_bachelors_plus` |
 | [tract-housing](tract-housing/collection.json) ([agent guide](tract-housing/AGENTS.md)) | Housing & Rent | `housing_units`, `households`, `pct_owner_occupied`, `median_gross_rent`, `median_home_value`, `pct_rent_burdened` |
 | [tract-connectivity](tract-connectivity/collection.json) ([agent guide](tract-connectivity/AGENTS.md)) | Commuting & Connectivity | `hh_no_vehicle`, the B08301 commute-mode shares, `pct_commute_45min_plus`, `pct_no_internet`, `pct_no_computer` |
 | [tract-wellbeing](tract-wellbeing/collection.json) ([agent guide](tract-wellbeing/AGENTS.md)) | Health, Disability & Income by Race | `pct_uninsured`, `pct_with_disability`, `pct_foreign_born`, `group_quarters_pop`, `median_hh_income_{black,white_nh,asian,hispanic}`, `pct_below_poverty_black` |
@@ -112,9 +112,11 @@ against **0.202** at block group, and 1.5% of tract medians are over the 0.40
   [states](../states/AGENTS.md)** when the answer will be quoted as a single
   number, or when a race-iteration median is the subject:
   `median_hh_income_black` is NULL on 61.43% of tracts against 39.47% of
-  counties, and `median_hh_income_asian` on 71.27% against 53.63%. Those
-  collections carry all 112 columns in one wide table, so no chunk join is
-  needed.
+  counties, and `median_hh_income_asian` on 71.27% against 53.63%. Both
+  geographies carry the same five themed chunks as this one — so
+  `county-wellbeing` is the direct step up from `tract-wellbeing` — plus a
+  sixth collection holding all 112 columns at once, for a question that
+  crosses themes with no chunk join at all.
 - **[Blocks](../blocks/AGENTS.md)** carry 2020 Decennial counts only — a
   different survey and vintage, not a finer version of these numbers.
 
@@ -160,6 +162,11 @@ against **0.202** at block group, and 1.5% of tract medians are over the 0.40
   [tract-wellbeing](tract-wellbeing/AGENTS.md).
 - Density against car ownership and transit, and other cross-collection
   showcases: [catalog AGENTS.md](../AGENTS.md).
+- The same five themes at a coarser geography, each with a sixth wide
+  all-indicator table beside them: [counties](../counties/AGENTS.md),
+  [states](../states/AGENTS.md), [ZCTAs](../zctas/AGENTS.md),
+  [places](../places/AGENTS.md),
+  [congressional districts](../congressional-districts/AGENTS.md).
 
 ## License
 

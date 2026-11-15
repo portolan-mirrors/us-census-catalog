@@ -241,15 +241,53 @@ COLLECTIONS = [
     Collection("tracts", "tract-housing", "tract", HOUSING_SPEC),
     Collection("tracts", "tract-connectivity", "tract", CONNECTIVITY_SPEC),
     Collection("tracts", "tract-wellbeing", "tract", WELLBEING_SPEC),
-    Collection(None, "counties", "county", ALL_SPEC),
-    Collection(None, "states", "state", ALL_SPEC),
-    # Wave 3. Three more coarse-or-sparse levels that the ACS publishes the
-    # whole column set for, each one wide table for the same reason counties
-    # and states are: nobody wants a themed chunk of 33,000 ZIP code areas.
-    Collection(None, "zctas", "zcta", ALL_SPEC),
-    Collection(None, "places", "place", ALL_SPEC),
-    Collection(None, "congressional-districts", "cd", ALL_SPEC),
+    # Every coarse-or-sparse level is a group too (2026-11-15): the five
+    # themed chunks mirror the tract set so the whole catalog reads
+    # uniformly, and the original wide table stays as a sixth child. The
+    # wide table keeps its id and its data files: the parquet and pmtiles
+    # stay one directory up (catalog/<group>/<id>.parquet), referenced
+    # from the moved collection.json with ../ hrefs, so every published
+    # data URL keeps working.
+    Collection("counties", "county-income", "county", INCOME_SPEC),
+    Collection("counties", "county-people", "county", PEOPLE_SPEC),
+    Collection("counties", "county-housing", "county", HOUSING_SPEC),
+    Collection("counties", "county-connectivity", "county", CONNECTIVITY_SPEC),
+    Collection("counties", "county-wellbeing", "county", WELLBEING_SPEC),
+    Collection("counties", "counties", "county", ALL_SPEC),
+    Collection("states", "state-income", "state", INCOME_SPEC),
+    Collection("states", "state-people", "state", PEOPLE_SPEC),
+    Collection("states", "state-housing", "state", HOUSING_SPEC),
+    Collection("states", "state-connectivity", "state", CONNECTIVITY_SPEC),
+    Collection("states", "state-wellbeing", "state", WELLBEING_SPEC),
+    Collection("states", "states", "state", ALL_SPEC),
+    Collection("zctas", "zcta-income", "zcta", INCOME_SPEC),
+    Collection("zctas", "zcta-people", "zcta", PEOPLE_SPEC),
+    Collection("zctas", "zcta-housing", "zcta", HOUSING_SPEC),
+    Collection("zctas", "zcta-connectivity", "zcta", CONNECTIVITY_SPEC),
+    Collection("zctas", "zcta-wellbeing", "zcta", WELLBEING_SPEC),
+    Collection("zctas", "zctas", "zcta", ALL_SPEC),
+    Collection("places", "place-income", "place", INCOME_SPEC),
+    Collection("places", "place-people", "place", PEOPLE_SPEC),
+    Collection("places", "place-housing", "place", HOUSING_SPEC),
+    Collection("places", "place-connectivity", "place", CONNECTIVITY_SPEC),
+    Collection("places", "place-wellbeing", "place", WELLBEING_SPEC),
+    Collection("places", "places", "place", ALL_SPEC),
+    Collection("congressional-districts", "cd-income", "cd", INCOME_SPEC),
+    Collection("congressional-districts", "cd-people", "cd", PEOPLE_SPEC),
+    Collection("congressional-districts", "cd-housing", "cd", HOUSING_SPEC),
+    Collection("congressional-districts", "cd-connectivity", "cd",
+               CONNECTIVITY_SPEC),
+    Collection("congressional-districts", "cd-wellbeing", "cd",
+               WELLBEING_SPEC),
+    Collection("congressional-districts", "congressional-districts", "cd",
+               ALL_SPEC),
 ]
+
+# The wide all-indicator tables: one per coarse level, same id as its group
+# directory. Their collection.json lives in catalog/<group>/<id>/ but their
+# parquet and pmtiles stay in catalog/<group>/, so published data URLs
+# survive the 2026-11-15 restructure.
+WIDE_IDS = {c.id for c in COLLECTIONS if c.group == c.id}
 
 
 # --------------------------------------------------------------------------

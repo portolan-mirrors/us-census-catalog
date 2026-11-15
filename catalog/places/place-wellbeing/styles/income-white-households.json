@@ -1,0 +1,107 @@
+{
+  "version": 8,
+  "name": "Median income, white non-Hispanic households",
+  "metadata": {
+    "description": "Median household income for white, non-Hispanic householders (ACS table B19013H), on the same scale as the Black-household style. Measured over all 26,865 places with a published value: 6 classes with breaks at $50k/$60k/$75k/$100k/$130k, which fall at the 17th/33rd/56th/79th/91st percentile of the national distribution. Same breaks, ramp and opacity rule as the Black-household style \u2014 neither fades its noisy estimates, because fading only one of the pair would make the gap look like a difference in confidence. 17.62% have no published value and draw in neutral gray rather than as a low value. 17.34% of places have a coefficient of variation above 0.3; this style does not fade them, so read median_hh_income_white_nh_moe in the GeoParquet before drawing a conclusion from any single place.",
+    "portolan:column": "median_hh_income_white_nh",
+    "portolan:breaks": [
+      50000,
+      60000,
+      75000,
+      100000,
+      130000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../place-wellbeing.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-wellbeing",
+      "filter": [
+        "!",
+        [
+          "has",
+          "median_hh_income_white_nh"
+        ]
+      ],
+      "paint": {
+        "fill-color": "#d9d6d2",
+        "fill-opacity": 0.55
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "place-wellbeing",
+      "filter": [
+        "has",
+        "median_hh_income_white_nh"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "median_hh_income_white_nh"
+          ],
+          "#00224e",
+          50000,
+          "#35456c",
+          60000,
+          "#666970",
+          75000,
+          "#958f5f",
+          100000,
+          "#cab969",
+          130000,
+          "#fee838"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "place-wellbeing",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

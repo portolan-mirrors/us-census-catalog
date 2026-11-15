@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T11:48:37.770067Z",
+      "breaking": false,
+      "assets": {
+        "county-income.parquet": {
+          "sha256": "53260d3ee75e952f67843588a2218905ecebfd5997d046c313ae710219bb3dac",
+          "size_bytes": 12933717,
+          "href": "counties/county-income/county-income.parquet",
+          "source_mtime": 1794742542.3626263,
+          "mtime": 1794742542.3626263,
+          "feature_count": 3235,
+          "schema_fingerprint": "1c257b0d313f3770"
+        },
+        "county-income.pmtiles": {
+          "sha256": "73db7592d57a9a06fc7a0cbc2d7bec209776fa1b67b5daf23819489db832021a",
+          "size_bytes": 18879994,
+          "href": "counties/county-income/county-income.pmtiles",
+          "mtime": 1794742626.561092
+        }
+      },
+      "changes": [
+        "county-income.parquet",
+        "county-income.pmtiles"
+      ]
+    }
+  ]
+}

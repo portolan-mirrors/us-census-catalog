@@ -1,5 +1,5 @@
 {
- "measured": "2026-11-12",
+ "measured": "2026-11-15",
  "method": "DuckDB over each collection's GeoParquet (the whole national file, not a sample). quantile_cont on non-null values; class counts are exact counts of features falling in each step class of the published style. Regenerate with python3 tools/make_styles.py --measure.",
  "collections": {
   "bg-income": {
@@ -3935,6 +3935,6001 @@
       14.42,
       9.84,
       4.35
+     ],
+     "noisy_cv_pct": 0.0
+    }
+   }
+  },
+  "county-income": {
+   "source": "catalog/counties/county-income/county-income.parquet",
+   "rows": 3235,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_hh_income",
+    "median_hh_income_moe",
+    "median_hh_income_cv",
+    "per_capita_income",
+    "per_capita_income_moe",
+    "pct_below_poverty",
+    "pct_below_poverty_moe",
+    "pct_below_poverty_cv",
+    "pct_below_2x_poverty",
+    "pct_below_2x_poverty_moe",
+    "pct_snap",
+    "pct_snap_moe",
+    "pct_unemployed",
+    "pct_unemployed_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_hh_income": {
+     "n_non_null": 3221,
+     "null_pct": 0.43,
+     "min": 16314.0,
+     "max": 181765.0,
+     "quantiles": {
+      "p2": 28553.600000000002,
+      "p5": 40900.0,
+      "p10": 46875.0,
+      "p20": 53275.0,
+      "p30": 58044.0,
+      "p40": 61479.0,
+      "p50": 65346.0,
+      "p60": 68642.0,
+      "p70": 73064.0,
+      "p80": 78548.0,
+      "p90": 89168.0,
+      "p95": 101087.0,
+      "p98": 116247.8
+     },
+     "breaks": [
+      45000,
+      55000,
+      65000,
+      75000,
+      90000,
+      110000
+     ],
+     "class_counts": [
+      259,
+      490,
+      838,
+      794,
+      542,
+      202,
+      96
+     ],
+     "class_pct": [
+      8.04,
+      15.21,
+      26.02,
+      24.65,
+      16.83,
+      6.27,
+      2.98
+     ],
+     "noisy_cv_pct": 0.25
+    },
+    "pct_below_poverty": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 1.42,
+     "max": 63.65,
+     "quantiles": {
+      "p2": 5.23,
+      "p5": 6.6,
+      "p10": 7.721,
+      "p20": 9.302000000000001,
+      "p30": 10.79,
+      "p40": 12.06,
+      "p50": 13.35,
+      "p60": 14.93,
+      "p70": 16.75,
+      "p80": 19.09,
+      "p90": 22.968999999999998,
+      "p95": 28.146999999999988,
+      "p98": 38.8658
+     },
+     "breaks": [
+      8,
+      11,
+      14,
+      18,
+      25
+     ],
+     "class_counts": [
+      361,
+      639,
+      758,
+      692,
+      542,
+      230
+     ],
+     "class_pct": [
+      11.2,
+      19.83,
+      23.53,
+      21.48,
+      16.82,
+      7.14
+     ],
+     "noisy_cv_pct": 2.39
+    },
+    "pct_snap": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 67.6,
+     "quantiles": {
+      "p2": 2.7942,
+      "p5": 4.1305,
+      "p10": 5.231000000000001,
+      "p20": 7.222,
+      "p30": 8.75,
+      "p40": 10.32,
+      "p50": 11.934999999999999,
+      "p60": 13.655999999999999,
+      "p70": 15.43,
+      "p80": 18.168000000000003,
+      "p90": 22.809,
+      "p95": 28.339499999999997,
+      "p98": 47.20399999999998
+     },
+     "breaks": [
+      7,
+      10,
+      14,
+      17,
+      24
+     ],
+     "class_counts": [
+      606,
+      615,
+      778,
+      469,
+      485,
+      269
+     ],
+     "class_pct": [
+      18.81,
+      19.09,
+      24.15,
+      14.56,
+      15.05,
+      8.35
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_unemployed": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 28.63,
+     "quantiles": {
+      "p2": 0.6484,
+      "p5": 1.451,
+      "p10": 2.1610000000000005,
+      "p20": 2.9620000000000006,
+      "p30": 3.49,
+      "p40": 3.97,
+      "p50": 4.45,
+      "p60": 4.915999999999999,
+      "p70": 5.43,
+      "p80": 6.208000000000002,
+      "p90": 7.64,
+      "p95": 9.47,
+      "p98": 12.197399999999998
+     },
+     "breaks": [
+      3,
+      4,
+      5,
+      6,
+      8
+     ],
+     "class_counts": [
+      661,
+      643,
+      675,
+      538,
+      421,
+      284
+     ],
+     "class_pct": [
+      20.52,
+      19.96,
+      20.95,
+      16.7,
+      13.07,
+      8.81
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "county-people": {
+   "source": "catalog/counties/county-people/county-people.parquet",
+   "rows": 3235,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_age",
+    "median_age_moe",
+    "pct_under_18",
+    "pct_under_18_moe",
+    "pct_65_plus",
+    "pct_65_plus_moe",
+    "pct_white_nh",
+    "pct_white_nh_moe",
+    "pct_black",
+    "pct_black_moe",
+    "pct_native",
+    "pct_native_moe",
+    "pct_asian",
+    "pct_asian_moe",
+    "pct_hispanic",
+    "pct_hispanic_moe",
+    "pct_people_of_color",
+    "pct_people_of_color_moe",
+    "pct_bachelors_plus",
+    "pct_bachelors_plus_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pop_density": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 27767.0,
+     "quantiles": {
+      "p2": 0.4,
+      "p5": 0.8,
+      "p10": 1.6,
+      "p20": 4.6,
+      "p30": 8.4,
+      "p40": 12.5,
+      "p50": 18.0,
+      "p60": 25.65999999999999,
+      "p70": 39.1,
+      "p80": 73.96000000000004,
+      "p90": 202.02000000000015,
+      "p95": 430.8749999999999,
+      "p98": 893.39
+     },
+     "breaks": [
+      2,
+      8,
+      20,
+      50,
+      150,
+      600
+     ],
+     "class_counts": [
+      373,
+      548,
+      797,
+      676,
+      415,
+      304,
+      109
+     ],
+     "class_pct": [
+      11.58,
+      17.01,
+      24.74,
+      20.98,
+      12.88,
+      9.44,
+      3.38
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_people_of_color": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 4.6642,
+      "p5": 5.78,
+      "p10": 6.901000000000001,
+      "p20": 8.882000000000001,
+      "p30": 11.58,
+      "p40": 15.274000000000001,
+      "p50": 20.31,
+      "p60": 26.901999999999997,
+      "p70": 35.67099999999999,
+      "p80": 45.1,
+      "p90": 61.274,
+      "p95": 74.88799999999996,
+      "p98": 98.87219999999999
+     },
+     "breaks": [
+      7,
+      12,
+      20,
+      36,
+      58,
+      75
+     ],
+     "class_counts": [
+      337,
+      668,
+      587,
+      677,
+      577,
+      215,
+      161
+     ],
+     "class_pct": [
+      10.46,
+      20.73,
+      18.22,
+      21.01,
+      17.91,
+      6.67,
+      5.0
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_65_plus": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 4.47,
+     "max": 81.82,
+     "quantiles": {
+      "p2": 11.6294,
+      "p5": 13.1805,
+      "p10": 14.79,
+      "p20": 16.67,
+      "p30": 17.99,
+      "p40": 19.04,
+      "p50": 20.09,
+      "p60": 21.05,
+      "p70": 22.33,
+      "p80": 23.96,
+      "p90": 26.659000000000002,
+      "p95": 29.338999999999995,
+      "p98": 32.70799999999999
+     },
+     "breaks": [
+      17,
+      19,
+      21,
+      24,
+      27
+     ],
+     "class_counts": [
+      717,
+      553,
+      643,
+      666,
+      347,
+      296
+     ],
+     "class_pct": [
+      22.25,
+      17.16,
+      19.96,
+      20.67,
+      10.77,
+      9.19
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_bachelors_plus": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 80.53,
+     "quantiles": {
+      "p2": 10.771,
+      "p5": 12.6105,
+      "p10": 14.352,
+      "p20": 16.56,
+      "p30": 18.523,
+      "p40": 20.4,
+      "p50": 22.305,
+      "p60": 24.55,
+      "p70": 27.457,
+      "p80": 31.672000000000008,
+      "p90": 38.65,
+      "p95": 45.63799999999999,
+      "p98": 53.1316
+     },
+     "breaks": [
+      14,
+      19,
+      22,
+      27,
+      36,
+      45
+     ],
+     "class_counts": [
+      290,
+      751,
+      528,
+      641,
+      581,
+      259,
+      172
+     ],
+     "class_pct": [
+      9.0,
+      23.31,
+      16.39,
+      19.89,
+      18.03,
+      8.04,
+      5.34
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "county-housing": {
+   "source": "catalog/counties/county-housing/county-housing.parquet",
+   "rows": 3235,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "housing_units",
+    "housing_units_moe",
+    "pct_vacant_units",
+    "pct_vacant_units_moe",
+    "households",
+    "households_moe",
+    "pct_owner_occupied",
+    "pct_owner_occupied_moe",
+    "median_gross_rent",
+    "median_gross_rent_moe",
+    "median_gross_rent_cv",
+    "pct_rent_burdened",
+    "pct_rent_burdened_moe",
+    "pct_rent_burdened_cv",
+    "pct_severely_rent_burdened",
+    "pct_severely_rent_burdened_moe",
+    "median_home_value",
+    "median_home_value_moe",
+    "median_home_value_cv",
+    "pct_built_pre_1940",
+    "pct_built_pre_1940_moe",
+    "pct_single_family",
+    "pct_single_family_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_home_value": {
+     "n_non_null": 3217,
+     "null_pct": 0.56,
+     "min": 48600.0,
+     "max": 1633900.0,
+     "quantiles": {
+      "p2": 82432.0,
+      "p5": 94680.0,
+      "p10": 106560.0,
+      "p20": 125100.0,
+      "p30": 150300.0,
+      "p40": 164200.0,
+      "p50": 182300.0,
+      "p60": 211760.0,
+      "p70": 241500.0,
+      "p80": 296900.0,
+      "p90": 388100.00000000006,
+      "p95": 471700.0,
+      "p98": 654259.9999999997
+     },
+     "breaks": [
+      110000,
+      150000,
+      200000,
+      275000,
+      400000,
+      650000
+     ],
+     "class_counts": [
+      366,
+      593,
+      854,
+      648,
+      469,
+      220,
+      67
+     ],
+     "class_pct": [
+      11.38,
+      18.43,
+      26.55,
+      20.14,
+      14.58,
+      6.84,
+      2.08
+     ],
+     "noisy_cv_pct": 0.5
+    },
+    "pct_rent_burdened": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 18.9572,
+      "p5": 25.762500000000003,
+      "p10": 30.9,
+      "p20": 36.49,
+      "p30": 40.193,
+      "p40": 42.54,
+      "p50": 44.825,
+      "p60": 47.166,
+      "p70": 49.367,
+      "p80": 51.87800000000001,
+      "p90": 55.56,
+      "p95": 58.39,
+      "p98": 62.2858
+     },
+     "breaks": [
+      30,
+      40,
+      45,
+      50,
+      55,
+      58
+     ],
+     "class_counts": [
+      282,
+      657,
+      703,
+      686,
+      530,
+      190,
+      174
+     ],
+     "class_pct": [
+      8.75,
+      20.39,
+      21.82,
+      21.29,
+      16.45,
+      5.9,
+      5.4
+     ],
+     "noisy_cv_pct": 7.85
+    },
+    "pct_vacant_units": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 1.7,
+     "max": 75.75,
+     "quantiles": {
+      "p2": 3.95,
+      "p5": 4.93,
+      "p10": 6.09,
+      "p20": 8.202,
+      "p30": 10.13,
+      "p40": 12.2,
+      "p50": 14.225000000000001,
+      "p60": 16.44,
+      "p70": 19.157,
+      "p80": 22.74,
+      "p90": 29.187,
+      "p95": 35.55749999999999,
+      "p98": 43.577400000000004
+     },
+     "breaks": [
+      8,
+      12,
+      16,
+      22,
+      30
+     ],
+     "class_counts": [
+      610,
+      648,
+      605,
+      654,
+      399,
+      306
+     ],
+     "class_pct": [
+      18.93,
+      20.11,
+      18.78,
+      20.3,
+      12.38,
+      9.5
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_built_pre_1940": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 57.94,
+     "quantiles": {
+      "p2": 0.78,
+      "p5": 1.46,
+      "p10": 2.49,
+      "p20": 4.0520000000000005,
+      "p30": 5.67,
+      "p40": 7.458000000000002,
+      "p50": 9.94,
+      "p60": 13.947999999999999,
+      "p70": 18.363999999999997,
+      "p80": 23.678000000000004,
+      "p90": 30.408000000000005,
+      "p95": 34.5995,
+      "p98": 39.1248
+     },
+     "breaks": [
+      4,
+      7.5,
+      14,
+      23,
+      32
+     ],
+     "class_counts": [
+      625,
+      668,
+      646,
+      602,
+      424,
+      257
+     ],
+     "class_pct": [
+      19.4,
+      20.73,
+      20.05,
+      18.68,
+      13.16,
+      7.98
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_owner_occupied": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 96.09,
+     "quantiles": {
+      "p2": 51.8656,
+      "p5": 57.366,
+      "p10": 62.093,
+      "p20": 66.862,
+      "p30": 70.343,
+      "p40": 72.51,
+      "p50": 74.525,
+      "p60": 76.346,
+      "p70": 77.947,
+      "p80": 80.0,
+      "p90": 82.29,
+      "p95": 84.169,
+      "p98": 86.589
+     },
+     "breaks": [
+      62,
+      70,
+      75,
+      78,
+      82,
+      85
+     ],
+     "class_counts": [
+      317,
+      612,
+      758,
+      577,
+      591,
+      247,
+      120
+     ],
+     "class_pct": [
+      9.84,
+      18.99,
+      23.53,
+      17.91,
+      18.34,
+      7.67,
+      3.72
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "county-connectivity": {
+   "source": "catalog/counties/county-connectivity/county-connectivity.parquet",
+   "rows": 3235,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "hh_no_vehicle",
+    "hh_no_vehicle_moe",
+    "pct_hh_no_vehicle",
+    "pct_hh_no_vehicle_moe",
+    "pct_hh_no_vehicle_cv",
+    "pct_commute_drive_alone",
+    "pct_commute_drive_alone_moe",
+    "pct_commute_transit",
+    "pct_commute_transit_moe",
+    "pct_commute_transit_cv",
+    "pct_commute_walk_bike",
+    "pct_commute_walk_bike_moe",
+    "pct_work_from_home",
+    "pct_work_from_home_moe",
+    "pct_commute_45min_plus",
+    "pct_commute_45min_plus_moe",
+    "pct_no_internet",
+    "pct_no_internet_moe",
+    "pct_no_internet_cv",
+    "pct_no_computer",
+    "pct_no_computer_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_no_internet": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 60.51,
+     "quantiles": {
+      "p2": 2.9942,
+      "p5": 3.89,
+      "p10": 4.89,
+      "p20": 6.492000000000001,
+      "p30": 7.85,
+      "p40": 9.014000000000001,
+      "p50": 10.175,
+      "p60": 11.495999999999999,
+      "p70": 12.886999999999999,
+      "p80": 14.798000000000002,
+      "p90": 17.97,
+      "p95": 21.099500000000003,
+      "p98": 25.28
+     },
+     "breaks": [
+      6.5,
+      9,
+      11,
+      14,
+      18
+     ],
+     "class_counts": [
+      645,
+      637,
+      516,
+      656,
+      448,
+      320
+     ],
+     "class_pct": [
+      20.02,
+      19.77,
+      16.01,
+      20.36,
+      13.9,
+      9.93
+     ],
+     "noisy_cv_pct": 4.1
+    },
+    "pct_hh_no_vehicle": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 82.93,
+     "quantiles": {
+      "p2": 1.55,
+      "p5": 2.27,
+      "p10": 2.9,
+      "p20": 3.64,
+      "p30": 4.33,
+      "p40": 4.88,
+      "p50": 5.49,
+      "p60": 6.08,
+      "p70": 6.79,
+      "p80": 7.88,
+      "p90": 9.949,
+      "p95": 11.789499999999997,
+      "p98": 14.9058
+     },
+     "breaks": [
+      3.5,
+      5,
+      6,
+      7.5,
+      10
+     ],
+     "class_counts": [
+      584,
+      764,
+      543,
+      586,
+      426,
+      319
+     ],
+     "class_pct": [
+      18.13,
+      23.71,
+      16.85,
+      18.19,
+      13.22,
+      9.9
+     ],
+     "noisy_cv_pct": 14.71
+    },
+    "pct_commute_transit": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 52.44,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.0,
+      "p30": 0.04,
+      "p40": 0.11,
+      "p50": 0.19,
+      "p60": 0.3,
+      "p70": 0.44,
+      "p80": 0.71,
+      "p90": 1.32,
+      "p95": 2.209499999999998,
+      "p98": 4.227399999999998
+     },
+     "breaks": [
+      0.5,
+      2,
+      5,
+      10,
+      25
+     ],
+     "class_counts": [
+      2329,
+      705,
+      134,
+      34,
+      15,
+      5
+     ],
+     "class_pct": [
+      72.28,
+      21.88,
+      4.16,
+      1.06,
+      0.47,
+      0.16
+     ],
+     "noisy_cv_pct": 58.69
+    },
+    "pct_work_from_home": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 43.67,
+     "quantiles": {
+      "p2": 2.1442,
+      "p5": 3.0705,
+      "p10": 4.051,
+      "p20": 5.362000000000001,
+      "p30": 6.49,
+      "p40": 7.56,
+      "p50": 8.59,
+      "p60": 9.72,
+      "p70": 11.083999999999996,
+      "p80": 12.958000000000002,
+      "p90": 16.17,
+      "p95": 19.2995,
+      "p98": 23.5474
+     },
+     "breaks": [
+      5.5,
+      7.5,
+      9.5,
+      12,
+      17
+     ],
+     "class_counts": [
+      681,
+      586,
+      605,
+      557,
+      530,
+      263
+     ],
+     "class_pct": [
+      21.14,
+      18.19,
+      18.78,
+      17.29,
+      16.45,
+      8.16
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "county-wellbeing": {
+   "source": "catalog/counties/county-wellbeing/county-wellbeing.parquet",
+   "rows": 3235,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "pct_uninsured",
+    "pct_uninsured_moe",
+    "pct_uninsured_cv",
+    "pct_with_disability",
+    "pct_with_disability_moe",
+    "pct_with_disability_cv",
+    "pct_foreign_born",
+    "pct_foreign_born_moe",
+    "group_quarters_pop",
+    "group_quarters_pop_moe",
+    "median_hh_income_black",
+    "median_hh_income_black_moe",
+    "median_hh_income_black_cv",
+    "median_hh_income_white_nh",
+    "median_hh_income_white_nh_moe",
+    "median_hh_income_white_nh_cv",
+    "median_hh_income_asian",
+    "median_hh_income_asian_moe",
+    "median_hh_income_asian_cv",
+    "median_hh_income_hispanic",
+    "median_hh_income_hispanic_moe",
+    "median_hh_income_hispanic_cv",
+    "pct_below_poverty_black",
+    "pct_below_poverty_black_moe",
+    "pct_below_poverty_black_cv",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_uninsured": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 44.56,
+     "quantiles": {
+      "p2": 2.8142,
+      "p5": 3.51,
+      "p10": 4.11,
+      "p20": 5.0120000000000005,
+      "p30": 5.7829999999999995,
+      "p40": 6.6640000000000015,
+      "p50": 7.725,
+      "p60": 8.975999999999999,
+      "p70": 10.45,
+      "p80": 12.188000000000002,
+      "p90": 15.219000000000001,
+      "p95": 18.32849999999999,
+      "p98": 22.1058
+     },
+     "breaks": [
+      5,
+      6.5,
+      9,
+      12,
+      16
+     ],
+     "class_counts": [
+      637,
+      584,
+      719,
+      609,
+      409,
+      264
+     ],
+     "class_pct": [
+      19.77,
+      18.13,
+      22.32,
+      18.9,
+      12.69,
+      8.19
+     ],
+     "noisy_cv_pct": 3.66
+    },
+    "pct_with_disability": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 1.8,
+     "max": 72.73,
+     "quantiles": {
+      "p2": 8.94,
+      "p5": 10.2705,
+      "p10": 11.341,
+      "p20": 12.75,
+      "p30": 13.97,
+      "p40": 15.04,
+      "p50": 16.064999999999998,
+      "p60": 17.19,
+      "p70": 18.52,
+      "p80": 20.228000000000005,
+      "p90": 22.628,
+      "p95": 24.718499999999995,
+      "p98": 27.82
+     },
+     "breaks": [
+      13,
+      15,
+      17,
+      20,
+      23
+     ],
+     "class_counts": [
+      708,
+      569,
+      598,
+      666,
+      392,
+      289
+     ],
+     "class_pct": [
+      21.97,
+      17.66,
+      18.56,
+      20.67,
+      12.17,
+      8.97
+     ],
+     "noisy_cv_pct": 0.47
+    },
+    "pct_foreign_born": {
+     "n_non_null": 3222,
+     "null_pct": 0.4,
+     "min": 0.0,
+     "max": 54.53,
+     "quantiles": {
+      "p2": 0.25420000000000004,
+      "p5": 0.4805000000000001,
+      "p10": 0.78,
+      "p20": 1.21,
+      "p30": 1.62,
+      "p40": 2.164000000000001,
+      "p50": 2.83,
+      "p60": 3.78,
+      "p70": 5.07,
+      "p80": 7.166000000000004,
+      "p90": 11.115000000000004,
+      "p95": 16.838999999999995,
+      "p98": 24.70219999999999
+     },
+     "breaks": [
+      1.25,
+      2,
+      4,
+      6.5,
+      12
+     ],
+     "class_counts": [
+      682,
+      522,
+      786,
+      497,
+      447,
+      288
+     ],
+     "class_pct": [
+      21.17,
+      16.2,
+      24.39,
+      15.43,
+      13.87,
+      8.94
+     ],
+     "noisy_cv_pct": null
+    },
+    "median_hh_income_black": {
+     "n_non_null": 1958,
+     "null_pct": 39.47,
+     "min": 2499.0,
+     "max": 250001.0,
+     "quantiles": {
+      "p2": 16985.24,
+      "p5": 22636.5,
+      "p10": 27628.600000000002,
+      "p20": 32724.800000000003,
+      "p30": 37168.7,
+      "p40": 41383.799999999996,
+      "p50": 45688.5,
+      "p60": 51843.0,
+      "p70": 60585.7,
+      "p80": 70824.8,
+      "p90": 89431.59999999999,
+      "p95": 106132.24999999997,
+      "p98": 133738.41999999993
+     },
+     "breaks": [
+      45000,
+      60000,
+      70000,
+      80000,
+      95000
+     ],
+     "class_counts": [
+      953,
+      406,
+      193,
+      122,
+      123,
+      161
+     ],
+     "class_pct": [
+      48.67,
+      20.74,
+      9.86,
+      6.23,
+      6.28,
+      8.22
+     ],
+     "noisy_cv_pct": 21.09
+    },
+    "median_hh_income_white_nh": {
+     "n_non_null": 3158,
+     "null_pct": 2.38,
+     "min": 9457.0,
+     "max": 217829.0,
+     "quantiles": {
+      "p2": 44040.24,
+      "p5": 49653.799999999996,
+      "p10": 53454.100000000006,
+      "p20": 58824.8,
+      "p30": 62176.3,
+      "p40": 65618.2,
+      "p50": 69082.0,
+      "p60": 73049.59999999999,
+      "p70": 77156.3,
+      "p80": 83431.80000000002,
+      "p90": 95205.9,
+      "p95": 109491.84999999999,
+      "p98": 127075.86000000012
+     },
+     "breaks": [
+      45000,
+      60000,
+      70000,
+      80000,
+      95000
+     ],
+     "class_counts": [
+      75,
+      661,
+      908,
+      735,
+      458,
+      321
+     ],
+     "class_pct": [
+      2.37,
+      20.93,
+      28.75,
+      23.27,
+      14.5,
+      10.16
+     ],
+     "noisy_cv_pct": 0.95
+    }
+   }
+  },
+  "state-income": {
+   "source": "catalog/states/state-income/state-income.parquet",
+   "rows": 56,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_hh_income",
+    "median_hh_income_moe",
+    "median_hh_income_cv",
+    "per_capita_income",
+    "per_capita_income_moe",
+    "pct_below_poverty",
+    "pct_below_poverty_moe",
+    "pct_below_poverty_cv",
+    "pct_below_2x_poverty",
+    "pct_below_2x_poverty_moe",
+    "pct_snap",
+    "pct_snap_moe",
+    "pct_unemployed",
+    "pct_unemployed_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_hh_income": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 26297.0,
+     "max": 109870.0,
+     "quantiles": {
+      "p2": 56510.22,
+      "p5": 60239.4,
+      "p10": 63753.3,
+      "p20": 69816.40000000001,
+      "p30": 72618.8,
+      "p40": 75067.8,
+      "p50": 77419.0,
+      "p60": 79368.79999999999,
+      "p70": 85668.0,
+      "p80": 94766.80000000002,
+      "p90": 99112.9,
+      "p95": 103610.9,
+      "p98": 103954.35999999999
+     },
+     "breaks": [
+      55000,
+      65000,
+      75000,
+      85000,
+      95000,
+      105000
+     ],
+     "class_counts": [
+      1,
+      7,
+      12,
+      16,
+      5,
+      10,
+      1
+     ],
+     "class_pct": [
+      1.92,
+      13.46,
+      23.08,
+      30.77,
+      9.62,
+      19.23,
+      1.92
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_below_poverty": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 7.25,
+     "max": 40.53,
+     "quantiles": {
+      "p2": 8.516,
+      "p5": 9.377,
+      "p10": 9.737,
+      "p20": 10.042,
+      "p30": 10.562,
+      "p40": 11.112,
+      "p50": 11.870000000000001,
+      "p60": 12.456,
+      "p70": 13.265999999999998,
+      "p80": 14.058000000000002,
+      "p90": 16.052999999999997,
+      "p95": 18.316999999999997,
+      "p98": 18.9294
+     },
+     "breaks": [
+      10,
+      12,
+      14,
+      17,
+      22
+     ],
+     "class_counts": [
+      8,
+      20,
+      12,
+      8,
+      3,
+      1
+     ],
+     "class_pct": [
+      15.38,
+      38.46,
+      23.08,
+      15.38,
+      5.77,
+      1.92
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_snap": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 5.16,
+     "max": 47.36,
+     "quantiles": {
+      "p2": 5.2076,
+      "p5": 6.3505,
+      "p10": 7.603,
+      "p20": 8.538,
+      "p30": 9.924,
+      "p40": 10.668000000000001,
+      "p50": 11.39,
+      "p60": 12.36,
+      "p70": 13.050999999999998,
+      "p80": 13.99,
+      "p90": 15.495999999999999,
+      "p95": 17.2815,
+      "p98": 19.18199999999999
+     },
+     "breaks": [
+      8.5,
+      11,
+      12,
+      14,
+      16
+     ],
+     "class_counts": [
+      11,
+      12,
+      7,
+      11,
+      6,
+      5
+     ],
+     "class_pct": [
+      21.15,
+      23.08,
+      13.46,
+      21.15,
+      11.54,
+      9.62
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_unemployed": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 2.76,
+     "max": 10.74,
+     "quantiles": {
+      "p2": 2.932,
+      "p5": 3.1510000000000002,
+      "p10": 3.56,
+      "p20": 3.738,
+      "p30": 4.266,
+      "p40": 4.736,
+      "p50": 4.904999999999999,
+      "p60": 5.102,
+      "p70": 5.333,
+      "p80": 5.784,
+      "p90": 6.308,
+      "p95": 6.477999999999999,
+      "p98": 6.962799999999999
+     },
+     "breaks": [
+      3.5,
+      4.5,
+      5,
+      6,
+      6.5
+     ],
+     "class_counts": [
+      5,
+      12,
+      12,
+      16,
+      4,
+      3
+     ],
+     "class_pct": [
+      9.62,
+      23.08,
+      23.08,
+      30.77,
+      7.69,
+      5.77
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "state-people": {
+   "source": "catalog/states/state-people/state-people.parquet",
+   "rows": 56,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_age",
+    "median_age_moe",
+    "pct_under_18",
+    "pct_under_18_moe",
+    "pct_65_plus",
+    "pct_65_plus_moe",
+    "pct_white_nh",
+    "pct_white_nh_moe",
+    "pct_black",
+    "pct_black_moe",
+    "pct_native",
+    "pct_native_moe",
+    "pct_asian",
+    "pct_asian_moe",
+    "pct_hispanic",
+    "pct_hispanic_moe",
+    "pct_people_of_color",
+    "pct_people_of_color_moe",
+    "pct_bachelors_plus",
+    "pct_bachelors_plus_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pop_density": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 0.5,
+     "max": 4303.4,
+     "quantiles": {
+      "p2": 2.314,
+      "p5": 3.7700000000000005,
+      "p10": 6.9300000000000015,
+      "p20": 16.14,
+      "p30": 22.63,
+      "p40": 28.120000000000005,
+      "p50": 43.25,
+      "p60": 67.28,
+      "p70": 85.17,
+      "p80": 112.16,
+      "p90": 284.7699999999999,
+      "p95": 385.7599999999998,
+      "p98": 488.91999999999973
+     },
+     "breaks": [
+      5,
+      15,
+      40,
+      80,
+      150,
+      400
+     ],
+     "class_counts": [
+      5,
+      5,
+      14,
+      11,
+      7,
+      7,
+      3
+     ],
+     "class_pct": [
+      9.62,
+      9.62,
+      26.92,
+      21.15,
+      13.46,
+      13.46,
+      5.77
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_people_of_color": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 10.06,
+     "max": 99.38,
+     "quantiles": {
+      "p2": 10.0946,
+      "p5": 11.838000000000001,
+      "p10": 17.747,
+      "p20": 21.442,
+      "p30": 24.644000000000002,
+      "p40": 28.046000000000003,
+      "p50": 34.305,
+      "p60": 38.116,
+      "p70": 42.184999999999995,
+      "p80": 48.732000000000006,
+      "p90": 60.312999999999995,
+      "p95": 65.0255,
+      "p98": 78.82299999999995
+     },
+     "breaks": [
+      18,
+      25,
+      35,
+      42,
+      55,
+      65
+     ],
+     "class_counts": [
+      6,
+      11,
+      9,
+      10,
+      9,
+      4,
+      3
+     ],
+     "class_pct": [
+      11.54,
+      21.15,
+      17.31,
+      19.23,
+      17.31,
+      7.69,
+      5.77
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_65_plus": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 11.86,
+     "max": 23.44,
+     "quantiles": {
+      "p2": 12.802999999999999,
+      "p5": 13.649,
+      "p10": 15.599,
+      "p20": 16.668,
+      "p30": 16.966,
+      "p40": 17.178,
+      "p50": 17.68,
+      "p60": 18.078,
+      "p70": 18.593,
+      "p80": 19.220000000000002,
+      "p90": 20.558,
+      "p95": 21.375,
+      "p98": 22.3512
+     },
+     "breaks": [
+      17,
+      18,
+      19,
+      20,
+      21
+     ],
+     "class_counts": [
+      19,
+      11,
+      10,
+      3,
+      4,
+      5
+     ],
+     "class_pct": [
+      36.54,
+      21.15,
+      19.23,
+      5.77,
+      7.69,
+      9.62
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_bachelors_plus": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 24.13,
+     "max": 64.25,
+     "quantiles": {
+      "p2": 25.142,
+      "p5": 26.4505,
+      "p10": 27.936,
+      "p20": 30.644,
+      "p30": 31.709000000000003,
+      "p40": 32.546,
+      "p50": 34.364999999999995,
+      "p60": 35.629999999999995,
+      "p70": 36.998999999999995,
+      "p80": 39.568,
+      "p90": 43.353,
+      "p95": 44.64949999999999,
+      "p98": 47.2484
+     },
+     "breaks": [
+      28,
+      32,
+      35,
+      38,
+      42,
+      45
+     ],
+     "class_counts": [
+      6,
+      12,
+      10,
+      12,
+      4,
+      5,
+      3
+     ],
+     "class_pct": [
+      11.54,
+      23.08,
+      19.23,
+      23.08,
+      7.69,
+      9.62,
+      5.77
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "state-housing": {
+   "source": "catalog/states/state-housing/state-housing.parquet",
+   "rows": 56,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "housing_units",
+    "housing_units_moe",
+    "pct_vacant_units",
+    "pct_vacant_units_moe",
+    "households",
+    "households_moe",
+    "pct_owner_occupied",
+    "pct_owner_occupied_moe",
+    "median_gross_rent",
+    "median_gross_rent_moe",
+    "median_gross_rent_cv",
+    "pct_rent_burdened",
+    "pct_rent_burdened_moe",
+    "pct_rent_burdened_cv",
+    "pct_severely_rent_burdened",
+    "pct_severely_rent_burdened_moe",
+    "median_home_value",
+    "median_home_value_moe",
+    "median_home_value_cv",
+    "pct_built_pre_1940",
+    "pct_built_pre_1940_moe",
+    "pct_single_family",
+    "pct_single_family_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_home_value": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 131500.0,
+     "max": 839100.0,
+     "quantiles": {
+      "p2": 162744.0,
+      "p5": 179810.0,
+      "p10": 205840.0,
+      "p20": 217400.0,
+      "p30": 248640.0,
+      "p40": 264580.0,
+      "p50": 299950.0,
+      "p60": 352540.0,
+      "p70": 391259.99999999994,
+      "p80": 423020.0,
+      "p90": 534399.9999999999,
+      "p95": 641144.9999999993,
+      "p98": 737052.0
+     },
+     "breaks": [
+      175000,
+      225000,
+      275000,
+      350000,
+      450000,
+      600000
+     ],
+     "class_counts": [
+      3,
+      9,
+      10,
+      8,
+      13,
+      6,
+      3
+     ],
+     "class_pct": [
+      5.77,
+      17.31,
+      19.23,
+      15.38,
+      25.0,
+      11.54,
+      5.77
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_rent_burdened": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 38.89,
+     "max": 60.09,
+     "quantiles": {
+      "p2": 39.8556,
+      "p5": 43.2955,
+      "p10": 43.992000000000004,
+      "p20": 45.434,
+      "p30": 47.002,
+      "p40": 48.154,
+      "p50": 48.67,
+      "p60": 49.822,
+      "p70": 51.372,
+      "p80": 52.024,
+      "p90": 52.859,
+      "p95": 55.553,
+      "p98": 56.6536
+     },
+     "breaks": [
+      45,
+      48,
+      50,
+      52,
+      55,
+      58
+     ],
+     "class_counts": [
+      9,
+      10,
+      13,
+      9,
+      7,
+      3,
+      1
+     ],
+     "class_pct": [
+      17.31,
+      19.23,
+      25.0,
+      17.31,
+      13.46,
+      5.77,
+      1.92
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_vacant_units": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 6.99,
+     "max": 21.02,
+     "quantiles": {
+      "p2": 7.3134,
+      "p5": 7.4855,
+      "p10": 7.611,
+      "p20": 8.148,
+      "p30": 9.139000000000001,
+      "p40": 9.636000000000001,
+      "p50": 10.315000000000001,
+      "p60": 11.574,
+      "p70": 12.517999999999999,
+      "p80": 13.501999999999999,
+      "p90": 14.653,
+      "p95": 18.413999999999994,
+      "p98": 20.555599999999995
+     },
+     "breaks": [
+      8,
+      9.5,
+      12,
+      13,
+      15
+     ],
+     "class_counts": [
+      8,
+      13,
+      12,
+      4,
+      10,
+      5
+     ],
+     "class_pct": [
+      15.38,
+      25.0,
+      23.08,
+      7.69,
+      19.23,
+      9.62
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_built_pre_1940": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 1.09,
+     "max": 31.49,
+     "quantiles": {
+      "p2": 1.3854,
+      "p5": 1.7325000000000002,
+      "p10": 3.104,
+      "p20": 4.178000000000001,
+      "p30": 6.119,
+      "p40": 7.948,
+      "p50": 10.68,
+      "p60": 14.047999999999996,
+      "p70": 15.906,
+      "p80": 18.94,
+      "p90": 24.269000000000002,
+      "p95": 30.192999999999998,
+      "p98": 30.534599999999998
+     },
+     "breaks": [
+      4,
+      8,
+      15,
+      19,
+      25
+     ],
+     "class_counts": [
+      9,
+      12,
+      12,
+      8,
+      7,
+      4
+     ],
+     "class_pct": [
+      17.31,
+      23.08,
+      23.08,
+      15.38,
+      13.46,
+      7.69
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_owner_occupied": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 41.51,
+     "max": 74.88,
+     "quantiles": {
+      "p2": 54.3802,
+      "p5": 58.1205,
+      "p10": 62.607,
+      "p20": 63.79,
+      "p30": 66.425,
+      "p40": 67.0,
+      "p50": 67.375,
+      "p60": 68.03,
+      "p70": 69.77799999999999,
+      "p80": 71.47,
+      "p90": 72.714,
+      "p95": 73.1935,
+      "p98": 74.2586
+     },
+     "breaks": [
+      60,
+      64,
+      67,
+      70,
+      72,
+      74
+     ],
+     "class_counts": [
+      4,
+      8,
+      9,
+      16,
+      7,
+      6,
+      2
+     ],
+     "class_pct": [
+      7.69,
+      15.38,
+      17.31,
+      30.77,
+      13.46,
+      11.54,
+      3.85
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "state-connectivity": {
+   "source": "catalog/states/state-connectivity/state-connectivity.parquet",
+   "rows": 56,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "hh_no_vehicle",
+    "hh_no_vehicle_moe",
+    "pct_hh_no_vehicle",
+    "pct_hh_no_vehicle_moe",
+    "pct_hh_no_vehicle_cv",
+    "pct_commute_drive_alone",
+    "pct_commute_drive_alone_moe",
+    "pct_commute_transit",
+    "pct_commute_transit_moe",
+    "pct_commute_transit_cv",
+    "pct_commute_walk_bike",
+    "pct_commute_walk_bike_moe",
+    "pct_work_from_home",
+    "pct_work_from_home_moe",
+    "pct_commute_45min_plus",
+    "pct_commute_45min_plus_moe",
+    "pct_no_internet",
+    "pct_no_internet_moe",
+    "pct_no_internet_cv",
+    "pct_no_computer",
+    "pct_no_computer_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_no_internet": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 3.36,
+     "max": 16.92,
+     "quantiles": {
+      "p2": 4.1508,
+      "p5": 4.4045000000000005,
+      "p10": 4.898000000000001,
+      "p20": 5.31,
+      "p30": 5.615,
+      "p40": 6.306,
+      "p50": 6.73,
+      "p60": 7.008,
+      "p70": 7.481,
+      "p80": 8.152000000000003,
+      "p90": 10.038,
+      "p95": 10.8075,
+      "p98": 12.271799999999997
+     },
+     "breaks": [
+      5.5,
+      6,
+      7,
+      8,
+      10
+     ],
+     "class_counts": [
+      12,
+      6,
+      13,
+      10,
+      5,
+      6
+     ],
+     "class_pct": [
+      23.08,
+      11.54,
+      25.0,
+      19.23,
+      9.62,
+      11.54
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_hh_no_vehicle": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 3.68,
+     "max": 36.01,
+     "quantiles": {
+      "p2": 4.070200000000001,
+      "p5": 4.3605,
+      "p10": 5.09,
+      "p20": 5.374,
+      "p30": 5.6049999999999995,
+      "p40": 5.928000000000001,
+      "p50": 6.275,
+      "p60": 6.77,
+      "p70": 7.087,
+      "p80": 8.714,
+      "p90": 10.915,
+      "p95": 12.283499999999995,
+      "p98": 28.90459999999995
+     },
+     "breaks": [
+      5.5,
+      6,
+      7,
+      8.5,
+      11
+     ],
+     "class_counts": [
+      15,
+      7,
+      10,
+      9,
+      6,
+      5
+     ],
+     "class_pct": [
+      28.85,
+      13.46,
+      19.23,
+      17.31,
+      11.54,
+      9.62
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_commute_transit": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 0.26,
+     "max": 21.6,
+     "quantiles": {
+      "p2": 0.27,
+      "p5": 0.28099999999999997,
+      "p10": 0.363,
+      "p20": 0.504,
+      "p30": 0.616,
+      "p40": 0.834,
+      "p50": 0.945,
+      "p60": 1.108,
+      "p70": 1.7409999999999999,
+      "p80": 2.7560000000000024,
+      "p90": 4.161999999999999,
+      "p95": 7.234499999999993,
+      "p98": 20.036799999999964
+     },
+     "breaks": [
+      0.5,
+      1,
+      3,
+      8,
+      20
+     ],
+     "class_counts": [
+      10,
+      18,
+      14,
+      7,
+      1,
+      2
+     ],
+     "class_pct": [
+      19.23,
+      34.62,
+      26.92,
+      13.46,
+      1.92,
+      3.85
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_work_from_home": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 5.91,
+     "max": 33.0,
+     "quantiles": {
+      "p2": 6.1598,
+      "p5": 8.121,
+      "p10": 8.853,
+      "p20": 9.709999999999999,
+      "p30": 11.369,
+      "p40": 12.66,
+      "p50": 13.18,
+      "p60": 15.381999999999998,
+      "p70": 16.000999999999998,
+      "p80": 17.118000000000002,
+      "p90": 18.612000000000002,
+      "p95": 19.526999999999997,
+      "p98": 20.9854
+     },
+     "breaks": [
+      9.5,
+      13,
+      16,
+      17,
+      19
+     ],
+     "class_counts": [
+      9,
+      15,
+      12,
+      5,
+      7,
+      4
+     ],
+     "class_pct": [
+      17.31,
+      28.85,
+      23.08,
+      9.62,
+      13.46,
+      7.69
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "state-wellbeing": {
+   "source": "catalog/states/state-wellbeing/state-wellbeing.parquet",
+   "rows": 56,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "pct_uninsured",
+    "pct_uninsured_moe",
+    "pct_uninsured_cv",
+    "pct_with_disability",
+    "pct_with_disability_moe",
+    "pct_with_disability_cv",
+    "pct_foreign_born",
+    "pct_foreign_born_moe",
+    "group_quarters_pop",
+    "group_quarters_pop_moe",
+    "median_hh_income_black",
+    "median_hh_income_black_moe",
+    "median_hh_income_black_cv",
+    "median_hh_income_white_nh",
+    "median_hh_income_white_nh_moe",
+    "median_hh_income_white_nh_cv",
+    "median_hh_income_asian",
+    "median_hh_income_asian_moe",
+    "median_hh_income_asian_cv",
+    "median_hh_income_hispanic",
+    "median_hh_income_hispanic_moe",
+    "median_hh_income_hispanic_cv",
+    "pct_below_poverty_black",
+    "pct_below_poverty_black_moe",
+    "pct_below_poverty_black_cv",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_uninsured": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 2.58,
+     "max": 17.13,
+     "quantiles": {
+      "p2": 3.6008,
+      "p5": 3.805,
+      "p10": 4.694,
+      "p20": 5.28,
+      "p30": 6.01,
+      "p40": 6.368,
+      "p50": 7.045,
+      "p60": 8.181999999999999,
+      "p70": 9.01,
+      "p80": 9.808,
+      "p90": 11.273,
+      "p95": 11.913499999999996,
+      "p98": 12.859999999999998
+     },
+     "breaks": [
+      5.5,
+      6.5,
+      8.5,
+      9.5,
+      11
+     ],
+     "class_counts": [
+      12,
+      11,
+      9,
+      7,
+      5,
+      8
+     ],
+     "class_pct": [
+      23.08,
+      21.15,
+      17.31,
+      13.46,
+      9.62,
+      15.38
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_with_disability": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 10.65,
+     "max": 22.94,
+     "quantiles": {
+      "p2": 10.8228,
+      "p5": 11.4555,
+      "p10": 11.631,
+      "p20": 12.292,
+      "p30": 12.532,
+      "p40": 13.354000000000001,
+      "p50": 13.719999999999999,
+      "p60": 14.106,
+      "p70": 14.434,
+      "p80": 15.356000000000002,
+      "p90": 17.198,
+      "p95": 17.935,
+      "p98": 19.048399999999997
+     },
+     "breaks": [
+      12,
+      13,
+      14,
+      15,
+      18
+     ],
+     "class_counts": [
+      7,
+      12,
+      10,
+      12,
+      9,
+      2
+     ],
+     "class_pct": [
+      13.46,
+      23.08,
+      19.23,
+      23.08,
+      17.31,
+      3.85
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_foreign_born": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 1.82,
+     "max": 26.98,
+     "quantiles": {
+      "p2": 2.3028,
+      "p5": 2.583,
+      "p10": 3.9730000000000003,
+      "p20": 4.67,
+      "p30": 5.536,
+      "p40": 6.2,
+      "p50": 7.715,
+      "p60": 9.28,
+      "p70": 12.439999999999992,
+      "p80": 15.41,
+      "p90": 18.037000000000003,
+      "p95": 22.293999999999997,
+      "p98": 23.917199999999998
+     },
+     "breaks": [
+      4.5,
+      6,
+      9.5,
+      15,
+      19
+     ],
+     "class_counts": [
+      10,
+      9,
+      13,
+      8,
+      7,
+      5
+     ],
+     "class_pct": [
+      19.23,
+      17.31,
+      25.0,
+      15.38,
+      13.46,
+      9.62
+     ],
+     "noisy_cv_pct": null
+    },
+    "median_hh_income_black": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 26204.0,
+     "max": 83654.0,
+     "quantiles": {
+      "p2": 39174.3,
+      "p5": 39835.5,
+      "p10": 43369.9,
+      "p20": 45674.6,
+      "p30": 48170.0,
+      "p40": 51378.4,
+      "p50": 55363.5,
+      "p60": 59720.0,
+      "p70": 62876.09999999999,
+      "p80": 66143.6,
+      "p90": 72643.2,
+      "p95": 75863.04999999997,
+      "p98": 81486.54
+     },
+     "breaks": [
+      45000,
+      62500,
+      70000,
+      75000,
+      80000
+     ],
+     "class_counts": [
+      9,
+      26,
+      9,
+      5,
+      1,
+      2
+     ],
+     "class_pct": [
+      17.31,
+      50.0,
+      17.31,
+      9.62,
+      1.92,
+      3.85
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "median_hh_income_white_nh": {
+     "n_non_null": 52,
+     "null_pct": 7.14,
+     "min": 44128.0,
+     "max": 170201.0,
+     "quantiles": {
+      "p2": 60462.64,
+      "p5": 65801.7,
+      "p10": 70503.2,
+      "p20": 74560.2,
+      "p30": 77361.6,
+      "p40": 79682.4,
+      "p50": 80947.0,
+      "p60": 85754.40000000001,
+      "p70": 93518.9,
+      "p80": 99490.0,
+      "p90": 106992.4,
+      "p95": 113755.09999999999,
+      "p98": 116058.76
+     },
+     "breaks": [
+      45000,
+      62500,
+      70000,
+      75000,
+      80000
+     ],
+     "class_counts": [
+      1,
+      1,
+      3,
+      7,
+      11,
+      29
+     ],
+     "class_pct": [
+      1.92,
+      1.92,
+      5.77,
+      13.46,
+      21.15,
+      55.77
+     ],
+     "noisy_cv_pct": 0.0
+    }
+   }
+  },
+  "zcta-income": {
+   "source": "catalog/zctas/zcta-income/zcta-income.parquet",
+   "rows": 33791,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_hh_income",
+    "median_hh_income_moe",
+    "median_hh_income_cv",
+    "per_capita_income",
+    "per_capita_income_moe",
+    "pct_below_poverty",
+    "pct_below_poverty_moe",
+    "pct_below_poverty_cv",
+    "pct_below_2x_poverty",
+    "pct_below_2x_poverty_moe",
+    "pct_snap",
+    "pct_snap_moe",
+    "pct_unemployed",
+    "pct_unemployed_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_hh_income": {
+     "n_non_null": 30547,
+     "null_pct": 9.6,
+     "min": 2499.0,
+     "max": 250001.0,
+     "quantiles": {
+      "p2": 30528.76,
+      "p5": 38778.4,
+      "p10": 45991.0,
+      "p20": 54213.4,
+      "p30": 60582.59999999999,
+      "p40": 65969.4,
+      "p50": 72067.0,
+      "p60": 78585.99999999999,
+      "p70": 86866.19999999997,
+      "p80": 98537.20000000001,
+      "p90": 118929.0,
+      "p95": 141048.5,
+      "p98": 174127.7199999998
+     },
+     "breaks": [
+      45000,
+      60000,
+      72000,
+      87000,
+      120000,
+      160000
+     ],
+     "class_counts": [
+      2806,
+      6059,
+      6387,
+      6174,
+      6159,
+      2073,
+      889
+     ],
+     "class_pct": [
+      9.19,
+      19.84,
+      20.91,
+      20.21,
+      20.16,
+      6.79,
+      2.91
+     ],
+     "noisy_cv_pct": 9.97
+    },
+    "pct_below_poverty": {
+     "n_non_null": 32878,
+     "null_pct": 2.7,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 2.917000000000003,
+      "p20": 5.12,
+      "p30": 6.91,
+      "p40": 8.65,
+      "p50": 10.55,
+      "p60": 12.77,
+      "p70": 15.47,
+      "p80": 19.22,
+      "p90": 25.93,
+      "p95": 33.95149999999998,
+      "p98": 47.649199999999986
+     },
+     "breaks": [
+      5,
+      9,
+      13,
+      19,
+      28
+     ],
+     "class_counts": [
+      6382,
+      7397,
+      6259,
+      6112,
+      3998,
+      2730
+     ],
+     "class_pct": [
+      19.41,
+      22.5,
+      19.04,
+      18.59,
+      12.16,
+      8.3
+     ],
+     "noisy_cv_pct": 40.53
+    },
+    "pct_snap": {
+     "n_non_null": 32819,
+     "null_pct": 2.88,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.56,
+      "p20": 3.2360000000000038,
+      "p30": 5.21,
+      "p40": 7.14,
+      "p50": 9.2,
+      "p60": 11.56,
+      "p70": 14.43,
+      "p80": 18.34,
+      "p90": 25.202000000000005,
+      "p95": 33.45,
+      "p98": 46.15
+     },
+     "breaks": [
+      3,
+      7,
+      12,
+      17,
+      26
+     ],
+     "class_counts": [
+      6217,
+      6664,
+      7375,
+      5001,
+      4499,
+      3063
+     ],
+     "class_pct": [
+      18.94,
+      20.31,
+      22.47,
+      15.24,
+      13.71,
+      9.33
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_unemployed": {
+     "n_non_null": 32807,
+     "null_pct": 2.91,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 1.07,
+      "p30": 2.23,
+      "p40": 3.0840000000000143,
+      "p50": 3.88,
+      "p60": 4.71,
+      "p70": 5.71,
+      "p80": 7.04,
+      "p90": 9.844000000000014,
+      "p95": 13.47,
+      "p98": 20.62
+     },
+     "breaks": [
+      1,
+      3,
+      4.5,
+      6.5,
+      10
+     ],
+     "class_counts": [
+      6379,
+      6394,
+      6110,
+      6220,
+      4536,
+      3168
+     ],
+     "class_pct": [
+      19.44,
+      19.49,
+      18.62,
+      18.96,
+      13.83,
+      9.66
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "zcta-people": {
+   "source": "catalog/zctas/zcta-people/zcta-people.parquet",
+   "rows": 33791,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_age",
+    "median_age_moe",
+    "pct_under_18",
+    "pct_under_18_moe",
+    "pct_65_plus",
+    "pct_65_plus_moe",
+    "pct_white_nh",
+    "pct_white_nh_moe",
+    "pct_black",
+    "pct_black_moe",
+    "pct_native",
+    "pct_native_moe",
+    "pct_asian",
+    "pct_asian_moe",
+    "pct_hispanic",
+    "pct_hispanic_moe",
+    "pct_people_of_color",
+    "pct_people_of_color_moe",
+    "pct_bachelors_plus",
+    "pct_bachelors_plus_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pop_density": {
+     "n_non_null": 33772,
+     "null_pct": 0.06,
+     "min": 0.0,
+     "max": 66465.4,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.6,
+      "p10": 1.8,
+      "p20": 5.1,
+      "p30": 9.9,
+      "p40": 17.3,
+      "p50": 30.6,
+      "p60": 61.95999999999985,
+      "p70": 157.8,
+      "p80": 471.0,
+      "p90": 1325.3500000000008,
+      "p95": 2255.9599999999978,
+      "p98": 4273.73200000001
+     },
+     "breaks": [
+      5,
+      20,
+      60,
+      200,
+      600,
+      2000
+     ],
+     "class_counts": [
+      6602,
+      7820,
+      5700,
+      4277,
+      3364,
+      3991,
+      2018
+     ],
+     "class_pct": [
+      19.55,
+      23.16,
+      16.88,
+      12.66,
+      9.96,
+      11.82,
+      5.98
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_people_of_color": {
+     "n_non_null": 33174,
+     "null_pct": 1.83,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 2.3,
+      "p20": 5.42,
+      "p30": 8.24,
+      "p40": 11.7,
+      "p50": 16.53,
+      "p60": 23.54,
+      "p70": 32.78,
+      "p80": 46.14400000000001,
+      "p90": 68.06400000000001,
+      "p95": 85.25699999999998,
+      "p98": 96.4454
+     },
+     "breaks": [
+      2.5,
+      8,
+      17,
+      32,
+      62,
+      85
+     ],
+     "class_counts": [
+      3485,
+      6202,
+      7170,
+      6140,
+      6151,
+      2347,
+      1679
+     ],
+     "class_pct": [
+      10.51,
+      18.7,
+      21.61,
+      18.51,
+      18.54,
+      7.07,
+      5.06
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_65_plus": {
+     "n_non_null": 33174,
+     "null_pct": 1.83,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 7.07,
+      "p10": 10.55,
+      "p20": 13.77,
+      "p30": 15.86,
+      "p40": 17.67,
+      "p50": 19.4,
+      "p60": 21.3,
+      "p70": 23.53,
+      "p80": 26.92,
+      "p90": 33.92,
+      "p95": 43.303499999999985,
+      "p98": 58.83620000000003
+     },
+     "breaks": [
+      14,
+      18,
+      21,
+      26,
+      35
+     ],
+     "class_counts": [
+      6958,
+      6915,
+      5491,
+      6377,
+      4417,
+      3016
+     ],
+     "class_pct": [
+      20.97,
+      20.84,
+      16.55,
+      19.22,
+      13.31,
+      9.09
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_bachelors_plus": {
+     "n_non_null": 33100,
+     "null_pct": 2.04,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 3.969500000000001,
+      "p10": 8.8,
+      "p20": 13.38,
+      "p30": 16.74,
+      "p40": 19.92,
+      "p50": 23.24,
+      "p60": 27.27,
+      "p70": 32.522999999999996,
+      "p80": 40.72200000000001,
+      "p90": 53.82,
+      "p95": 64.83049999999999,
+      "p98": 76.33040000000001
+     },
+     "breaks": [
+      9,
+      17,
+      23,
+      32,
+      50,
+      65
+     ],
+     "class_counts": [
+      3416,
+      6753,
+      6156,
+      6566,
+      6070,
+      2499,
+      1640
+     ],
+     "class_pct": [
+      10.32,
+      20.4,
+      18.6,
+      19.84,
+      18.34,
+      7.55,
+      4.95
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "zcta-housing": {
+   "source": "catalog/zctas/zcta-housing/zcta-housing.parquet",
+   "rows": 33791,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "housing_units",
+    "housing_units_moe",
+    "pct_vacant_units",
+    "pct_vacant_units_moe",
+    "households",
+    "households_moe",
+    "pct_owner_occupied",
+    "pct_owner_occupied_moe",
+    "median_gross_rent",
+    "median_gross_rent_moe",
+    "median_gross_rent_cv",
+    "pct_rent_burdened",
+    "pct_rent_burdened_moe",
+    "pct_rent_burdened_cv",
+    "pct_severely_rent_burdened",
+    "pct_severely_rent_burdened_moe",
+    "median_home_value",
+    "median_home_value_moe",
+    "median_home_value_cv",
+    "pct_built_pre_1940",
+    "pct_built_pre_1940_moe",
+    "pct_single_family",
+    "pct_single_family_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_home_value": {
+     "n_non_null": 30260,
+     "null_pct": 10.45,
+     "min": 9999.0,
+     "max": 2000001.0,
+     "quantiles": {
+      "p2": 63218.00000000001,
+      "p5": 83200.0,
+      "p10": 100000.0,
+      "p20": 130300.0,
+      "p30": 160600.0,
+      "p40": 186900.0,
+      "p50": 221900.0,
+      "p60": 261800.0,
+      "p70": 324000.0,
+      "p80": 406700.0,
+      "p90": 579700.0,
+      "p95": 775109.9999999999,
+      "p98": 1071885.9999999993
+     },
+     "breaks": [
+      100000,
+      160000,
+      225000,
+      325000,
+      500000,
+      800000
+     ],
+     "class_counts": [
+      3006,
+      5976,
+      6399,
+      5841,
+      5136,
+      2513,
+      1389
+     ],
+     "class_pct": [
+      9.93,
+      19.75,
+      21.15,
+      19.3,
+      16.97,
+      8.3,
+      4.59
+     ],
+     "noisy_cv_pct": 7.93
+    },
+    "pct_rent_burdened": {
+     "n_non_null": 30087,
+     "null_pct": 10.96,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 8.442000000000007,
+      "p20": 25.45,
+      "p30": 34.48,
+      "p40": 40.67,
+      "p50": 45.42,
+      "p60": 50.0,
+      "p70": 54.29,
+      "p80": 59.70800000000003,
+      "p90": 69.42200000000004,
+      "p95": 88.0,
+      "p98": 100.0
+     },
+     "breaks": [
+      8.5,
+      34,
+      45,
+      55,
+      68,
+      88
+     ],
+     "class_counts": [
+      3013,
+      5844,
+      5892,
+      6739,
+      5310,
+      1783,
+      1506
+     ],
+     "class_pct": [
+      10.01,
+      19.42,
+      19.58,
+      22.4,
+      17.65,
+      5.93,
+      5.01
+     ],
+     "noisy_cv_pct": 39.44
+    },
+    "pct_vacant_units": {
+     "n_non_null": 32961,
+     "null_pct": 2.46,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 2.46,
+      "p20": 4.52,
+      "p30": 6.43,
+      "p40": 8.57,
+      "p50": 11.11,
+      "p60": 14.11,
+      "p70": 18.26,
+      "p80": 24.29,
+      "p90": 36.62,
+      "p95": 50.49,
+      "p98": 69.69599999999998
+     },
+     "breaks": [
+      4.5,
+      8.5,
+      14,
+      23,
+      38
+     ],
+     "class_counts": [
+      6552,
+      6533,
+      6590,
+      6085,
+      4121,
+      3080
+     ],
+     "class_pct": [
+      19.88,
+      19.82,
+      19.99,
+      18.46,
+      12.5,
+      9.34
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_built_pre_1940": {
+     "n_non_null": 32961,
+     "null_pct": 2.46,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.33,
+      "p20": 2.02,
+      "p30": 4.49,
+      "p40": 7.58,
+      "p50": 11.59,
+      "p60": 16.73,
+      "p70": 22.74,
+      "p80": 30.3,
+      "p90": 41.07,
+      "p95": 51.43,
+      "p98": 64.51399999999998
+     },
+     "breaks": [
+      2,
+      7.5,
+      17,
+      29,
+      42
+     ],
+     "class_counts": [
+      6556,
+      6558,
+      6814,
+      5938,
+      3986,
+      3109
+     ],
+     "class_pct": [
+      19.89,
+      19.9,
+      20.67,
+      18.02,
+      12.09,
+      9.43
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_owner_occupied": {
+     "n_non_null": 32819,
+     "null_pct": 2.88,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 18.688000000000002,
+      "p5": 38.289,
+      "p10": 51.47,
+      "p20": 63.85,
+      "p30": 70.28,
+      "p40": 74.93,
+      "p50": 78.78,
+      "p60": 82.25,
+      "p70": 85.57,
+      "p80": 89.23,
+      "p90": 94.37,
+      "p95": 100.0,
+      "p98": 100.0
+     },
+     "breaks": [
+      52,
+      70,
+      78,
+      85,
+      92,
+      99
+     ],
+     "class_counts": [
+      3366,
+      6300,
+      6059,
+      6698,
+      5786,
+      2735,
+      1875
+     ],
+     "class_pct": [
+      10.26,
+      19.2,
+      18.46,
+      20.41,
+      17.63,
+      8.33,
+      5.71
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "zcta-connectivity": {
+   "source": "catalog/zctas/zcta-connectivity/zcta-connectivity.parquet",
+   "rows": 33791,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "hh_no_vehicle",
+    "hh_no_vehicle_moe",
+    "pct_hh_no_vehicle",
+    "pct_hh_no_vehicle_moe",
+    "pct_hh_no_vehicle_cv",
+    "pct_commute_drive_alone",
+    "pct_commute_drive_alone_moe",
+    "pct_commute_transit",
+    "pct_commute_transit_moe",
+    "pct_commute_transit_cv",
+    "pct_commute_walk_bike",
+    "pct_commute_walk_bike_moe",
+    "pct_work_from_home",
+    "pct_work_from_home_moe",
+    "pct_commute_45min_plus",
+    "pct_commute_45min_plus_moe",
+    "pct_no_internet",
+    "pct_no_internet_moe",
+    "pct_no_internet_cv",
+    "pct_no_computer",
+    "pct_no_computer_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_no_internet": {
+     "n_non_null": 32819,
+     "null_pct": 2.88,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 1.1,
+      "p20": 3.03,
+      "p30": 4.58,
+      "p40": 6.14,
+      "p50": 7.79,
+      "p60": 9.73,
+      "p70": 11.96,
+      "p80": 15.09,
+      "p90": 20.802000000000007,
+      "p95": 27.800999999999988,
+      "p98": 41.211199999999955
+     },
+     "breaks": [
+      3,
+      6,
+      9.5,
+      14,
+      22
+     ],
+     "class_counts": [
+      6493,
+      6338,
+      6510,
+      5936,
+      4637,
+      2905
+     ],
+     "class_pct": [
+      19.78,
+      19.31,
+      19.84,
+      18.09,
+      14.13,
+      8.85
+     ],
+     "noisy_cv_pct": 50.02
+    },
+    "pct_hh_no_vehicle": {
+     "n_non_null": 32819,
+     "null_pct": 2.88,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.83,
+      "p30": 1.94,
+      "p40": 2.9,
+      "p50": 3.86,
+      "p60": 4.97,
+      "p70": 6.295999999999985,
+      "p80": 8.32,
+      "p90": 12.552000000000008,
+      "p95": 18.780999999999985,
+      "p98": 33.85279999999999
+     },
+     "breaks": [
+      0.75,
+      3,
+      5,
+      8,
+      13
+     ],
+     "class_counts": [
+      6387,
+      7045,
+      6332,
+      6065,
+      3896,
+      3094
+     ],
+     "class_pct": [
+      19.46,
+      21.47,
+      19.29,
+      18.48,
+      11.87,
+      9.43
+     ],
+     "noisy_cv_pct": 53.24
+    },
+    "pct_commute_transit": {
+     "n_non_null": 32798,
+     "null_pct": 2.94,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.0,
+      "p30": 0.0,
+      "p40": 0.0,
+      "p50": 0.0,
+      "p60": 0.03,
+      "p70": 0.37,
+      "p80": 1.01,
+      "p90": 2.94,
+      "p95": 6.16,
+      "p98": 13.23
+     },
+     "breaks": [
+      0.5,
+      2,
+      5,
+      10,
+      25
+     ],
+     "class_counts": [
+      23838,
+      4614,
+      2324,
+      1045,
+      725,
+      252
+     ],
+     "class_pct": [
+      72.68,
+      14.07,
+      7.09,
+      3.19,
+      2.21,
+      0.77
+     ],
+     "noisy_cv_pct": 32.38
+    },
+    "pct_work_from_home": {
+     "n_non_null": 32798,
+     "null_pct": 2.94,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.25,
+      "p20": 3.91,
+      "p30": 6.02,
+      "p40": 7.87,
+      "p50": 9.69,
+      "p60": 11.72,
+      "p70": 14.33,
+      "p80": 18.09,
+      "p90": 24.44,
+      "p95": 30.77,
+      "p98": 38.85239999999991
+     },
+     "breaks": [
+      4,
+      8,
+      12,
+      17,
+      25
+     ],
+     "class_counts": [
+      6663,
+      6688,
+      6709,
+      5363,
+      4276,
+      3099
+     ],
+     "class_pct": [
+      20.32,
+      20.39,
+      20.46,
+      16.35,
+      13.04,
+      9.45
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "zcta-wellbeing": {
+   "source": "catalog/zctas/zcta-wellbeing/zcta-wellbeing.parquet",
+   "rows": 33791,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "pct_uninsured",
+    "pct_uninsured_moe",
+    "pct_uninsured_cv",
+    "pct_with_disability",
+    "pct_with_disability_moe",
+    "pct_with_disability_cv",
+    "pct_foreign_born",
+    "pct_foreign_born_moe",
+    "group_quarters_pop",
+    "group_quarters_pop_moe",
+    "median_hh_income_black",
+    "median_hh_income_black_moe",
+    "median_hh_income_black_cv",
+    "median_hh_income_white_nh",
+    "median_hh_income_white_nh_moe",
+    "median_hh_income_white_nh_cv",
+    "median_hh_income_asian",
+    "median_hh_income_asian_moe",
+    "median_hh_income_asian_cv",
+    "median_hh_income_hispanic",
+    "median_hh_income_hispanic_moe",
+    "median_hh_income_hispanic_cv",
+    "pct_below_poverty_black",
+    "pct_below_poverty_black_moe",
+    "pct_below_poverty_black_cv",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_uninsured": {
+     "n_non_null": 33037,
+     "null_pct": 2.23,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.83,
+      "p20": 2.46,
+      "p30": 3.61,
+      "p40": 4.73,
+      "p50": 5.95,
+      "p60": 7.43,
+      "p70": 9.35,
+      "p80": 12.05,
+      "p90": 16.77,
+      "p95": 21.97,
+      "p98": 30.99279999999999
+     },
+     "breaks": [
+      2.5,
+      4.5,
+      7.5,
+      11,
+      18
+     ],
+     "class_counts": [
+      6702,
+      5804,
+      7430,
+      5359,
+      4936,
+      2806
+     ],
+     "class_pct": [
+      20.29,
+      17.57,
+      22.49,
+      16.22,
+      14.94,
+      8.49
+     ],
+     "noisy_cv_pct": 43.78
+    },
+    "pct_with_disability": {
+     "n_non_null": 33037,
+     "null_pct": 2.23,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 5.518000000000002,
+      "p10": 7.68,
+      "p20": 9.85,
+      "p30": 11.48,
+      "p40": 12.96,
+      "p50": 14.49,
+      "p60": 16.14,
+      "p70": 18.07,
+      "p80": 20.67,
+      "p90": 25.47,
+      "p95": 31.33,
+      "p98": 42.31
+     },
+     "breaks": [
+      10,
+      13,
+      16,
+      20,
+      26
+     ],
+     "class_counts": [
+      6879,
+      6405,
+      6267,
+      6128,
+      4276,
+      3082
+     ],
+     "class_pct": [
+      20.82,
+      19.39,
+      18.97,
+      18.55,
+      12.94,
+      9.33
+     ],
+     "noisy_cv_pct": 21.91
+    },
+    "pct_foreign_born": {
+     "n_non_null": 33174,
+     "null_pct": 1.83,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.12,
+      "p30": 0.79,
+      "p40": 1.52,
+      "p50": 2.55,
+      "p60": 4.06,
+      "p70": 6.46,
+      "p80": 10.37,
+      "p90": 18.56,
+      "p95": 27.76699999999997,
+      "p98": 38.54620000000003
+     },
+     "breaks": [
+      0.25,
+      1.5,
+      4,
+      9.5,
+      20
+     ],
+     "class_counts": [
+      7215,
+      5944,
+      6633,
+      6131,
+      4283,
+      2968
+     ],
+     "class_pct": [
+      21.75,
+      17.92,
+      19.99,
+      18.48,
+      12.91,
+      8.95
+     ],
+     "noisy_cv_pct": null
+    },
+    "median_hh_income_black": {
+     "n_non_null": 10390,
+     "null_pct": 69.25,
+     "min": 2499.0,
+     "max": 250001.0,
+     "quantiles": {
+      "p2": 16771.38,
+      "p5": 22961.300000000003,
+      "p10": 28750.0,
+      "p20": 36146.0,
+      "p30": 42735.09999999999,
+      "p40": 49630.4,
+      "p50": 57329.0,
+      "p60": 66338.2,
+      "p70": 77973.3,
+      "p80": 96128.0,
+      "p90": 122957.10000000002,
+      "p95": 155642.94999999998,
+      "p98": 202967.85999999984
+     },
+     "breaks": [
+      50000,
+      65000,
+      80000,
+      100000,
+      130000
+     ],
+     "class_counts": [
+      4197,
+      1903,
+      1302,
+      1096,
+      1003,
+      889
+     ],
+     "class_pct": [
+      40.39,
+      18.32,
+      12.53,
+      10.55,
+      9.65,
+      8.56
+     ],
+     "noisy_cv_pct": 28.57
+    },
+    "median_hh_income_white_nh": {
+     "n_non_null": 29708,
+     "null_pct": 12.08,
+     "min": 2499.0,
+     "max": 250001.0,
+     "quantiles": {
+      "p2": 35000.0,
+      "p5": 43326.5,
+      "p10": 50113.1,
+      "p20": 57955.0,
+      "p30": 63750.0,
+      "p40": 69748.40000000001,
+      "p50": 75625.0,
+      "p60": 82500.0,
+      "p70": 90879.49999999999,
+      "p80": 103084.80000000003,
+      "p90": 124043.19999999997,
+      "p95": 146921.44999999998,
+      "p98": 180901.60000000003
+     },
+     "breaks": [
+      50000,
+      65000,
+      80000,
+      100000,
+      130000
+     ],
+     "class_counts": [
+      2928,
+      6631,
+      7270,
+      6292,
+      4108,
+      2479
+     ],
+     "class_pct": [
+      9.86,
+      22.32,
+      24.47,
+      21.18,
+      13.83,
+      8.34
+     ],
+     "noisy_cv_pct": 11.05
+    }
+   }
+  },
+  "place-income": {
+   "source": "catalog/places/place-income/place-income.parquet",
+   "rows": 32612,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_hh_income",
+    "median_hh_income_moe",
+    "median_hh_income_cv",
+    "per_capita_income",
+    "per_capita_income_moe",
+    "pct_below_poverty",
+    "pct_below_poverty_moe",
+    "pct_below_poverty_cv",
+    "pct_below_2x_poverty",
+    "pct_below_2x_poverty_moe",
+    "pct_snap",
+    "pct_snap_moe",
+    "pct_unemployed",
+    "pct_unemployed_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_hh_income": {
+     "n_non_null": 28468,
+     "null_pct": 12.71,
+     "min": 2499.0,
+     "max": 250001.0,
+     "quantiles": {
+      "p2": 25265.38,
+      "p5": 33428.9,
+      "p10": 40365.7,
+      "p20": 48750.0,
+      "p30": 54821.700000000004,
+      "p40": 60961.8,
+      "p50": 67199.0,
+      "p60": 74598.6,
+      "p70": 83958.0,
+      "p80": 97836.20000000003,
+      "p90": 121841.39999999997,
+      "p95": 150103.49999999994,
+      "p98": 192323.25999999998
+     },
+     "breaks": [
+      40000,
+      55000,
+      67000,
+      84000,
+      115000,
+      150000
+     ],
+     "class_counts": [
+      2743,
+      5840,
+      5563,
+      5784,
+      5058,
+      2051,
+      1429
+     ],
+     "class_pct": [
+      9.64,
+      20.51,
+      19.54,
+      20.32,
+      17.77,
+      7.2,
+      5.02
+     ],
+     "noisy_cv_pct": 15.41
+    },
+    "pct_below_poverty": {
+     "n_non_null": 31778,
+     "null_pct": 2.56,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 1.41,
+      "p20": 4.23,
+      "p30": 6.4,
+      "p40": 8.57,
+      "p50": 10.99,
+      "p60": 13.73,
+      "p70": 17.16,
+      "p80": 21.91,
+      "p90": 30.46,
+      "p95": 40.62,
+      "p98": 57.14
+     },
+     "breaks": [
+      5,
+      9,
+      14,
+      20,
+      30
+     ],
+     "class_counts": [
+      7443,
+      5896,
+      5999,
+      4903,
+      4247,
+      3290
+     ],
+     "class_pct": [
+      23.42,
+      18.55,
+      18.88,
+      15.43,
+      13.36,
+      10.35
+     ],
+     "noisy_cv_pct": 56.69
+    },
+    "pct_snap": {
+     "n_non_null": 31711,
+     "null_pct": 2.76,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 2.39,
+      "p30": 5.09,
+      "p40": 7.65,
+      "p50": 10.45,
+      "p60": 13.49,
+      "p70": 17.32,
+      "p80": 22.4,
+      "p90": 31.03,
+      "p95": 40.74,
+      "p98": 55.26
+     },
+     "breaks": [
+      2.5,
+      7.5,
+      13,
+      21,
+      32
+     ],
+     "class_counts": [
+      6448,
+      6057,
+      6042,
+      6048,
+      4129,
+      2987
+     ],
+     "class_pct": [
+      20.33,
+      19.1,
+      19.05,
+      19.07,
+      13.02,
+      9.42
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_unemployed": {
+     "n_non_null": 31481,
+     "null_pct": 3.47,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.0,
+      "p30": 1.55,
+      "p40": 2.65,
+      "p50": 3.63,
+      "p60": 4.69,
+      "p70": 5.92,
+      "p80": 7.74,
+      "p90": 11.54,
+      "p95": 16.67,
+      "p98": 25.93
+     },
+     "breaks": [
+      0.5,
+      2.5,
+      4.5,
+      7.5,
+      12
+     ],
+     "class_counts": [
+      7253,
+      4852,
+      6230,
+      6523,
+      3680,
+      2943
+     ],
+     "class_pct": [
+      23.04,
+      15.41,
+      19.79,
+      20.72,
+      11.69,
+      9.35
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "place-people": {
+   "source": "catalog/places/place-people/place-people.parquet",
+   "rows": 32612,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_age",
+    "median_age_moe",
+    "pct_under_18",
+    "pct_under_18_moe",
+    "pct_65_plus",
+    "pct_65_plus_moe",
+    "pct_white_nh",
+    "pct_white_nh_moe",
+    "pct_black",
+    "pct_black_moe",
+    "pct_native",
+    "pct_native_moe",
+    "pct_asian",
+    "pct_asian_moe",
+    "pct_hispanic",
+    "pct_hispanic_moe",
+    "pct_people_of_color",
+    "pct_people_of_color_moe",
+    "pct_bachelors_plus",
+    "pct_bachelors_plus_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pop_density": {
+     "n_non_null": 32330,
+     "null_pct": 0.86,
+     "min": 0.0,
+     "max": 26170.2,
+     "quantiles": {
+      "p2": 1.0,
+      "p5": 10.9,
+      "p10": 29.1,
+      "p20": 72.48000000000002,
+      "p30": 127.8,
+      "p40": 193.3,
+      "p50": 273.6,
+      "p60": 371.4,
+      "p70": 498.2,
+      "p80": 702.4400000000002,
+      "p90": 1175.2800000000018,
+      "p95": 1746.324999999999,
+      "p98": 2628.613999999997
+     },
+     "breaks": [
+      50,
+      125,
+      250,
+      500,
+      1000,
+      2000
+     ],
+     "class_counts": [
+      4889,
+      4657,
+      5721,
+      7390,
+      5566,
+      2902,
+      1205
+     ],
+     "class_pct": [
+      15.12,
+      14.4,
+      17.7,
+      22.86,
+      17.22,
+      8.98,
+      3.73
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_people_of_color": {
+     "n_non_null": 31818,
+     "null_pct": 2.43,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 1.44,
+      "p20": 5.34,
+      "p30": 8.661000000000003,
+      "p40": 12.33,
+      "p50": 16.98,
+      "p60": 23.512000000000008,
+      "p70": 33.26,
+      "p80": 48.39600000000002,
+      "p90": 74.02599999999998,
+      "p95": 93.10149999999997,
+      "p98": 100.0
+     },
+     "breaks": [
+      1.5,
+      8.5,
+      17,
+      34,
+      68,
+      92
+     ],
+     "class_counts": [
+      3231,
+      6162,
+      6529,
+      6526,
+      5597,
+      2083,
+      1690
+     ],
+     "class_pct": [
+      10.15,
+      19.37,
+      20.52,
+      20.51,
+      17.59,
+      6.55,
+      5.31
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_65_plus": {
+     "n_non_null": 31818,
+     "null_pct": 2.43,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 5.74,
+      "p10": 9.2,
+      "p20": 12.58,
+      "p30": 14.92,
+      "p40": 16.93,
+      "p50": 18.92,
+      "p60": 21.08,
+      "p70": 23.84,
+      "p80": 28.016000000000023,
+      "p90": 36.71,
+      "p95": 47.62,
+      "p98": 67.6566
+     },
+     "breaks": [
+      13,
+      17,
+      21,
+      27,
+      38
+     ],
+     "class_counts": [
+      6876,
+      5965,
+      6136,
+      5839,
+      4092,
+      2910
+     ],
+     "class_pct": [
+      21.61,
+      18.75,
+      19.28,
+      18.35,
+      12.86,
+      9.15
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_bachelors_plus": {
+     "n_non_null": 31797,
+     "null_pct": 2.5,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 5.03,
+      "p20": 9.93,
+      "p30": 13.51,
+      "p40": 16.94,
+      "p50": 20.59,
+      "p60": 24.72,
+      "p70": 30.44,
+      "p80": 38.67800000000003,
+      "p90": 52.58400000000002,
+      "p95": 65.25199999999997,
+      "p98": 77.08319999999992
+     },
+     "breaks": [
+      5,
+      14,
+      21,
+      30,
+      50,
+      65
+     ],
+     "class_counts": [
+      3152,
+      6826,
+      6252,
+      5821,
+      6052,
+      2065,
+      1629
+     ],
+     "class_pct": [
+      9.91,
+      21.47,
+      19.66,
+      18.31,
+      19.03,
+      6.49,
+      5.12
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "place-housing": {
+   "source": "catalog/places/place-housing/place-housing.parquet",
+   "rows": 32612,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "housing_units",
+    "housing_units_moe",
+    "pct_vacant_units",
+    "pct_vacant_units_moe",
+    "households",
+    "households_moe",
+    "pct_owner_occupied",
+    "pct_owner_occupied_moe",
+    "median_gross_rent",
+    "median_gross_rent_moe",
+    "median_gross_rent_cv",
+    "pct_rent_burdened",
+    "pct_rent_burdened_moe",
+    "pct_rent_burdened_cv",
+    "pct_severely_rent_burdened",
+    "pct_severely_rent_burdened_moe",
+    "median_home_value",
+    "median_home_value_moe",
+    "median_home_value_cv",
+    "pct_built_pre_1940",
+    "pct_built_pre_1940_moe",
+    "pct_single_family",
+    "pct_single_family_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_home_value": {
+     "n_non_null": 28443,
+     "null_pct": 12.78,
+     "min": 9999.0,
+     "max": 2000001.0,
+     "quantiles": {
+      "p2": 48768.00000000001,
+      "p5": 65000.0,
+      "p10": 82200.0,
+      "p20": 104500.0,
+      "p30": 129060.00000000004,
+      "p40": 159280.00000000012,
+      "p50": 190100.0,
+      "p60": 231400.0,
+      "p70": 290700.0,
+      "p80": 378560.00000000023,
+      "p90": 560500.0,
+      "p95": 772100.0,
+      "p98": 1094680.0
+     },
+     "breaks": [
+      85000,
+      130000,
+      190000,
+      290000,
+      450000,
+      750000
+     ],
+     "class_counts": [
+      3178,
+      5423,
+      5614,
+      5676,
+      4350,
+      2693,
+      1509
+     ],
+     "class_pct": [
+      11.17,
+      19.07,
+      19.74,
+      19.96,
+      15.29,
+      9.47,
+      5.31
+     ],
+     "noisy_cv_pct": 10.29
+    },
+    "pct_rent_burdened": {
+     "n_non_null": 27852,
+     "null_pct": 14.6,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 22.22,
+      "p30": 32.5,
+      "p40": 39.53,
+      "p50": 45.12,
+      "p60": 50.0,
+      "p70": 55.58,
+      "p80": 62.5,
+      "p90": 77.14,
+      "p95": 100.0,
+      "p98": 100.0
+     },
+     "breaks": [
+      1,
+      32,
+      45,
+      55,
+      72,
+      99
+     ],
+     "class_counts": [
+      3101,
+      5081,
+      5667,
+      5355,
+      5168,
+      1778,
+      1702
+     ],
+     "class_pct": [
+      11.13,
+      18.24,
+      20.35,
+      19.23,
+      18.56,
+      6.38,
+      6.11
+     ],
+     "noisy_cv_pct": 48.41
+    },
+    "pct_vacant_units": {
+     "n_non_null": 31895,
+     "null_pct": 2.2,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 3.21,
+      "p30": 5.311999999999989,
+      "p40": 7.5,
+      "p50": 9.93,
+      "p60": 12.88,
+      "p70": 16.73,
+      "p80": 22.36,
+      "p90": 33.96600000000002,
+      "p95": 50.0,
+      "p98": 71.43
+     },
+     "breaks": [
+      3,
+      7.5,
+      13,
+      21,
+      36
+     ],
+     "class_counts": [
+      6066,
+      6689,
+      6493,
+      5642,
+      4128,
+      2877
+     ],
+     "class_pct": [
+      19.02,
+      20.97,
+      20.36,
+      17.69,
+      12.94,
+      9.02
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_built_pre_1940": {
+     "n_non_null": 31895,
+     "null_pct": 2.2,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.98,
+      "p30": 3.6,
+      "p40": 7.17,
+      "p50": 11.92,
+      "p60": 18.18,
+      "p70": 25.81,
+      "p80": 34.912000000000006,
+      "p90": 47.54,
+      "p95": 58.172999999999995,
+      "p98": 70.97
+     },
+     "breaks": [
+      1,
+      7,
+      18,
+      32,
+      50
+     ],
+     "class_counts": [
+      6395,
+      6219,
+      6444,
+      5565,
+      4477,
+      2795
+     ],
+     "class_pct": [
+      20.05,
+      19.5,
+      20.2,
+      17.45,
+      14.04,
+      8.76
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_owner_occupied": {
+     "n_non_null": 31711,
+     "null_pct": 2.76,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 27.27,
+      "p5": 41.900000000000006,
+      "p10": 50.83,
+      "p20": 59.72,
+      "p30": 65.91,
+      "p40": 71.1,
+      "p50": 75.85,
+      "p60": 80.61,
+      "p70": 85.4,
+      "p80": 90.85,
+      "p90": 97.91,
+      "p95": 100.0,
+      "p98": 100.0
+     },
+     "breaks": [
+      50,
+      65,
+      75,
+      85,
+      97,
+      99
+     ],
+     "class_counts": [
+      2916,
+      6076,
+      6263,
+      6663,
+      6342,
+      521,
+      2930
+     ],
+     "class_pct": [
+      9.2,
+      19.16,
+      19.75,
+      21.01,
+      20.0,
+      1.64,
+      9.24
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "place-connectivity": {
+   "source": "catalog/places/place-connectivity/place-connectivity.parquet",
+   "rows": 32612,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "hh_no_vehicle",
+    "hh_no_vehicle_moe",
+    "pct_hh_no_vehicle",
+    "pct_hh_no_vehicle_moe",
+    "pct_hh_no_vehicle_cv",
+    "pct_commute_drive_alone",
+    "pct_commute_drive_alone_moe",
+    "pct_commute_transit",
+    "pct_commute_transit_moe",
+    "pct_commute_transit_cv",
+    "pct_commute_walk_bike",
+    "pct_commute_walk_bike_moe",
+    "pct_work_from_home",
+    "pct_work_from_home_moe",
+    "pct_commute_45min_plus",
+    "pct_commute_45min_plus_moe",
+    "pct_no_internet",
+    "pct_no_internet_moe",
+    "pct_no_internet_cv",
+    "pct_no_computer",
+    "pct_no_computer_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_no_internet": {
+     "n_non_null": 31711,
+     "null_pct": 2.76,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 2.16,
+      "p30": 3.91,
+      "p40": 5.6,
+      "p50": 7.41,
+      "p60": 9.47,
+      "p70": 11.99,
+      "p80": 15.65,
+      "p90": 22.83,
+      "p95": 31.91,
+      "p98": 47.74599999999999
+     },
+     "breaks": [
+      2,
+      5.5,
+      9.5,
+      15,
+      24
+     ],
+     "class_counts": [
+      6083,
+      6416,
+      6558,
+      5863,
+      3922,
+      2869
+     ],
+     "class_pct": [
+      19.18,
+      20.23,
+      20.68,
+      18.49,
+      12.37,
+      9.05
+     ],
+     "noisy_cv_pct": 66.72
+    },
+    "pct_hh_no_vehicle": {
+     "n_non_null": 31711,
+     "null_pct": 2.76,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.0,
+      "p30": 1.24,
+      "p40": 2.49,
+      "p50": 3.76,
+      "p60": 5.16,
+      "p70": 6.83,
+      "p80": 9.19,
+      "p90": 13.64,
+      "p95": 18.85,
+      "p98": 28.69199999999997
+     },
+     "breaks": [
+      0.5,
+      2.5,
+      5,
+      8.5,
+      14
+     ],
+     "class_counts": [
+      7995,
+      4691,
+      5972,
+      5903,
+      4118,
+      3032
+     ],
+     "class_pct": [
+      25.21,
+      14.79,
+      18.83,
+      18.61,
+      12.99,
+      9.56
+     ],
+     "noisy_cv_pct": 60.43
+    },
+    "pct_commute_transit": {
+     "n_non_null": 31433,
+     "null_pct": 3.62,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.0,
+      "p30": 0.0,
+      "p40": 0.0,
+      "p50": 0.0,
+      "p60": 0.0,
+      "p70": 0.0,
+      "p80": 0.54,
+      "p90": 2.07,
+      "p95": 4.583999999999978,
+      "p98": 9.09
+     },
+     "breaks": [
+      0.5,
+      2,
+      5,
+      10,
+      25
+     ],
+     "class_counts": [
+      24991,
+      3208,
+      1801,
+      893,
+      470,
+      70
+     ],
+     "class_pct": [
+      79.51,
+      10.21,
+      5.73,
+      2.84,
+      1.5,
+      0.22
+     ],
+     "noisy_cv_pct": 22.51
+    },
+    "pct_work_from_home": {
+     "n_non_null": 31433,
+     "null_pct": 3.62,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 1.48,
+      "p30": 3.7060000000000035,
+      "p40": 5.688000000000011,
+      "p50": 7.66,
+      "p60": 9.95,
+      "p70": 12.77,
+      "p80": 16.87,
+      "p90": 23.577999999999992,
+      "p95": 30.52399999999998,
+      "p98": 40.97880000000005
+     },
+     "breaks": [
+      1.5,
+      5.5,
+      10,
+      16,
+      25
+     ],
+     "class_counts": [
+      6306,
+      5970,
+      6625,
+      5703,
+      4087,
+      2742
+     ],
+     "class_pct": [
+      20.06,
+      18.99,
+      21.08,
+      18.14,
+      13.0,
+      8.72
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "place-wellbeing": {
+   "source": "catalog/places/place-wellbeing/place-wellbeing.parquet",
+   "rows": 32612,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "pct_uninsured",
+    "pct_uninsured_moe",
+    "pct_uninsured_cv",
+    "pct_with_disability",
+    "pct_with_disability_moe",
+    "pct_with_disability_cv",
+    "pct_foreign_born",
+    "pct_foreign_born_moe",
+    "group_quarters_pop",
+    "group_quarters_pop_moe",
+    "median_hh_income_black",
+    "median_hh_income_black_moe",
+    "median_hh_income_black_cv",
+    "median_hh_income_white_nh",
+    "median_hh_income_white_nh_moe",
+    "median_hh_income_white_nh_cv",
+    "median_hh_income_asian",
+    "median_hh_income_asian_moe",
+    "median_hh_income_asian_cv",
+    "median_hh_income_hispanic",
+    "median_hh_income_hispanic_moe",
+    "median_hh_income_hispanic_cv",
+    "pct_below_poverty_black",
+    "pct_below_poverty_black_moe",
+    "pct_below_poverty_black_cv",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_uninsured": {
+     "n_non_null": 31808,
+     "null_pct": 2.47,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 1.83,
+      "p30": 3.11,
+      "p40": 4.4,
+      "p50": 5.8,
+      "p60": 7.41,
+      "p70": 9.508999999999977,
+      "p80": 12.62,
+      "p90": 18.212999999999994,
+      "p95": 24.62,
+      "p98": 35.0
+     },
+     "breaks": [
+      2,
+      4.5,
+      7.5,
+      12,
+      19
+     ],
+     "class_counts": [
+      6758,
+      6177,
+      6289,
+      5688,
+      4004,
+      2892
+     ],
+     "class_pct": [
+      21.25,
+      19.42,
+      19.77,
+      17.88,
+      12.59,
+      9.09
+     ],
+     "noisy_cv_pct": 61.01
+    },
+    "pct_with_disability": {
+     "n_non_null": 31808,
+     "null_pct": 2.47,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 3.96,
+      "p10": 6.78,
+      "p20": 9.504000000000005,
+      "p30": 11.48,
+      "p40": 13.31,
+      "p50": 15.15,
+      "p60": 17.19,
+      "p70": 19.608999999999977,
+      "p80": 22.856000000000023,
+      "p90": 28.532999999999994,
+      "p95": 35.61,
+      "p98": 47.434400000000025
+     },
+     "breaks": [
+      9.5,
+      13,
+      17,
+      22,
+      29
+     ],
+     "class_counts": [
+      6349,
+      5835,
+      6628,
+      5917,
+      4065,
+      3014
+     ],
+     "class_pct": [
+      19.96,
+      18.34,
+      20.84,
+      18.6,
+      12.78,
+      9.48
+     ],
+     "noisy_cv_pct": 36.21
+    },
+    "pct_foreign_born": {
+     "n_non_null": 31818,
+     "null_pct": 2.43,
+     "min": 0.0,
+     "max": 100.0,
+     "quantiles": {
+      "p2": 0.0,
+      "p5": 0.0,
+      "p10": 0.0,
+      "p20": 0.0,
+      "p30": 0.32,
+      "p40": 1.09,
+      "p50": 2.1,
+      "p60": 3.53,
+      "p70": 5.72,
+      "p80": 9.57,
+      "p90": 17.33,
+      "p95": 26.27149999999998,
+      "p98": 37.48
+     },
+     "breaks": [
+      0.25,
+      1,
+      3.5,
+      8.5,
+      19
+     ],
+     "class_counts": [
+      9251,
+      3079,
+      6692,
+      5736,
+      4266,
+      2794
+     ],
+     "class_pct": [
+      29.07,
+      9.68,
+      21.03,
+      18.03,
+      13.41,
+      8.78
+     ],
+     "noisy_cv_pct": null
+    },
+    "median_hh_income_black": {
+     "n_non_null": 6769,
+     "null_pct": 79.24,
+     "min": 2499.0,
+     "max": 250001.0,
+     "quantiles": {
+      "p2": 14178.52,
+      "p5": 20491.6,
+      "p10": 26376.2,
+      "p20": 34192.200000000004,
+      "p30": 41220.399999999994,
+      "p40": 48917.4,
+      "p50": 57700.0,
+      "p60": 68108.79999999999,
+      "p70": 81045.59999999999,
+      "p80": 100728.8,
+      "p90": 131341.19999999998,
+      "p95": 169812.7999999995,
+      "p98": 226401.32000000024
+     },
+     "breaks": [
+      50000,
+      60000,
+      75000,
+      100000,
+      130000
+     ],
+     "class_counts": [
+      2785,
+      753,
+      894,
+      957,
+      674,
+      706
+     ],
+     "class_pct": [
+      41.14,
+      11.12,
+      13.21,
+      14.14,
+      9.96,
+      10.43
+     ],
+     "noisy_cv_pct": 32.77
+    },
+    "median_hh_income_white_nh": {
+     "n_non_null": 26865,
+     "null_pct": 17.62,
+     "min": 2499.0,
+     "max": 250001.0,
+     "quantiles": {
+      "p2": 30625.0,
+      "p5": 37500.0,
+      "p10": 44039.6,
+      "p20": 51875.0,
+      "p30": 58214.0,
+      "p40": 64160.600000000006,
+      "p50": 70801.0,
+      "p60": 78133.8,
+      "p70": 87919.4,
+      "p80": 101956.00000000001,
+      "p90": 126952.6,
+      "p95": 156378.99999999997,
+      "p98": 199273.36000000007
+     },
+     "breaks": [
+      50000,
+      60000,
+      75000,
+      100000,
+      130000
+     ],
+     "class_counts": [
+      4575,
+      4236,
+      6210,
+      6124,
+      3223,
+      2497
+     ],
+     "class_pct": [
+      17.03,
+      15.77,
+      23.12,
+      22.8,
+      12.0,
+      9.29
+     ],
+     "noisy_cv_pct": 17.34
+    }
+   }
+  },
+  "cd-income": {
+   "source": "catalog/congressional-districts/cd-income/cd-income.parquet",
+   "rows": 441,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_hh_income",
+    "median_hh_income_moe",
+    "median_hh_income_cv",
+    "per_capita_income",
+    "per_capita_income_moe",
+    "pct_below_poverty",
+    "pct_below_poverty_moe",
+    "pct_below_poverty_cv",
+    "pct_below_2x_poverty",
+    "pct_below_2x_poverty_moe",
+    "pct_snap",
+    "pct_snap_moe",
+    "pct_unemployed",
+    "pct_unemployed_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_hh_income": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 26297.0,
+     "max": 182230.0,
+     "quantiles": {
+      "p2": 52724.52,
+      "p5": 57911.4,
+      "p10": 61139.0,
+      "p20": 66421.6,
+      "p30": 70696.0,
+      "p40": 74563.2,
+      "p50": 78678.0,
+      "p60": 84661.4,
+      "p70": 91182.79999999999,
+      "p80": 99648.0,
+      "p90": 114005.00000000001,
+      "p95": 130630.59999999999,
+      "p98": 141506.75999999995
+     },
+     "breaks": [
+      60000,
+      70000,
+      79000,
+      91000,
+      110000,
+      130000
+     ],
+     "class_counts": [
+      33,
+      93,
+      97,
+      81,
+      82,
+      28,
+      23
+     ],
+     "class_pct": [
+      7.55,
+      21.28,
+      22.2,
+      18.54,
+      18.76,
+      6.41,
+      5.26
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_below_poverty": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 4.83,
+     "max": 40.53,
+     "quantiles": {
+      "p2": 5.8132,
+      "p5": 6.3,
+      "p10": 7.392,
+      "p20": 9.203999999999999,
+      "p30": 10.285999999999998,
+      "p40": 11.024,
+      "p50": 11.89,
+      "p60": 12.866,
+      "p70": 13.866,
+      "p80": 15.698,
+      "p90": 18.116000000000007,
+      "p95": 20.596,
+      "p98": 23.014799999999976
+     },
+     "breaks": [
+      8,
+      10,
+      12,
+      15,
+      19
+     ],
+     "class_counts": [
+      54,
+      67,
+      104,
+      111,
+      68,
+      33
+     ],
+     "class_pct": [
+      12.36,
+      15.33,
+      23.8,
+      25.4,
+      15.56,
+      7.55
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_snap": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 2.79,
+     "max": 47.36,
+     "quantiles": {
+      "p2": 4.1575999999999995,
+      "p5": 5.16,
+      "p10": 5.892,
+      "p20": 7.684,
+      "p30": 9.007999999999997,
+      "p40": 10.21,
+      "p50": 11.23,
+      "p60": 12.656,
+      "p70": 13.957999999999998,
+      "p80": 15.646,
+      "p90": 19.660000000000007,
+      "p95": 22.356,
+      "p98": 26.01919999999999
+     },
+     "breaks": [
+      7.5,
+      10,
+      13,
+      15,
+      20
+     ],
+     "class_counts": [
+      81,
+      87,
+      103,
+      55,
+      71,
+      40
+     ],
+     "class_pct": [
+      18.54,
+      19.91,
+      23.57,
+      12.59,
+      16.25,
+      9.15
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_unemployed": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 2.49,
+     "max": 12.11,
+     "quantiles": {
+      "p2": 3.0668,
+      "p5": 3.422,
+      "p10": 3.6460000000000004,
+      "p20": 4.15,
+      "p30": 4.48,
+      "p40": 4.76,
+      "p50": 5.04,
+      "p60": 5.32,
+      "p70": 5.66,
+      "p80": 6.178,
+      "p90": 6.972000000000001,
+      "p95": 8.153999999999996,
+      "p98": 9.198799999999995
+     },
+     "breaks": [
+      4,
+      5,
+      5.5,
+      6,
+      7
+     ],
+     "class_counts": [
+      74,
+      139,
+      74,
+      51,
+      56,
+      43
+     ],
+     "class_pct": [
+      16.93,
+      31.81,
+      16.93,
+      11.67,
+      12.81,
+      9.84
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "cd-people": {
+   "source": "catalog/congressional-districts/cd-people/cd-people.parquet",
+   "rows": 441,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "median_age",
+    "median_age_moe",
+    "pct_under_18",
+    "pct_under_18_moe",
+    "pct_65_plus",
+    "pct_65_plus_moe",
+    "pct_white_nh",
+    "pct_white_nh_moe",
+    "pct_black",
+    "pct_black_moe",
+    "pct_native",
+    "pct_native_moe",
+    "pct_asian",
+    "pct_asian_moe",
+    "pct_hispanic",
+    "pct_hispanic_moe",
+    "pct_people_of_color",
+    "pct_people_of_color_moe",
+    "pct_bachelors_plus",
+    "pct_bachelors_plus_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pop_density": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 0.5,
+     "max": 29047.9,
+     "quantiles": {
+      "p2": 5.172,
+      "p5": 9.34,
+      "p10": 17.08,
+      "p20": 32.160000000000004,
+      "p30": 51.4,
+      "p40": 80.06000000000002,
+      "p50": 142.2,
+      "p60": 241.51999999999992,
+      "p70": 534.8199999999999,
+      "p80": 1158.8600000000004,
+      "p90": 1887.8800000000017,
+      "p95": 3879.8399999999997,
+      "p98": 7485.131999999925
+     },
+     "breaks": [
+      25,
+      75,
+      200,
+      600,
+      1500,
+      4000
+     ],
+     "class_counts": [
+      62,
+      106,
+      79,
+      69,
+      58,
+      43,
+      20
+     ],
+     "class_pct": [
+      14.19,
+      24.26,
+      18.08,
+      15.79,
+      13.27,
+      9.84,
+      4.58
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_people_of_color": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 6.3,
+     "max": 99.38,
+     "quantiles": {
+      "p2": 10.5508,
+      "p5": 12.528,
+      "p10": 15.496,
+      "p20": 22.488,
+      "p30": 29.445999999999998,
+      "p40": 33.88,
+      "p50": 39.35,
+      "p60": 43.989999999999995,
+      "p70": 52.44,
+      "p80": 62.727999999999994,
+      "p90": 76.876,
+      "p95": 84.45199999999998,
+      "p98": 87.4016
+     },
+     "breaks": [
+      15,
+      29,
+      40,
+      52,
+      75,
+      85
+     ],
+     "class_counts": [
+      42,
+      88,
+      94,
+      80,
+      81,
+      33,
+      19
+     ],
+     "class_pct": [
+      9.61,
+      20.14,
+      21.51,
+      18.31,
+      18.54,
+      7.55,
+      4.35
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_65_plus": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 8.67,
+     "max": 35.05,
+     "quantiles": {
+      "p2": 10.8076,
+      "p5": 11.952,
+      "p10": 13.082,
+      "p20": 14.472000000000001,
+      "p30": 15.559999999999999,
+      "p40": 16.382,
+      "p50": 17.21,
+      "p60": 17.796,
+      "p70": 18.76,
+      "p80": 19.854,
+      "p90": 21.176000000000002,
+      "p95": 22.588,
+      "p98": 25.651999999999997
+     },
+     "breaks": [
+      14,
+      16,
+      18,
+      20,
+      21
+     ],
+     "class_counts": [
+      76,
+      78,
+      115,
+      91,
+      27,
+      50
+     ],
+     "class_pct": [
+      17.39,
+      17.85,
+      26.32,
+      20.82,
+      6.18,
+      11.44
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_bachelors_plus": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 10.24,
+     "max": 80.31,
+     "quantiles": {
+      "p2": 19.7692,
+      "p5": 21.336,
+      "p10": 23.406,
+      "p20": 25.842,
+      "p30": 28.608,
+      "p40": 30.964,
+      "p50": 33.33,
+      "p60": 36.118,
+      "p70": 39.556,
+      "p80": 44.75000000000001,
+      "p90": 50.336000000000006,
+      "p95": 55.934,
+      "p98": 63.69559999999999
+     },
+     "breaks": [
+      23,
+      29,
+      34,
+      40,
+      50,
+      55
+     ],
+     "class_counts": [
+      40,
+      98,
+      90,
+      81,
+      83,
+      21,
+      24
+     ],
+     "class_pct": [
+      9.15,
+      22.43,
+      20.59,
+      18.54,
+      18.99,
+      4.81,
+      5.49
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "cd-housing": {
+   "source": "catalog/congressional-districts/cd-housing/cd-housing.parquet",
+   "rows": 441,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "housing_units",
+    "housing_units_moe",
+    "pct_vacant_units",
+    "pct_vacant_units_moe",
+    "households",
+    "households_moe",
+    "pct_owner_occupied",
+    "pct_owner_occupied_moe",
+    "median_gross_rent",
+    "median_gross_rent_moe",
+    "median_gross_rent_cv",
+    "pct_rent_burdened",
+    "pct_rent_burdened_moe",
+    "pct_rent_burdened_cv",
+    "pct_severely_rent_burdened",
+    "pct_severely_rent_burdened_moe",
+    "median_home_value",
+    "median_home_value_moe",
+    "median_home_value_cv",
+    "pct_built_pre_1940",
+    "pct_built_pre_1940_moe",
+    "pct_single_family",
+    "pct_single_family_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "median_home_value": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 115000.0,
+     "max": 1851300.0,
+     "quantiles": {
+      "p2": 151560.0,
+      "p5": 168900.0,
+      "p10": 184600.0,
+      "p20": 214380.0,
+      "p30": 243920.0,
+      "p40": 281880.0,
+      "p50": 334100.0,
+      "p60": 377560.0,
+      "p70": 438500.0,
+      "p80": 542500.0,
+      "p90": 721660.0000000003,
+      "p95": 855519.9999999999,
+      "p98": 1115243.999999999
+     },
+     "breaks": [
+      185000,
+      250000,
+      335000,
+      450000,
+      650000,
+      900000
+     ],
+     "class_counts": [
+      44,
+      101,
+      74,
+      93,
+      63,
+      43,
+      19
+     ],
+     "class_pct": [
+      10.07,
+      23.11,
+      16.93,
+      21.28,
+      14.42,
+      9.84,
+      4.35
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_rent_burdened": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 36.87,
+     "max": 66.43,
+     "quantiles": {
+      "p2": 40.046800000000005,
+      "p5": 42.178,
+      "p10": 43.86,
+      "p20": 46.324,
+      "p30": 47.824,
+      "p40": 49.058,
+      "p50": 50.24,
+      "p60": 51.676,
+      "p70": 53.666,
+      "p80": 55.568000000000005,
+      "p90": 58.03,
+      "p95": 59.961999999999996,
+      "p98": 62.52679999999999
+     },
+     "breaks": [
+      45,
+      48,
+      50,
+      55,
+      58,
+      60
+     ],
+     "class_counts": [
+      61,
+      82,
+      68,
+      127,
+      53,
+      24,
+      22
+     ],
+     "class_pct": [
+      13.96,
+      18.76,
+      15.56,
+      29.06,
+      12.13,
+      5.49,
+      5.03
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_vacant_units": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 3.09,
+     "max": 30.97,
+     "quantiles": {
+      "p2": 3.42,
+      "p5": 3.988,
+      "p10": 4.456,
+      "p20": 5.61,
+      "p30": 6.999999999999999,
+      "p40": 8.03,
+      "p50": 8.79,
+      "p60": 9.797999999999998,
+      "p70": 10.941999999999998,
+      "p80": 13.18,
+      "p90": 16.33200000000001,
+      "p95": 18.683999999999997,
+      "p98": 21.40079999999996
+     },
+     "breaks": [
+      5.5,
+      8,
+      10,
+      13,
+      17
+     ],
+     "class_counts": [
+      85,
+      88,
+      97,
+      74,
+      55,
+      38
+     ],
+     "class_pct": [
+      19.45,
+      20.14,
+      22.2,
+      16.93,
+      12.59,
+      8.7
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_built_pre_1940": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 0.2,
+     "max": 55.17,
+     "quantiles": {
+      "p2": 0.6043999999999999,
+      "p5": 0.9380000000000001,
+      "p10": 1.65,
+      "p20": 2.934,
+      "p30": 4.044,
+      "p40": 5.36,
+      "p50": 7.24,
+      "p60": 11.14199999999999,
+      "p70": 15.291999999999998,
+      "p80": 20.400000000000002,
+      "p90": 27.788000000000025,
+      "p95": 33.166,
+      "p98": 38.04279999999998
+     },
+     "breaks": [
+      3,
+      5.5,
+      11,
+      19,
+      29
+     ],
+     "class_counts": [
+      89,
+      98,
+      75,
+      78,
+      61,
+      36
+     ],
+     "class_pct": [
+      20.37,
+      22.43,
+      17.16,
+      17.85,
+      13.96,
+      8.24
+     ],
+     "noisy_cv_pct": null
+    },
+    "pct_owner_occupied": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 12.63,
+     "max": 84.63,
+     "quantiles": {
+      "p2": 31.477999999999998,
+      "p5": 42.684,
+      "p10": 50.192,
+      "p20": 58.174,
+      "p30": 62.71,
+      "p40": 65.186,
+      "p50": 67.86,
+      "p60": 70.07000000000001,
+      "p70": 72.012,
+      "p80": 73.768,
+      "p90": 75.476,
+      "p95": 77.87,
+      "p98": 79.5168
+     },
+     "breaks": [
+      50,
+      62,
+      68,
+      72,
+      75,
+      78
+     ],
+     "class_counts": [
+      41,
+      78,
+      104,
+      81,
+      79,
+      33,
+      21
+     ],
+     "class_pct": [
+      9.38,
+      17.85,
+      23.8,
+      18.54,
+      18.08,
+      7.55,
+      4.81
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "cd-connectivity": {
+   "source": "catalog/congressional-districts/cd-connectivity/cd-connectivity.parquet",
+   "rows": 441,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "hh_no_vehicle",
+    "hh_no_vehicle_moe",
+    "pct_hh_no_vehicle",
+    "pct_hh_no_vehicle_moe",
+    "pct_hh_no_vehicle_cv",
+    "pct_commute_drive_alone",
+    "pct_commute_drive_alone_moe",
+    "pct_commute_transit",
+    "pct_commute_transit_moe",
+    "pct_commute_transit_cv",
+    "pct_commute_walk_bike",
+    "pct_commute_walk_bike_moe",
+    "pct_work_from_home",
+    "pct_work_from_home_moe",
+    "pct_commute_45min_plus",
+    "pct_commute_45min_plus_moe",
+    "pct_no_internet",
+    "pct_no_internet_moe",
+    "pct_no_internet_cv",
+    "pct_no_computer",
+    "pct_no_computer_moe",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_no_internet": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 1.33,
+     "max": 16.92,
+     "quantiles": {
+      "p2": 2.4372,
+      "p5": 2.878,
+      "p10": 3.4200000000000004,
+      "p20": 4.212,
+      "p30": 4.83,
+      "p40": 5.444000000000001,
+      "p50": 6.17,
+      "p60": 6.851999999999998,
+      "p70": 7.67,
+      "p80": 8.646,
+      "p90": 10.084,
+      "p95": 11.003999999999996,
+      "p98": 12.711199999999986
+     },
+     "breaks": [
+      4,
+      5.5,
+      7,
+      8.5,
+      10
+     ],
+     "class_counts": [
+      75,
+      103,
+      90,
+      75,
+      46,
+      48
+     ],
+     "class_pct": [
+      17.16,
+      23.57,
+      20.59,
+      17.16,
+      10.53,
+      10.98
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_hh_no_vehicle": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 2.86,
+     "max": 77.29,
+     "quantiles": {
+      "p2": 3.2104,
+      "p5": 3.526,
+      "p10": 3.99,
+      "p20": 4.65,
+      "p30": 5.127999999999999,
+      "p40": 5.49,
+      "p50": 5.85,
+      "p60": 6.433999999999999,
+      "p70": 7.402,
+      "p80": 8.74,
+      "p90": 11.84400000000001,
+      "p95": 19.684,
+      "p98": 37.11039999999989
+     },
+     "breaks": [
+      4.5,
+      5.5,
+      6.5,
+      8.5,
+      13
+     ],
+     "class_counts": [
+      76,
+      101,
+      87,
+      77,
+      60,
+      36
+     ],
+     "class_pct": [
+      17.39,
+      23.11,
+      19.91,
+      17.62,
+      13.73,
+      8.24
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_commute_transit": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 0.09,
+     "max": 56.94,
+     "quantiles": {
+      "p2": 0.16,
+      "p5": 0.20800000000000002,
+      "p10": 0.26,
+      "p20": 0.36,
+      "p30": 0.47,
+      "p40": 0.64,
+      "p50": 0.94,
+      "p60": 1.3519999999999994,
+      "p70": 1.9,
+      "p80": 2.9760000000000013,
+      "p90": 6.858000000000009,
+      "p95": 13.001999999999995,
+      "p98": 37.03719999999997
+     },
+     "breaks": [
+      0.5,
+      2,
+      5,
+      10,
+      25
+     ],
+     "class_counts": [
+      141,
+      174,
+      69,
+      22,
+      19,
+      12
+     ],
+     "class_pct": [
+      32.27,
+      39.82,
+      15.79,
+      5.03,
+      4.35,
+      2.75
+     ],
+     "noisy_cv_pct": 0.23
+    },
+    "pct_work_from_home": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 4.94,
+     "max": 33.79,
+     "quantiles": {
+      "p2": 6.2792,
+      "p5": 7.112,
+      "p10": 8.416,
+      "p20": 9.934000000000001,
+      "p30": 11.11,
+      "p40": 12.23,
+      "p50": 13.94,
+      "p60": 15.23,
+      "p70": 16.654,
+      "p80": 19.52,
+      "p90": 22.608,
+      "p95": 26.087999999999997,
+      "p98": 29.4352
+     },
+     "breaks": [
+      10,
+      12,
+      15,
+      19,
+      23
+     ],
+     "class_counts": [
+      89,
+      80,
+      86,
+      84,
+      58,
+      40
+     ],
+     "class_pct": [
+      20.37,
+      18.31,
+      19.68,
+      19.22,
+      13.27,
+      9.15
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "cd-wellbeing": {
+   "source": "catalog/congressional-districts/cd-wellbeing/cd-wellbeing.parquet",
+   "rows": 441,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "population",
+    "population_moe",
+    "aland_sqkm",
+    "pop_density",
+    "pct_uninsured",
+    "pct_uninsured_moe",
+    "pct_uninsured_cv",
+    "pct_with_disability",
+    "pct_with_disability_moe",
+    "pct_with_disability_cv",
+    "pct_foreign_born",
+    "pct_foreign_born_moe",
+    "group_quarters_pop",
+    "group_quarters_pop_moe",
+    "median_hh_income_black",
+    "median_hh_income_black_moe",
+    "median_hh_income_black_cv",
+    "median_hh_income_white_nh",
+    "median_hh_income_white_nh_moe",
+    "median_hh_income_white_nh_cv",
+    "median_hh_income_asian",
+    "median_hh_income_asian_moe",
+    "median_hh_income_asian_cv",
+    "median_hh_income_hispanic",
+    "median_hh_income_hispanic_moe",
+    "median_hh_income_hispanic_cv",
+    "pct_below_poverty_black",
+    "pct_below_poverty_black_moe",
+    "pct_below_poverty_black_cv",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "pct_uninsured": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 2.09,
+     "max": 32.01,
+     "quantiles": {
+      "p2": 3.0204,
+      "p5": 3.608,
+      "p10": 4.132,
+      "p20": 4.934,
+      "p30": 5.648,
+      "p40": 6.29,
+      "p50": 7.43,
+      "p60": 8.576,
+      "p70": 9.836,
+      "p80": 10.986,
+      "p90": 13.462000000000007,
+      "p95": 16.456,
+      "p98": 20.540399999999977
+     },
+     "breaks": [
+      5,
+      6.5,
+      8.5,
+      11,
+      14
+     ],
+     "class_counts": [
+      95,
+      93,
+      69,
+      93,
+      48,
+      39
+     ],
+     "class_pct": [
+      21.74,
+      21.28,
+      15.79,
+      21.28,
+      10.98,
+      8.92
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_with_disability": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 7.44,
+     "max": 25.12,
+     "quantiles": {
+      "p2": 8.8616,
+      "p5": 9.277999999999999,
+      "p10": 9.792,
+      "p20": 10.778,
+      "p30": 11.716,
+      "p40": 12.506,
+      "p50": 13.29,
+      "p60": 13.995999999999997,
+      "p70": 14.604,
+      "p80": 15.534,
+      "p90": 16.732,
+      "p95": 17.855999999999998,
+      "p98": 19.30999999999999
+     },
+     "breaks": [
+      11,
+      12,
+      14,
+      15,
+      17
+     ],
+     "class_counts": [
+      96,
+      52,
+      114,
+      59,
+      78,
+      38
+     ],
+     "class_pct": [
+      21.97,
+      11.9,
+      26.09,
+      13.5,
+      17.85,
+      8.7
+     ],
+     "noisy_cv_pct": 0.0
+    },
+    "pct_foreign_born": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 0.98,
+     "max": 55.56,
+     "quantiles": {
+      "p2": 1.9132,
+      "p5": 2.56,
+      "p10": 3.312,
+      "p20": 5.032,
+      "p30": 6.588,
+      "p40": 8.122,
+      "p50": 10.32,
+      "p60": 13.597999999999999,
+      "p70": 16.93,
+      "p80": 23.342000000000002,
+      "p90": 31.20200000000001,
+      "p95": 36.153999999999996,
+      "p98": 41.797999999999945
+     },
+     "breaks": [
+      5,
+      8,
+      14,
+      22,
+      32
+     ],
+     "class_counts": [
+      87,
+      84,
+      96,
+      72,
+      58,
+      40
+     ],
+     "class_pct": [
+      19.91,
+      19.22,
+      21.97,
+      16.48,
+      13.27,
+      9.15
+     ],
+     "noisy_cv_pct": null
+    },
+    "median_hh_income_black": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 26204.0,
+     "max": 133653.0,
+     "quantiles": {
+      "p2": 34546.12,
+      "p5": 37219.0,
+      "p10": 40295.8,
+      "p20": 45067.200000000004,
+      "p30": 49861.2,
+      "p40": 54415.0,
+      "p50": 58785.0,
+      "p60": 63459.2,
+      "p70": 68530.0,
+      "p80": 76690.2,
+      "p90": 87161.8,
+      "p95": 99292.59999999999,
+      "p98": 115194.39999999994
+     },
+     "breaks": [
+      55000,
+      70000,
+      80000,
+      95000,
+      115000
+     ],
+     "class_counts": [
+      181,
+      135,
+      47,
+      43,
+      22,
+      9
+     ],
+     "class_pct": [
+      41.42,
+      30.89,
+      10.76,
+      9.84,
+      5.03,
+      2.06
+     ],
+     "noisy_cv_pct": 0.69
+    },
+    "median_hh_income_white_nh": {
+     "n_non_null": 437,
+     "null_pct": 0.91,
+     "min": 44128.0,
+     "max": 186896.0,
+     "quantiles": {
+      "p2": 61665.280000000006,
+      "p5": 65077.8,
+      "p10": 68844.4,
+      "p20": 73557.4,
+      "p30": 76766.0,
+      "p40": 81300.4,
+      "p50": 87326.0,
+      "p60": 94967.59999999999,
+      "p70": 101431.2,
+      "p80": 108910.6,
+      "p90": 125655.80000000002,
+      "p95": 138325.4,
+      "p98": 162386.07999999996
+     },
+     "breaks": [
+      55000,
+      70000,
+      80000,
+      95000,
+      115000
+     ],
+     "class_counts": [
+      2,
+      51,
+      113,
+      96,
+      109,
+      66
+     ],
+     "class_pct": [
+      0.46,
+      11.67,
+      25.86,
+      21.97,
+      24.94,
+      15.1
      ],
      "noisy_cv_pct": 0.0
     }

@@ -1,0 +1,93 @@
+{
+  "version": 8,
+  "name": "Population density",
+  "metadata": {
+    "description": "People per square kilometre of land area on roughly logarithmic steps, pale cream (empty) to deep plum (dense). Measured over all 33,772 ZIP Code Tabulation Areas with a published value: 7 classes with breaks at 5/20/60/200/600/2,000 people per km\u00b2, which fall at the 20th/43rd/60th/72nd/82nd/94th percentile of the national distribution.",
+    "portolan:column": "pop_density",
+    "portolan:breaks": [
+      5,
+      20,
+      60,
+      200,
+      600,
+      2000
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../zcta-people.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "zcta-people",
+      "filter": [
+        "has",
+        "pop_density"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pop_density"
+          ],
+          "#fcfdbf",
+          5,
+          "#fec488",
+          20,
+          "#fe9f6d",
+          60,
+          "#f1605d",
+          200,
+          "#b63679",
+          600,
+          "#721f81",
+          2000,
+          "#2d1160"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "zcta-people",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

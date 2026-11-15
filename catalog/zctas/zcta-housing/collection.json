@@ -1,0 +1,567 @@
+{
+  "type": "Collection",
+  "id": "zctas/zcta-housing",
+  "stac_version": "1.1.0",
+  "description": "The housing stock and what it costs: total units and the vacancy rate ([B25002](https://data.census.gov/table/ACSDT5Y2024.B25002)), households and the owner-occupied share ([B25003](https://data.census.gov/table/ACSDT5Y2024.B25003)), median gross rent ([B25064](https://data.census.gov/table/ACSDT5Y2024.B25064)) and median owner-occupied home value ([B25077](https://data.census.gov/table/ACSDT5Y2024.B25077)), the share of renter households paying 30% and 50% or more of income on rent ([B25070](https://data.census.gov/table/ACSDT5Y2024.B25070)), the pre-1940 share ([B25034](https://data.census.gov/table/ACSDT5Y2024.B25034)) and the single-family share ([B25024](https://data.census.gov/table/ACSDT5Y2024.B25024)).\n\nCurated indicators for all **33,791** ZIP Code Tabulation Areas in the United States, Puerto Rico and the island areas, from the U.S. Census Bureau's [American Community Survey](https://www.census.gov/programs-surveys/acs.html) **2020–2024 5-year estimates** (`acsdt5y2024`, the table-based [Summary File](https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/)). The Census Bureau calls the ACS \"the premier source of detailed information about the nation's people and housing\". The 5-year file is the only ACS release published for ZCTAs at all — [areas published](https://www.census.gov/programs-surveys/acs/geography-acs/areas-published.html) lists the 5-digit ZCTA under the 5-year estimates and nowhere else.\n\nEvery estimate ships with its margin of error — `<column>_moe`, at the 90% confidence level, the level the Census Bureau publishes — and the headline statistics also carry a coefficient of variation (`<column>_cv` = `moe / 1.645 / estimate`) so small-area noise can be flagged rather than mapped as if certain. Derived percentages propagate error with the Census Bureau's own formulas from [ACS Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf): sums add in quadrature, proportions use the subset formula with the ratio formula as fallback. ACS jam values for suppressed or unestimable cells are NULL here, never numbers, and medians are published as the Bureau publishes them — a median cannot be aggregated to a larger area. Each column's description names its ACS table, its exact universe, and the lines summed to make it.\n\nA ZIP Code Tabulation Area [is not a ZIP code](https://www.census.gov/programs-surveys/geography/guidance/geo-areas/zctas.html) — it is the Census Bureau's block-built approximation of a USPS 5-digit delivery area — and it nests in nothing, so `state` is NULL on every row and there is no prefix join to counties or tracts. Relating ZCTAs to other geographies is a spatial operation. `median_gross_rent` is NULL for **23.79%** of ZCTAs, `median_home_value` for **10.45%** and `pct_rent_burdened` for **10.96%**: a ZCTA with few renter or owner households has no publishable median.\n\nGeometries are the Census Bureau's [2020 cartographic boundary files](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) for ZIP Code Tabulation Areas (GENZ2020, 1:500,000), reprojected to EPSG:4326 and joined on `GEOID`. Cartographic rather than TIGER/Line because TIGER extends census geographies into open water while the cartographic files clip to the shoreline, which is what a choropleth wants. GENZ2020 and not GENZ2024 because no cartographic ZCTA file has been published since: the 2020-based ZCTAs are the current ones, and they are the vintage this release tabulates ([ACS geography boundaries by year](https://www.census.gov/programs-surveys/acs/geography-acs/geography-boundaries-by-year/2024.html) gives 5-digit ZCTA as \"2020 Census\"). The ZCTA file is also the one boundary file in this catalog with no state attribute, which is why `state` is NULL here.\n\nThe join is driven by geometry, so a geography with 2020 boundaries but no ACS tabulation keeps its row with NULL values instead of disappearing: 17 ZCTAs in the island areas, which have cartographic boundaries but no ACS 5-year estimates because the Island Areas run a separate decennial-only program. Two more, 11717 and 11798, have boundaries and no matching ACS row, both in Suffolk County, New York — the county whose 2024 re-delineation also leaves 14 tracts and 39 block groups without ACS rows elsewhere in this catalog. No ACS ZCTA row is dropped in the other direction: all 33,772 tabulated ZCTAs have a polygon. Keeping these rows means a national map has no holes and a consumer can see the absence; dropping them would make \"every US geography\" quietly mean something narrower.\n\nThis is one themed chunk of six at this geography. The other themes are [Income & Poverty](../zcta-income/collection.json), [People & Education](../zcta-people/collection.json), [Commuting & Connectivity](../zcta-connectivity/collection.json) and [Health, Disability & Income by Race](../zcta-wellbeing/collection.json), split that way so a consumer who wants one theme reads one file. Chunks at the same geography hold the same rows and the same geometry, so they join 1:1 on `geoid`. A sixth collection, [All Indicators](../zctas/collection.json), carries all 112 columns on the same rows in one wide table — at this many features width costs little, so take that one if a question crosses themes. A ZCTA nests in nothing: it can cross county and state lines, so there is no prefix join from `geoid` to any other collection here, and `state` is NULL on every row. Relating ZCTAs to counties or tracts is a spatial operation (or a Census relationship file), not a string operation. Every other geography in this catalog is organized the same way — [block groups](../../block-groups/catalog.json), [census tracts](../../tracts/catalog.json), [counties](../../counties/catalog.json), [states](../../states/catalog.json), [places and CDPs](../../places/catalog.json) and [congressional districts](../../congressional-districts/catalog.json) — and the [blocks](../../blocks/collection.json) collection carries 2020 Decennial counts, a different survey and vintage rather than a finer version of these numbers.\n\nThe PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons carrying the Census Bureau's own published county estimates, and z6–z12 are the ZIP Code Tabulation Areas themselves. ZCTAs do not nest inside counties, so the county band is orientation at national zooms — real county values — and not a roll-up of these features. Thinning this many polygons down to a national zoom would show a biased subset (small urban geographies drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead of a thinned sample of this one. Every band carries the same column names, so one style expression classifies every zoom — but below z6 you are looking at counties, not ZIP Code Tabulation Areas, and the values there are the Bureau's official estimates for those geographies, with their own meaning, rather than a visualization-only average: clicking a coarse feature identifies a real county by `geoid` and `name`. The `*_moe` columns are excluded from the tiles at every zoom — a margin of error is computed for one specific geography and cannot be carried across bands — while the `*_cv` columns are kept. Statistics come from the GeoParquet, never from the tiles.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "ZIP Code Tabulation Areas"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./zcta-housing.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Housing & Rent — ZIP Code Tabulation Areas (vector tiles)",
+      "pmtiles:layers": [
+        "zcta-housing"
+      ]
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/zctas/zcta-housing/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "MultiPolygon",
+  "geoparquet:feature_count": 33791,
+  "title": "Housing & Rent — ZIP Code Tabulation Areas",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -176.696678,
+          17.926684,
+          -65.221081,
+          71.341223
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-01-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "zcta-housing-tiles": {
+      "href": "./zcta-housing.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 230089371,
+      "file:checksum": "12203ae3b4b2a4ccdbc3e6bba3ea61e2f034eed931754219119f8724dd0fdcea9053",
+      "roles": [
+        "data"
+      ],
+      "title": "Housing & Rent — ZIP Code Tabulation Areas (PMTiles)",
+      "pmtiles:layers": [
+        "zcta-housing"
+      ]
+    },
+    "zcta-housing": {
+      "href": "./zcta-housing.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "Housing & Rent — ZIP Code Tabulation Areas (GeoParquet, national)",
+      "file:size": 69944559,
+      "file:checksum": "1220c4245268934017c27304d14f6be1cac57ce7c9a6ceaf8aeb41674c7f13f24aa0"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Median home value",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "Median value of owner-occupied homes, pale amber to burnt brown. Measured over all 30,260 ZIP Code Tabulation Areas with a published value: 7 classes with breaks at $100k/$160k/$225k/$325k/$500k/$800k, which fall at the 10th/30th/51st/70th/87th/95th percentile of the national distribution. 10.45% have no published value and draw in neutral gray rather than as a low value. 7.93% have a coefficient of variation above 0.3 and render faded — the estimate is real but its margin of error swamps it.",
+      "file:size": 2714,
+      "file:checksum": "1220bfe04b845117afc3276d4586081d081e606619de081184c9e0f0605ba09d0d9c"
+    },
+    "styles/ownership": {
+      "href": "./styles/ownership.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Owner-occupied homes",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of occupied housing units lived in by their owner, pale to deep green. Measured over all 32,819 ZIP Code Tabulation Areas with a published value: 7 classes with breaks at 52%/70%/78%/85%/92%/99%, which fall at the 10th/29th/48th/68th/86th/94th percentile of the national distribution.",
+      "file:size": 1866,
+      "file:checksum": "1220e0a2b20c6aee5a570f09b18e1a19aa2540df9191fbceeaeb3a227638638f2833"
+    },
+    "styles/pre-1940": {
+      "href": "./styles/pre-1940.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Homes built before 1940",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of housing units built in 1939 or earlier, pale parchment to dark sepia. Measured over all 32,961 ZIP Code Tabulation Areas with a published value: 6 classes with breaks at 2%/7.5%/17%/29%/42%, which fall at the 20th/40th/60th/78th/91st percentile of the national distribution.",
+      "file:size": 1817,
+      "file:checksum": "1220eb25dcb7c7df6ba23a96c37933ae6c0059ce397f83aa883cb075eb189f7986f4"
+    },
+    "styles/rent-burden": {
+      "href": "./styles/rent-burden.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Renters paying 30%+ of income",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of renter households spending 30% or more of income on gross rent — the federal definition of rent-burdened — pale mauve to deep magenta. Measured over all 30,087 ZIP Code Tabulation Areas with a published value: 7 classes with breaks at 8.5%/34%/45%/55%/68%/88%, which fall at the 10th/29th/49th/71st/89th/95th percentile of the national distribution. 10.96% have no published value and draw in neutral gray rather than as a low value. 39.44% of ZIP Code Tabulation Areas have a coefficient of variation above 0.3 at this geography, too many to fade without washing the map out, so read pct_rent_burdened_moe in the GeoParquet before drawing a conclusion from any single ZCTA.",
+      "file:size": 2591,
+      "file:checksum": "1220839760d9d3bae0bed1f0eed435eeac07bfb9ca28ae457478e6aa462db55eb1bb"
+    },
+    "styles/vacancy": {
+      "href": "./styles/vacancy.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Vacant housing units",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of housing units vacant, cream to dark red; seasonal and recreational housing drives the high end as much as abandonment does. Measured over all 32,961 ZIP Code Tabulation Areas with a published value: 6 classes with breaks at 4.5%/8.5%/14%/23%/38%, which fall at the 20th/40th/60th/78th/91st percentile of the national distribution.",
+      "file:size": 1868,
+      "file:checksum": "1220c0a17e04cc7dc46527fb79cd8fb1c5ba500081397971660b549dfec4b20b7c6e"
+    },
+    "source-b01003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01003 — Total Population",
+      "description": "The upstream file this collection's B01003 columns were read from: one pipe-delimited row per geography, estimate (`B01003_E###`) and margin of error (`B01003_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18313708,
+      "file:checksum": "122038d1a992bb058d184009b10b9b34987279aee575e4323165cfb5706c69b6ca90"
+    },
+    "source-b25002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25002 — Occupancy Status",
+      "description": "The upstream file this collection's B25002 columns were read from: one pipe-delimited row per geography, estimate (`B25002_E###`) and margin of error (`B25002_M###`) side by side, for every summary level in one national file. Universe: Housing units. Served by census.gov, not by this mirror; see [B25002](https://data.census.gov/table/ACSDT5Y2024.B25002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 23400695,
+      "file:checksum": "1220eb98debfe8e8533e9a8e647a8c5dca5dbe11401c4de4e4449b4a2ba7dc75620f"
+    },
+    "source-b25003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25003 — Tenure",
+      "description": "The upstream file this collection's B25003 columns were read from: one pipe-delimited row per geography, estimate (`B25003_E###`) and margin of error (`B25003_M###`) side by side, for every summary level in one national file. Universe: Occupied housing units. Served by census.gov, not by this mirror; see [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 26901770,
+      "file:checksum": "122068e963e1ed60fcf6b0658579cefc6498b7a9eb780b9f3e87fd1b9775c4d4ac6c"
+    },
+    "source-b25024": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25024.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25024 — Units in Structure",
+      "description": "The upstream file this collection's B25024 columns were read from: one pipe-delimited row per geography, estimate (`B25024_E###`) and margin of error (`B25024_M###`) side by side, for every summary level in one national file. Universe: Housing units. Served by census.gov, not by this mirror; see [B25024](https://data.census.gov/table/ACSDT5Y2024.B25024) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 47866463,
+      "file:checksum": "122026ff26c645d1abc55c3b47998931cea45af40600a6e8d36228d3ed7493add2ef"
+    },
+    "source-b25034": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25034.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25034 — Year Structure Built",
+      "description": "The upstream file this collection's B25034 columns were read from: one pipe-delimited row per geography, estimate (`B25034_E###`) and margin of error (`B25034_M###`) side by side, for every summary level in one national file. Universe: Housing units. Served by census.gov, not by this mirror; see [B25034](https://data.census.gov/table/ACSDT5Y2024.B25034) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 50103592,
+      "file:checksum": "1220806d6cb18e8e6c0855e065eca99164b07334cc32f521899aa45a4415ef7d380e"
+    },
+    "source-b25064": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25064.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25064 — Median Gross Rent (Dollars)",
+      "description": "The upstream file this collection's B25064 columns were read from: one pipe-delimited row per geography, estimate (`B25064_E###`) and margin of error (`B25064_M###`) side by side, for every summary level in one national file. Universe: Renter-occupied housing units paying cash rent. Served by census.gov, not by this mirror; see [B25064](https://data.census.gov/table/ACSDT5Y2024.B25064) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17272062,
+      "file:checksum": "1220b36e6dc1fcef36b8b307d31b37517b64c80d8b9c70d48c9b1894242860f42eb0"
+    },
+    "source-b25070": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25070.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25070 — Gross Rent as a Percentage of Household Income in the Past 12 Months",
+      "description": "The upstream file this collection's B25070 columns were read from: one pipe-delimited row per geography, estimate (`B25070_E###`) and margin of error (`B25070_M###`) side by side, for every summary level in one national file. Universe: Renter-occupied housing units. Served by census.gov, not by this mirror; see [B25070](https://data.census.gov/table/ACSDT5Y2024.B25070) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 46466758,
+      "file:checksum": "1220862ccc17d913305d11e6f802ce4518d76b30585ea0b05b251cd8cf21f8661386"
+    },
+    "source-b25077": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25077.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25077 — Median Value (Dollars)",
+      "description": "The upstream file this collection's B25077 columns were read from: one pipe-delimited row per geography, estimate (`B25077_E###`) and margin of error (`B25077_M###`) side by side, for every summary level in one national file. Universe: Owner-occupied housing units. Served by census.gov, not by this mirror; see [B25077](https://data.census.gov/table/ACSDT5Y2024.B25077) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18496426,
+      "file:checksum": "122089eb2153764a2330b23959d8bbc29b3a8f3016f087b990f2a8ea0d5096d9a816"
+    },
+    "source-table-shells": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 5-year table shells",
+      "description": "`Table ID|Line|Indent|Unique ID|Label|Title|Universe|Type` for every table in the release. Two jobs here: every line number the build reads is pinned against this file and a vintage that renumbers a line fails the build, and every universe quoted in the column descriptions is this file's own `Universe` field. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 5622840,
+      "file:checksum": "12205b46f4af873744a415c4974204010db976e2a61ff916674732f81c496a6b517d"
+    },
+    "source-cartographic-boundaries": {
+      "href": "https://www2.census.gov/geo/tiger/GENZ2020/shp/cb_2020_us_zcta520_500k.zip",
+      "type": "application/zip",
+      "title": "2020 cartographic boundary file — ZIP Code Tabulation Areas (1:500,000, national)",
+      "description": "The geometry this collection joins onto, shoreline-clipped and generalized for mapping. Only the join key, the name parts and the land-area field are kept; reprojected from NAD83 to EPSG:4326 with ogr2ogr. GENZ2020 is the only cartographic ZCTA edition the Census Bureau publishes, and the 2020-based ZCTAs are the vintage this ACS release tabulates; its fields are suffixed with the vintage (`GEOID20`, `ZCTA5CE20`, `ALAND20`) and carry no state, which is why `state` is NULL in this collection. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 66655314,
+      "file:checksum": "1220c69a4ede8aebebfc7ed3a98a9075c6aaa1b75d514a129bc5c662fd806d2f3d17"
+    },
+    "doc-geo-tallies": {
+      "href": "https://www2.census.gov/geo/docs/maps-data/data/geo_tallies2020/Natl_Geographic_Tallies_2020.txt",
+      "type": "text/plain",
+      "title": "2020 Census national geographic entity tallies",
+      "description": "The published count of every geographic entity type, which this collection's row count is checked against: 33,791 ZCTAs (33,642 US + 132 Puerto Rico + 17 island areas), 19,734 incorporated places and 12,454 census designated places, 441 congressional districts (436 US including the DC delegate + 1 Puerto Rico + 4 island areas). Index page: https://www.census.gov/geographies/reference-files/time-series/geo/tallies.html.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1746,
+      "file:checksum": "122006db85a152a3e7de71ec15f3c225d0e4ea466b34bcab4cb443bfa1aebc244d80"
+    },
+    "doc-zcta-about": {
+      "href": "https://www.census.gov/programs-surveys/geography/guidance/geo-areas/zctas.html",
+      "type": "text/html",
+      "title": "ZIP Code Tabulation Areas (ZCTAs) — Census Bureau",
+      "description": "What a ZCTA is and, more importantly, what it is not: the Bureau's own page on how ZCTAs are built from census blocks to approximate USPS 5-digit ZIP delivery areas, why they do not match ZIP codes, and why they do not nest in any other census geography.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-handbook": {
+      "href": "https://www.census.gov/programs-surveys/acs/library/handbooks/general.html",
+      "type": "text/html",
+      "title": "Understanding and Using American Community Survey Data — Census Bureau handbooks",
+      "description": "The Bureau's own guidance on what ACS estimates can and cannot support: 1-year versus 5-year releases, margins of error, comparing across vintages, and small-area reliability. Read it before drawing a conclusion from a single block group.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-accuracy": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf",
+      "type": "application/pdf",
+      "title": "ACS Accuracy of the Data (2024, multiyear estimates)",
+      "description": "The source of every margin-of-error formula this build applies: quadrature for sums, the proportion formula and its ratio fallback for percentages, and the definition of the published 90% confidence level.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 387987,
+      "file:checksum": "12204d3258202e02828c55e95312573f48c83e2fee26f5967fcf817c273b154741ad"
+    },
+    "doc-acs-subject-definitions": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf",
+      "type": "application/pdf",
+      "title": "ACS 2024 Subject Definitions",
+      "description": "The Census Bureau's definitions of the concepts behind these columns — household, householder, gross rent, poverty status determined, group quarters, means of transportation to work, disability. Where a column description here says what a universe is, this is the document it is saying it from.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1170567,
+      "file:checksum": "12206e0c5b1a5d3ebf7e300e583ac6424cbd5f09de50d69e7ef03aa6d070d9c4a7a8"
+    },
+    "doc-geo-glossary": {
+      "href": "https://www.census.gov/programs-surveys/geography/about/glossary.html",
+      "type": "text/html",
+      "title": "Census Bureau geography program glossary",
+      "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "ACS",
+    "American Community Survey",
+    "demographics",
+    "United States",
+    "margins of error",
+    "housing",
+    "rent",
+    "home values",
+    "tenure",
+    "vacancy",
+    "affordability",
+    "ZCTA",
+    "ZIP Code Tabulation Areas",
+    "ZIP codes",
+    "zip"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/acs.html",
+      "concepts": [
+        {
+          "id": "acs5",
+          "title": "American Community Survey 5-year estimates"
+        }
+      ]
+    }
+  ],
+  "table:row_count": 33791,
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "5-digit ZIP Code Tabulation Area code, e.g. `90210`. **Not a ZIP code**: a ZCTA is the Census Bureau's approximation of the area a USPS 5-digit ZIP delivery area covers, built from 2020 census blocks, and the two are not interchangeable (see the collection's known issues). ZCTAs do not nest in any other census geography — a ZCTA can cross county and state lines — so there is no prefix join to counties, tracts or states, and the first two characters are a postal region, not a state FIPS code. Matches `GEOID20`/`ZCTA5CE20` in the Census Bureau's 2020 cartographic boundary ZCTA file; the ACS `860Z200US` prefix is stripped."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "`'ZCTA5 ' || ZCTA5CE20` from the 2020 cartographic boundary ZCTA file — \"ZCTA5 90210\". A ZCTA has no containing geography to name it by, because it crosses county and state lines, and the Census Bureau publishes no other name for one; this is the label data.census.gov uses."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Always NULL in this collection. A ZIP Code Tabulation Area is not inside any state: it approximates a USPS ZIP delivery area, which can cross state lines, the ACS publishes ZCTAs at the nation level only, and the 2020 cartographic boundary ZCTA file carries no state attribute (its fields are `ZCTA5CE20`, `AFFGEOID20`, `GEOID20`, `NAME20`, `LSAD20`, `ALAND20`, `AWATER20`). The column is kept so the schema matches the other collections; deriving a value from the first digits of the code would be wrong, because those are a postal region. To assign ZCTAs to states, do it spatially, and expect ties."
+    },
+    {
+      "name": "population",
+      "type": "int64",
+      "description": "Total population. Universe: total population. The single line of [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) (Total Population), published as an integer. Carried on every ACS collection so a rate can be weighted or sanity-checked without a second download. NULL on 0.06% of ZCTAs — the 19 ZCTAs that have a 2020 cartographic boundary but no row in the ACS tabulation (17 in the island areas, plus 11717 and 11798 in Suffolk County, New York)."
+    },
+    {
+      "name": "population_moe",
+      "type": "double",
+      "description": "Margin of error for `population` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND20 / 1e6` from the 2020 cartographic boundary ZCTA file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+    },
+    {
+      "name": "pop_density",
+      "type": "double",
+      "description": "People per square kilometre of land area, rounded to 1 decimal: `population / aland_sqkm`. NULL where `ALAND` is 0 or `population` is NULL."
+    },
+    {
+      "name": "housing_units",
+      "type": "int64",
+      "description": "Total housing units, occupied and vacant. Universe: housing units. Line 1 of [B25002](https://data.census.gov/table/ACSDT5Y2024.B25002) (Occupancy Status), published as an integer."
+    },
+    {
+      "name": "housing_units_moe",
+      "type": "double",
+      "description": "Margin of error for `housing_units` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "pct_vacant_units",
+      "type": "double",
+      "description": "Percent of housing units that are vacant. Universe: housing units. Line 3 (\"Vacant\") over line 1 of [B25002](https://data.census.gov/table/ACSDT5Y2024.B25002). The ACS counts for-sale, for-rent, seasonal and migrant-worker units as vacant, so this is not a measure of abandonment."
+    },
+    {
+      "name": "pct_vacant_units_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_vacant_units` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "households",
+      "type": "int64",
+      "description": "Households — occupied housing units. One household per occupied unit, by definition. Universe: occupied housing units. Line 1 of [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003) (Tenure), published as an integer."
+    },
+    {
+      "name": "households_moe",
+      "type": "double",
+      "description": "Margin of error for `households` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "pct_owner_occupied",
+      "type": "double",
+      "description": "Percent of occupied housing units that are owner-occupied. Universe: occupied housing units. Line 2 (\"Owner occupied\") over line 1 of [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003). The homeownership rate of households, not of people, and vacant units are outside the universe entirely."
+    },
+    {
+      "name": "pct_owner_occupied_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_owner_occupied` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "median_gross_rent",
+      "type": "double",
+      "description": "Median gross rent in dollars per month — contract rent plus the estimated average monthly cost of utilities and fuels. Universe: renter-occupied housing units **paying cash rent**, so units occupied rent-free are excluded. Line 1 of [B25064](https://data.census.gov/table/ACSDT5Y2024.B25064). **NULL on 23.79% of ZCTAs** — nearly a quarter. A ZCTA with few renter households paying cash rent has no publishable rent median."
+    },
+    {
+      "name": "median_gross_rent_moe",
+      "type": "double",
+      "description": "Margin of error for `median_gross_rent` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_gross_rent_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_gross_rent`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_rent_burdened",
+      "type": "double",
+      "description": "Percent of renter households paying 30% or more of household income on gross rent — the standard affordability threshold. Universe: renter-occupied housing units, less those whose ratio the Census could not compute. Lines 7–10 (30.0–34.9, 35.0–39.9, 40.0–49.9, 50.0 percent or more) of [B25070](https://data.census.gov/table/ACSDT5Y2024.B25070) over line 1 minus line 11 (\"Not computed\" — no cash rent, or no income). Including the not-computed units in the denominator would understate the burden. NULL on 10.96% of ZCTAs, where the denominator (renter households whose rent-to-income ratio could be computed) came out at or below 0."
+    },
+    {
+      "name": "pct_rent_burdened_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_rent_burdened` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_rent_burdened_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_rent_burdened`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_severely_rent_burdened",
+      "type": "double",
+      "description": "Percent of renter households paying 50% or more of household income on gross rent. Universe: renter-occupied housing units, less those whose ratio could not be computed. Line 10 of [B25070](https://data.census.gov/table/ACSDT5Y2024.B25070) over line 1 minus line 11. A subset of `pct_rent_burdened`."
+    },
+    {
+      "name": "pct_severely_rent_burdened_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_severely_rent_burdened` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "median_home_value",
+      "type": "double",
+      "description": "Median value of owner-occupied housing units, in dollars — the owner's estimate of what the property would sell for, not an assessment or a sale price. Universe: owner-occupied housing units. Line 1 of [B25077](https://data.census.gov/table/ACSDT5Y2024.B25077). NULL on 10.45% of ZCTAs."
+    },
+    {
+      "name": "median_home_value_moe",
+      "type": "double",
+      "description": "Margin of error for `median_home_value` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_home_value_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_home_value`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_built_pre_1940",
+      "type": "double",
+      "description": "Percent of housing units built in 1939 or earlier. Universe: housing units. Line 11 of [B25034](https://data.census.gov/table/ACSDT5Y2024.B25034) (Year Structure Built) over line 1. The oldest bucket the table publishes, and a standard screening proxy for lead-paint risk."
+    },
+    {
+      "name": "pct_built_pre_1940_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_built_pre_1940` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_single_family",
+      "type": "double",
+      "description": "Percent of housing units in single-family structures. Universe: housing units. Lines 2 (\"1, detached\") + 3 (\"1, attached\") over line 1 of [B25024](https://data.census.gov/table/ACSDT5Y2024.B25024) (Units in Structure). Attached single-family — rowhouses, townhouses — is included; a duplex (line 4) is not."
+    },
+    {
+      "name": "pct_single_family_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_single_family` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2020 cartographic boundary ZIP Code Tabulation Area file (GENZ2020, 1:500,000), which clips to the shoreline — TIGER/Line would extend the ZIP Code Tabulation Area into open water. GENZ2020 because the Census Bureau has published no cartographic ZCTA file since: the 2020-based ZCTAs are the current ones, and they are the vintage the ACS tabulates. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z"
+}

@@ -7,18 +7,23 @@ mirroring United States Census Bureau demographics as cloud-native
 
 - Catalog root: `https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json`
 - ACS 2020–2024 5-year indicators (income, poverty, age, race, education,
-  housing, vehicles, commuting, internet) at **block group**, **tract**,
-  **county**, and **state** level — every estimate with its margin of error,
-  headline statistics with a reliability (CV) column
+  housing, vehicles, commuting, internet, health insurance, disability,
+  nativity) at **block group**, **tract**, **county**, **state**, **ZCTA**,
+  **place** and **congressional district** level — every estimate with its
+  margin of error, headline statistics with a reliability (CV) column
 - 2020 Decennial Census counts at **block** level (the smallest census
   geography, ~8.1M polygons)
 - Statistics ship in themed "chunks": each collection is one geography ×
-  one theme, with its own GeoParquet, PMTiles, and 3–5 legend-bearing map
-  styles. Coarse zooms of a PMTiles archive step up to a coarser census
-  geography — counties at z0–z5, tracts in the middle — carrying the Census
-  Bureau's own estimates for those geographies, so the national view shows
-  official values for every part of the country rather than a thinned subset
-  of the fine features.
+  one theme (income, people, housing, connectivity, wellbeing), with its own
+  GeoParquet, PMTiles, and 3–5 legend-bearing map styles. Every geography is
+  a sub-catalog of those chunks, and the five coarse-or-sparse ones —
+  counties, states, ZCTAs, places, congressional districts — add a sixth
+  collection carrying all 112 columns in one wide table for a question that
+  crosses themes. Coarse zooms of a PMTiles archive step up to a coarser
+  census geography — counties at z0–z5, tracts in the middle — carrying the
+  Census Bureau's own estimates for those geographies, so the national view
+  shows official values for every part of the country rather than a thinned
+  subset of the fine features.
 - A mirror that liberally references the source:
   [data.census.gov](https://data.census.gov/) is authoritative, and every
   collection links the exact upstream files it was built from
@@ -50,9 +55,13 @@ Howard County, Maryland         |  336328 | 149763.0
 Run against the published URL with DuckDB 1.4.1 on 2026-11-13: **about 5
 seconds**, no file on disk. `median_hh_income_cv` is the reliability column — every headline
 statistic has one, and `< 0.05` is what keeps a county of four thousand people
-out of a national ranking. Swap `counties` for `states`, `places`,
-`zctas`, `congressional-districts`, or one of the themed tract and block-group
-chunks; add `WHERE state = 'XX'` for one state; add `LOAD spatial;` to get
+out of a national ranking. Swap `counties/counties.parquet` for
+`states/states.parquet`, `places/places.parquet`, `zctas/zctas.parquet`,
+`congressional-districts/congressional-districts.parquet`, or for any themed
+chunk at `<geography>/<chunk>/<chunk>.parquet` — say
+`counties/county-income/county-income.parquet`, which is the same rows with
+23 columns instead of 112. Add `WHERE state = 'XX'` for one state; add
+`LOAD spatial;` to get
 `geometry` back as a `GEOMETRY` for point-in-polygon and distance work.
 
 Then read the agent guides, which carry the join keys, the NULL stories, and
@@ -60,8 +69,10 @@ Then read the agent guides, which carry the join keys, the NULL stories, and
 
 - [`catalog/AGENTS.md`](catalog/AGENTS.md) — cross-collection showcase queries
   and which collection answers which question
-- [`catalog/<collection>/AGENTS.md`](catalog/) — per-collection schema, quirks
-  and recipes
+- [`catalog/<geography>/AGENTS.md`](catalog/) — what the six collections at
+  one geography share, and when to step up or down a level
+- [`catalog/<geography>/<collection>/AGENTS.md`](catalog/) — per-collection
+  schema, quirks and recipes
 - [`catalog/llms.txt`](catalog/llms.txt) — the one-page orientation for an
   automated client
 
@@ -84,6 +95,7 @@ Run from the repo root, in order:
 | 1 | `bash tools/download_sources.sh`<br>`bash tools/download_blocks.sh` | ACS table-based Summary File tables, cartographic boundary files, TIGER blocks, PL 94-171 (plain HTTPS, no API key) into `staging/` |
 | 2 | `python3 tools/build_acs.py` | Parse national ACS tables, compute indicators with Census MOE formulas, join to boundary geometry → GeoParquet per collection |
 | 3 | `python3 tools/build_blocks.py` | 2020 PL 94-171 counts joined to TIGER blocks → `catalog/blocks/`, hive-partitioned by state |
+| 3b | `python3 tools/build_wide_themes.py --all` | Column-prune each wide all-indicators table into its five themed child collections (same rows, same values — nothing recomputed) |
 | 4 | `python3 tools/build_tile_staging.py`<br>`python3 tools/make_tiles.py --all` | PMTiles per collection via [tylertoo](https://github.com/geoparquet-io/tylertoo) `pyramid`: counties at z0–z5, tracts at the mid zooms, the collection's own features at the close zooms. The staging step builds the coarse-band inputs under `staging/agg/` |
 | 5 | `python3 tools/collection_meta.py --write` | `.portolan/metadata.yaml` per collection — titles, descriptions, processing notes, known issues. Must precede `portolan add`, which reads them |
 | 6 | `portolan add catalog/<collection>/ …` | The CLI writes each `collection.json` (and the 52 block items) |

@@ -103,7 +103,7 @@ Connecticut needs a crosswalk in those coarse bands. The 2020 block GEOIDs carry
 ## Related collections
 
 - [`block-groups/`](../block-groups/catalog.json) — ACS indicators at the finest geography the Bureau publishes income and housing data for. A block's block group is `substr(geoid, 1, 12)`.
-- [`tracts/`](../tracts/catalog.json), [`counties`](../counties/collection.json), [`states`](../states/collection.json) — coarser ACS geographies, all joinable by GEOID prefix.
+- [`tracts/`](../tracts/catalog.json), [`counties/`](../counties/AGENTS.md), [`states/`](../states/AGENTS.md) — coarser ACS geographies, all joinable by GEOID prefix. Each coarse geography is a group of five themed collections plus a wide all-indicator table ([`counties`](../counties/counties/collection.json), [`states`](../states/states/collection.json)).
 
 ## Example queries
 
@@ -237,7 +237,7 @@ FROM (
 → `789 | 1097379 | 1101801 | 0.4`. 3.7 s. All 789 Rhode Island block groups
 matched (nothing fell out of the join), the blocks sum to the published 2020
 count, and the ACS total is 0.4% higher — and equals the `RI` row in
-[`states`](../states/collection.json) exactly, as it must.
+[`states`](../states/states/collection.json) exactly, as it must.
 
 ### 5. All 52 partitions as one table
 

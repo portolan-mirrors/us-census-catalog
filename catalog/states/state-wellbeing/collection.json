@@ -1,0 +1,576 @@
+{
+  "type": "Collection",
+  "id": "states/state-wellbeing",
+  "stac_version": "1.1.0",
+  "description": "Health coverage, disability, nativity and income by race — the tables the Census Bureau does not publish for block groups, which is why this chunk has no block-group twin. The uninsured share and the share with a disability ([B27001](https://data.census.gov/table/ACSDT5Y2024.B27001), [B18101](https://data.census.gov/table/ACSDT5Y2024.B18101)), the foreign-born share ([B05002](https://data.census.gov/table/ACSDT5Y2024.B05002)), the group-quarters population ([B26001](https://data.census.gov/table/ACSDT5Y2024.B26001)), median household income for Black, non-Hispanic White, Asian and Hispanic householders ([B19013B](https://data.census.gov/table/ACSDT5Y2024.B19013B), [B19013H](https://data.census.gov/table/ACSDT5Y2024.B19013H), [B19013D](https://data.census.gov/table/ACSDT5Y2024.B19013D), [B19013I](https://data.census.gov/table/ACSDT5Y2024.B19013I)), and the poverty rate of the Black alone population ([B17020B](https://data.census.gov/table/ACSDT5Y2024.B17020B)).\n\nCurated indicators for all **56** states and state equivalents in the United States, Puerto Rico and the island areas, from the U.S. Census Bureau's [American Community Survey](https://www.census.gov/programs-surveys/acs.html) **2020–2024 5-year estimates** (`acsdt5y2024`, the table-based [Summary File](https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/)). The Census Bureau calls the ACS \"the premier source of detailed information about the nation's people and housing\". The Bureau also publishes 1-year estimates at this geography; the 5-year release is used throughout this catalog so every geography in it is the same vintage and directly comparable.\n\nEvery estimate ships with its margin of error — `<column>_moe`, at the 90% confidence level, the level the Census Bureau publishes — and the headline statistics also carry a coefficient of variation (`<column>_cv` = `moe / 1.645 / estimate`) so small-area noise can be flagged rather than mapped as if certain. Derived percentages propagate error with the Census Bureau's own formulas from [ACS Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf): sums add in quadrature, proportions use the subset formula with the ratio formula as fallback. ACS jam values for suppressed or unestimable cells are NULL here, never numbers, and medians are published as the Bureau publishes them — a median cannot be aggregated to a larger area. Each column's description names its ACS table, its exact universe, and the lines summed to make it.\n\nFifty-six rows: the 50 states, the District of Columbia, Puerto Rico and the four island areas. The island-area rows carry geometry and no ACS estimates, so every value column is NULL on 4 of 56 rows (**7.14%**), and the 52 rows that do carry data are the most reliable estimates in this catalog — no headline column has a median coefficient of variation above **0.037** (measured). `population_moe` is NULL on all 56 rows, so `population` here is a count to use rather than an estimate to put an interval on. All four race-iteration medians are published for every one of the 52 rows with ACS data, which is true at no other geography in this catalog: their median coefficients of variation run **0.005** (`median_hh_income_white_nh`) to **0.025** (`median_hh_income_asian`), measured.\n\nGeometries are the Census Bureau's [2024 cartographic boundary files](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) for states and state equivalents (GENZ2024, 1:500,000), reprojected to EPSG:4326 and joined on `GEOID`. Cartographic rather than TIGER/Line because TIGER extends census geographies into open water while the cartographic files clip to the shoreline, which is what a choropleth wants. The boundary vintage matches the estimate vintage.\n\nThe join is driven by geometry, so a geography with 2024 boundaries but no ACS tabulation keeps its row with NULL values instead of disappearing: 4 rows (American Samoa, Guam, the Northern Mariana Islands, the U.S. Virgin Islands) in the island areas, which have cartographic boundaries but no ACS 5-year estimates because the Island Areas run a separate decennial-only program. Keeping these rows means a national map has no holes and a consumer can see the absence; dropping them would make \"every US geography\" quietly mean something narrower.\n\nThis is one themed chunk of six at this geography. The other themes are [Income & Poverty](../state-income/collection.json), [People & Education](../state-people/collection.json), [Housing & Rent](../state-housing/collection.json) and [Commuting & Connectivity](../state-connectivity/collection.json), split that way so a consumer who wants one theme reads one file. Chunks at the same geography hold the same rows and the same geometry, so they join 1:1 on `geoid`. A sixth collection, [All Indicators](../states/collection.json), carries all 112 columns on the same rows in one wide table — at this many features width costs little, so take that one if a question crosses themes. GEOIDs nest by prefix: the first 2 characters of every county, tract, block-group, place and district GEOID in this catalog are its state's `geoid`. Every other geography in this catalog is organized the same way — [block groups](../../block-groups/catalog.json), [census tracts](../../tracts/catalog.json), [counties](../../counties/catalog.json), [ZCTAs](../../zctas/catalog.json), [places and CDPs](../../places/catalog.json) and [congressional districts](../../congressional-districts/catalog.json) — and the [blocks](../../blocks/collection.json) collection carries 2020 Decennial counts, a different survey and vintage rather than a finer version of these numbers.\n\nThe PMTiles archive carries the same columns as the GeoParquet, minus the `*_moe` columns, and at every zoom the tiles are the real census geographies — there are few enough features here to draw them all at a national zoom, so this archive needs none of the coarser-geography coarse-zoom bands the catalog's finer collections carry. Built with [tylertoo](https://github.com/geoparquet-io/tylertoo). Statistics still come from the GeoParquet: margins of error are not in the tiles.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "States"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./state-wellbeing.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Health, Disability & Income by Race — States (vector tiles)",
+      "pmtiles:layers": [
+        "state-wellbeing"
+      ]
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/states/state-wellbeing/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "MultiPolygon",
+  "geoparquet:feature_count": 56,
+  "title": "Health, Disability & Income by Race — States",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.146711,
+          17.88329,
+          -65.221081,
+          71.387815
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-01-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "state-wellbeing-tiles": {
+      "href": "./state-wellbeing.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 1776251,
+      "file:checksum": "1220891b7fce51ec69eb8d0c0c6d83cf780d77a155368848a751ba04a4a1905e03fb",
+      "roles": [
+        "data"
+      ],
+      "title": "Health, Disability & Income by Race — States (PMTiles)",
+      "pmtiles:layers": [
+        "state-wellbeing"
+      ]
+    },
+    "state-wellbeing": {
+      "href": "./state-wellbeing.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "Health, Disability & Income by Race — States (GeoParquet, national)",
+      "file:size": 4074179,
+      "file:checksum": "1220121b9051a16a6fe2d575f0358bb067cb7cc9f689578c5fe91a926f145268018a"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "People without health insurance",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "Share of the civilian non-institutionalized population with no health insurance coverage, pale yellow to deep red. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at 5.5%/6.5%/8.5%/9.5%/11%, which fall at the 23rd/44th/62nd/75th/85th percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2260,
+      "file:checksum": "12201302d211bc505231c9971cbafdb4fdc9ded4ab4674f668532c2fc97cadf49fd1"
+    },
+    "styles/disability": {
+      "href": "./styles/disability.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "People with a disability",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of the civilian non-institutionalized population reporting a disability, pale pink to deep magenta. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at 12%/13%/14%/15%/18%, which fall at the 13th/37th/56th/79th/96th percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2256,
+      "file:checksum": "122006772727a2fe0d36541b5ee4a0d023e24f5bb8d6f52167f52472a546f11f6d15"
+    },
+    "styles/foreign-born": {
+      "href": "./styles/foreign-born.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Foreign-born residents",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents born outside the United States, pale green to deep blue. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at 4.5%/6%/9.5%/15%/19%, which fall at the 19th/37th/62nd/77th/90th percentile of the national distribution. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2215,
+      "file:checksum": "12206e9dd404fc1ad3ade20925365d6ffb4dad5f4b8cde964722630dee32f71d7ab3"
+    },
+    "styles/income-black-households": {
+      "href": "./styles/income-black-households.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Median income, Black households",
+      "roles": [
+        "style"
+      ],
+      "description": "Median household income for Black or African American householders (ACS table B19013B), cividis navy (low) to gold (high). Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at $45k/$62.5k/$70k/$75k/$80k, which fall at the 17th/67th/85th/94th/96th percentile of the national distribution. Shares its breaks and ramp with the white non-Hispanic style, so switching between the two shows the gap directly; the Census publishes this estimate only where the state's Black household count supports one. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2538,
+      "file:checksum": "1220268c7d2ab4d05bf66a7ab48bcf41173fe2dcfe28d17f0490a536f4c0bbc1efb8"
+    },
+    "styles/income-white-households": {
+      "href": "./styles/income-white-households.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Median income, white non-Hispanic households",
+      "roles": [
+        "style"
+      ],
+      "description": "Median household income for white, non-Hispanic householders (ACS table B19013H), on the same scale as the Black-household style. Measured over all 52 states and state equivalents with a published value: 6 classes with breaks at $45k/$62.5k/$70k/$75k/$80k, which fall at the 2nd/4th/10th/23rd/44th percentile of the national distribution. Same breaks, ramp and opacity rule as the Black-household style — neither fades its noisy estimates, because fading only one of the pair would make the gap look like a difference in confidence. 7.14% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2558,
+      "file:checksum": "1220004fde26430119c3f03f6e2bf5d667ecda5e13b5990818ac44334f71bfdf824a"
+    },
+    "source-b01003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01003 — Total Population",
+      "description": "The upstream file this collection's B01003 columns were read from: one pipe-delimited row per geography, estimate (`B01003_E###`) and margin of error (`B01003_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18313708,
+      "file:checksum": "122038d1a992bb058d184009b10b9b34987279aee575e4323165cfb5706c69b6ca90"
+    },
+    "source-b05002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b05002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B05002 — Place of Birth by Nativity and Citizenship Status",
+      "description": "The upstream file this collection's B05002 columns were read from: one pipe-delimited row per geography, estimate (`B05002_E###`) and margin of error (`B05002_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B05002](https://data.census.gov/table/ACSDT5Y2024.B05002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 57767821,
+      "file:checksum": "12207c97161f6a299ba213b54acad4fc869bd993f438ca70287a61d5b857d98ba295"
+    },
+    "source-b17020b": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b17020b.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B17020B — Poverty Status in the Past 12 Months by Age (Black or African American Alone)",
+      "description": "The upstream file this collection's B17020B columns were read from: one pipe-delimited row per geography, estimate (`B17020B_E###`) and margin of error (`B17020B_M###`) side by side, for every summary level in one national file. Universe: Black or African American alone population for whom poverty status is determined. Served by census.gov, not by this mirror; see [B17020B](https://data.census.gov/table/ACSDT5Y2024.B17020B) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 34700797,
+      "file:checksum": "1220cc2cc99c52cb72f4f7d02af6a7630a06edb1e274e411f2f236181bd7d93031e7"
+    },
+    "source-b18101": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b18101.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B18101 — Sex by Age by Disability Status",
+      "description": "The upstream file this collection's B18101 columns were read from: one pipe-delimited row per geography, estimate (`B18101_E###`) and margin of error (`B18101_M###`) side by side, for every summary level in one national file. Universe: Civilian noninstitutionalized population. Served by census.gov, not by this mirror; see [B18101](https://data.census.gov/table/ACSDT5Y2024.B18101) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 86298310,
+      "file:checksum": "1220efd8f4945ac4c4986b9a7b9478b7b831e83cc1430e0ead22b2d1f47eae8d4ec4"
+    },
+    "source-b19013b": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013b.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013B — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Black or African American Alone Householder)",
+      "description": "The upstream file this collection's B19013B columns were read from: one pipe-delimited row per geography, estimate (`B19013B_E###`) and margin of error (`B19013B_M###`) side by side, for every summary level in one national file. Universe: Households with a householder who is Black or African American alone. Served by census.gov, not by this mirror; see [B19013B](https://data.census.gov/table/ACSDT5Y2024.B19013B) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 11123180,
+      "file:checksum": "12200d0ad5b366e22a2445516122612cc71b7feca316538c54389d59206d56d7b1ad"
+    },
+    "source-b19013d": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013d.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013D — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Asian Alone Householder)",
+      "description": "The upstream file this collection's B19013D columns were read from: one pipe-delimited row per geography, estimate (`B19013D_E###`) and margin of error (`B19013D_M###`) side by side, for every summary level in one national file. Universe: Households with a householder who is Asian alone. Served by census.gov, not by this mirror; see [B19013D](https://data.census.gov/table/ACSDT5Y2024.B19013D) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 11426298,
+      "file:checksum": "12207f9af08358370f2f4bda551aedb604184faaa0c47e0984105d86e7ec1236635d"
+    },
+    "source-b19013h": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013h.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013H — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (White Alone, Not Hispanic or Latino Householder)",
+      "description": "The upstream file this collection's B19013H columns were read from: one pipe-delimited row per geography, estimate (`B19013H_E###`) and margin of error (`B19013H_M###`) side by side, for every summary level in one national file. Universe: Households with a householder who is White alone, not Hispanic or Latino. Served by census.gov, not by this mirror; see [B19013H](https://data.census.gov/table/ACSDT5Y2024.B19013H) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 9545492,
+      "file:checksum": "1220827fd88b8d0cb1d741d2151b2f55073dc7c32d5c2d9f32201abfab7ea97afc65"
+    },
+    "source-b19013i": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013i.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013I — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars) (Hispanic or Latino Householder)",
+      "description": "The upstream file this collection's B19013I columns were read from: one pipe-delimited row per geography, estimate (`B19013I_E###`) and margin of error (`B19013I_M###`) side by side, for every summary level in one national file. Universe: Households with a householder who is Hispanic or Latino. Served by census.gov, not by this mirror; see [B19013I](https://data.census.gov/table/ACSDT5Y2024.B19013I) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 10738686,
+      "file:checksum": "12204e171f70f9ffabeb904a4a16a029a30c330aa1dbc2c3500a71d6e365244681df"
+    },
+    "source-b26001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b26001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B26001 — Group Quarters Population",
+      "description": "The upstream file this collection's B26001 columns were read from: one pipe-delimited row per geography, estimate (`B26001_E###`) and margin of error (`B26001_M###`) side by side, for every summary level in one national file. Universe: Population in group quarters. Served by census.gov, not by this mirror; see [B26001](https://data.census.gov/table/ACSDT5Y2024.B26001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 7328564,
+      "file:checksum": "12207c2991c91ec5de57bbe79c589e27f7f5f1cd753dbb540adb8662fb8d97aec726"
+    },
+    "source-b27001": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b27001.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B27001 — Health Insurance Coverage Status by Sex by Age",
+      "description": "The upstream file this collection's B27001 columns were read from: one pipe-delimited row per geography, estimate (`B27001_E###`) and margin of error (`B27001_M###`) side by side, for every summary level in one national file. Universe: Civilian noninstitutionalized population. Served by census.gov, not by this mirror; see [B27001](https://data.census.gov/table/ACSDT5Y2024.B27001) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 119572124,
+      "file:checksum": "1220af9b1cad8178ebc85fa96a32b615a3f7a5f98ead7afabc68922614c68eb976ad"
+    },
+    "source-table-shells": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 5-year table shells",
+      "description": "`Table ID|Line|Indent|Unique ID|Label|Title|Universe|Type` for every table in the release. Two jobs here: every line number the build reads is pinned against this file and a vintage that renumbers a line fails the build, and every universe quoted in the column descriptions is this file's own `Universe` field. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 5622840,
+      "file:checksum": "12205b46f4af873744a415c4974204010db976e2a61ff916674732f81c496a6b517d"
+    },
+    "source-cartographic-boundaries": {
+      "href": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_state_500k.zip",
+      "type": "application/zip",
+      "title": "2024 cartographic boundary file — states and state equivalents (1:500,000, national)",
+      "description": "The geometry this collection joins onto, shoreline-clipped and generalized for mapping. Only the join key, the name parts and the land-area field are kept; reprojected from NAD83 to EPSG:4326 with ogr2ogr. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 3242450,
+      "file:checksum": "12203e81cbb6cf5f60d9b01ef3e730afa14d61ce5f784252a0b33a696135e71447bc"
+    },
+    "doc-acs-handbook": {
+      "href": "https://www.census.gov/programs-surveys/acs/library/handbooks/general.html",
+      "type": "text/html",
+      "title": "Understanding and Using American Community Survey Data — Census Bureau handbooks",
+      "description": "The Bureau's own guidance on what ACS estimates can and cannot support: 1-year versus 5-year releases, margins of error, comparing across vintages, and small-area reliability. Read it before drawing a conclusion from a single block group.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-accuracy": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf",
+      "type": "application/pdf",
+      "title": "ACS Accuracy of the Data (2024, multiyear estimates)",
+      "description": "The source of every margin-of-error formula this build applies: quadrature for sums, the proportion formula and its ratio fallback for percentages, and the definition of the published 90% confidence level.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 387987,
+      "file:checksum": "12204d3258202e02828c55e95312573f48c83e2fee26f5967fcf817c273b154741ad"
+    },
+    "doc-acs-subject-definitions": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/subject_definitions/2024_ACSSubjectDefinitions.pdf",
+      "type": "application/pdf",
+      "title": "ACS 2024 Subject Definitions",
+      "description": "The Census Bureau's definitions of the concepts behind these columns — household, householder, gross rent, poverty status determined, group quarters, means of transportation to work, disability. Where a column description here says what a universe is, this is the document it is saying it from.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 1170567,
+      "file:checksum": "12206e0c5b1a5d3ebf7e300e583ac6424cbd5f09de50d69e7ef03aa6d070d9c4a7a8"
+    },
+    "doc-geo-glossary": {
+      "href": "https://www.census.gov/programs-surveys/geography/about/glossary.html",
+      "type": "text/html",
+      "title": "Census Bureau geography program glossary",
+      "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "ACS",
+    "American Community Survey",
+    "demographics",
+    "United States",
+    "margins of error",
+    "health insurance",
+    "disability",
+    "foreign-born",
+    "income by race",
+    "group quarters",
+    "equity",
+    "states"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/acs.html",
+      "concepts": [
+        {
+          "id": "acs5",
+          "title": "American Community Survey 5-year estimates"
+        }
+      ]
+    }
+  ],
+  "table:row_count": 56,
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "2-character state FIPS code, e.g. `29` for Missouri. Covers the 50 states, the District of Columbia, Puerto Rico and the four island areas. Matches `GEOID` in the 2024 cartographic boundary state file; the ACS `0400000US` prefix is stripped."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "State name from the cartographic boundary state file's `NAME` field — \"Missouri\"."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Two-letter USPS state or territory code (`MO`, `PR`, `GU`). Carried on every collection from the `STATEFP → USPS` lookup embedded in `tools/specs.py` rather than read off the boundary files, because the 2024 cartographic boundary block-group file has no `STUSPS` column while the tract, county and state files do."
+    },
+    {
+      "name": "population",
+      "type": "int64",
+      "description": "Total population. Universe: total population. The single line of [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) (Total Population), published as an integer. Carried on every ACS collection so a rate can be weighted or sanity-checked without a second download. NULL on 4 of 56 rows: American Samoa, Guam, the Northern Mariana Islands and the U.S. Virgin Islands have boundaries here but no ACS 5-year data, because the island areas run a separate decennial-only program. 52 rows carry data."
+    },
+    {
+      "name": "population_moe",
+      "type": "double",
+      "description": "Margin of error for `population` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND / 1e6` from the cartographic boundary file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+    },
+    {
+      "name": "pop_density",
+      "type": "double",
+      "description": "People per square kilometre of land area, rounded to 1 decimal: `population / aland_sqkm`. NULL where `ALAND` is 0 or `population` is NULL."
+    },
+    {
+      "name": "pct_uninsured",
+      "type": "double",
+      "description": "Percent of the civilian noninstitutionalized population with no health insurance coverage. Universe: civilian noninstitutionalized population — people on active duty and people in institutions are outside it. The \"No health insurance coverage\" lines of [B27001](https://data.census.gov/table/ACSDT5Y2024.B27001) over line 1, resolved from the table shells by label (9 age groups × 2 sexes = 18 lines for this vintage) rather than hardcoded. Not published for block groups, which is why there is no block-group twin of this collection."
+    },
+    {
+      "name": "pct_uninsured_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_uninsured` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_uninsured_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_uninsured`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_with_disability",
+      "type": "double",
+      "description": "Percent of the civilian noninstitutionalized population with a disability, as the ACS's six-question sequence defines it (hearing, vision, cognitive, ambulatory, self-care, independent living). Universe: civilian noninstitutionalized population. The \"With a disability\" lines of [B18101](https://data.census.gov/table/ACSDT5Y2024.B18101) over line 1, resolved from the shells by label (6 age groups × 2 sexes = 12 lines for this vintage)."
+    },
+    {
+      "name": "pct_with_disability_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_with_disability` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_with_disability_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_with_disability`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_foreign_born",
+      "type": "double",
+      "description": "Percent of the population that is foreign-born — anyone not a U.S. citizen at birth, naturalized citizens included. Universe: total population. Line 13 (\"Foreign-born\") over line 1 of [B05002](https://data.census.gov/table/ACSDT5Y2024.B05002) (Place of Birth by Nativity and Citizenship Status). People born abroad to American parents (line 12) are native-born and are not in this share."
+    },
+    {
+      "name": "pct_foreign_born_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_foreign_born` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "group_quarters_pop",
+      "type": "int64",
+      "description": "Population living in group quarters — correctional facilities, nursing facilities, college and university housing, military quarters, group homes, shelters. Universe: population in group quarters. Line 1 of [B26001](https://data.census.gov/table/ACSDT5Y2024.B26001), published as an integer. A large value next to a small household population usually explains an odd median: a prison or a dorm dominates the geography."
+    },
+    {
+      "name": "group_quarters_pop_moe",
+      "type": "double",
+      "description": "Margin of error for `group_quarters_pop` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "median_hh_income_black",
+      "type": "double",
+      "description": "Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Black or African American alone. Universe: households with a householder who is Black or African American alone. Line 1 of [B19013B](https://data.census.gov/table/ACSDT5Y2024.B19013B), the B race iteration of [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013). Classified by the householder's race, not by every member's."
+    },
+    {
+      "name": "median_hh_income_black_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income_black` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_black_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income_black`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "median_hh_income_white_nh",
+      "type": "double",
+      "description": "Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is White alone, not Hispanic or Latino. Universe: households with a householder who is White alone, not Hispanic or Latino. Line 1 of [B19013H](https://data.census.gov/table/ACSDT5Y2024.B19013H) (the H iteration)."
+    },
+    {
+      "name": "median_hh_income_white_nh_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income_white_nh` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_white_nh_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income_white_nh`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "median_hh_income_asian",
+      "type": "double",
+      "description": "Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Asian alone. Universe: households with a householder who is Asian alone. Line 1 of [B19013D](https://data.census.gov/table/ACSDT5Y2024.B19013D) (the D iteration)."
+    },
+    {
+      "name": "median_hh_income_asian_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income_asian` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_asian_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income_asian`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "median_hh_income_hispanic",
+      "type": "double",
+      "description": "Median household income in the past 12 months (2024 inflation-adjusted dollars) for households whose householder is Hispanic or Latino, of any race. Universe: households with a householder who is Hispanic or Latino. Line 1 of [B19013I](https://data.census.gov/table/ACSDT5Y2024.B19013I) (the I iteration)."
+    },
+    {
+      "name": "median_hh_income_hispanic_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income_hispanic` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "median_hh_income_hispanic_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `median_hh_income_hispanic`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "pct_below_poverty_black",
+      "type": "double",
+      "description": "Percent of the Black or African American alone population below the poverty level. Universe: Black or African American alone population for whom poverty status is determined — a race-specific universe, so this is not comparable to `pct_below_poverty`'s denominator. Line 2 (\"Income in the past 12 months below poverty level\") over line 1 of [B17020B](https://data.census.gov/table/ACSDT5Y2024.B17020B)."
+    },
+    {
+      "name": "pct_below_poverty_black_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_poverty_black` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "pct_below_poverty_black_cv",
+      "type": "double",
+      "description": "Coefficient of variation for `pct_below_poverty_black`: `moe / 1.645 / estimate`, rounded to 3 decimals — the standard error as a fraction of the estimate, with 1.645 converting the published 90% margin back to a standard error. A rule of thumb: under 0.12 reliable, 0.12–0.40 use with caution, over 0.40 unreliable. NULL when the estimate is NULL or 0, or the margin of error is NULL. Published on the headline statistics so a map can grey out the geographies whose value is swamped by its own error instead of drawing them as if certain."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2024 cartographic boundary state file (GENZ2024, 1:500,000), which clips to the shoreline — TIGER/Line would extend the state into open water. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z"
+}
