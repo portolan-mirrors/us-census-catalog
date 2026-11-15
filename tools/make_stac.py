@@ -563,7 +563,20 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
 
     f.write_text(json.dumps(coll, indent=2, ensure_ascii=False) + "\n")
 
-    # Items (the block partitions): type, role, size and checksum.
+    # Items (the block partitions): type, role, size and checksum — plus the
+    # column documentation and the parent PMTiles with its styles, so an item
+    # page describes its schema and renders a map without a hop back to the
+    # collection. The copied assets keep the collection's file:size and
+    # file:checksum stamps (same files), so nothing is re-hashed per item.
+    item_extras = {}
+    for key, a in {**assets, **styles}.items():
+        href = a.get("href", "")
+        if href.endswith(".pmtiles") or key.startswith("styles/"):
+            c = dict(a)
+            c["href"] = "../" + href[2:] if href.startswith("./") else href
+            item_extras[key] = c
+    item_exts = {e for e in coll.get("stac_extensions", [])
+                 if "/table/" in e or "/file/" in e}
     n_items = 0
     for item_path in sorted(coll_dir.glob("**/*.json")):
         if item_path.name == "collection.json" or "styles" in item_path.parts:
@@ -574,8 +587,17 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
             continue
         if item.get("type") != "Feature":
             continue
-        for asset in item.get("assets", {}).values():
-            if asset.get("href", "").endswith(".parquet"):
+        item["stac_extensions"] = sorted(
+            set(item.get("stac_extensions", [])) | item_exts)
+        item.setdefault("properties", {})["table:columns"] = \
+            coll["table:columns"]
+        item.setdefault("assets", {}).update(
+            json.loads(json.dumps(item_extras)))
+        for asset in item["assets"].values():
+            href = asset.get("href", "")
+            if href.startswith("../"):
+                continue  # parent-dir copies already carry their stamps
+            if href.endswith(".parquet"):
                 asset["type"] = PARQUET_TYPE
                 asset.setdefault("roles", ["data"])
             stamp_asset(item_path.parent, asset, checksums)

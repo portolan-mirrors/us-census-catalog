@@ -2,6 +2,8 @@
   "type": "Feature",
   "stac_version": "1.1.0",
   "stac_extensions": [
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/vector/v0.1.0/schema.json"
   ],
   "id": "54",
@@ -144,7 +146,139 @@
     "vector:geometry_types": [
       "Polygon"
     ],
-    "datetime": "2020-04-01T00:00:00Z"
+    "datetime": "2020-04-01T00:00:00Z",
+    "table:columns": [
+      {
+        "name": "geoid",
+        "type": "string",
+        "description": "15-character 2020 census block GEOID — state (2) + county (3) + tract (6) + block (4), e.g. `020130001001000`. The geoheader's `GEOCODE` field, not its `GEOID` (which carries a `7500000US` summary-level prefix); the build asserts `GEOCODE == STATE || COUNTY || TRACT || BLOCK` on every row. `substr(geoid, 1, 12)` is the block group, so blocks join the ACS block-group collections by prefix."
+      },
+      {
+        "name": "state",
+        "type": "string",
+        "description": "Two-letter USPS state or territory code (`MO`, `PR`, `GU`). Carried on every collection from the `STATEFP → USPS` lookup embedded in `tools/specs.py` rather than read off the boundary files, because the 2024 cartographic boundary block-group file has no `STUSPS` column while the tract, county and state files do. In the block collection this sits alongside the hive partition key `state_fips`, which carries the numeric FIPS code."
+      },
+      {
+        "name": "pop_total",
+        "type": "int32",
+        "description": "Total population of the block, from the 2020 Decennial Census. Universe: total population. Table P1, cell 1 (`P0010001`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1). Read from the 2020 P.L. 94-171 redistricting file at the field position pinned in `docs/blocks-build-notes.md` against the Census Bureau's own R import scripts. A complete count, not a survey estimate, so there is no margin of error — but it is protected by the 2020 disclosure-avoidance system, which injects noise at the block level and exact-counts states. Blocks tile their state exhaustively: summed over the 50 states and DC this column equals 331,449,281, the published 2020 resident population, exactly. 28.97% of all 8,174,955 blocks have a population of 0 (measured)."
+      },
+      {
+        "name": "pop_white",
+        "type": "int32",
+        "description": "Population reporting White alone. Universe: total population. Table P1, cell 3 (`P0010003`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1) — a race-alone count, crossing Hispanic origin, so it is not comparable to `pop_white_nh`."
+      },
+      {
+        "name": "pop_black",
+        "type": "int32",
+        "description": "Population reporting Black or African American alone. Universe: total population. Table P1, cell 4 (`P0010004`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1). Race alone, crossing Hispanic origin."
+      },
+      {
+        "name": "pop_aian",
+        "type": "int32",
+        "description": "Population reporting American Indian and Alaska Native alone. Universe: total population. Table P1, cell 5 (`P0010005`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1)."
+      },
+      {
+        "name": "pop_asian",
+        "type": "int32",
+        "description": "Population reporting Asian alone. Universe: total population. Table P1, cell 6 (`P0010006`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1)."
+      },
+      {
+        "name": "pop_nhpi",
+        "type": "int32",
+        "description": "Population reporting Native Hawaiian and Other Pacific Islander alone. Universe: total population. Table P1, cell 7 (`P0010007`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1)."
+      },
+      {
+        "name": "pop_other",
+        "type": "int32",
+        "description": "Population reporting Some Other Race alone. Universe: total population. Table P1, cell 8 (`P0010008`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1)."
+      },
+      {
+        "name": "pop_two_plus",
+        "type": "int32",
+        "description": "Population reporting two or more races. Universe: total population. Table P1, cell 9 (`P0010009`) of [P1](https://data.census.gov/table/DECENNIALPL2020.P1). The seven race-alone columns plus this one sum exactly to `pop_total`; P1's cell 2 (\"Population of one race\") is an intermediate subtotal and is deliberately not carried, which is why the sum closes."
+      },
+      {
+        "name": "pop_hispanic",
+        "type": "int32",
+        "description": "Population of Hispanic or Latino origin, of any race. Universe: total population. Table P2, cell 2 (`P0020002`) of [P2](https://data.census.gov/table/DECENNIALPL2020.P2). Hispanic origin is asked separately from race, so this crosses all seven race columns."
+      },
+      {
+        "name": "pop_white_nh",
+        "type": "int32",
+        "description": "Population reporting White alone and not Hispanic or Latino. Universe: total population. Table P2, cell 5 (`P0020005`) of [P2](https://data.census.gov/table/DECENNIALPL2020.P2) — the not-Hispanic branch, so this is a subset of `pop_white` and the two are not interchangeable."
+      },
+      {
+        "name": "vap_total",
+        "type": "int32",
+        "description": "Voting-age population: people 18 years and over. Universe: population 18 years and over. Table P3, cell 1 (`P0030001`) of [P3](https://data.census.gov/table/DECENNIALPL2020.P3). The table this column comes from is the one P.L. 94-171 exists to publish — the race detail behind redistricting — and `pop_total − vap_total` is the under-18 population."
+      },
+      {
+        "name": "housing_units",
+        "type": "int32",
+        "description": "Total housing units in the block, occupied and vacant. Universe: housing units. Table H1, cell 1 (`H0010001`) of [H1](https://data.census.gov/table/DECENNIALPL2020.H1). A complete count of units, not of households."
+      },
+      {
+        "name": "housing_occupied",
+        "type": "int32",
+        "description": "Occupied housing units. Universe: housing units. Table H1, cell 2 (`H0010002`) of [H1](https://data.census.gov/table/DECENNIALPL2020.H1). `housing_occupied + housing_vacant == housing_units` holds on every block in this collection; the build checks it (0 violations)."
+      },
+      {
+        "name": "housing_vacant",
+        "type": "int32",
+        "description": "Vacant housing units. Universe: housing units. Table H1, cell 3 (`H0010003`) of [H1](https://data.census.gov/table/DECENNIALPL2020.H1). Includes seasonal, for-rent and for-sale units, so it is not a measure of abandonment."
+      },
+      {
+        "name": "group_quarters_pop",
+        "type": "int32",
+        "description": "Population living in group quarters — correctional facilities, juvenile facilities, nursing facilities, college/university housing, military quarters, other group quarters. Universe: population in group quarters. Table P5, cell 1 (`P0050001`) of [P5](https://data.census.gov/table/DECENNIALPL2020.P5). Group-quarters residents are included in `pop_total` but live in no housing unit, which is how a block can hold hundreds of people and few or no units."
+      },
+      {
+        "name": "pct_white_nh",
+        "type": "double",
+        "description": "`pop_white_nh` as a percent of `pop_total`, 2 decimals. Universe: total population. NULL where `pop_total` is 0 — 28.97% of blocks (measured), because roughly three in ten census blocks are unpopulated by design. That is a property of census blocks, not missing data: filter `pop_total > 0` before averaging."
+      },
+      {
+        "name": "pct_black",
+        "type": "double",
+        "description": "`pop_black` as a percent of `pop_total`, 2 decimals. Universe: total population — and note the numerator is race-alone, crossing Hispanic origin, unlike the ACS collections' `pct_black`. NULL where `pop_total` is 0 (28.97% of blocks, measured)."
+      },
+      {
+        "name": "pct_hispanic",
+        "type": "double",
+        "description": "`pop_hispanic` as a percent of `pop_total`, 2 decimals. Universe: total population. NULL where `pop_total` is 0 (28.97% of blocks, measured)."
+      },
+      {
+        "name": "pct_vacant",
+        "type": "double",
+        "description": "`housing_vacant` as a percent of `housing_units`, 2 decimals. Universe: housing units. NULL where the block has no housing units — 27.64% of blocks (measured)."
+      },
+      {
+        "name": "pop_density",
+        "type": "double",
+        "description": "People per square kilometre of land area, rounded to 1 decimal: `pop_total / aland_sqkm`. NULL where `ALAND20` is 0 — a water-only block has no land to divide by; 2.92% of the 8,174,955 blocks are NULL on this column (measured)."
+      },
+      {
+        "name": "aland_sqkm",
+        "type": "double",
+        "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND20 / 1e6` from the TIGER/Line 2024 block file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+      },
+      {
+        "name": "geometry",
+        "type": "binary",
+        "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. TIGER/Line 2024 `TABBLOCK20`, which is **not** shoreline-clipped: a coastal block extends to the 3-mile limit. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+      },
+      {
+        "name": "bbox",
+        "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+        "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+      },
+      {
+        "name": "state_fips",
+        "type": "string",
+        "description": "Hive partition key, synthesized from the directory name when the `state_fips=*/*.parquet` glob is read — the 2-digit state FIPS code of the partition. Not a column in the parquet files themselves. Named `state_fips` rather than `state` so it does not shadow the USPS `state` column."
+      }
+    ]
   },
   "links": [
     {
@@ -174,6 +308,75 @@
       "roles": [
         "data"
       ]
+    },
+    "blocks-tiles": {
+      "href": "../blocks.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 7067134582,
+      "file:checksum": "12202a415c3722a13bd9b848f223494e63098dbf50315ff12e8dc6e2631a2f6ce260",
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Census Counts — Blocks (PMTiles)",
+      "pmtiles:layers": [
+        "blocks"
+      ]
+    },
+    "styles/black-share": {
+      "href": "../styles/black-share.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Black share",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents who are Black or African American alone, pale to deep green. Measured over all 5,806,512 blocks with a published value: 6 classes with breaks at 1%/5%/15%/35%/65%, which fall at the 59th/70th/82nd/91st/95th percentile of the national distribution. 28.97% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2126,
+      "file:checksum": "122033e39965bda6b40e0f5c3f84329c2f2cc9c5b18e1c1f87afe73e486a5a120f6e"
+    },
+    "styles/default": {
+      "href": "../styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Population density",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "People per square kilometre of land area on roughly logarithmic steps, pale cream to deep plum; the lowest class is almost entirely the blocks with no residents at all. Measured over all 7,936,543 blocks with a published value: 7 classes with breaks at 1/10/50/200/800/2,500 people per km², which fall at the 28th/35th/44th/51st/63rd/84th percentile of the national distribution.",
+      "file:size": 1928,
+      "file:checksum": "1220b991a40181c557de0d01e079ec95c13fd7d05d017fd21fbc5798d8e614a5590b"
+    },
+    "styles/hispanic-share": {
+      "href": "../styles/hispanic-share.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Hispanic or Latino share",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents who are Hispanic or Latino of any race, pale apricot to burnt orange. Measured over all 5,806,512 blocks with a published value: 6 classes with breaks at 2%/6%/15%/30%/60%, which fall at the 40th/51st/68th/82nd/92nd percentile of the national distribution. 28.97% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2160,
+      "file:checksum": "12201b3ef825813bd33c39e8df024de30cc6f5546ec2345afc957c7e17764ddd83b4"
+    },
+    "styles/vacancy": {
+      "href": "../styles/vacancy.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Vacant housing units",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of housing units vacant on Census Day 2020, cream to dark red; blocks with no housing units draw as no data, not as zero. Measured over all 5,915,599 blocks with a published value: 6 classes with breaks at 5%/15%/30%/50%/75%, which fall at the 69th/77th/83rd/87th/91st percentile of the national distribution. 27.64% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2190,
+      "file:checksum": "1220f1f940ba184c34d2c29f2ee0cad666f708857771490827f8bfae0ccb9144221a"
+    },
+    "styles/white-share": {
+      "href": "../styles/white-share.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "White, non-Hispanic share",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of residents who are white alone and not Hispanic or Latino, pale to deep blue. Measured over all 5,806,512 blocks with a published value: 7 classes with breaks at 10%/30%/50%/70%/85%/95%, which fall at the 12th/20th/30th/47th/65th/80th percentile of the national distribution. 28.97% have no published value and draw in neutral gray rather than as a low value.",
+      "file:size": 2218,
+      "file:checksum": "1220f4c680bf5b649151e40ce2c26d0f77f48d39bac8d1b0ed20c411825107b5f2a4"
     }
   },
   "collection": "blocks"
