@@ -1,0 +1,263 @@
+{
+  "type": "Collection",
+  "id": "reference/landmarks-point",
+  "stac_version": "1.1.0",
+  "description": "Point landmarks from [TIGER/Line 2024 `POINTLM`](https://www2.census.gov/geo/tiger/TIGER2024/POINTLM/): all **1,088,085** features, one file per state (56 state and territory files), each carrying the `state` USPS code its source file was read from.\n\n`feature_type` decodes each row's `mtfcc` the same way landmarks-area does. Measured nationally, most of these points are cul-de-sacs and locality points — address-system landmarks, not places a person would look for on a map — followed by cemeteries, mountain peaks and summits, and airports or airfields.\n\nThe PMTiles archive is a single band at full resolution, built with [tylertoo](https://github.com/geoparquet-io/tylertoo) `tiles` (not `pyramid` — there is no coarser geography to step up to below this collection, so every zoom draws this collection's own features, thinned to fit the tile-size cap where a zoom is too dense to draw in full). Statistics come from the GeoParquet; this collection has no `*_moe` columns to exclude.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-point/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Reference Geography"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./landmarks-point.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Landmarks — Point (vector tiles)",
+      "pmtiles:layers": [
+        "landmarks-point"
+      ]
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "Point",
+  "geoparquet:feature_count": 1088085,
+  "pmtiles:min_zoom": 0,
+  "pmtiles:max_zoom": 14,
+  "pmtiles:tile_type": "mvt",
+  "pmtiles:center": [
+    0.4530809,
+    28.5196255,
+    7
+  ],
+  "pmtiles:layers": [
+    "landmarks-point"
+  ],
+  "title": "Landmarks — Point",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -178.791666,
+          -14.346304,
+          -64.565687,
+          71.385555
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-04-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "landmarks-point-tiles": {
+      "href": "./landmarks-point.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 196237881,
+      "file:checksum": "1220df3e75bf57c5df97b8c461809cbadb1f7749c4813f6f9a76ff7109039c472a53",
+      "proj:code": "EPSG:4269",
+      "roles": [
+        "data"
+      ],
+      "title": "Landmarks — Point (PMTiles)",
+      "pmtiles:layers": [
+        "landmarks-point"
+      ]
+    },
+    "landmarks-point": {
+      "href": "./landmarks-point.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "Landmarks — Point (GeoParquet, national)",
+      "file:size": 46357443,
+      "file:checksum": "1220da3fbef9063d21f467d03a4a72ed10816e6a36686b2bbaebe52588faf89c2cba"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Landmarks — Point rendered with the default style",
+      "file:size": 80697,
+      "file:checksum": "122070bdfe563e17b23c2654f8aeac6c740ea30a020a1c395d9685eaa54410dfd36a"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Landmark type",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "The five most common point-landmark types nationally -- most of them cul-de-sacs and locality points, address-system landmarks rather than places -- each its own color; every other type draws neutral gray. Measured over all 1,088,085 landmarks with a value: Cul-de-sac (668,308), Locality Point (208,547), Cemetery (103,934), Mountain Peak or Summit (63,097), Airport or Airfield (13,146), and 31,053 other types in neutral gray.",
+      "file:size": 1666,
+      "file:checksum": "1220940e1b03cc7aa78d0806ab7a73517eba15ba872c756771dbbed1acd21bb203e2"
+    },
+    "source-pointlm": {
+      "href": "https://www2.census.gov/geo/tiger/TIGER2024/POINTLM/",
+      "type": "text/html",
+      "title": "TIGER/Line 2024 POINTLM — point landmarks, state directory",
+      "description": "56 state and territory shapefiles (`tl_2024_<FIPS>_pointlm.zip`), this collection's source.",
+      "roles": [
+        "source"
+      ]
+    },
+    "doc-mtfcc": {
+      "href": "https://www2.census.gov/geo/pdfs/reference/mtfccs2022.pdf",
+      "type": "application/pdf",
+      "title": "2022 MAF/TIGER Feature Class Code Definitions",
+      "description": "The code -> name table `feature_type` was decoded from. TIGER2024 has no 2024 edition of this PDF; 2022 is the nearest published vintage, linked from the Bureau's own index at https://www.census.gov/library/reference/code-lists/mt-feature-class-codes.html. The code set is unchanged between the two: every code this build used also appears, worded the same, in the 2021 and 2025 editions.",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "TIGER/Line",
+    "geography",
+    "United States",
+    "landmarks",
+    "POINTLM",
+    "MTFCC",
+    "points of interest",
+    "cul-de-sac",
+    "TIGER"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/geography.html",
+      "concepts": [
+        {
+          "id": "tiger-line",
+          "title": "TIGER/Line and geographic relationship files"
+        }
+      ]
+    }
+  ],
+  "table:row_count": 1088085,
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "`POINTID`, from TIGER's internal address/point ID scheme -- not a census tabulation GEOID."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "`FULLNAME`."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "USPS code of the state file this row was read from."
+    },
+    {
+      "name": "mtfcc",
+      "type": "string",
+      "description": "`MTFCC`."
+    },
+    {
+      "name": "feature_type",
+      "type": "string",
+      "description": "`mtfcc` decoded through the 2022 MAF/TIGER Feature Class Code list. The two largest categories nationally (measured, 1,088,085 rows total) are Cul-de-sac (668,308) and Locality Point (208,547) -- both address-system landmarks, not places."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Landmark point, WKB-encoded. Written in the source CRS, NAD83 (EPSG:4269) -- unlike the ACS collections, this is kept rather than reprojected to WGS84/OGC:CRS84, so the GeoParquet `geo` metadata carries an explicit `crs` key."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct for the row's geometry (a point's own coordinates, repeated), written by gpio."
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z"
+}

@@ -110,7 +110,16 @@ SOURCES = {
     "congressional-districts": ("congressional-districts",
                                 "congressional-districts.parquet"),
     "blocks": ("blocks", "state_fips=*/*.parquet"),
+    # reference/ (2026-11-15): geography with no demographic columns.
+    "urban-areas": ("reference/urban-areas", "urban-areas.parquet"),
+    "landmarks-area": ("reference/landmarks-area", "landmarks-area.parquet"),
+    "landmarks-point": ("reference/landmarks-point",
+                        "landmarks-point.parquet"),
 }
+
+# Point collections need a `circle` layer, not the `fill`/`line` pair every
+# polygon collection gets. landmarks-point is the only one in this catalog.
+POINT_COLLECTIONS = {"landmarks-point"}
 
 # What one feature is, for prose: (singular, plural). The states collection
 # holds 50 states plus DC, Puerto Rico and four Island Areas, so its plural
@@ -136,6 +145,9 @@ UNIT = {
     "places": ("place", "places"),
     "congressional-districts": ("district", "districts"),
     "blocks": ("block", "blocks"),
+    "urban-areas": ("urban area", "urban areas"),
+    "landmarks-area": ("landmark", "landmarks"),
+    "landmarks-point": ("landmark", "landmarks"),
 }
 
 # ---------------------------------------------------------------------------
@@ -232,6 +244,31 @@ class S:
         self.breaks, self.ramp, self.blurb = breaks, ramp, blurb
         self.fmt, self.default, self.note = fmt, default, note
         self.fade = fade  # False keeps a pair of styles visually comparable
+
+
+class M:
+    """One categorical style: a `match` on a label column, not a `step` on
+    a number. Used for reference/ -- feature_type and landmark_kind are
+    text, not a measured quantity, so there is no break to choose.
+
+    `categories` is every value drawn its own color, in legend order; any
+    other value (including a value this build could not decode) draws
+    `other_color`. `--measure` counts every category named here, and the
+    generator refuses to publish a style with a zero-count category -- see
+    the module docstring's "any class is empty" rule, which this extends
+    from step classes to match branches.
+    """
+
+    def __init__(self, file, name, col, categories, colors, blurb,
+                 other_color=NODATA, default=False):
+        assert len(categories) == len(colors), (
+            f"{file}: {len(categories)} categories need {len(categories)} "
+            f"colors, got {len(colors)}")
+        self.file, self.name, self.col = file, name, col
+        self.categories, self.colors = categories, colors
+        self.blurb, self.default = blurb, default
+        self.other_color = other_color
+        self.breaks = None  # marks this style as categorical, not numeric
 
 
 # -- income: ACS 2020-2024, block groups and tracts -------------------------
@@ -757,6 +794,79 @@ STYLES["blocks"] = [
 ]
 
 
+# -- reference/ (2026-11-15): geography with no demographic columns --------
+# No ACS or decennial statistic touches these four collections, so there is
+# no income or density to class on. urban-areas has no urban/urbanized
+# split to style on either: TIGER2024's UAC20 carries a single MTFCC
+# (G3500, "Urban Area") and a single LSAD for every one of its 2,644
+# features -- the 2010-era UATYP10 class this spec asked to style on does
+# not exist in the 2020 urban area product, so the default style classes
+# on land area instead, which the docstring's "class breaks measured from
+# the data" rule already covers. landmarks-area and landmarks-point style
+# on feature_type, the column this build decoded from MTFCC.
+STYLES["urban-areas"] = [
+    S("default", "Land area", "aland_sqkm",
+      [10, 25, 75, 250, 750], "purples6",
+      "Land area in square kilometres, pale to deep purple, roughly "
+      "logarithmic so a small city's urban area and a metro area's both "
+      "get their own class", fmt="km2", default=True, fade=False),
+]
+
+# Top feature_type categories, measured (see the report this build wrote):
+# landmarks-area's are dominated by cemeteries and parks; landmarks-point's
+# by cul-de-sacs and locality points, which are address-system landmarks,
+# not places you would look for on a map. Every category below has a
+# nonzero national count; `--measure` fails the run if that stops being
+# true.
+# landmarks-area classes on the types that COVER AREA, not the types
+# that are most numerous. Cemeteries are 54.6% of features but 0.1% of
+# land area, so a count-ranked legend paints a national map almost
+# entirely in the "other" color. These six cover 97.9% of land area
+# (measured 2026-11-15).
+LANDMARK_AREA_TYPES = [
+    "National Park Service Land", "National Forest or Other Federal Land",
+    "Military Installation", "Island",
+    "State Park, Forest, or Recreation Area", "Park",
+]
+LANDMARK_AREA_COLORS = ["#00441b", "#238b45", "#b30000", "#8c6bb1",
+                        "#66c2a4", "#b8e186", NODATA]
+
+LANDMARK_POINT_TYPES = [
+    "Cul-de-sac", "Locality Point", "Cemetery", "Mountain Peak or Summit",
+    "Airport or Airfield",
+]
+LANDMARK_POINT_COLORS = ["#969696", "#6baed6", "#54278f", "#a67c52",
+                         "#e6550d", NODATA]
+
+STYLES["landmarks-area"] = [
+    M("default", "Landmark type", "feature_type",
+      LANDMARK_AREA_TYPES, LANDMARK_AREA_COLORS[:-1],
+      "The six landmark types that cover the most land nationally -- "
+      "National Park Service land, national forest and other federal "
+      "land, military installations, islands, state parks and forests, "
+      "and local parks -- each its own color; every other type draws "
+      "neutral gray. These six hold 97.9% of the collection's land area "
+      "(measured), which is why they are ranked by area and not by "
+      "count: cemeteries are 54.6% of the features and 0.1% of the land",
+      other_color=LANDMARK_AREA_COLORS[-1], default=True),
+    M("kind", "Landmark kind", "landmark_kind",
+      ["landmark", "military"], ["#238b45", "#b30000"],
+      "Civilian landmarks (AREALM) in green against military installations "
+      "(MIL) in red -- the two source files this collection combines",
+      other_color=NODATA),
+]
+
+STYLES["landmarks-point"] = [
+    M("default", "Landmark type", "feature_type",
+      LANDMARK_POINT_TYPES, LANDMARK_POINT_COLORS[:-1],
+      "The five most common point-landmark types nationally -- most of "
+      "them cul-de-sacs and locality points, address-system landmarks "
+      "rather than places -- each its own color; every other type draws "
+      "neutral gray",
+      other_color=LANDMARK_POINT_COLORS[-1], default=True),
+]
+
+
 # ---------------------------------------------------------------------------
 # Measurement
 # ---------------------------------------------------------------------------
@@ -799,14 +909,25 @@ def measure(only=None):
         schema = [r[0] for r in
                   duckdb.sql(f"describe select * from read_parquet('{src}')")
                   .fetchall()]
-        cols = {}
+        cols, cat_cols = {}, {}
         for s in styles:
             if s.col not in schema:
                 sys.exit(f"✗ {coll_id}: column {s.col!r} is not in the "
                          f"parquet schema")
-            cols.setdefault(s.col, s.breaks)
+            if isinstance(s, M):
+                merged = cat_cols.setdefault(s.col, [])
+                for c in s.categories:
+                    if c not in merged:
+                        merged.append(c)
+            else:
+                cols.setdefault(s.col, s.breaks)
 
         sel = ["count(*) as rows"]
+        for col, cats in cat_cols.items():
+            sel.append(f"count({col}) as n_{col}")
+            for i, cat in enumerate(cats):
+                lit = cat.replace("'", "''")
+                sel.append(f"count_if({col} = '{lit}') as m{i}_{col}")
         for col, breaks in cols.items():
             sel += [f"count({col}) as n_{col}",
                     f"min({col}) as min_{col}",
@@ -848,8 +969,20 @@ def measure(only=None):
                     round(100 * int(v[f"cv_{col}"]) / n, 2)
                     if f"cv_{col}" in v and n else None),
             }
+        for col, cats in cat_cols.items():
+            n = int(v[f"n_{col}"])
+            cat_counts = {cat: int(v[f"m{i}_{col}"])
+                         for i, cat in enumerate(cats)}
+            rec["stats"][col] = {
+                "kind": "match",
+                "n_non_null": n,
+                "null_pct": round(100 * (rec["rows"] - n) / rec["rows"], 2),
+                "categories": list(cats),
+                "category_counts": cat_counts,
+                "other_count": n - sum(cat_counts.values()),
+            }
         out["collections"][coll_id] = rec
-        print(f"✓ measured {coll_id}: {len(cols)} columns over "
+        print(f"✓ measured {coll_id}: {len(cols) + len(cat_cols)} columns over "
               f"{rec['rows']:,} rows")
 
     BREAKS_JSON.parent.mkdir(exist_ok=True)
@@ -874,12 +1007,12 @@ def step_expr(col, breaks, ramp):
 def fmt_value(x, fmt):
     if fmt == "usd":
         return f"${x / 1000:g}k" if x >= 1000 else f"${x:g}"
-    if fmt == "dens":
+    if fmt in ("dens", "km2"):
         return f"{x:,g}"
     return f"{x:g}%"
 
 
-SUFFIX = {"dens": " people per km²"}
+SUFFIX = {"dens": " people per km²", "km2": " km²"}
 
 
 ORDINAL = {1: "st", 2: "nd", 3: "rd"}
@@ -912,7 +1045,23 @@ def fades(s, stat):
     return bool(s.fade and noisy and noisy <= NOISY_FADE_MAX)
 
 
+def description_match(coll_id, s, stat):
+    """Prose for an M (categorical) style: counts, not percentile breaks."""
+    unit, units = UNIT[coll_id]
+    parts = [f"{cat} ({stat['category_counts'][cat]:,})"
+             for cat in s.categories]
+    bits = [f"{s.blurb}. Measured over all {stat['n_non_null']:,} {units} "
+            f"with a value: {', '.join(parts)}, and "
+            f"{stat['other_count']:,} other types in neutral gray."]
+    if stat["null_pct"] >= 5:
+        bits.append(f"{stat['null_pct']:g}% have no {s.col} value and draw "
+                    f"in neutral gray too.")
+    return " ".join(bits)
+
+
 def description(coll_id, s, stat):
+    if isinstance(s, M):
+        return description_match(coll_id, s, stat)
     unit, units = UNIT[coll_id]
     bits = [f"{s.blurb}. Measured over all "
             f"{stat['n_non_null']:,} {units} with a published value: "
@@ -941,16 +1090,51 @@ def description(coll_id, s, stat):
     return " ".join(bits)
 
 
+def match_expr(col, categories, colors, other_color):
+    expr = ["match", ["get", col]]
+    for cat, color in zip(categories, colors):
+        expr += [cat, color]
+    expr.append(other_color)
+    return expr
+
+
 def build_style(coll_id, s, stat):
+    point = coll_id in POINT_COLLECTIONS
+    paint_prop = "circle-color" if point else "fill-color"
+    opacity_prop = "circle-opacity" if point else "fill-opacity"
+    layer_type = "circle" if point else "fill"
     layers = []
+    if isinstance(s, M):
+        # The `other_color` branch of the match expression already covers
+        # a missing value (a null `get` matches no literal case), so there
+        # is no separate no-data layer -- one `match` layer carries both.
+        expr = match_expr(s.col, s.categories, s.colors, s.other_color)
+        paint = {paint_prop: expr, opacity_prop: OPACITY}
+        if point:
+            paint["circle-radius"] = ["interpolate", ["linear"], ["zoom"],
+                                      4, 1.5, 14, 5]
+            paint["circle-stroke-width"] = 0
+        layers.append({"id": layer_type, "type": layer_type, "source": "data",
+                       "source-layer": coll_id, "paint": paint})
+        return {
+            "version": 8,
+            "name": s.name,
+            "metadata": {"description": description(coll_id, s, stat),
+                        "portolan:column": s.col,
+                        "portolan:categories": list(s.categories)},
+            "sources": {"data": {"type": "vector",
+                                 "url": f"pmtiles://../{coll_id}.pmtiles"}},
+            "layers": layers,
+        }
+
     if stat["null_pct"] >= 5:
         # Constant colour, so portolan-browser's legend walk steps over it and
         # finds the step expression on the layer above.
         layers.append({
-            "id": "no-data", "type": "fill", "source": "data",
+            "id": "no-data", "type": layer_type, "source": "data",
             "source-layer": coll_id,
             "filter": ["!", ["has", s.col]],
-            "paint": {"fill-color": NODATA, "fill-opacity": 0.55},
+            "paint": {paint_prop: NODATA, opacity_prop: 0.55},
         })
     expr = step_expr(s.col, s.breaks, s.ramp)
     opacity = OPACITY
@@ -958,29 +1142,36 @@ def build_style(coll_id, s, stat):
         opacity = ["case",
                    [">", ["coalesce", ["get", f"{s.col}_cv"], 0], CV_LIMIT],
                    OPACITY_NOISY, OPACITY]
+    fill_paint = {paint_prop: expr, opacity_prop: opacity}
+    if point:
+        fill_paint["circle-radius"] = ["interpolate", ["linear"], ["zoom"],
+                                       4, 1.5, 14, 5]
+        fill_paint["circle-stroke-width"] = 0
     layers.append({
-        "id": "fill", "type": "fill", "source": "data",
+        "id": layer_type, "type": layer_type, "source": "data",
         "source-layer": coll_id,
         # Tiles omit null attributes; an unfiltered step would get a
         # non-numeric input and fall back to the paint default (black).
         "filter": ["has", s.col],
-        "paint": {"fill-color": expr, "fill-opacity": opacity},
+        "paint": fill_paint,
     })
-    # Boundaries only once they can be seen: at national zoom 242k block-group
-    # outlines are noise, and 8.2M block outlines are a gray sheet.
-    zmin = 11 if coll_id == "blocks" else (
-        4 if coll_id in COARSE_OUTLINES else 8)
-    layers.append({
-        "id": "outline", "type": "line", "source": "data",
-        "source-layer": coll_id, "minzoom": zmin,
-        "paint": {
-            "line-color": OUTLINE,
-            "line-width": ["interpolate", ["linear"], ["zoom"],
-                           zmin, 0.2, zmin + 5, 0.8],
-            "line-opacity": ["interpolate", ["linear"], ["zoom"],
-                             zmin, 0.0, zmin + 2, 0.45],
-        },
-    })
+    if not point:
+        # Boundaries only once they can be seen: at national zoom 242k
+        # block-group outlines are noise, and 8.2M block outlines a gray
+        # sheet. Points have no outline layer at all.
+        zmin = 11 if coll_id == "blocks" else (
+            4 if coll_id in COARSE_OUTLINES else 8)
+        layers.append({
+            "id": "outline", "type": "line", "source": "data",
+            "source-layer": coll_id, "minzoom": zmin,
+            "paint": {
+                "line-color": OUTLINE,
+                "line-width": ["interpolate", ["linear"], ["zoom"],
+                               zmin, 0.2, zmin + 5, 0.8],
+                "line-opacity": ["interpolate", ["linear"], ["zoom"],
+                                 zmin, 0.0, zmin + 2, 0.45],
+            },
+        })
     return {
         "version": 8,
         "name": s.name,
@@ -994,6 +1185,13 @@ def build_style(coll_id, s, stat):
 
 
 def validate(coll_id, s, stat):
+    if isinstance(s, M):
+        empty = [cat for cat in s.categories
+                if stat["category_counts"].get(cat, 0) == 0]
+        if empty:
+            sys.exit(f"✗ {coll_id}/{s.file}: match branches {empty} are "
+                     f"empty nationally — no empty legend swatches")
+        return
     if list(s.breaks) != sorted(set(s.breaks)):
         sys.exit(f"✗ {coll_id}/{s.file}: breaks are not strictly increasing: "
                  f"{s.breaks}")
@@ -1063,9 +1261,11 @@ def main():
             json.loads(json.dumps(obj))  # round-trips as JSON
             (d / f"{s.file}.json").write_text(json.dumps(obj, indent=2) + "\n")
             total += 1
-            worst = max(stat["class_pct"])
-            if worst >= 50:
-                thin.append(f"{s.file} ({s.col}: {worst:g}% in one class)")
+            if "class_pct" in stat:
+                worst = max(stat["class_pct"])
+                if worst >= 50:
+                    thin.append(
+                        f"{s.file} ({s.col}: {worst:g}% in one class)")
         print(f"✓ {coll_id}: {len(styles)} styles → "
               f"{d.relative_to(CATALOG)} (default: {styles[0].name})")
         for t in thin:

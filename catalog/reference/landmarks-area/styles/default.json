@@ -1,0 +1,53 @@
+{
+  "version": 8,
+  "name": "Landmark type",
+  "metadata": {
+    "description": "The six landmark types that cover the most land nationally -- National Park Service land, national forest and other federal land, military installations, islands, state parks and forests, and local parks -- each its own color; every other type draws neutral gray. These six hold 97.9% of the collection's land area (measured), which is why they are ranked by area and not by count: cemeteries are 54.6% of the features and 0.1% of the land. Measured over all 120,734 landmarks with a value: National Park Service Land (622), National Forest or Other Federal Land (1,570), Military Installation (858), Island (3,217), State Park, Forest, or Recreation Area (3,093), Park (18,686), and 92,688 other types in neutral gray.",
+    "portolan:column": "feature_type",
+    "portolan:categories": [
+      "National Park Service Land",
+      "National Forest or Other Federal Land",
+      "Military Installation",
+      "Island",
+      "State Park, Forest, or Recreation Area",
+      "Park"
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../landmarks-area.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "landmarks-area",
+      "paint": {
+        "fill-color": [
+          "match",
+          [
+            "get",
+            "feature_type"
+          ],
+          "National Park Service Land",
+          "#00441b",
+          "National Forest or Other Federal Land",
+          "#238b45",
+          "Military Installation",
+          "#b30000",
+          "Island",
+          "#8c6bb1",
+          "State Park, Forest, or Recreation Area",
+          "#66c2a4",
+          "Park",
+          "#b8e186",
+          "#d9d6d2"
+        ],
+        "fill-opacity": 0.8
+      }
+    }
+  ]
+}

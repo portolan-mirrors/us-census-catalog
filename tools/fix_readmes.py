@@ -70,6 +70,13 @@ def nav_line(rel: str, cid: str | None) -> str:
     if cid == "blocks":
         parquet = f"{DATA}/{rel}/state_fips=01/01.parquet"
         parquet_label = "Download one state's GeoParquet (AL)"
+    elif cid == "crosswalks":
+        # 29 separate tables, no single `<cid>.parquet` -- same shape of
+        # problem as blocks' per-state partitions, so the nav line points
+        # at one representative table instead of a file that does not
+        # exist.
+        parquet = f"{DATA}/{rel}/t10t20-tract.parquet"
+        parquet_label = "Download one table's GeoParquet (t10t20-tract)"
     else:
         # A wide all-indicators table's parquet lives one level above its
         # collection.json (the group restructure kept data URLs stable).

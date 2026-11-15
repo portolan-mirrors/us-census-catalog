@@ -997,12 +997,100 @@ def _acs_value_doc(column: str, level: str) -> str | None:
     return f"{base} {note}" if note else base
 
 
+# reference/ (2026-11-15): not in specs.COLLECTIONS, so not in LEVEL_OF.
+# Duplicated from tools/collection_meta.py's REFERENCE_IDS rather than
+# imported -- collection_meta imports this module, so importing back would
+# be circular. Keep the two lists in sync by hand; a mismatch here is
+# caught immediately: a reference collection missing from this list raises
+# the same "unknown collection id" error every other unknown id does.
+REFERENCE_IDS = ["urban-areas", "landmarks-area", "landmarks-point",
+                 "crosswalks"]
+
+# Column docs for the three reference/ collections that publish a single
+# GeoParquet with a fixed schema (crosswalks' 29 tables never reach this
+# path -- make_stac.py's table_columns() only calls describe() against a
+# collection whose data_source() resolves to one file named `<id>.parquet`,
+# and crosswalks has 29 differently-named, differently-shaped files
+# instead, so cd.missing() is never called for it).
+_REFERENCE_GEOM_NOTE = (
+    "Written in the source CRS, NAD83 (EPSG:4269) -- unlike the ACS "
+    "collections, this is kept rather than reprojected to WGS84/OGC:CRS84, "
+    "so the GeoParquet `geo` metadata carries an explicit `crs` key.")
+_REFERENCE_DOC = {
+    "urban-areas": {
+        "geoid": "`UACE20`, the 5-digit urban area code.",
+        "name": "`NAMELSAD20`, e.g. \"Chicago, IL--IN Urban Area\".",
+        "mtfcc": "`MTFCC20`. Always `G3500` (measured over all 2,644 "
+                 "rows) -- the 2020 Census urban area product has no "
+                 "urban/urbanized split, unlike its 2010 predecessor.",
+        "feature_type": "`mtfcc` decoded through the 2022 MAF/TIGER "
+                        "Feature Class Code list. Always \"Urban Area\".",
+        "aland_sqkm": "`ALAND20 / 1e6`, land area in square kilometres.",
+        "awater_sqkm": "`AWATER20 / 1e6`, water area in square "
+                       "kilometres.",
+        "geometry": f"Urban area boundary polygon, WKB-encoded. "
+                   f"{_REFERENCE_GEOM_NOTE}",
+        "bbox": "GeoParquet 1.1 covering struct for the row's geometry, "
+               "written by gpio, with row-group statistics.",
+    },
+    "landmarks-area": {
+        "geoid": "`AREAID`, from TIGER's internal address/area ID "
+                "scheme -- not a census tabulation GEOID.",
+        "name": "`FULLNAME`.",
+        "state": "USPS code of the state file this row's `AREALM` zip "
+                "was read from. NULL on every `landmark_kind = "
+                "'military'` row (measured, 858 of 120,734): `MIL` is "
+                "one national file, not 56 state files, so there is no "
+                "state to carry.",
+        "landmark_kind": "`'landmark'` for a row from `AREALM` (civilian "
+                         "landmarks, 119,876 rows measured) or "
+                         "`'military'` for a row from `MIL` (858 rows "
+                         "measured). Not a source column -- set by "
+                         "tools/build_reference.py from which file the "
+                         "row came from.",
+        "mtfcc": "`MTFCC`.",
+        "feature_type": "`mtfcc` decoded through the 2022 MAF/TIGER "
+                        "Feature Class Code list. Most common nationally "
+                        "(measured): Cemetery, Park, Local Jail or "
+                        "Detention Center, Hospital/Hospice/Urgent Care "
+                        "Facility, University or College.",
+        "aland_sqkm": "`ALAND / 1e6`. NULL on every `landmark_kind = "
+                     "'landmark'` row (measured, 119,876 of 120,734) -- "
+                     "`AREALM` carries no area fields at all.",
+        "awater_sqkm": "`AWATER / 1e6`. NULL on the same rows as "
+                      "`aland_sqkm`, for the same reason.",
+        "geometry": f"Landmark boundary polygon, WKB-encoded. "
+                   f"{_REFERENCE_GEOM_NOTE}",
+        "bbox": "GeoParquet 1.1 covering struct for the row's geometry, "
+               "written by gpio, with row-group statistics.",
+    },
+    "landmarks-point": {
+        "geoid": "`POINTID`, from TIGER's internal address/point ID "
+                "scheme -- not a census tabulation GEOID.",
+        "name": "`FULLNAME`.",
+        "state": "USPS code of the state file this row was read from.",
+        "mtfcc": "`MTFCC`.",
+        "feature_type": "`mtfcc` decoded through the 2022 MAF/TIGER "
+                        "Feature Class Code list. The two largest "
+                        "categories nationally (measured, 1,088,085 "
+                        "rows total) are Cul-de-sac (668,308) and "
+                        "Locality Point (208,547) -- both address-system "
+                        "landmarks, not places.",
+        "geometry": f"Landmark point, WKB-encoded. {_REFERENCE_GEOM_NOTE}",
+        "bbox": "GeoParquet 1.1 covering struct for the row's geometry "
+               "(a point's own coordinates, repeated), written by gpio.",
+    },
+}
+
+
 def describe(column: str, collection_id: str) -> str | None:
     """The description for one column of one collection, or None.
 
     None means "undocumented", and `tools/make_stac.py` treats that as a
     build failure rather than writing a column with no description.
     """
+    if collection_id in REFERENCE_IDS:
+        return _REFERENCE_DOC.get(collection_id, {}).get(column)
     level = LEVEL_OF.get(collection_id)
     if level is None:
         raise KeyError(f"unknown collection id: {collection_id!r}")

@@ -63,6 +63,8 @@ ACS_5YR_DATA = f"{ACS_SF}/data/5YRData/"
 CB_SHP = "https://www2.census.gov/geo/tiger/GENZ2024/shp"
 CB_SHP_2020 = "https://www2.census.gov/geo/tiger/GENZ2020/shp"
 TIGER_TABBLOCK = "https://www2.census.gov/geo/tiger/TIGER2024/TABBLOCK20/"
+TIGER = "https://www2.census.gov/geo/tiger/TIGER2024"
+REL2020 = "https://www2.census.gov/geo/docs/maps-data/data/rel2020"
 PL_DIR = ("https://www2.census.gov/programs-surveys/decennial/2020/data/"
           "01-Redistricting_File--PL_94-171/")
 PL_IMPORT_SCRIPTS = (
@@ -71,6 +73,9 @@ PL_IMPORT_SCRIPTS = (
 
 DATA_CENSUS = "https://data.census.gov/"
 ACS_PROGRAM = "https://www.census.gov/programs-surveys/acs.html"
+# The geography program, which publishes TIGER/Line and the
+# relationship files. It is not a survey, so it carries no estimates.
+GEO_PROGRAM = "https://www.census.gov/programs-surveys/geography.html"
 ACS_HANDBOOK = ("https://www.census.gov/programs-surveys/acs/library/"
                 "handbooks/general.html")
 ACS_ACCURACY = cd.ACCURACY_URL
@@ -167,6 +172,34 @@ FEATURES["blocks"] = LEVEL_FEATURES["block"]
 ACS_INTERVAL = ["2020-01-01T00:00:00Z", "2024-12-31T23:59:59Z"]
 BLOCKS_INTERVAL = ["2020-04-01T00:00:00Z", "2020-04-01T00:00:00Z"]
 
+# --------------------------------------------------------------------------
+# reference/ (2026-11-15): geography that carries no demographic numbers.
+# Not built from specs.COLLECTIONS -- this group holds no ACS theme and no
+# ACS geography level, so it is registered here by hand instead of being
+# derived from the ACS build's own contract.
+# --------------------------------------------------------------------------
+REFERENCE_IDS = ["urban-areas", "landmarks-area", "landmarks-point",
+                 "crosswalks"]
+GROUPS["reference"] = REFERENCE_IDS
+GROUP_OF.update({cid: "reference" for cid in REFERENCE_IDS})
+COLL_REL.update({cid: f"reference/{cid}" for cid in REFERENCE_IDS})
+ALL_COLLECTIONS += REFERENCE_IDS
+
+# Row counts, measured off the published files (staging/tiles-logs/
+# reference.qc.json). crosswalks sums all 29 relationship tables; a single
+# scalar count does not really describe 29 tables of very different sizes,
+# but `make_stac.py` overrides it with the live count the same way it does
+# for `blocks`, so this is only ever the --write-time placeholder.
+FEATURES.update({
+    "urban-areas": 2644, "landmarks-area": 120734,
+    "landmarks-point": 1088085, "crosswalks": 22429855,
+})
+
+# TIGER2024 (urban-areas, landmarks-*) carries a 2024-09 vintage date; the
+# rel2020 relationship files are keyed to the 2020 Census. The interval
+# spans both rather than picking one.
+REFERENCE_INTERVAL = ["2020-04-01T00:00:00Z", "2024-12-31T23:59:59Z"]
+
 LEVEL_PLURAL = {
     "bg": "census block groups", "tract": "census tracts",
     "county": "counties and county equivalents",
@@ -212,6 +245,7 @@ GROUP_TITLES = {
     "zctas": LEVEL_TITLE["zcta"],
     "places": LEVEL_TITLE["place"],
     "congressional-districts": LEVEL_TITLE["cd"],
+    "reference": "Reference Geography",
 }
 
 # --------------------------------------------------------------------------
@@ -252,12 +286,33 @@ def theme_of(cid: str) -> str:
         return "all"
     if cid == "blocks":
         return "blocks"
+    if cid in REFERENCE_IDS:
+        return "reference"
     return cid.split("-", 1)[1]
 
 
 TITLES = {c.id: f"{THEME_TITLE[theme_of(c.id)]} — {LEVEL_TITLE[c.level]}"
           for c in specs.COLLECTIONS}
 TITLES["blocks"] = "2020 Census Counts — Blocks"
+TITLES.update({
+    "urban-areas": "2020 Urban Areas",
+    "landmarks-area": "Landmarks — Area",
+    "landmarks-point": "Landmarks — Point",
+    "crosswalks": "2020 Geography Crosswalks",
+})
+
+
+_KW_REFERENCE = {
+    "urban-areas": ["urban area", "urban cluster", "UAC20", "TIGER",
+                    "urbanized", "city", "metro"],
+    "landmarks-area": ["landmarks", "AREALM", "MIL", "MTFCC",
+                       "military installation", "cemetery", "park", "TIGER"],
+    "landmarks-point": ["landmarks", "POINTLM", "MTFCC", "points of "
+                        "interest", "cul-de-sac", "TIGER"],
+    "crosswalks": ["crosswalk", "relationship file", "rel2020",
+                   "2010 Census", "2020 Census", "geography conversion",
+                   "tract relationship"],
+}
 
 
 def keywords(cid: str) -> list[str]:
@@ -266,6 +321,9 @@ def keywords(cid: str) -> list[str]:
                 "P.L. 94-171", "redistricting", "population", "race",
                 "ethnicity", "voting age population", "housing occupancy",
                 "group quarters", "United States", "census blocks"]
+    if cid in REFERENCE_IDS:
+        return (["census", "TIGER/Line", "geography", "United States"]
+                + _KW_REFERENCE[cid])
     kw = _KW_COMMON + _KW_THEME[theme_of(cid)] + _KW_LEVEL[LEVEL_OF[cid]]
     return list(dict.fromkeys(kw))
 
@@ -848,8 +906,12 @@ _NUM = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
 
 
 def _other_groups_clause(group: str) -> str:
-    """Links to every geography's sub-catalog except this one's."""
-    others = [g for g in GROUPS if g != group]
+    """Links to every geography's sub-catalog except this one's.
+
+    GROUP_PHRASE holds the geography groups. The reference group is not
+    a geography, so it never appears in this clause.
+    """
+    others = [g for g in GROUPS if g != group and g in GROUP_PHRASE]
     links = [f"[{GROUP_PHRASE[g]}](../../{g}/catalog.json)" for g in others]
     return ", ".join(links[:-1]) + f" and {links[-1]}"
 
@@ -934,9 +996,11 @@ def _mirror_para(cid: str) -> str:
 def description(cid: str, features: int | None = None) -> str:
     """Full STAC description for a collection, as markdown."""
     n = features if features is not None else FEATURES[cid]
-    level = LEVEL_OF[cid]
     if cid == "blocks":
         return _blocks_description(n)
+    if cid in REFERENCE_IDS:
+        return _reference_description(cid, n)
+    level = LEVEL_OF[cid]
 
     noun = LEVEL_PLURAL[level]
     # Island-area rows are published with NULL estimates at every level, so
@@ -1043,6 +1107,110 @@ def _blocks_description(n: int) -> str:
 
         tiles_para("blocks"),
         _mirror_para("blocks"),
+    ])
+
+
+REFERENCE_TILES_PARA = (
+    "The PMTiles archive is a single band at full resolution, built with "
+    f"[tylertoo]({TYLERTOO}) `tiles` (not `pyramid` — there is no coarser "
+    "geography to step up to below this collection, so every zoom draws "
+    "this collection's own features, thinned to fit the tile-size cap "
+    "where a zoom is too dense to draw in full). Statistics come from the "
+    "GeoParquet; this collection has no `*_moe` columns to exclude.")
+
+
+def _reference_description(cid: str, n: int) -> str:
+    """Full STAC description for a reference/ collection.
+
+    Every geography/row count here is a literal copy of what
+    tools/build_reference.py measured and printed; nothing is carried over
+    from the ACS prose helpers above, since none of them applies to a
+    collection with no ACS theme, no ACS geography level and no margin of
+    error.
+    """
+    if cid == "urban-areas":
+        return "\n\n".join([
+            f"The Census Bureau's 2020 urban area delineation: all "
+            f"**{n:,}** urban areas in the United States and Puerto Rico, "
+            f"from [TIGER/Line 2024 `UAC20`]({TIGER}/UAC20/) — one national "
+            f"file. For the 2020 Census the Bureau replaced the 2010 "
+            f"urbanized-area/urban-cluster split with a single urban area "
+            f"definition: every feature here carries the same MTFCC, "
+            f"`G3500` (\"Urban Area\"), decoded into `feature_type`. "
+            f"**Deviation from the original brief:** this means there is "
+            f"no urban/rural class column (`UATYPE20`, from the 2010 "
+            f"product) to style on — it does not exist in `UAC20` — so the "
+            f"default style classes on land area instead; see the "
+            f"collection's processing notes.",
+            "`aland_sqkm` and `awater_sqkm` are `ALAND20`/`AWATER20` "
+            "converted from square meters. Geometry keeps the source CRS "
+            "(NAD83, EPSG:4269) rather than being reprojected to WGS84.",
+            REFERENCE_TILES_PARA,
+            _mirror_para(cid),
+        ])
+    if cid == "landmarks-area":
+        return "\n\n".join([
+            f"Polygon landmarks from TIGER/Line 2024: all **{n:,}** "
+            f"features combining [`AREALM`]({TIGER}/AREALM/) (civilian "
+            f"landmarks, one file per state) and [`MIL`]({TIGER}/MIL/) "
+            f"(military installations, one national file) into a single "
+            f"table, with `landmark_kind` set to `landmark` or `military` "
+            f"so the two sources stay distinguishable after the merge. "
+            f"Measured: 119,876 `landmark` rows (all 56 states carry a "
+            f"`state` column) and 858 `military` rows (none do — `MIL` is "
+            f"a national file, not per-state, so there is no state to "
+            f"carry, and `AREALM` carries no `aland_sqkm`/`awater_sqkm` so "
+            f"those are NULL on every `landmark` row).",
+            "`feature_type` decodes each row's `mtfcc` through the Census "
+            "Bureau's MAF/TIGER Feature Class Code list; see the "
+            "collection's processing notes for the exact source and which "
+            "codes, if any, this build could not decode. Measured "
+            "nationally, the five most common types are cemeteries, "
+            "parks, local jails and detention centers, hospitals, and "
+            "universities or colleges — the five the default style colors.",
+            REFERENCE_TILES_PARA,
+            _mirror_para(cid),
+        ])
+    if cid == "landmarks-point":
+        return "\n\n".join([
+            f"Point landmarks from [TIGER/Line 2024 `POINTLM`]({TIGER}"
+            f"/POINTLM/): all **{n:,}** features, one file per state (56 "
+            f"state and territory files), each carrying the `state` USPS "
+            f"code its source file was read from.",
+            "`feature_type` decodes each row's `mtfcc` the same way "
+            "landmarks-area does. Measured nationally, most of these "
+            "points are cul-de-sacs and locality points — address-system "
+            "landmarks, not places a person would look for on a map — "
+            "followed by cemeteries, mountain peaks and summits, and "
+            "airports or airfields.",
+            REFERENCE_TILES_PARA,
+            _mirror_para(cid),
+        ])
+    # crosswalks
+    return "\n\n".join([
+        f"**{n:,}** rows across **29 tables**, each its own parquet file "
+        f"in this collection's directory, from the Census Bureau's [2020 "
+        f"relationship files]({REL2020}/) — every geography pair this "
+        f"catalog carries a crosswalk for. Tabular: no geometry, no "
+        f"`geoid`/`name`/`state` columns, because a relationship file's "
+        f"job is converting between two geography vintages or two "
+        f"geography types, not describing one feature.",
+        "`t10t20-tract.parquet` is the one later trend work depends on: it "
+        "maps 2010 tabulation blocks to 2020 tabulation blocks, with the "
+        "land and water area each 2010 block split across. It is "
+        "block-level, not tract-level, because 2010 and 2020 tracts do "
+        "not nest — the Bureau's own crosswalk for that relationship is "
+        "built from block-level overlap, and the state+county+tract "
+        "columns already in that file are what a tract-to-tract join "
+        "reads. The other 28 tables are every other rel2020 relationship, "
+        "one file per relationship, read from each subdirectory's single "
+        "national file (`*_natl.txt`) except `t10t20`, the one "
+        "relationship rel2020 ships with no national file — those 28 "
+        "come from `tract`, `blkgrp`, `place`, `cousub`, `cbsa` (3 "
+        "relationships), `zcta520` (6), `ua` (8), `puma520` (4) and "
+        "`aiannh` (3).",
+        "No PMTiles for this collection — there is no geometry to tile.",
+        _mirror_para(cid),
     ])
 
 
@@ -1194,6 +1362,22 @@ GROUP_DESCRIPTIONS = {
         f"far tighter than at any other geography and the margins are the "
         f"narrowest in this catalog. [data.census.gov]({DATA_CENSUS}) is "
         f"authoritative."),
+    "reference": (
+        "Geography that carries no demographic statistic, so it stays out "
+        "of the seven geography groups above. Four collections, all from "
+        "TIGER/Line 2024 and the 2020 Census relationship files: "
+        "[urban-areas](./urban-areas/collection.json) (2,644 features, the "
+        "2020 urban area delineation), "
+        "[landmarks-area](./landmarks-area/collection.json) (120,734 "
+        "civilian and military area landmarks), "
+        "[landmarks-point](./landmarks-point/collection.json) (1,088,085 "
+        "point landmarks) and "
+        "[crosswalks](./crosswalks/collection.json) (22,429,855 rows "
+        "across 29 tabular relationship tables, no geometry). None of the "
+        "four shares a geometry or a `geoid` with another, so there is no "
+        "1:1 join across this group the way the ACS geographies join "
+        "across their themed collections — each collection here stands "
+        "on its own."),
 }
 
 # --------------------------------------------------------------------------
@@ -1241,6 +1425,91 @@ def _dat_asset(table: str) -> tuple[str, dict]:
     }
 
 
+MTFCC_CODES_URL = ("https://www.census.gov/library/reference/code-lists/"
+                   "mt-feature-class-codes.html")
+MTFCC_PDF_2022 = "https://www2.census.gov/geo/pdfs/reference/mtfccs2022.pdf"
+
+
+def _reference_source_assets(cid: str) -> dict:
+    """`source_assets` for the four reference/ collections."""
+    out: dict[str, dict] = {}
+    mtfcc_doc = {
+        "href": MTFCC_PDF_2022,
+        "type": "application/pdf",
+        "title": "2022 MAF/TIGER Feature Class Code Definitions",
+        "description": (
+            "The code -> name table `feature_type` was decoded from. "
+            "TIGER2024 has no 2024 edition of this PDF; 2022 is the "
+            "nearest published vintage, linked from the Bureau's own "
+            f"index at {MTFCC_CODES_URL}. The code set is unchanged "
+            "between the two: every code this build used also appears, "
+            "worded the same, in the 2021 and 2025 editions."),
+        "roles": ["metadata"],
+    }
+    if cid == "urban-areas":
+        out["source-uac20"] = {
+            "href": f"{TIGER}/UAC20/tl_2024_us_uac20.zip",
+            "type": "application/zip",
+            "title": "TIGER/Line 2024 UAC20 — 2020 urban areas, national file",
+            "description": (
+                "The one national shapefile this collection's 2,644 "
+                "features were read from."),
+            "roles": ["source"],
+        }
+        out["doc-mtfcc"] = mtfcc_doc
+        return out
+    if cid == "landmarks-area":
+        out["source-arealm"] = {
+            "href": f"{TIGER}/AREALM/",
+            "type": "text/html",
+            "title": "TIGER/Line 2024 AREALM — area landmarks, state directory",
+            "description": (
+                "56 state and territory shapefiles "
+                "(`tl_2024_<FIPS>_arealm.zip`), this collection's "
+                "`landmark_kind = 'landmark'` rows."),
+            "roles": ["source"],
+        }
+        out["source-mil"] = {
+            "href": f"{TIGER}/MIL/tl_2024_us_mil.zip",
+            "type": "application/zip",
+            "title": "TIGER/Line 2024 MIL — military installations, "
+                     "national file",
+            "description": (
+                "The one national shapefile this collection's "
+                "`landmark_kind = 'military'` rows were read from."),
+            "roles": ["source"],
+        }
+        out["doc-mtfcc"] = mtfcc_doc
+        return out
+    if cid == "landmarks-point":
+        out["source-pointlm"] = {
+            "href": f"{TIGER}/POINTLM/",
+            "type": "text/html",
+            "title": "TIGER/Line 2024 POINTLM — point landmarks, state "
+                     "directory",
+            "description": (
+                "56 state and territory shapefiles "
+                "(`tl_2024_<FIPS>_pointlm.zip`), this collection's source."),
+            "roles": ["source"],
+        }
+        out["doc-mtfcc"] = mtfcc_doc
+        return out
+    # crosswalks
+    out["source-rel2020"] = {
+        "href": f"{REL2020}/",
+        "type": "text/html",
+        "title": "2020 Census relationship files (rel2020) — subdirectory "
+                 "index",
+        "description": (
+            "The ten subdirectories this collection's 29 tables were read "
+            "from: t10t20, tract, blkgrp, place, cousub, cbsa, zcta520, "
+            "ua, puma520, aiannh. Each is a pipe-delimited text file, "
+            "read directly over HTTPS with no download step."),
+        "roles": ["source"],
+    }
+    return out
+
+
 def source_assets(cid: str) -> dict:
     """Upstream `source` assets plus `metadata` documentation assets.
 
@@ -1249,6 +1518,8 @@ def source_assets(cid: str) -> dict:
     this mirror does not control.
     """
     out: dict[str, dict] = {}
+    if cid in REFERENCE_IDS:
+        return _reference_source_assets(cid)
     level = LEVEL_OF[cid]
     if cid == "blocks":
         out["source-pl94171"] = {
@@ -1464,7 +1735,97 @@ PROCESSING_COMMON = (
     "are tiled as real polygons at every zoom.")
 
 
+REFERENCE_EXTRACTED = "2026-11-15"  # the day the reference/ sources were read
+
+
+def _reference_processing_notes(cid: str) -> str:
+    common = (
+        f"Downloaded {REFERENCE_EXTRACTED} over plain HTTPS, no API key. "
+        "GeoParquet written with the same path as the rest of this "
+        "catalog (pyarrow, ZSTD, sized row groups, bbox covering column — "
+        "tools/build_wide_themes.py documents the convention, verified "
+        "against catalog/counties/county-income/county-income.parquet): "
+        "`gpio convert geoparquet` reads the shapefile, keeping the "
+        "source CRS (NAD83, EPSG:4269 — not reprojected, unlike the ACS "
+        "collections' cartographic boundaries), then "
+        "`gpio sort hilbert --add-bbox` writes the Hilbert-ordered file "
+        "with the bbox covering metadata."
+    )
+    mtfcc_note = (
+        f"`feature_type` decodes `mtfcc` through a table copied from the "
+        f"2022 MAF/TIGER Feature Class Code PDF ({MTFCC_PDF_2022}), the "
+        f"nearest published vintage to TIGER2024 — see this collection's "
+        f"`doc-mtfcc` source asset. A code this build met that is not in "
+        f"that table is left NULL rather than guessed at; none were, for "
+        f"this collection's data (see docs/spec-reference-layers.md's "
+        f"build report)."
+    )
+    if cid == "urban-areas":
+        return "\n\n".join([
+            f"Built from the single national `UAC20` shapefile "
+            f"({TIGER}/UAC20/tl_2024_us_uac20.zip, 70 MB). " + common,
+            "Every one of the 2,644 features carries MTFCC `G3500` and "
+            "LSAD `67` (measured) — the 2020 Census urban area product "
+            "has no urban/urbanized split, unlike its 2010 predecessor, "
+            "so there is no categorical column to style on. The default "
+            "style classes on `aland_sqkm` instead; see the description "
+            "for the full note on this deviation from the original spec.",
+            mtfcc_note,
+        ])
+    if cid == "landmarks-area":
+        return "\n\n".join([
+            f"Built from 56 state `AREALM` shapefiles "
+            f"({TIGER}/AREALM/, 68 MB total) plus the one national `MIL` "
+            f"shapefile ({TIGER}/MIL/tl_2024_us_mil.zip, 3 MB), unioned "
+            f"into one table after each is converted independently. " +
+            common,
+            "`state` is the USPS code for the AREALM file each row's "
+            "state zip was read from; MIL rows carry `state = NULL`, "
+            "since MIL is one national file, not 56 state files, and has "
+            "no state column of its own to carry forward. "
+            "`landmark_kind` is `'landmark'` for every AREALM row and "
+            "`'military'` for every MIL row — not read off any source "
+            "column, since neither file has one. AREALM carries no "
+            "`ALAND`/`AWATER`, so `aland_sqkm`/`awater_sqkm` are NULL on "
+            "every `landmark` row; MIL has both, so every `military` row "
+            "has them.",
+            mtfcc_note,
+        ])
+    if cid == "landmarks-point":
+        return "\n\n".join([
+            f"Built from 56 state `POINTLM` shapefiles "
+            f"({TIGER}/POINTLM/, 28 MB total), concatenated after each is "
+            f"converted independently. " + common,
+            "`state` is the USPS code for the file each row was read "
+            "from.",
+            mtfcc_note,
+        ])
+    # crosswalks
+    return "\n\n".join([
+        f"Downloaded {REFERENCE_EXTRACTED} over plain HTTPS from "
+        f"{REL2020}/. Every subdirectory but `t10t20` ships one national "
+        f"file per relationship (`*_natl.txt`); that is the file this "
+        f"build reads for `tract`, `blkgrp`, `place`, `cousub`, `cbsa`, "
+        f"`zcta520`, `ua`, `puma520` and `aiannh` — the per-state files "
+        f"those nine subdirectories also publish are the same "
+        f"relationship split into smaller pieces, so reading the "
+        f"national file once is complete and the per-state files are "
+        f"not read. `t10t20` is the one subdirectory with no national "
+        f"file: its 52 per-state zips (`TAB2010_TAB2020_ST##.zip`) are "
+        f"concatenated into `t10t20-tract.parquet`.",
+        "Every file is pipe-delimited with a header row and read "
+        "directly with DuckDB (`read_csv(..., delim='|', header=true)`); "
+        "column names are lowercased on write and otherwise kept exactly "
+        "as published. No geometry, no gpio step, no Hilbert sort — "
+        "written straight to ZSTD-compressed Parquet with "
+        "`ROW_GROUP_SIZE 20000`, the same row-group size the spatial "
+        "write path uses, for consistency rather than necessity.",
+    ])
+
+
 def processing_notes(cid: str) -> str:
+    if cid in REFERENCE_IDS:
+        return _reference_processing_notes(cid)
     if cid == "blocks":
         return "\n\n".join([
             f"Built {EXTRACTED} from two sets of Census Bureau files, "
@@ -1741,7 +2102,50 @@ MEDIAN_SUPPRESSION_LEAD = {
 }
 
 
+def _reference_known_issues(cid: str) -> str:
+    if cid == "urban-areas":
+        return (
+            "There is no urban/urbanized-area class to style on. The "
+            "2020 Census urban area product carries a single MTFCC "
+            "(`G3500`) and a single LSAD (`67`) on every one of its "
+            "2,644 features — the 2010-era `UATYP10` urban/urban-cluster "
+            "split this build was originally asked to carry forward does "
+            "not exist in `UAC20`. The default style classes on land "
+            "area instead; see the collection's AGENTS.md for the exact "
+            "breaks.")
+    if cid == "landmarks-area":
+        return (
+            "`state` and `aland_sqkm`/`awater_sqkm` are NULL on different "
+            "rows for different reasons, not the same reason: `state` is "
+            "NULL on the 858 `landmark_kind = 'military'` rows (MIL is a "
+            "national file with no per-state source to read a state "
+            "from), while `aland_sqkm`/`awater_sqkm` are NULL on the "
+            "119,876 `landmark_kind = 'landmark'` rows (AREALM carries no "
+            "area fields at all). Filter on `landmark_kind`, not on "
+            "whether a column is NULL, if you need one kind cleanly.")
+    if cid == "landmarks-point":
+        return (
+            "Most of these points are not places. Measured nationally, "
+            "the single largest `feature_type` is `Cul-de-sac` (668,308 "
+            "of 1,088,085 points) followed by `Locality Point` (208,547) "
+            "— both are address-system landmarks TIGER uses to resolve "
+            "street addresses, not landmarks a person would look for on "
+            "a map. Filter `feature_type` before treating this collection "
+            "as a point-of-interest dataset.")
+    # crosswalks
+    return (
+        "`t10t20-tract.parquet` is block-level (12,689,707 rows, "
+        "measured), not tract-level, even though its job is mapping 2010 "
+        "tracts to 2020 tracts — see the processing notes for why. A "
+        "join on this file needs the state+county+tract columns, not a "
+        "direct tract-to-tract key; there is no row that just says "
+        "\"2010 tract X became 2020 tract Y\" for a tract that split or "
+        "merged.")
+
+
 def known_issues(cid: str) -> str:
+    if cid in REFERENCE_IDS:
+        return _reference_known_issues(cid)
     if cid == "blocks":
         return "\n\n".join([
             "28.97% of blocks have `pop_total = 0` (measured), so "
@@ -2023,7 +2427,17 @@ def known_issues(cid: str) -> str:
     return "\n\n".join(items)
 
 
+REFERENCE_SOURCE_URL = {
+    "urban-areas": f"{TIGER}/UAC20/",
+    "landmarks-area": f"{TIGER}/AREALM/",
+    "landmarks-point": f"{TIGER}/POINTLM/",
+    "crosswalks": f"{REL2020}/",
+}
+
+
 def source_url(cid: str) -> str:
+    if cid in REFERENCE_IDS:
+        return REFERENCE_SOURCE_URL[cid]
     return PL_DIR if cid == "blocks" else ACS_5YR_DATA
 
 
@@ -2049,6 +2463,8 @@ def data_url(cid: str, ext: str = "parquet") -> str:
     """
     if cid == "blocks":
         return f"{PUBLIC_BASE}/blocks/state_fips=*/*.parquet"
+    if cid == "crosswalks":
+        return f"{PUBLIC_BASE}/{COLL_REL[cid]}/*.parquet"
     if cid in WIDE_IDS:
         return f"{PUBLIC_BASE}/{GROUP_OF[cid]}/{cid}.{ext}"
     return f"{PUBLIC_BASE}/{COLL_REL[cid]}/{cid}.{ext}"
@@ -2064,6 +2480,10 @@ def metadata_yaml(cid: str) -> str:
         "us-census-catalog/blocks/state_fips=*/*.parquet', "
         "hive_partitioning=true) LIMIT 5;"
         if cid == "blocks" else
+        f"INSTALL httpfs; LOAD httpfs;\nSELECT * FROM "
+        f"'{PUBLIC_BASE}/{COLL_REL[cid]}/t10t20-tract.parquet' LIMIT 5; "
+        f"-- one of 29 tables; see source_url for the rest"
+        if cid == "crosswalks" else
         f"INSTALL httpfs; LOAD httpfs;\nSELECT * FROM '{data_href}' LIMIT 5;")
     lines = [
         f"title: {_yq(TITLES[cid])}",

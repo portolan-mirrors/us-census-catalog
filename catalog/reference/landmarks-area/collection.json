@@ -1,0 +1,300 @@
+{
+  "type": "Collection",
+  "id": "reference/landmarks-area",
+  "stac_version": "1.1.0",
+  "description": "Polygon landmarks from TIGER/Line 2024: all **120,734** features combining [`AREALM`](https://www2.census.gov/geo/tiger/TIGER2024/AREALM/) (civilian landmarks, one file per state) and [`MIL`](https://www2.census.gov/geo/tiger/TIGER2024/MIL/) (military installations, one national file) into a single table, with `landmark_kind` set to `landmark` or `military` so the two sources stay distinguishable after the merge. Measured: 119,876 `landmark` rows (all 56 states carry a `state` column) and 858 `military` rows (none do — `MIL` is a national file, not per-state, so there is no state to carry, and `AREALM` carries no `aland_sqkm`/`awater_sqkm` so those are NULL on every `landmark` row).\n\n`feature_type` decodes each row's `mtfcc` through the Census Bureau's MAF/TIGER Feature Class Code list; see the collection's processing notes for the exact source and which codes, if any, this build could not decode. Measured nationally, the five most common types are cemeteries, parks, local jails and detention centers, hospitals, and universities or colleges — the five the default style colors.\n\nThe PMTiles archive is a single band at full resolution, built with [tylertoo](https://github.com/geoparquet-io/tylertoo) `tiles` (not `pyramid` — there is no coarser geography to step up to below this collection, so every zoom draws this collection's own features, thinned to fit the tile-size cap where a zoom is too dense to draw in full). Statistics come from the GeoParquet; this collection has no `*_moe` columns to exclude.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-area/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Reference Geography"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./landmarks-area.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Landmarks — Area (vector tiles)",
+      "pmtiles:layers": [
+        "landmarks-area"
+      ]
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "Polygon",
+  "geoparquet:feature_count": 120734,
+  "pmtiles:min_zoom": 0,
+  "pmtiles:max_zoom": 14,
+  "pmtiles:tile_type": "mvt",
+  "pmtiles:center": [
+    0.2910705,
+    28.40559,
+    7
+  ],
+  "pmtiles:layers": [
+    "landmarks-area"
+  ],
+  "title": "Landmarks — Area",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.147236,
+          -14.548699,
+          -64.605552,
+          71.359879
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-04-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "landmarks-area-tiles": {
+      "href": "./landmarks-area.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "file:size": 156194020,
+      "file:checksum": "1220de752979550f7b23235fd965f8ef4a70c29f377e5bd5d1f905e1e7416ac17184",
+      "proj:code": "EPSG:4269",
+      "roles": [
+        "data"
+      ],
+      "title": "Landmarks — Area (PMTiles)",
+      "pmtiles:layers": [
+        "landmarks-area"
+      ]
+    },
+    "landmarks-area": {
+      "href": "./landmarks-area.parquet",
+      "type": "application/vnd.apache.parquet",
+      "roles": [
+        "data"
+      ],
+      "title": "Landmarks — Area (GeoParquet, national)",
+      "file:size": 69056083,
+      "file:checksum": "1220464c66f52cddb992c6bc1dff1beb085beffb02e31d5daa99afe0a653d1a51741"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Landmarks — Area rendered with the default style",
+      "file:size": 24721,
+      "file:checksum": "122033f6088ba0933e76590cc8f3da1a4935181f3f37d840404b19e830431b7a54d0"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Landmark type",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "The six landmark types that cover the most land nationally -- National Park Service land, national forest and other federal land, military installations, islands, state parks and forests, and local parks -- each its own color; every other type draws neutral gray. These six hold 97.9% of the collection's land area (measured), which is why they are ranked by area and not by count: cemeteries are 54.6% of the features and 0.1% of the land. Measured over all 120,734 landmarks with a value: National Park Service Land (622), National Forest or Other Federal Land (1,570), Military Installation (858), Island (3,217), State Park, Forest, or Recreation Area (3,093), Park (18,686), and 92,688 other types in neutral gray.",
+      "file:size": 1866,
+      "file:checksum": "12203be4652031de48a3057c5c77bc65524e32df05015902bcdd7efc57e0f35695e3"
+    },
+    "styles/kind": {
+      "href": "./styles/kind.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Landmark kind",
+      "roles": [
+        "style"
+      ],
+      "description": "Civilian landmarks (AREALM) in green against military installations (MIL) in red -- the two source files this collection combines. Measured over all 120,734 landmarks with a value: landmark (119,876), military (858), and 0 other types in neutral gray.",
+      "file:size": 988,
+      "file:checksum": "12204c14ed099d46fd38030e309ec78965db78a5dfff26a103b2646afc390d7d3f3d"
+    },
+    "source-arealm": {
+      "href": "https://www2.census.gov/geo/tiger/TIGER2024/AREALM/",
+      "type": "text/html",
+      "title": "TIGER/Line 2024 AREALM — area landmarks, state directory",
+      "description": "56 state and territory shapefiles (`tl_2024_<FIPS>_arealm.zip`), this collection's `landmark_kind = 'landmark'` rows.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-mil": {
+      "href": "https://www2.census.gov/geo/tiger/TIGER2024/MIL/tl_2024_us_mil.zip",
+      "type": "application/zip",
+      "title": "TIGER/Line 2024 MIL — military installations, national file",
+      "description": "The one national shapefile this collection's `landmark_kind = 'military'` rows were read from.",
+      "roles": [
+        "source"
+      ]
+    },
+    "doc-mtfcc": {
+      "href": "https://www2.census.gov/geo/pdfs/reference/mtfccs2022.pdf",
+      "type": "application/pdf",
+      "title": "2022 MAF/TIGER Feature Class Code Definitions",
+      "description": "The code -> name table `feature_type` was decoded from. TIGER2024 has no 2024 edition of this PDF; 2022 is the nearest published vintage, linked from the Bureau's own index at https://www.census.gov/library/reference/code-lists/mt-feature-class-codes.html. The code set is unchanged between the two: every code this build used also appears, worded the same, in the 2021 and 2025 editions.",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "TIGER/Line",
+    "geography",
+    "United States",
+    "landmarks",
+    "AREALM",
+    "MIL",
+    "MTFCC",
+    "military installation",
+    "cemetery",
+    "park",
+    "TIGER"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/geography.html",
+      "concepts": [
+        {
+          "id": "tiger-line",
+          "title": "TIGER/Line and geographic relationship files"
+        }
+      ]
+    }
+  ],
+  "table:row_count": 120734,
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "`AREAID`, from TIGER's internal address/area ID scheme -- not a census tabulation GEOID."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "`FULLNAME`."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "USPS code of the state file this row's `AREALM` zip was read from. NULL on every `landmark_kind = 'military'` row (measured, 858 of 120,734): `MIL` is one national file, not 56 state files, so there is no state to carry."
+    },
+    {
+      "name": "landmark_kind",
+      "type": "string",
+      "description": "`'landmark'` for a row from `AREALM` (civilian landmarks, 119,876 rows measured) or `'military'` for a row from `MIL` (858 rows measured). Not a source column -- set by tools/build_reference.py from which file the row came from."
+    },
+    {
+      "name": "mtfcc",
+      "type": "string",
+      "description": "`MTFCC`."
+    },
+    {
+      "name": "feature_type",
+      "type": "string",
+      "description": "`mtfcc` decoded through the 2022 MAF/TIGER Feature Class Code list. Most common nationally (measured): Cemetery, Park, Local Jail or Detention Center, Hospital/Hospice/Urgent Care Facility, University or College."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "`ALAND / 1e6`. NULL on every `landmark_kind = 'landmark'` row (measured, 119,876 of 120,734) -- `AREALM` carries no area fields at all."
+    },
+    {
+      "name": "awater_sqkm",
+      "type": "double",
+      "description": "`AWATER / 1e6`. NULL on the same rows as `aland_sqkm`, for the same reason."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Landmark boundary polygon, WKB-encoded. Written in the source CRS, NAD83 (EPSG:4269) -- unlike the ACS collections, this is kept rather than reprojected to WGS84/OGC:CRS84, so the GeoParquet `geo` metadata carries an explicit `crs` key."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct for the row's geometry, written by gpio, with row-group statistics."
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z"
+}

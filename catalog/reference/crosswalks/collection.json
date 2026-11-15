@@ -1,0 +1,2488 @@
+{
+  "type": "Collection",
+  "id": "reference/crosswalks",
+  "stac_version": "1.1.0",
+  "description": "**22,429,855** rows across **29 tables**, each its own parquet file in this collection's directory, from the Census Bureau's [2020 relationship files](https://www2.census.gov/geo/docs/maps-data/data/rel2020/) — every geography pair this catalog carries a crosswalk for. Tabular: no geometry, no `geoid`/`name`/`state` columns, because a relationship file's job is converting between two geography vintages or two geography types, not describing one feature.\n\n`t10t20-tract.parquet` is the one later trend work depends on: it maps 2010 tabulation blocks to 2020 tabulation blocks, with the land and water area each 2010 block split across. It is block-level, not tract-level, because 2010 and 2020 tracts do not nest — the Bureau's own crosswalk for that relationship is built from block-level overlap, and the state+county+tract columns already in that file are what a tract-to-tract join reads. The other 28 tables are every other rel2020 relationship, one file per relationship, read from each subdirectory's single national file (`*_natl.txt`) except `t10t20`, the one relationship rel2020 ships with no national file — those 28 come from `tract`, `blkgrp`, `place`, `cousub`, `cbsa` (3 relationships), `zcta520` (6), `ua` (8), `puma520` (4) and `aiannh` (3).\n\nNo PMTiles for this collection — there is no geometry to tile.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/reference/crosswalks/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Reference Geography"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json"
+  ],
+  "table:columns": [
+    {
+      "name": "oid_aiannh_20",
+      "type": "int64"
+    },
+    {
+      "name": "geoid_aiannh_20",
+      "type": "string"
+    },
+    {
+      "name": "namelsad_aiannh_20",
+      "type": "string"
+    },
+    {
+      "name": "arealand_aiannh_20",
+      "type": "int64"
+    },
+    {
+      "name": "areawater_aiannh_20",
+      "type": "int64"
+    },
+    {
+      "name": "mtfcc_aiannh_20",
+      "type": "string"
+    },
+    {
+      "name": "classfp_aiannh_20",
+      "type": "string"
+    },
+    {
+      "name": "funcstat_aiannh_20",
+      "type": "string"
+    },
+    {
+      "name": "oid_county_20",
+      "type": "int64"
+    },
+    {
+      "name": "geoid_county_20",
+      "type": "string"
+    },
+    {
+      "name": "namelsad_county_20",
+      "type": "string"
+    },
+    {
+      "name": "arealand_county_20",
+      "type": "int64"
+    },
+    {
+      "name": "areawater_county_20",
+      "type": "int64"
+    },
+    {
+      "name": "mtfcc_county_20",
+      "type": "string"
+    },
+    {
+      "name": "classfp_county_20",
+      "type": "string"
+    },
+    {
+      "name": "funcstat_county_20",
+      "type": "string"
+    },
+    {
+      "name": "arealand_part",
+      "type": "int64"
+    },
+    {
+      "name": "areawater_part",
+      "type": "int64"
+    }
+  ],
+  "table:row_count": 4283,
+  "title": "2020 Geography Crosswalks",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.231086,
+          17.831519,
+          -65.168508,
+          71.439786
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-04-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "aiannh-county20": {
+      "href": "./aiannh-county20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 142941,
+      "file:checksum": "12202465c977d7591f1fd299c700d89366e077a50bacda3fc2b987e82cc878f9c9c2",
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "aiannh-cousub20": {
+      "href": "./aiannh-cousub20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 1059289,
+      "file:checksum": "1220902f3bc559507886a9dfe3c6ef6e6711a9e893bd40012577689796c96690ae1f",
+      "table:columns": [
+        {
+          "name": "oid_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "geoid_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "areawater_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "mtfcc_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 38309,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "aiannh-tract20": {
+      "href": "./aiannh-tract20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 1757240,
+      "file:checksum": "1220fab0891e228ee66ebf4111eb64d9f5ac5f46d090508dc6eabfacb9b6d730fa21",
+      "table:columns": [
+        {
+          "name": "oid_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "geoid_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "areawater_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "mtfcc_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_aiannh_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 87274,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "blkgrp": {
+      "href": "./blkgrp.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 7611103,
+      "file:checksum": "12203394730492b1eb5eb60c36f26a1a4de505b5b06d6a38f76368cbd9448deb4aaf",
+      "table:columns": [
+        {
+          "name": "oid_blkgrp_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_blkgrp_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_blkgrp_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_blkgrp_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_blkgrp_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_blkgrp_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_blkgrp_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_blkgrp_10",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_blkgrp_10",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_blkgrp_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_blkgrp_10",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_blkgrp_10",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_blkgrp_10",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_blkgrp_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 337326,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "cbsa-cbsa23": {
+      "href": "./cbsa-cbsa23.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 60998,
+      "file:checksum": "12201509ff054c8226778094ffdb042e80053f93e8ff2d41ddb922ea9a48d01adf53",
+      "table:columns": [
+        {
+          "name": "oid_cbsa_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cbsa_20",
+          "type": "int64"
+        },
+        {
+          "name": "namelsad_cbsa_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cbsa_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cbsa_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cbsa_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cbsa_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "namelsad_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 1247,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "cbsa-necta23": {
+      "href": "./cbsa-necta23.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 35735,
+      "file:checksum": "12201103eddf861ca5d26201dcd82315fd66d7f7016e7c8520753ff5cf00c514648f",
+      "table:columns": [
+        {
+          "name": "oid_necta_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_necta_20",
+          "type": "int64"
+        },
+        {
+          "name": "namelsad_necta_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_necta_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_necta_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_necta_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_necta_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "namelsad_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 1018,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "cbsa-ua23": {
+      "href": "./cbsa-ua23.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 148707,
+      "file:checksum": "1220707cd11f6265889afc33784f11bd811a50896494fb587530a073f0e7860c48f1",
+      "table:columns": [
+        {
+          "name": "oid_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "namelsad_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cbsa_23",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cbsa_23",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 3991,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "cousub": {
+      "href": "./cousub.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 2186119,
+      "file:checksum": "1220929661f4fa0a9eee44794f2e969d1958b7afe469279cf2e16394fbe6baa72fe3",
+      "table:columns": [
+        {
+          "name": "oid_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_cousub_10",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cousub_10",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_cousub_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cousub_10",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cousub_10",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cousub_10",
+          "type": "string"
+        },
+        {
+          "name": "classfp_cousub_10",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cousub_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 63057,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "place": {
+      "href": "./place.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 2084898,
+      "file:checksum": "12206988ffbfb5fbb5efb885f8dfb9df9affa234d3e950b1afdedb7bb48558305741",
+      "table:columns": [
+        {
+          "name": "oid_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_place_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_place_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_place_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_place_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_place_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_place_10",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_place_10",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_place_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_place_10",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_place_10",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_place_10",
+          "type": "string"
+        },
+        {
+          "name": "classfp_place_10",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_place_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 68260,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "puma520-cousub20": {
+      "href": "./puma520-cousub20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 1169802,
+      "file:checksum": "12201f2651e90e0d3dbfd81b3f66ad6d998a551951ddd716914db43678ec81d11b4e",
+      "table:columns": [
+        {
+          "name": "oid_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 38883,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "puma520-puma510": {
+      "href": "./puma520-puma510.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 255669,
+      "file:checksum": "1220a1f387acaa1342029c9034bfe85653ffd33950214dfdc2b2790e0def368dca0b",
+      "table:columns": [
+        {
+          "name": "oid_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_puma5_10",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_puma5_10",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_puma5_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_puma5_10",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_puma5_10",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_puma5_10",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_puma5_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 6972,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "puma520-ua20": {
+      "href": "./puma520-ua20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 230176,
+      "file:checksum": "12208439c28a41d2adcad2dab60522f628792668772834be5ad5b20e4aef58889437",
+      "table:columns": [
+        {
+          "name": "oid_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 7087,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "puma520-zcta520": {
+      "href": "./puma520-zcta520.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 1142797,
+      "file:checksum": "12203d0f337bd98627ae9877b5fe227e2f6366c8621361c00e08e12f99eead2e8cd9",
+      "table:columns": [
+        {
+          "name": "oid_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_puma5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_puma5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 47848,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "t10t20-tract": {
+      "href": "./t10t20-tract.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 165774020,
+      "file:checksum": "1220333194c8f12ef6ef1df8a51a730805cc6cdd48648b50b4b0d7e2a7629dbb397f",
+      "table:columns": [
+        {
+          "name": "STATE_2010",
+          "type": "string"
+        },
+        {
+          "name": "COUNTY_2010",
+          "type": "string"
+        },
+        {
+          "name": "TRACT_2010",
+          "type": "string"
+        },
+        {
+          "name": "BLK_2010",
+          "type": "string"
+        },
+        {
+          "name": "BLKSF_2010",
+          "type": "string"
+        },
+        {
+          "name": "AREALAND_2010",
+          "type": "int64"
+        },
+        {
+          "name": "AREAWATER_2010",
+          "type": "int64"
+        },
+        {
+          "name": "BLOCK_PART_FLAG_O",
+          "type": "string"
+        },
+        {
+          "name": "STATE_2020",
+          "type": "string"
+        },
+        {
+          "name": "COUNTY_2020",
+          "type": "string"
+        },
+        {
+          "name": "TRACT_2020",
+          "type": "string"
+        },
+        {
+          "name": "BLK_2020",
+          "type": "string"
+        },
+        {
+          "name": "BLKSF_2020",
+          "type": "string"
+        },
+        {
+          "name": "AREALAND_2020",
+          "type": "int64"
+        },
+        {
+          "name": "AREAWATER_2020",
+          "type": "int64"
+        },
+        {
+          "name": "BLOCK_PART_FLAG_R",
+          "type": "string"
+        },
+        {
+          "name": "AREALAND_INT",
+          "type": "int64"
+        },
+        {
+          "name": "AREAWATER_INT",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 12689707,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "tract": {
+      "href": "./tract.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 3425051,
+      "file:checksum": "122063479a13ac0e8c18b3257f727da45d771071e51e930498758aaa8bf5653b5dd3",
+      "table:columns": [
+        {
+          "name": "oid_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_tract_10",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_tract_10",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_tract_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_tract_10",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_tract_10",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_tract_10",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_tract_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 126450,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "ua-cd118": {
+      "href": "./ua-cd118.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 124219,
+      "file:checksum": "12202caa269d5830c5bf2ddcc9dd9462da84a53351c0d1a707e4005dee4224ff5ee7",
+      "table:columns": [
+        {
+          "name": "oid_cd118_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cd118_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_cd118_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cd118_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cd118_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cd118_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cd118_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 3852,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "ua-county20": {
+      "href": "./ua-county20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 237613,
+      "file:checksum": "1220141d1466af519309c50d31ec3eb18d533748a9fd5253b43ab3f6dbdd5da5ed16",
+      "table:columns": [
+        {
+          "name": "oid_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_county_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_county_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_county_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_county_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_county_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_county_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_county_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_county_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 6968,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "ua-cousub20": {
+      "href": "./ua-cousub20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 1418144,
+      "file:checksum": "122094463652d58510925bdc4f41f410748c5f94c4109c9c5d8f889b8821303a3a8c",
+      "table:columns": [
+        {
+          "name": "oid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 47907,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "ua-place20": {
+      "href": "./ua-place20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 1217321,
+      "file:checksum": "12207030906fc36f2d98cd29d3fe08ce58480468a36f922d80f978ab68d7d5c4c8ed",
+      "table:columns": [
+        {
+          "name": "oid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_place_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_place_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_place_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_place_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_place_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 43492,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "ua-sldl2022": {
+      "href": "./ua-sldl2022.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 275373,
+      "file:checksum": "12207986ddf28e4d018bbdadf63e49d53e827126915a96f25413b1a8d0342e8d9d87",
+      "table:columns": [
+        {
+          "name": "oid_sldl2022_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_sldl2022_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_sldl2022_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_sldl2022_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_sldl2022_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_sldl2022_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_sldl2022_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 11319,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "ua-sldu2022": {
+      "href": "./ua-sldu2022.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 171975,
+      "file:checksum": "12209a6263b3bcdef44c1c57bf41e68ee6253729e0b007d887c974bdd292b195a46d",
+      "table:columns": [
+        {
+          "name": "oid_sldu2022_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_sldu2022_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_sldu2022_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_sldu2022_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_sldu2022_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_sldu2022_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_sldu2022_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 6532,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "ua-ua10": {
+      "href": "./ua-ua10.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 238630,
+      "file:checksum": "12200b6a0d58071a1f160b9e96f0abbfe65d3af4e57ca9f5c9b1a98e667780c3e349",
+      "table:columns": [
+        {
+          "name": "oid_ua_10",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_ua_10",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_10",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_ua_10",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_ua_10",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_10",
+          "type": "string"
+        },
+        {
+          "name": "oid_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 9088,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "ua-zcta520": {
+      "href": "./ua-zcta520.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 1094216,
+      "file:checksum": "1220cbd3496b784aacc9fa9fc3572c51d0db36dacf645a99737d7c540d0e19154a60",
+      "table:columns": [
+        {
+          "name": "oid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "geoid_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "areawater_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "mtfcc_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_ua_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 44917,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "zcta520-county20": {
+      "href": "./zcta520-county20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 1242617,
+      "file:checksum": "12205fd8c196b74870585098736a13fdc5132ad8b9c487d4bed2c4e56880c5126fca",
+      "table:columns": [
+        {
+          "name": "oid_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_county_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_county_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_county_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_county_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_county_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_county_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_county_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_county_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 47863,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "zcta520-cousub20": {
+      "href": "./zcta520-cousub20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 2885853,
+      "file:checksum": "1220659a7ee4d0f44ae8c1fa2e72ef9081612c0233195bd7ed7151d656743420ef77",
+      "table:columns": [
+        {
+          "name": "oid_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_cousub_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_cousub_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 112565,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "zcta520-place20": {
+      "href": "./zcta520-place20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 2031732,
+      "file:checksum": "12205111014b0c216b0d1b5b978fc89bdd633fa5e34f14da3ab149ae93815038efe5",
+      "table:columns": [
+        {
+          "name": "oid_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_place_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_place_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_place_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_place_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_place_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_place_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 82880,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "zcta520-tabblock20": {
+      "href": "./zcta520-tabblock20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 100152193,
+      "file:checksum": "1220c7814c700d7e38b324067c53fc01caac9abb479f2d3343a7e6f12ec4ff6e30b8",
+      "table:columns": [
+        {
+          "name": "oid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "geoid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "areawater_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "mtfcc_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_tabblock_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_tabblock_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_tabblock_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_tabblock_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_tabblock_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_tabblock_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_tabblock_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 8180866,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "zcta520-tract20": {
+      "href": "./zcta520-tract20.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 4111398,
+      "file:checksum": "122050f502fce112c0ad735ee637e34006e4e1c832ebdc8d4fa40b1b07a9c24374ff",
+      "table:columns": [
+        {
+          "name": "oid_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "oid_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_tract_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_tract_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 171480,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "zcta520-zcta510": {
+      "href": "./zcta520-zcta510.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 2704495,
+      "file:checksum": "122026b569f39a2f99e1d3de36d349cd9415d14bbd83aa62e3ae54918b213e9282d4",
+      "table:columns": [
+        {
+          "name": "oid_zcta5_10",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_zcta5_10",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_10",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_10",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_zcta5_10",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_zcta5_10",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_10",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_10",
+          "type": "string"
+        },
+        {
+          "name": "oid_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "geoid_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "namelsad_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_zcta5_20",
+          "type": "int64"
+        },
+        {
+          "name": "mtfcc_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "classfp_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "funcstat_zcta5_20",
+          "type": "string"
+        },
+        {
+          "name": "arealand_part",
+          "type": "int64"
+        },
+        {
+          "name": "areawater_part",
+          "type": "int64"
+        }
+      ],
+      "table:row_count": 138414,
+      "roles": [
+        "data"
+      ],
+      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+    },
+    "source-rel2020": {
+      "href": "https://www2.census.gov/geo/docs/maps-data/data/rel2020/",
+      "type": "text/html",
+      "title": "2020 Census relationship files (rel2020) — subdirectory index",
+      "description": "The ten subdirectories this collection's 29 tables were read from: t10t20, tract, blkgrp, place, cousub, cbsa, zcta520, ua, puma520, aiannh. Each is a pipe-delimited text file, read directly over HTTPS with no download step.",
+      "roles": [
+        "source"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "TIGER/Line",
+    "geography",
+    "United States",
+    "crosswalk",
+    "relationship file",
+    "rel2020",
+    "2010 Census",
+    "2020 Census",
+    "geography conversion",
+    "tract relationship"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/geography.html",
+      "concepts": [
+        {
+          "id": "tiger-line",
+          "title": "TIGER/Line and geographic relationship files"
+        }
+      ]
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z"
+}

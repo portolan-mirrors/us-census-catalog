@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T20:06:52.447181Z",
+      "breaking": false,
+      "assets": {
+        "urban-areas.parquet": {
+          "sha256": "826addc007a92c4b5d216a89be7b3ed08054f81a9f07543b78474e124f3dcb7d",
+          "size_bytes": 80876821,
+          "href": "reference/urban-areas/urban-areas.parquet",
+          "source_mtime": 1794772297.9574904,
+          "mtime": 1794772297.9574904,
+          "feature_count": 2644,
+          "schema_fingerprint": "f71502eecc696cd9"
+        },
+        "urban-areas.pmtiles": {
+          "sha256": "0b4835552d5784d6c6b9c586906d9837ff13e7f7e44a5e16687fd8c3e60995ea",
+          "size_bytes": 12521045,
+          "href": "reference/urban-areas/urban-areas.pmtiles",
+          "mtime": 1794772557.437095
+        }
+      },
+      "changes": [
+        "urban-areas.parquet",
+        "urban-areas.pmtiles"
+      ]
+    }
+  ]
+}

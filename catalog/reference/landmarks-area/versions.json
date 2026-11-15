@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T20:06:52.453680Z",
+      "breaking": false,
+      "assets": {
+        "landmarks-area.parquet": {
+          "sha256": "216f818b26bbc962952f7969b6694b91eed5502a7a38bb57b906ad21114f74d8",
+          "size_bytes": 68867172,
+          "href": "reference/landmarks-area/landmarks-area.parquet",
+          "source_mtime": 1794772444.609942,
+          "mtime": 1794772444.609942,
+          "feature_count": 120734,
+          "schema_fingerprint": "c9f8489c9bbed0d6"
+        },
+        "landmarks-area.pmtiles": {
+          "sha256": "de752979550f7b23235fd965f8ef4a70c29f377e5bd5d1f905e1e7416ac17184",
+          "size_bytes": 156194020,
+          "href": "reference/landmarks-area/landmarks-area.pmtiles",
+          "mtime": 1794772567.6939101
+        }
+      },
+      "changes": [
+        "landmarks-area.parquet",
+        "landmarks-area.pmtiles"
+      ]
+    }
+  ]
+}

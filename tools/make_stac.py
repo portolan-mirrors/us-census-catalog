@@ -109,6 +109,7 @@ HOST = {
 # "everything from the ACS" is answerable without string-matching titles.
 THEME_SCHEME_ACS = meta.ACS_PROGRAM
 THEME_SCHEME_PL = meta.PL_PROGRAM
+THEME_SCHEME_GEO = meta.GEO_PROGRAM
 
 
 # --------------------------------------------------------------------------
@@ -414,6 +415,15 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
             "concepts": [{"id": "dec-pl94171",
                           "title": "2020 Census P.L. 94-171 Redistricting "
                                    "Data"}]}]
+    elif cid in meta.REFERENCE_IDS:
+        # Reference geography comes from the geography program, not from
+        # a survey. Labelling it acs5 would claim these files hold
+        # survey estimates, which they do not.
+        coll["themes"] = [{
+            "scheme": THEME_SCHEME_GEO,
+            "concepts": [{"id": "tiger-line",
+                          "title": "TIGER/Line and geographic relationship "
+                                   "files"}]}]
     else:
         coll["themes"] = [{
             "scheme": THEME_SCHEME_ACS,
@@ -422,6 +432,7 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
                                    "estimates"}]}]
 
     interval = (meta.BLOCKS_INTERVAL if cid == "blocks"
+                else meta.REFERENCE_INTERVAL if cid in meta.REFERENCE_IDS
                 else meta.ACS_INTERVAL)
     coll.setdefault("extent", {})["temporal"] = {"interval": [list(interval)]}
 
@@ -444,6 +455,14 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     if cid == "blocks":
         pq_glob = str(CATALOG / "blocks" / "state_fips=*" / "*.parquet")
         ext_sql = "bbox.xmin < 0"
+    elif cid in meta.REFERENCE_IDS:
+        # reference/ (2026-11-15): no `population` column -- these are not
+        # ACS collections, so there is no "carries an estimate" row to
+        # restrict to. Same western-hemisphere framing as blocks.
+        pq_path = data_dir(cid) / f"{cid}.parquet"
+        if pq_path.exists():
+            pq_glob = str(pq_path)
+            ext_sql = "bbox.xmin < 0"
     else:
         pq_path = data_dir(cid) / f"{cid}.parquet"
         if pq_path.exists():

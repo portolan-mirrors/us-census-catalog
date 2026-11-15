@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Land area",
+  "metadata": {
+    "description": "Land area in square kilometres, pale to deep purple, roughly logarithmic so a small city's urban area and a metro area's both get their own class. Measured over all 2,644 urban areas with a published value: 6 classes with breaks at 10/25/75/250/750 km\u00b2, which fall at the 19th/57th/81st/93rd/98th percentile of the national distribution.",
+    "portolan:column": "aland_sqkm",
+    "portolan:breaks": [
+      10,
+      25,
+      75,
+      250,
+      750
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../urban-areas.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "urban-areas",
+      "filter": [
+        "has",
+        "aland_sqkm"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "aland_sqkm"
+          ],
+          "#f2f0f7",
+          10,
+          "#dadaeb",
+          25,
+          "#bcbddc",
+          75,
+          "#9e9ac8",
+          250,
+          "#756bb1",
+          750,
+          "#54278f"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "urban-areas",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

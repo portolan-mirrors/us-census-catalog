@@ -1,0 +1,64 @@
+{
+  "version": 8,
+  "name": "Landmark type",
+  "metadata": {
+    "description": "The five most common point-landmark types nationally -- most of them cul-de-sacs and locality points, address-system landmarks rather than places -- each its own color; every other type draws neutral gray. Measured over all 1,088,085 landmarks with a value: Cul-de-sac (668,308), Locality Point (208,547), Cemetery (103,934), Mountain Peak or Summit (63,097), Airport or Airfield (13,146), and 31,053 other types in neutral gray.",
+    "portolan:column": "feature_type",
+    "portolan:categories": [
+      "Cul-de-sac",
+      "Locality Point",
+      "Cemetery",
+      "Mountain Peak or Summit",
+      "Airport or Airfield"
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../landmarks-point.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "circle",
+      "type": "circle",
+      "source": "data",
+      "source-layer": "landmarks-point",
+      "paint": {
+        "circle-color": [
+          "match",
+          [
+            "get",
+            "feature_type"
+          ],
+          "Cul-de-sac",
+          "#969696",
+          "Locality Point",
+          "#6baed6",
+          "Cemetery",
+          "#54278f",
+          "Mountain Peak or Summit",
+          "#a67c52",
+          "Airport or Airfield",
+          "#e6550d",
+          "#d9d6d2"
+        ],
+        "circle-opacity": 0.8,
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          4,
+          1.5,
+          14,
+          5
+        ],
+        "circle-stroke-width": 0
+      }
+    }
+  ]
+}

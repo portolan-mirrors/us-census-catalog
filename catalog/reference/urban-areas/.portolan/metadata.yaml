@@ -1,0 +1,31 @@
+title: "2020 Urban Areas"
+description: |
+  The Census Bureau's 2020 urban area delineation: all **2,644** urban areas in the United States and Puerto Rico, from [TIGER/Line 2024 `UAC20`](https://www2.census.gov/geo/tiger/TIGER2024/UAC20/) — one national file. For the 2020 Census the Bureau replaced the 2010 urbanized-area/urban-cluster split with a single urban area definition: every feature here carries the same MTFCC, `G3500` ("Urban Area"), decoded into `feature_type`. **Deviation from the original brief:** this means there is no urban/rural class column (`UATYPE20`, from the 2010 product) to style on — it does not exist in `UAC20` — so the default style classes on land area instead; see the collection's processing notes.
+
+  `aland_sqkm` and `awater_sqkm` are `ALAND20`/`AWATER20` converted from square meters. Geometry keeps the source CRS (NAD83, EPSG:4269) rather than being reprojected to WGS84.
+
+  The PMTiles archive is a single band at full resolution, built with [tylertoo](https://github.com/geoparquet-io/tylertoo) `tiles` (not `pyramid` — there is no coarser geography to step up to below this collection, so every zoom draws this collection's own features, thinned to fit the tile-size cap where a zoom is too dense to draw in full). Statistics come from the GeoParquet; this collection has no `*_moe` columns to exclude.
+
+  This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
+contact:
+  name: "Chris Holmes"
+  email: "cholmes@9eo.org"
+license: "CC0-1.0"
+license_url: "https://www.census.gov/about/policies/open-gov/open-data.html"
+attribution: "U.S. Census Bureau"
+source_url: "https://www2.census.gov/geo/tiger/TIGER2024/UAC20/"
+keywords: ["census", "TIGER/Line", "geography", "United States", "urban area", "urban cluster", "UAC20", "TIGER", "urbanized", "city", "metro"]
+processing_notes: |
+  Built from the single national `UAC20` shapefile (https://www2.census.gov/geo/tiger/TIGER2024/UAC20/tl_2024_us_uac20.zip, 70 MB). Downloaded 2026-11-15 over plain HTTPS, no API key. GeoParquet written with the same path as the rest of this catalog (pyarrow, ZSTD, sized row groups, bbox covering column — tools/build_wide_themes.py documents the convention, verified against catalog/counties/county-income/county-income.parquet): `gpio convert geoparquet` reads the shapefile, keeping the source CRS (NAD83, EPSG:4269 — not reprojected, unlike the ACS collections' cartographic boundaries), then `gpio sort hilbert --add-bbox` writes the Hilbert-ordered file with the bbox covering metadata.
+
+  Every one of the 2,644 features carries MTFCC `G3500` and LSAD `67` (measured) — the 2020 Census urban area product has no urban/urbanized split, unlike its 2010 predecessor, so there is no categorical column to style on. The default style classes on `aland_sqkm` instead; see the description for the full note on this deviation from the original spec.
+
+  `feature_type` decodes `mtfcc` through a table copied from the 2022 MAF/TIGER Feature Class Code PDF (https://www2.census.gov/geo/pdfs/reference/mtfccs2022.pdf), the nearest published vintage to TIGER2024 — see this collection's `doc-mtfcc` source asset. A code this build met that is not in that table is left NULL rather than guessed at; none were, for this collection's data (see docs/spec-reference-layers.md's build report).
+known_issues: |
+  There is no urban/urbanized-area class to style on. The 2020 Census urban area product carries a single MTFCC (`G3500`) and a single LSAD (`67`) on every one of its 2,644 features — the 2010-era `UATYP10` urban/urban-cluster split this build was originally asked to carry forward does not exist in `UAC20`. The default style classes on land area instead; see the collection's AGENTS.md for the exact breaks.
+examples:
+  - engine: duckdb
+    description: "Preview the first rows, straight off the published file"
+    code: |
+      INSTALL httpfs; LOAD httpfs;
+      SELECT * FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/reference/urban-areas/urban-areas.parquet' LIMIT 5;

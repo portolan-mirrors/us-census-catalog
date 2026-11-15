@@ -1,0 +1,60 @@
+{
+  "type": "Catalog",
+  "id": "reference",
+  "stac_version": "1.1.0",
+  "title": "Reference Geography",
+  "description": "Geography that carries no demographic statistic, so it stays out of the seven geography groups above. Four collections, all from TIGER/Line 2024 and the 2020 Census relationship files: [urban-areas](./urban-areas/collection.json) (2,644 features, the 2020 urban area delineation), [landmarks-area](./landmarks-area/collection.json) (120,734 civilian and military area landmarks), [landmarks-point](./landmarks-point/collection.json) (1,088,085 point landmarks) and [crosswalks](./crosswalks/collection.json) (22,429,855 rows across 29 tabular relationship tables, no geometry). None of the four shares a geometry or a `geoid` with another, so there is no 1:1 join across this group the way the ACS geographies join across their themed collections — each collection here stands on its own.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Human-readable documentation"
+    },
+    {
+      "rel": "root",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "child",
+      "href": "./urban-areas/collection.json",
+      "type": "application/json",
+      "title": "2020 Urban Areas"
+    },
+    {
+      "rel": "child",
+      "href": "./landmarks-area/collection.json",
+      "type": "application/json",
+      "title": "Landmarks — Area"
+    },
+    {
+      "rel": "child",
+      "href": "./landmarks-point/collection.json",
+      "type": "application/json",
+      "title": "Landmarks — Point"
+    },
+    {
+      "rel": "child",
+      "href": "./crosswalks/collection.json",
+      "type": "application/json",
+      "title": "2020 Geography Crosswalks"
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json"
+  ]
+}

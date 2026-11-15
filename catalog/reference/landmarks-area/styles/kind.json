@@ -1,0 +1,41 @@
+{
+  "version": 8,
+  "name": "Landmark kind",
+  "metadata": {
+    "description": "Civilian landmarks (AREALM) in green against military installations (MIL) in red -- the two source files this collection combines. Measured over all 120,734 landmarks with a value: landmark (119,876), military (858), and 0 other types in neutral gray.",
+    "portolan:column": "landmark_kind",
+    "portolan:categories": [
+      "landmark",
+      "military"
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../landmarks-area.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "landmarks-area",
+      "paint": {
+        "fill-color": [
+          "match",
+          [
+            "get",
+            "landmark_kind"
+          ],
+          "landmark",
+          "#238b45",
+          "military",
+          "#b30000",
+          "#d9d6d2"
+        ],
+        "fill-opacity": 0.8
+      }
+    }
+  ]
+}

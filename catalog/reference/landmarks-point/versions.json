@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T20:06:52.460829Z",
+      "breaking": false,
+      "assets": {
+        "landmarks-point.parquet": {
+          "sha256": "da3fbef9063d21f467d03a4a72ed10816e6a36686b2bbaebe52588faf89c2cba",
+          "size_bytes": 46357443,
+          "href": "reference/landmarks-point/landmarks-point.parquet",
+          "source_mtime": 1794772382.3778985,
+          "mtime": 1794772382.3778985,
+          "feature_count": 1088085,
+          "schema_fingerprint": "0049c69333576726"
+        },
+        "landmarks-point.pmtiles": {
+          "sha256": "df3e75bf57c5df97b8c461809cbadb1f7749c4813f6f9a76ff7109039c472a53",
+          "size_bytes": 196237881,
+          "href": "reference/landmarks-point/landmarks-point.pmtiles",
+          "mtime": 1794772576.8308163
+        }
+      },
+      "changes": [
+        "landmarks-point.parquet",
+        "landmarks-point.pmtiles"
+      ]
+    }
+  ]
+}

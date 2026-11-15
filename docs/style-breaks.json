@@ -9934,7 +9934,157 @@
      "noisy_cv_pct": 0.0
     }
    }
+  },
+  "urban-areas": {
+   "source": "catalog/reference/urban-areas/urban-areas.parquet",
+   "rows": 2644,
+   "schema": [
+    "geoid",
+    "name",
+    "mtfcc",
+    "feature_type",
+    "aland_sqkm",
+    "awater_sqkm",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "aland_sqkm": {
+     "n_non_null": 2644,
+     "null_pct": 0.0,
+     "min": 1.622,
+     "max": 8412.246,
+     "quantiles": {
+      "p2": 5.46476,
+      "p5": 6.7324,
+      "p10": 7.916399999999999,
+      "p20": 10.3738,
+      "p30": 12.8506,
+      "p40": 15.9988,
+      "p50": 20.4095,
+      "p60": 27.0714,
+      "p70": 40.014599999999994,
+      "p80": 70.45600000000007,
+      "p90": 168.66630000000032,
+      "p95": 382.74919999999975,
+      "p98": 889.6832399999946
+     },
+     "breaks": [
+      10,
+      25,
+      75,
+      250,
+      750
+     ],
+     "class_counts": [
+      494,
+      1026,
+      619,
+      314,
+      125,
+      66
+     ],
+     "class_pct": [
+      18.68,
+      38.8,
+      23.41,
+      11.88,
+      4.73,
+      2.5
+     ],
+     "noisy_cv_pct": null
+    }
+   }
+  },
+  "landmarks-area": {
+   "source": "catalog/reference/landmarks-area/landmarks-area.parquet",
+   "rows": 120734,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "landmark_kind",
+    "mtfcc",
+    "feature_type",
+    "aland_sqkm",
+    "awater_sqkm",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "feature_type": {
+     "kind": "match",
+     "n_non_null": 120734,
+     "null_pct": 0.0,
+     "categories": [
+      "National Park Service Land",
+      "National Forest or Other Federal Land",
+      "Military Installation",
+      "Island",
+      "State Park, Forest, or Recreation Area",
+      "Park"
+     ],
+     "category_counts": {
+      "National Park Service Land": 622,
+      "National Forest or Other Federal Land": 1570,
+      "Military Installation": 858,
+      "Island": 3217,
+      "State Park, Forest, or Recreation Area": 3093,
+      "Park": 18686
+     },
+     "other_count": 92688
+    },
+    "landmark_kind": {
+     "kind": "match",
+     "n_non_null": 120734,
+     "null_pct": 0.0,
+     "categories": [
+      "landmark",
+      "military"
+     ],
+     "category_counts": {
+      "landmark": 119876,
+      "military": 858
+     },
+     "other_count": 0
+    }
+   }
+  },
+  "landmarks-point": {
+   "source": "catalog/reference/landmarks-point/landmarks-point.parquet",
+   "rows": 1088085,
+   "schema": [
+    "geoid",
+    "name",
+    "state",
+    "mtfcc",
+    "feature_type",
+    "geometry",
+    "bbox"
+   ],
+   "stats": {
+    "feature_type": {
+     "kind": "match",
+     "n_non_null": 1088085,
+     "null_pct": 0.0,
+     "categories": [
+      "Cul-de-sac",
+      "Locality Point",
+      "Cemetery",
+      "Mountain Peak or Summit",
+      "Airport or Airfield"
+     ],
+     "category_counts": {
+      "Cul-de-sac": 668308,
+      "Locality Point": 208547,
+      "Cemetery": 103934,
+      "Mountain Peak or Summit": 63097,
+      "Airport or Airfield": 13146
+     },
+     "other_count": 31053
+    }
+   }
   }
  },
- "measured_previously": "2026-11-12"
+ "measured_previously": "2026-11-15"
 }

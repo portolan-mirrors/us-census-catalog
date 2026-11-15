@@ -1,0 +1,29 @@
+title: "2020 Geography Crosswalks"
+description: |
+  **22,429,855** rows across **29 tables**, each its own parquet file in this collection's directory, from the Census Bureau's [2020 relationship files](https://www2.census.gov/geo/docs/maps-data/data/rel2020/) — every geography pair this catalog carries a crosswalk for. Tabular: no geometry, no `geoid`/`name`/`state` columns, because a relationship file's job is converting between two geography vintages or two geography types, not describing one feature.
+
+  `t10t20-tract.parquet` is the one later trend work depends on: it maps 2010 tabulation blocks to 2020 tabulation blocks, with the land and water area each 2010 block split across. It is block-level, not tract-level, because 2010 and 2020 tracts do not nest — the Bureau's own crosswalk for that relationship is built from block-level overlap, and the state+county+tract columns already in that file are what a tract-to-tract join reads. The other 28 tables are every other rel2020 relationship, one file per relationship, read from each subdirectory's single national file (`*_natl.txt`) except `t10t20`, the one relationship rel2020 ships with no national file — those 28 come from `tract`, `blkgrp`, `place`, `cousub`, `cbsa` (3 relationships), `zcta520` (6), `ua` (8), `puma520` (4) and `aiannh` (3).
+
+  No PMTiles for this collection — there is no geometry to tile.
+
+  This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
+contact:
+  name: "Chris Holmes"
+  email: "cholmes@9eo.org"
+license: "CC0-1.0"
+license_url: "https://www.census.gov/about/policies/open-gov/open-data.html"
+attribution: "U.S. Census Bureau"
+source_url: "https://www2.census.gov/geo/docs/maps-data/data/rel2020/"
+keywords: ["census", "TIGER/Line", "geography", "United States", "crosswalk", "relationship file", "rel2020", "2010 Census", "2020 Census", "geography conversion", "tract relationship"]
+processing_notes: |
+  Downloaded 2026-11-15 over plain HTTPS from https://www2.census.gov/geo/docs/maps-data/data/rel2020/. Every subdirectory but `t10t20` ships one national file per relationship (`*_natl.txt`); that is the file this build reads for `tract`, `blkgrp`, `place`, `cousub`, `cbsa`, `zcta520`, `ua`, `puma520` and `aiannh` — the per-state files those nine subdirectories also publish are the same relationship split into smaller pieces, so reading the national file once is complete and the per-state files are not read. `t10t20` is the one subdirectory with no national file: its 52 per-state zips (`TAB2010_TAB2020_ST##.zip`) are concatenated into `t10t20-tract.parquet`.
+
+  Every file is pipe-delimited with a header row and read directly with DuckDB (`read_csv(..., delim='|', header=true)`); column names are lowercased on write and otherwise kept exactly as published. No geometry, no gpio step, no Hilbert sort — written straight to ZSTD-compressed Parquet with `ROW_GROUP_SIZE 20000`, the same row-group size the spatial write path uses, for consistency rather than necessity.
+known_issues: |
+  `t10t20-tract.parquet` is block-level (12,689,707 rows, measured), not tract-level, even though its job is mapping 2010 tracts to 2020 tracts — see the processing notes for why. A join on this file needs the state+county+tract columns, not a direct tract-to-tract key; there is no row that just says "2010 tract X became 2020 tract Y" for a tract that split or merged.
+examples:
+  - engine: duckdb
+    description: "Preview the first rows, straight off the published file"
+    code: |
+      INSTALL httpfs; LOAD httpfs;
+      SELECT * FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/reference/crosswalks/t10t20-tract.parquet' LIMIT 5; -- one of 29 tables; see source_url for the rest

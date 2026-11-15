@@ -1,0 +1,31 @@
+title: "Landmarks — Area"
+description: |
+  Polygon landmarks from TIGER/Line 2024: all **120,734** features combining [`AREALM`](https://www2.census.gov/geo/tiger/TIGER2024/AREALM/) (civilian landmarks, one file per state) and [`MIL`](https://www2.census.gov/geo/tiger/TIGER2024/MIL/) (military installations, one national file) into a single table, with `landmark_kind` set to `landmark` or `military` so the two sources stay distinguishable after the merge. Measured: 119,876 `landmark` rows (all 56 states carry a `state` column) and 858 `military` rows (none do — `MIL` is a national file, not per-state, so there is no state to carry, and `AREALM` carries no `aland_sqkm`/`awater_sqkm` so those are NULL on every `landmark` row).
+
+  `feature_type` decodes each row's `mtfcc` through the Census Bureau's MAF/TIGER Feature Class Code list; see the collection's processing notes for the exact source and which codes, if any, this build could not decode. Measured nationally, the five most common types are cemeteries, parks, local jails and detention centers, hospitals, and universities or colleges — the five the default style colors.
+
+  The PMTiles archive is a single band at full resolution, built with [tylertoo](https://github.com/geoparquet-io/tylertoo) `tiles` (not `pyramid` — there is no coarser geography to step up to below this collection, so every zoom draws this collection's own features, thinned to fit the tile-size cap where a zoom is too dense to draw in full). Statistics come from the GeoParquet; this collection has no `*_moe` columns to exclude.
+
+  This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
+contact:
+  name: "Chris Holmes"
+  email: "cholmes@9eo.org"
+license: "CC0-1.0"
+license_url: "https://www.census.gov/about/policies/open-gov/open-data.html"
+attribution: "U.S. Census Bureau"
+source_url: "https://www2.census.gov/geo/tiger/TIGER2024/AREALM/"
+keywords: ["census", "TIGER/Line", "geography", "United States", "landmarks", "AREALM", "MIL", "MTFCC", "military installation", "cemetery", "park", "TIGER"]
+processing_notes: |
+  Built from 56 state `AREALM` shapefiles (https://www2.census.gov/geo/tiger/TIGER2024/AREALM/, 68 MB total) plus the one national `MIL` shapefile (https://www2.census.gov/geo/tiger/TIGER2024/MIL/tl_2024_us_mil.zip, 3 MB), unioned into one table after each is converted independently. Downloaded 2026-11-15 over plain HTTPS, no API key. GeoParquet written with the same path as the rest of this catalog (pyarrow, ZSTD, sized row groups, bbox covering column — tools/build_wide_themes.py documents the convention, verified against catalog/counties/county-income/county-income.parquet): `gpio convert geoparquet` reads the shapefile, keeping the source CRS (NAD83, EPSG:4269 — not reprojected, unlike the ACS collections' cartographic boundaries), then `gpio sort hilbert --add-bbox` writes the Hilbert-ordered file with the bbox covering metadata.
+
+  `state` is the USPS code for the AREALM file each row's state zip was read from; MIL rows carry `state = NULL`, since MIL is one national file, not 56 state files, and has no state column of its own to carry forward. `landmark_kind` is `'landmark'` for every AREALM row and `'military'` for every MIL row — not read off any source column, since neither file has one. AREALM carries no `ALAND`/`AWATER`, so `aland_sqkm`/`awater_sqkm` are NULL on every `landmark` row; MIL has both, so every `military` row has them.
+
+  `feature_type` decodes `mtfcc` through a table copied from the 2022 MAF/TIGER Feature Class Code PDF (https://www2.census.gov/geo/pdfs/reference/mtfccs2022.pdf), the nearest published vintage to TIGER2024 — see this collection's `doc-mtfcc` source asset. A code this build met that is not in that table is left NULL rather than guessed at; none were, for this collection's data (see docs/spec-reference-layers.md's build report).
+known_issues: |
+  `state` and `aland_sqkm`/`awater_sqkm` are NULL on different rows for different reasons, not the same reason: `state` is NULL on the 858 `landmark_kind = 'military'` rows (MIL is a national file with no per-state source to read a state from), while `aland_sqkm`/`awater_sqkm` are NULL on the 119,876 `landmark_kind = 'landmark'` rows (AREALM carries no area fields at all). Filter on `landmark_kind`, not on whether a column is NULL, if you need one kind cleanly.
+examples:
+  - engine: duckdb
+    description: "Preview the first rows, straight off the published file"
+    code: |
+      INSTALL httpfs; LOAD httpfs;
+      SELECT * FROM 'https://data.source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-area/landmarks-area.parquet' LIMIT 5;

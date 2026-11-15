@@ -205,6 +205,21 @@ GEOM_ONLY = [
     ("congressional-districts", "0-10:geom", "2M"),
 ]
 
+# ===== reference/ (2026-11-15): geography with no demographic columns =====
+# One band, full zoom range, same `tiles` (not `pyramid`) command as
+# GEOM_ONLY above -- there is no county/tract band to build on top of,
+# because these collections are not keyed to a geography level. landmarks-*
+# go to z14 so a single landmark is still visible at neighborhood zoom;
+# urban-areas stops at z10, like counties, since an urban area is a
+# city/metro-scale polygon. The 2M cap matches the counties precedent: a
+# national band of a few thousand to just over a million features
+# overruns the default at z0 without one.
+REFERENCE_SPATIAL = [
+    ("urban-areas", "0-10:geom", "2M"),
+    ("landmarks-area", "0-14:geom", "2M"),
+    ("landmarks-point", "0-14:geom", "2M"),
+]
+
 
 def build_geom_cmd(cid, band, max_tile, group=None):
     d = coll_dir(group, cid)
@@ -281,6 +296,9 @@ def recipes():
         out[cid] = (lambda c=cid: build_wave3_cmd(c))
     for cid, band, cap in GEOM_ONLY:
         out[cid] = (lambda c=cid, b=band, p=cap: build_geom_cmd(c, b, p))
+    for cid, band, cap in REFERENCE_SPATIAL:
+        out[cid] = (lambda c=cid, b=band, p=cap:
+                    build_geom_cmd(c, b, p, group="reference"))
     for group, prefix, band, cap in GEOM_LEVELS:
         for theme in THEMES:
             cid = f"{prefix}-{theme}"
