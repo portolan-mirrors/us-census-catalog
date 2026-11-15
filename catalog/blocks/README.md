@@ -12,7 +12,7 @@ Geometry is [TIGER/Line 2024 `TABBLOCK20`](https://www2.census.gov/geo/tiger/TIG
 
 The collection is **hive-partitioned by state**: 52 parquet files under `state_fips=<FIPS>/`, one STAC item each with its own bbox and row count. Pull one state and you download one file. To query all 52 as one table use the glob over the anonymous S3 endpoint (`SET s3_region='us-west-2'; ... read_parquet('s3://us-west-2.opendata.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=*/*.parquet', hive_partitioning=true)`) — an HTTPS glob cannot list a directory and returns 404; see the [agent guide](https://source.coop/portolan-mirrors/us-census-catalog/blocks/AGENTS.md) for the tested forms. The synthesized `state_fips` key carries the numeric FIPS code and sits alongside the `state` column's USPS code.
 
-The PMTiles archive carries the same columns as the GeoParquet. At feature zooms the tiles are the census geographies; at coarse zooms they are [A5](https://a5geo.org/) cell aggregations built by [tylertoo](https://github.com/geoparquet-io/tylertoo) — counts summed, rates and medians averaged unweighted over the geographies in the cell — because thinning hundreds of thousands of polygons at a national zoom would show a biased subset (small urban geographies drop first) rather than less data. Cell and feature zooms share column names, so one style expression classifies both. The aggregation is a visualization aid: statistics come from the GeoParquet, never from the tiles.
+The PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons and z6–z9 census tracts carrying exact sums of the 2020 block counts — decennial counts aggregate exactly, and the rate columns are recomputed from the summed counts rather than averaged — and z10–z14 are the blocks themselves. Thinning 8.1 million polygons down to a national zoom would show a biased subset (small urban blocks drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead. Every band carries the same column names, so one style expression classifies every zoom — but below z10 you are looking at counties and tracts, not blocks, and clicking a coarse feature identifies a real county or tract by `geoid` and `name`. Statistics come from the GeoParquet, never from the tiles.
 
 This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](https://source.coop/portolan-mirrors/us-census-catalog/blocks/AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
 
@@ -65,7 +65,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 | ./state_fips=*/*.parquet | - | - |
 | ./items.parquet | 50.4 KB | 12209fad0824... |
 | ./thumbnail.png | 66.9 KB | 1220c57df1ec... |
-| ./blocks.pmtiles | 6.7 GB | 1220a6cad2bf... |
+| ./blocks.pmtiles | 6.6 GB | 12202a415c37... |
 | ./styles/black-share.json | 2.1 KB | 122033e39965... |
 | ./styles/default.json | 1.9 KB | 1220b991a401... |
 | ./styles/hispanic-share.json | 2.1 KB | 12201b3ef825... |
@@ -155,7 +155,7 @@ Per state: ogr2ogr converts the shapefile to EPSG:4326 parquet keeping only `GEO
 
 Validated: `pop_total` over the 50 states + DC equals the published 331,449,281 exactly and Puerto Rico 3,285,874; `housing_occupied + housing_vacant == housing_units` on every block; GEOIDs unique across all 52 partitions; zero orphans in either direction between TIGER and the P.L. files; one schema across all partitions.
 
-Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo, with A5 cell aggregation at coarse zooms (counts summed, rates averaged) — a visualization aid, not a statistical product.
+Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo as a census-geography pyramid, so coarse zooms carry a coarser census geography — counties, then tracts — with that geography's own official values, instead of a thinned sample of this collection's features; the collections small enough to draw nationally (counties, states, congressional districts) are tiled as real polygons at every zoom.
 
 
 ## Attribution
@@ -181,6 +181,10 @@ Geometry is TIGER/Line, which is not shoreline-clipped: a coastal block extends 
 The race columns are race-alone counts crossing Hispanic origin (P1), while `pop_white_nh` is the not-Hispanic branch of P2. The two are not interchangeable, and `pct_black` here is not the same measure as `pct_black` in the ACS collections, which is non-Hispanic Black alone.
 
 Blocks carry 2020 Decennial counts only. The Census Bureau publishes no income, education, commuting or internet data below block group, and this collection invents none.
+
+PMTiles coarse zooms are a different census geography from this collection's: below z10 you are looking at counties and tracts, not blocks. Those bands carry exact sums of the block counts (rates recomputed from the summed counts), so they are consistent with the data — but the geometry and the `geoid` belong to the county or tract. Statistics come from the GeoParquet.
+
+Connecticut needs a crosswalk in those coarse bands. The 2020 block GEOIDs carry Connecticut's old 8-county prefixes (09001–09015), while the 2024 boundaries used for the county and tract bands are the 9 planning regions (09110–09190) that replaced them as the county equivalent in 2022. The build matches blocks to current geographies on the 6-digit tract number, which is preserved across the change, so no Connecticut population is dropped: the aggregates still sum to the published national block total of 334,735,155 exactly. The block rows themselves are untouched — they keep the 2020 GEOIDs, so a 5-character prefix join from Connecticut blocks to the 2024-vintage counties collection finds no match.
 
 
 ---

@@ -14,7 +14,7 @@ The join is driven by geometry, so a geography with 2024 boundaries but no ACS t
 
 This is one themed chunk of 5 at this geography — the others are [Income & Poverty](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/collection.json), [People & Education](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/collection.json), [Commuting & Connectivity](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/collection.json) and [Health, Disability & Income by Race](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/collection.json) — split that way because a single wide national table would make a consumer who wanted one column download all of them. Collections at the same geography join 1:1 on `geoid`. The same indicators are published for [counties](https://source.coop/portolan-mirrors/us-census-catalog/counties/collection.json) and [states](https://source.coop/portolan-mirrors/us-census-catalog/states/collection.json) as single wide tables.
 
-The PMTiles archive carries the same columns as the GeoParquet. At feature zooms the tiles are the census geographies; at coarse zooms they are [A5](https://a5geo.org/) cell aggregations built by [tylertoo](https://github.com/geoparquet-io/tylertoo) — counts summed, rates and medians averaged unweighted over the geographies in the cell — because thinning hundreds of thousands of polygons at a national zoom would show a biased subset (small urban geographies drop first) rather than less data. Cell and feature zooms share column names, so one style expression classifies both. The aggregation is a visualization aid: statistics come from the GeoParquet, never from the tiles.
+The PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons carrying the Census Bureau's own published county estimates, and z6–z12 are the census tracts themselves. Thinning this many polygons down to a national zoom would show a biased subset (small urban geographies drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead of a thinned sample of this one. Every band carries the same column names, so one style expression classifies every zoom — but below z6 you are looking at counties, not tracts, and the values there are the Bureau's official estimates for those geographies, with their own meaning, rather than a visualization-only average: clicking a coarse feature identifies a real county by `geoid` and `name`. The `*_moe` columns are excluded from the tiles at every zoom — a margin of error is computed for one specific geography and cannot be carried across bands — while the `*_cv` columns are kept. Statistics come from the GeoParquet, never from the tiles.
 
 This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
 
@@ -71,7 +71,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 | File | Size | Checksum |
 |------|------|----------|
 | ./thumbnail.png | 67.2 KB | 12204105767a... |
-| ./tract-housing.pmtiles | 253.3 MB | 12204eaf6bb2... |
+| ./tract-housing.pmtiles | 255.2 MB | 1220c0231814... |
 | ./tract-housing.parquet | 54.1 MB | 122097f82b99... |
 | ./styles/default.json | 2.2 KB | 122064e466fe... |
 | ./styles/ownership.json | 1.8 KB | 122099738c22... |
@@ -123,7 +123,7 @@ Cross-checked end to end against the published St. Louis census catalog, which r
 
 
 
-Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo, with A5 cell aggregation at coarse zooms (counts summed, rates averaged) — a visualization aid, not a statistical product.
+Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo as a census-geography pyramid, so coarse zooms carry a coarser census geography — counties, then tracts — with that geography's own official values, instead of a thinned sample of this collection's features; the collections small enough to draw nationally (counties, states, congressional districts) are tiled as real polygons at every zoom.
 
 
 ## Attribution
@@ -148,7 +148,7 @@ Suffolk County, New York (36103) was re-delineated in the 2024 vintage: 39 block
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts summed, rates and medians averaged unweighted. Statistics come from the GeoParquet.
+PMTiles coarse zooms are a different census geography from this collection's: below z6 you are looking at counties, not tracts. The values there are the Census Bureau's own estimates for those geographies, not an aggregation of this file, and `*_moe` columns are not in the tiles. Statistics come from the GeoParquet.
 
 
 ---

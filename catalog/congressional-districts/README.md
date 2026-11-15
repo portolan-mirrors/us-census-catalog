@@ -16,7 +16,7 @@ The join is driven by geometry, so a geography with 2024 boundaries but no ACS t
 
 A district nests in a state, so `substr(geoid, 1, 2)` joins [states](https://source.coop/portolan-mirrors/us-census-catalog/states/collection.json); nothing finer joins by prefix, because district boundaries follow 2020 census blocks rather than counties or tracts. The same 112-column wide table is published at the catalog's other coarse geographies — [Counties](https://source.coop/portolan-mirrors/us-census-catalog/counties/collection.json), [States](https://source.coop/portolan-mirrors/us-census-catalog/states/collection.json), [ZIP Code Tabulation Areas](https://source.coop/portolan-mirrors/us-census-catalog/zctas/collection.json), [Places & CDPs](https://source.coop/portolan-mirrors/us-census-catalog/places/collection.json) — and the finer geographies split the indicators into themed chunks: [block groups](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/catalog.json) and [census tracts](https://source.coop/portolan-mirrors/us-census-catalog/tracts/catalog.json).
 
-The PMTiles archive carries the same columns as the GeoParquet, minus the `*_moe` columns, and at every zoom the tiles are the real census geographies — no [A5](https://a5geo.org/) cell aggregation, unlike the catalog's finer collections, because there are few enough features here to draw them all at a national zoom. Built with [tylertoo](https://github.com/geoparquet-io/tylertoo). Statistics still come from the GeoParquet: margins of error are not in the tiles.
+The PMTiles archive carries the same columns as the GeoParquet, minus the `*_moe` columns, and at every zoom the tiles are the real census geographies — there are few enough features here to draw them all at a national zoom, so this archive needs none of the coarser-geography coarse-zoom bands the catalog's finer collections carry. Built with [tylertoo](https://github.com/geoparquet-io/tylertoo). Statistics still come from the GeoParquet: margins of error are not in the tiles.
 
 This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](https://source.coop/portolan-mirrors/us-census-catalog/congressional-districts/AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
 
@@ -229,7 +229,7 @@ Cross-checked end to end against the published St. Louis census catalog, which r
 
 Validated: 441 rows against the 441 districts in the Census Bureau's own [geographic entity tallies](https://www.census.gov/geographies/reference-files/time-series/geo/tallies.html) (436 US including the District of Columbia delegate + 1 Puerto Rico + 4 island areas), 441 distinct `geoid`, no percentage outside 0–100, population 546,488–1,021,191 across the 435 voting districts. Spot-checked: CA-12 median household income $108,648, NY-12 $147,775, AL-01 $66,291.
 
-Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo, with A5 cell aggregation at coarse zooms (counts summed, rates averaged) — a visualization aid, not a statistical product.
+Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo as a census-geography pyramid, so coarse zooms carry a coarser census geography — counties, then tracts — with that geography's own official values, instead of a thinned sample of this collection's features; the collections small enough to draw nationally (counties, states, congressional districts) are tiled as real polygons at every zoom.
 
 
 ## Attribution
@@ -258,7 +258,7 @@ Districts are equal-population by design (546,488–1,021,191 here, around 770,0
 
 Margins of error are the narrowest in this catalog — a district is ~770,000 people — and no styled column has a single district with a coefficient of variation above 0.30 (measured). They are still margins: check whether two districts' margins overlap before calling a difference real, and never aggregate a median.
 
-The PMTiles archive is real geographies at every zoom, with no A5 cell aggregation (the catalog's finer collections aggregate at coarse zooms; this one has few enough features not to). `*_moe` columns are not in the tiles — statistics come from the GeoParquet.
+The PMTiles archive is real geographies at every zoom, with no coarser-geography coarse-zoom band (the catalog's finer collections switch to counties and tracts at coarse zooms; this one has few enough features not to). `*_moe` columns are not in the tiles — statistics come from the GeoParquet.
 
 
 ---

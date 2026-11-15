@@ -16,7 +16,7 @@ The join is driven by geometry, so a geography with 2024 boundaries but no ACS t
 
 A place nests in a state but not in a county — a place can straddle a county line — so `substr(geoid, 1, 2)` joins [states](https://source.coop/portolan-mirrors/us-census-catalog/states/collection.json) and nothing else joins by prefix. The same 112-column wide table is published at the catalog's other coarse geographies — [Counties](https://source.coop/portolan-mirrors/us-census-catalog/counties/collection.json), [States](https://source.coop/portolan-mirrors/us-census-catalog/states/collection.json), [ZIP Code Tabulation Areas](https://source.coop/portolan-mirrors/us-census-catalog/zctas/collection.json), [Congressional Districts (119th Congress)](https://source.coop/portolan-mirrors/us-census-catalog/congressional-districts/collection.json) — and the finer geographies split the indicators into themed chunks: [block groups](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/catalog.json) and [census tracts](https://source.coop/portolan-mirrors/us-census-catalog/tracts/catalog.json).
 
-The PMTiles archive carries the same columns as the GeoParquet. At feature zooms the tiles are the census geographies; at coarse zooms they are [A5](https://a5geo.org/) cell aggregations built by [tylertoo](https://github.com/geoparquet-io/tylertoo) — counts summed, rates and medians averaged unweighted over the geographies in the cell — because thinning hundreds of thousands of polygons at a national zoom would show a biased subset (small urban geographies drop first) rather than less data. Cell and feature zooms share column names, so one style expression classifies both. The aggregation is a visualization aid: statistics come from the GeoParquet, never from the tiles.
+The PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons carrying the Census Bureau's own published county estimates, and z6–z12 are the places themselves. Places do not nest inside counties — a place can cross a county line — so the county band is orientation at national zooms, not a roll-up of these features. Thinning this many polygons down to a national zoom would show a biased subset (small urban geographies drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead of a thinned sample of this one. Every band carries the same column names, so one style expression classifies every zoom — but below z6 you are looking at counties, not places, and the values there are the Bureau's official estimates for those geographies, with their own meaning, rather than a visualization-only average: clicking a coarse feature identifies a real county by `geoid` and `name`. The `*_moe` columns are excluded from the tiles at every zoom — a margin of error is computed for one specific geography and cannot be carried across bands — while the `*_cv` columns are kept. Statistics come from the GeoParquet, never from the tiles.
 
 This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](https://source.coop/portolan-mirrors/us-census-catalog/places/AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
 
@@ -152,7 +152,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 | File | Size | Checksum |
 |------|------|----------|
-| ./places.pmtiles | 196.6 MB | 1220e37493fd... |
+| ./places.pmtiles | 197.0 MB | 1220c7c9e138... |
 | ./places.parquet | 32.9 MB | 1220f1f1d496... |
 | ./thumbnail.png | 75.6 KB | 12203b84a9b1... |
 | ./styles/default.json | 2.6 KB | 1220121597ce... |
@@ -229,7 +229,7 @@ Cross-checked end to end against the published St. Louis census catalog, which r
 
 Validated: 32,612 rows (the 2024 cartographic boundary file's own feature count; the Bureau's [2020 tallies](https://www.census.gov/geographies/reference-files/time-series/geo/tallies.html) give 19,734 incorporated places + 12,454 CDPs = 32,188 for the 2020 vintage), 32,612 distinct `geoid`, no percentage outside 0–100, every one of the 32,330 tabulated ACS places matched to a polygon, 282 polygons with no ACS row kept with NULL values. Spot-checked: Los Angeles city population 3,857,263, New York city 8,483,844.
 
-Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo, with A5 cell aggregation at coarse zooms (counts summed, rates averaged) — a visualization aid, not a statistical product.
+Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo as a census-geography pyramid, so coarse zooms carry a coarser census geography — counties, then tracts — with that geography's own official values, instead of a thinned sample of this collection's features; the collections small enough to draw nationally (counties, states, congressional districts) are tiled as real polygons at every zoom.
 
 
 ## Attribution
@@ -256,7 +256,7 @@ Three non-island places carry geometry and no ACS row: Brentwood CDP (`3608026`)
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts summed, rates and medians averaged unweighted. Statistics come from the GeoParquet.
+PMTiles coarse zooms are a different census geography from this collection's: below z6 you are looking at counties, not places. The values there are the Census Bureau's own estimates for those geographies, not an aggregation of this file, and `*_moe` columns are not in the tiles. Statistics come from the GeoParquet.
 
 
 ---

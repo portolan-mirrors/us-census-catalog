@@ -16,7 +16,7 @@ The join is driven by geometry, so a geography with 2020 boundaries but no ACS t
 
 A ZCTA nests in nothing: it can cross county and state lines, so there is no prefix join from `geoid` to any other collection here, and `state` is NULL. Relating ZCTAs to counties or tracts is a spatial operation (or a Census relationship file), not a string operation. The same 112-column wide table is published at the catalog's other coarse geographies — [Counties](https://source.coop/portolan-mirrors/us-census-catalog/counties/collection.json), [States](https://source.coop/portolan-mirrors/us-census-catalog/states/collection.json), [Places & CDPs](https://source.coop/portolan-mirrors/us-census-catalog/places/collection.json), [Congressional Districts (119th Congress)](https://source.coop/portolan-mirrors/us-census-catalog/congressional-districts/collection.json) — and the finer geographies split the indicators into themed chunks: [block groups](https://source.coop/portolan-mirrors/us-census-catalog/block-groups/catalog.json) and [census tracts](https://source.coop/portolan-mirrors/us-census-catalog/tracts/catalog.json).
 
-The PMTiles archive carries the same columns as the GeoParquet. At feature zooms the tiles are the census geographies; at coarse zooms they are [A5](https://a5geo.org/) cell aggregations built by [tylertoo](https://github.com/geoparquet-io/tylertoo) — counts summed, rates and medians averaged unweighted over the geographies in the cell — because thinning hundreds of thousands of polygons at a national zoom would show a biased subset (small urban geographies drop first) rather than less data. Cell and feature zooms share column names, so one style expression classifies both. The aggregation is a visualization aid: statistics come from the GeoParquet, never from the tiles.
+The PMTiles archive is a census-geography pyramid built with [tylertoo](https://github.com/geoparquet-io/tylertoo): z0–z5 are county polygons carrying the Census Bureau's own published county estimates, and z6–z12 are the ZIP Code Tabulation Areas themselves. ZCTAs do not nest inside counties, so the county band is orientation at national zooms — real county values — and not a roll-up of these features. Thinning this many polygons down to a national zoom would show a biased subset (small urban geographies drop first) rather than less data, so the coarse zooms step up to a coarser census geography instead of a thinned sample of this one. Every band carries the same column names, so one style expression classifies every zoom — but below z6 you are looking at counties, not ZIP Code Tabulation Areas, and the values there are the Bureau's official estimates for those geographies, with their own meaning, rather than a visualization-only average: clicking a coarse feature identifies a real county by `geoid` and `name`. The `*_moe` columns are excluded from the tiles at every zoom — a margin of error is computed for one specific geography and cannot be carried across bands — while the `*_cv` columns are kept. Statistics come from the GeoParquet, never from the tiles.
 
 This is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](https://source.coop/portolan-mirrors/us-census-catalog/zctas/AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.
 
@@ -152,7 +152,7 @@ This is a mirror — [data.census.gov](https://data.census.gov/) is authoritativ
 
 | File | Size | Checksum |
 |------|------|----------|
-| ./zctas.pmtiles | 455.5 MB | 12204fa3ef9a... |
+| ./zctas.pmtiles | 455.9 MB | 12201552af02... |
 | ./zctas.parquet | 71.7 MB | 122045e7bd0d... |
 | ./thumbnail.png | 71.3 KB | 122075a3d2e9... |
 | ./styles/default.json | 2.6 KB | 122029ff610b... |
@@ -229,7 +229,7 @@ Cross-checked end to end against the published St. Louis census catalog, which r
 
 Validated: 33,791 rows against the 33,791 ZCTAs in the Census Bureau's own [2020 geographic entity tallies](https://www.census.gov/geographies/reference-files/time-series/geo/tallies.html) (33,642 US + 132 Puerto Rico + 17 island areas), 33,791 distinct `geoid`, no percentage outside 0–100, every one of the 33,772 tabulated ACS ZCTAs matched to a polygon, and 19 polygons with no ACS row kept with NULL values. Spot-checked against data.census.gov: 90210 median household income $187,801, 00601 (Adjuntas, PR) $19,454, 60614 (Chicago) $136,448.
 
-Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo, with A5 cell aggregation at coarse zooms (counts summed, rates averaged) — a visualization aid, not a statistical product.
+Converted to GeoParquet with geoparquet-io (gpio): ZSTD compression, Hilbert row order, and a covering `bbox` column with row-group statistics, so a spatial filter can skip most of the file over the network. Tiled to PMTiles with tylertoo as a census-geography pyramid, so coarse zooms carry a coarser census geography — counties, then tracts — with that geography's own official values, instead of a thinned sample of this collection's features; the collections small enough to draw nationally (counties, states, congressional districts) are tiled as real polygons at every zoom.
 
 
 ## Attribution
@@ -258,7 +258,7 @@ Two ZCTAs — 11717 and 11798, in Suffolk County, New York — have 2020 boundar
 
 Margins of error at this geography can be large relative to the estimate. Use the `*_cv` columns to flag or grey out unreliable values; never compare two geographies without checking whether their margins overlap, and never aggregate a median.
 
-PMTiles coarse zooms are A5 cell aggregations, not census geographies — counts summed, rates and medians averaged unweighted. Statistics come from the GeoParquet.
+PMTiles coarse zooms are a different census geography from this collection's: below z6 you are looking at counties, not ZIP Code Tabulation Areas. The values there are the Census Bureau's own estimates for those geographies, not an aggregation of this file, and `*_moe` columns are not in the tiles. Statistics come from the GeoParquet.
 
 
 ---
