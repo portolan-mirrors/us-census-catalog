@@ -16,7 +16,7 @@ Two problems this fixes, both verified against the live pages:
    the data browser) with no way across, so a nav line is injected under
    each title: data browser deep link, GeoParquet download, repo.
 
-Upstream bug to file against portolan-cli for the doubled prefix; the
+The wrong prefixes are filed upstream as portolan-cli#1114; the
 no-trailing-slash resolution is source.coop rendering behavior.
 """
 import re
