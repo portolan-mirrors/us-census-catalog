@@ -1,0 +1,71 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.1",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T21:52:46.497164Z",
+      "breaking": false,
+      "assets": {
+        "tract-household-dec2020.parquet": {
+          "sha256": "80cd7e137aed1d14fe8f94176ec9f656d9835da309ec51c5b2195f0920be9c4e",
+          "size_bytes": 56734993,
+          "href": "tracts/tract-household-dec2020/tract-household-dec2020.parquet",
+          "source_mtime": 1794779433.7412803,
+          "mtime": 1794779433.7412803,
+          "feature_count": 85184,
+          "schema_fingerprint": "ecfd18f36d70aeaf"
+        },
+        "tract-household-dec2020.pmtiles": {
+          "sha256": "43cf0770b0fb0379399d520ddc0a5f09b7c414d679be5e9e372a9f2badfa5d17",
+          "size_bytes": 374587417,
+          "href": "tracts/tract-household-dec2020/tract-household-dec2020.pmtiles",
+          "mtime": 1794779539.0614603
+        }
+      },
+      "changes": [
+        "tract-household-dec2020.parquet",
+        "tract-household-dec2020.pmtiles"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "created": "2026-11-15T22:09:55.122204Z",
+      "breaking": false,
+      "assets": {
+        "tract-household-dec2020.parquet": {
+          "sha256": "80cd7e137aed1d14fe8f94176ec9f656d9835da309ec51c5b2195f0920be9c4e",
+          "size_bytes": 56734993,
+          "href": "tracts/tract-household-dec2020/tract-household-dec2020.parquet",
+          "source_mtime": 1794779433.7412803,
+          "mtime": 1794779433.7412803,
+          "feature_count": 85184,
+          "schema_fingerprint": "ecfd18f36d70aeaf"
+        },
+        "tract-household-dec2020.pmtiles": {
+          "sha256": "a59cc2bbf8cf81a1e7c1110da928ecc95fb90956b21204756f159cd9b2c45e3f",
+          "size_bytes": 370805867,
+          "href": "tracts/tract-household-dec2020/tract-household-dec2020.pmtiles",
+          "mtime": 1794780485.5203075
+        },
+        "README.md": {
+          "sha256": "6ea36112866266c817bd4eb37a8fd2acbc76ba42089189afda0d946aecad35e7",
+          "size_bytes": 19161,
+          "href": "tracts/tract-household-dec2020/README.md",
+          "mtime": 1794779716.1047287
+        },
+        "thumbnail.png": {
+          "sha256": "65edf0b82a3e894db25d603d728bfb21fcca3d3c0fb61ce96decc8b58b36fd42",
+          "size_bytes": 164690,
+          "href": "tracts/tract-household-dec2020/thumbnail.png",
+          "mtime": 1794780112.0846157
+        }
+      },
+      "changes": [
+        "README.md",
+        "thumbnail.png",
+        "tract-household-dec2020.pmtiles"
+      ]
+    }
+  ]
+}

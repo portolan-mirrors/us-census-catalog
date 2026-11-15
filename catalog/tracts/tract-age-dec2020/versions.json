@@ -1,0 +1,71 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.1",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T21:52:46.488172Z",
+      "breaking": false,
+      "assets": {
+        "tract-age-dec2020.parquet": {
+          "sha256": "4721145d7478d8eeb75a62b8a25698006ae94262d77f2a000857bf0bacc5847c",
+          "size_bytes": 57115316,
+          "href": "tracts/tract-age-dec2020/tract-age-dec2020.parquet",
+          "source_mtime": 1794779431.1410367,
+          "mtime": 1794779431.1410367,
+          "feature_count": 85184,
+          "schema_fingerprint": "893eddd42792d004"
+        },
+        "tract-age-dec2020.pmtiles": {
+          "sha256": "94317674c1499a1f83809ec77029df3e0a7d6f2fcdedcbeb84a269ffbb891543",
+          "size_bytes": 364434017,
+          "href": "tracts/tract-age-dec2020/tract-age-dec2020.pmtiles",
+          "mtime": 1794779522.5839868
+        }
+      },
+      "changes": [
+        "tract-age-dec2020.parquet",
+        "tract-age-dec2020.pmtiles"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "created": "2026-11-15T22:09:55.112911Z",
+      "breaking": false,
+      "assets": {
+        "tract-age-dec2020.parquet": {
+          "sha256": "4721145d7478d8eeb75a62b8a25698006ae94262d77f2a000857bf0bacc5847c",
+          "size_bytes": 57115316,
+          "href": "tracts/tract-age-dec2020/tract-age-dec2020.parquet",
+          "source_mtime": 1794779431.1410367,
+          "mtime": 1794779431.1410367,
+          "feature_count": 85184,
+          "schema_fingerprint": "893eddd42792d004"
+        },
+        "tract-age-dec2020.pmtiles": {
+          "sha256": "d6f9bec11b746505f136aaecb16a57751e03b77a2f56dc5b2788c860859f54ae",
+          "size_bytes": 361651316,
+          "href": "tracts/tract-age-dec2020/tract-age-dec2020.pmtiles",
+          "mtime": 1794780471.7808468
+        },
+        "README.md": {
+          "sha256": "5b4bc9910b126c73a8ab7cdf59ef7df5bd9076a984e189518619984cdb124960",
+          "size_bytes": 17522,
+          "href": "tracts/tract-age-dec2020/README.md",
+          "mtime": 1794779716.104314
+        },
+        "thumbnail.png": {
+          "sha256": "86ff4e33d2d8385bbe99125c0513ef710a39a5ca0c2ba5b6be66c1a0c731e048",
+          "size_bytes": 176002,
+          "href": "tracts/tract-age-dec2020/thumbnail.png",
+          "mtime": 1794780111.6925735
+        }
+      },
+      "changes": [
+        "README.md",
+        "thumbnail.png",
+        "tract-age-dec2020.pmtiles"
+      ]
+    }
+  ]
+}

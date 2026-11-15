@@ -1,0 +1,84 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.1",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T21:52:46.478825Z",
+      "breaking": false,
+      "assets": {
+        "bg-tenure-dec2020.pmtiles": {
+          "sha256": "f63b401368625bfbe8bbe94b8ab66baf8a674cdbf88b511657c5ce11a802104e",
+          "size_bytes": 571762143,
+          "href": "block-groups/bg-tenure-dec2020/bg-tenure-dec2020.pmtiles",
+          "mtime": 1794779503.5588808
+        },
+        "bg-tenure-dec2020.parquet": {
+          "sha256": "2ff809e0fe42428b2ed2a2d56a9e5a80d20f35aa7ee9b14d46bd4506282c82cb",
+          "size_bytes": 86634271,
+          "href": "block-groups/bg-tenure-dec2020/bg-tenure-dec2020.parquet",
+          "source_mtime": 1794779428.4721885,
+          "mtime": 1794779428.4721885,
+          "feature_count": 242298,
+          "schema_fingerprint": "02997037e46db0ad"
+        },
+        "bg-tenure-dec2020.thumb.jpg": {
+          "sha256": "8df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325",
+          "size_bytes": 2323,
+          "href": "block-groups/bg-tenure-dec2020/bg-tenure-dec2020.thumb.jpg",
+          "mtime": 1794779573.0122674
+        }
+      },
+      "changes": [
+        "bg-tenure-dec2020.pmtiles",
+        "bg-tenure-dec2020.parquet",
+        "bg-tenure-dec2020.thumb.jpg"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "created": "2026-11-15T22:09:55.103757Z",
+      "breaking": false,
+      "assets": {
+        "bg-tenure-dec2020.pmtiles": {
+          "sha256": "0b105ad3ba81234b86432976bed25dc0f476d4168f0f47b2b3050fde829dfd08",
+          "size_bytes": 552643695,
+          "href": "block-groups/bg-tenure-dec2020/bg-tenure-dec2020.pmtiles",
+          "mtime": 1794780447.2098894
+        },
+        "bg-tenure-dec2020.parquet": {
+          "sha256": "2ff809e0fe42428b2ed2a2d56a9e5a80d20f35aa7ee9b14d46bd4506282c82cb",
+          "size_bytes": 86634271,
+          "href": "block-groups/bg-tenure-dec2020/bg-tenure-dec2020.parquet",
+          "source_mtime": 1794779428.4721885,
+          "mtime": 1794779428.4721885,
+          "feature_count": 242298,
+          "schema_fingerprint": "02997037e46db0ad"
+        },
+        "bg-tenure-dec2020.thumb.jpg": {
+          "sha256": "8df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325",
+          "size_bytes": 2323,
+          "href": "block-groups/bg-tenure-dec2020/bg-tenure-dec2020.thumb.jpg",
+          "mtime": 1794779573.0122674
+        },
+        "README.md": {
+          "sha256": "2968817e81397a831e5119d217e8868dbcea886965b0aa7efbf4553e2faca6bf",
+          "size_bytes": 14835,
+          "href": "block-groups/bg-tenure-dec2020/README.md",
+          "mtime": 1794779716.0905042
+        },
+        "thumbnail.png": {
+          "sha256": "3996b604d1d06861dcb6fc5945ebdb5b04d111da7374d315f86bf24f2982c12c",
+          "size_bytes": 217463,
+          "href": "block-groups/bg-tenure-dec2020/thumbnail.png",
+          "mtime": 1794780111.3566365
+        }
+      },
+      "changes": [
+        "bg-tenure-dec2020.pmtiles",
+        "README.md",
+        "thumbnail.png"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Population under 18",
+  "metadata": {
+    "description": "Share of the 2020 Census population under 18, pale to deep orange -- a 100% count, not the ACS people collections' pct_under_18 estimate. Measured over all 240,941 block groups with a published value: 6 classes with breaks at 18%/22%/26%/30%/35%, which fall at the 24th/52nd/78th/92nd/98th percentile of the national distribution.",
+    "portolan:column": "pct_under18",
+    "portolan:breaks": [
+      18,
+      22,
+      26,
+      30,
+      35
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../bg-age-dec2020.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "bg-age-dec2020",
+      "filter": [
+        "has",
+        "pct_under18"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_under18"
+          ],
+          "#feedde",
+          18,
+          "#fdd0a2",
+          22,
+          "#fdae6b",
+          26,
+          "#fd8d3c",
+          30,
+          "#e6550d",
+          35,
+          "#a63603"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "bg-age-dec2020",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

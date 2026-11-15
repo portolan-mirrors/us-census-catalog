@@ -2,11 +2,15 @@
 
 **[🗺️ Open in the data browser](https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/tracts/catalog.json)** · [Source repository](https://github.com/portolan-mirrors/us-census-catalog) · [Agent guide](https://source.coop/portolan-mirrors/us-census-catalog/tracts/AGENTS.md) · [STAC root](https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)
 
-American Community Survey 2020–2024 5-year indicators for all 85,184 census tracts in the United States and Puerto Rico — typically 1,200–8,000 people, the geography most small-area social research is done at. The same four themed collections as block groups — [income](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/collection.json), [people](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/collection.json), [housing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/collection.json), [connectivity](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/collection.json) — plus [wellbeing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/collection.json), which carries the health-insurance, disability, nativity and income-by-race tables the Census Bureau does not publish for block groups. All five share the same geometry and `geoid` and join 1:1; tract margins of error are substantially narrower than block-group margins (median household income is NULL on 1.59% of tracts against 7.69% of block groups). [data.census.gov](https://data.census.gov/) is authoritative.
+American Community Survey 2020–2024 5-year indicators for all 85,184 census tracts in the United States and Puerto Rico — typically 1,200–8,000 people, the geography most small-area social research is done at. The same four themed collections as block groups — [income](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-income/collection.json), [people](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people/collection.json), [housing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing/collection.json), [connectivity](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/collection.json) — plus [wellbeing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing/collection.json), which carries the health-insurance, disability, nativity and income-by-race tables the Census Bureau does not publish for block groups. All five share the same geometry and `geoid` and join 1:1; tract margins of error are substantially narrower than block-group margins (median household income is NULL on 1.59% of tracts against 7.69% of block groups). [data.census.gov](https://data.census.gov/) is authoritative. Three more collections sit beside these five, mirroring the block-group group: [age & sex](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-age-dec2020/collection.json), [household type](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-household-dec2020/collection.json) and [tenure](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-tenure-dec2020/collection.json), 2020 Census 100% counts with no margin of error.
 
 ## Collections
 
+### [tracts/tract-age-dec2020](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-age-dec2020)
+
 ### [tract-connectivity](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity)
+
+### [tracts/tract-household-dec2020](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-household-dec2020)
 
 ### [tract-housing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-housing)
 
@@ -14,13 +18,15 @@ American Community Survey 2020–2024 5-year indicators for all 85,184 census tr
 
 ### [tract-people](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-people)
 
+### [tracts/tract-tenure-dec2020](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-tenure-dec2020)
+
 ### [tract-wellbeing](https://source.coop/portolan-mirrors/us-census-catalog/tracts/tract-wellbeing)
 
 ## Coverage
 
 **Spatial Extent**
 
-- West: -179.1467, South: 17.8833, East: -65.2211, North: 71.3878
+- West: -179.1467, South: -14.5487, East: -64.5656, North: 71.3878
 
 **Temporal Extent**
 

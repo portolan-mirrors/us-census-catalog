@@ -1,0 +1,71 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.1",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T21:52:46.505034Z",
+      "breaking": false,
+      "assets": {
+        "tract-tenure-dec2020.parquet": {
+          "sha256": "a8367544f7b42e4045a10ad346f91a2a881eb3ad3d04af2e1c6c57e952e316d5",
+          "size_bytes": 53355767,
+          "href": "tracts/tract-tenure-dec2020/tract-tenure-dec2020.parquet",
+          "source_mtime": 1794779436.3007104,
+          "mtime": 1794779436.3007104,
+          "feature_count": 85184,
+          "schema_fingerprint": "02997037e46db0ad"
+        },
+        "tract-tenure-dec2020.pmtiles": {
+          "sha256": "1f4412424969d1e3c34395361387942dbbedfffa488bb78aa6eee37a77bbd6c8",
+          "size_bytes": 205300128,
+          "href": "tracts/tract-tenure-dec2020/tract-tenure-dec2020.pmtiles",
+          "mtime": 1794779541.7407713
+        }
+      },
+      "changes": [
+        "tract-tenure-dec2020.parquet",
+        "tract-tenure-dec2020.pmtiles"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "created": "2026-11-15T22:09:55.130690Z",
+      "breaking": false,
+      "assets": {
+        "tract-tenure-dec2020.parquet": {
+          "sha256": "a8367544f7b42e4045a10ad346f91a2a881eb3ad3d04af2e1c6c57e952e316d5",
+          "size_bytes": 53355767,
+          "href": "tracts/tract-tenure-dec2020/tract-tenure-dec2020.parquet",
+          "source_mtime": 1794779436.3007104,
+          "mtime": 1794779436.3007104,
+          "feature_count": 85184,
+          "schema_fingerprint": "02997037e46db0ad"
+        },
+        "tract-tenure-dec2020.pmtiles": {
+          "sha256": "a6cb0649726d19f18f9747be3d40e2dec082413be03c3c159e398d80b02ad29a",
+          "size_bytes": 197711134,
+          "href": "tracts/tract-tenure-dec2020/tract-tenure-dec2020.pmtiles",
+          "mtime": 1794780483.6670299
+        },
+        "README.md": {
+          "sha256": "c4d6ce8b3be8cb17f94997a7ce23d7ab25c5b375b5d22ae480cdcaa408b044f6",
+          "size_bytes": 14557,
+          "href": "tracts/tract-tenure-dec2020/README.md",
+          "mtime": 1794779716.1056247
+        },
+        "thumbnail.png": {
+          "sha256": "09ba9506f34e271736ccaed6f2c46cac60f0182c440b9b05eb0eaee9a6ad87e5",
+          "size_bytes": 198975,
+          "href": "tracts/tract-tenure-dec2020/thumbnail.png",
+          "mtime": 1794780112.2877932
+        }
+      },
+      "changes": [
+        "README.md",
+        "tract-tenure-dec2020.pmtiles",
+        "thumbnail.png"
+      ]
+    }
+  ]
+}

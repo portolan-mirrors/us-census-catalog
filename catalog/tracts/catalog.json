@@ -3,7 +3,7 @@
   "id": "tracts",
   "stac_version": "1.1.0",
   "title": "Census Tracts",
-  "description": "American Community Survey 2020–2024 5-year indicators for all 85,184 census tracts in the United States and Puerto Rico — typically 1,200–8,000 people, the geography most small-area social research is done at. The same four themed collections as block groups — [income](./tract-income/collection.json), [people](./tract-people/collection.json), [housing](./tract-housing/collection.json), [connectivity](./tract-connectivity/collection.json) — plus [wellbeing](./tract-wellbeing/collection.json), which carries the health-insurance, disability, nativity and income-by-race tables the Census Bureau does not publish for block groups. All five share the same geometry and `geoid` and join 1:1; tract margins of error are substantially narrower than block-group margins (median household income is NULL on 1.59% of tracts against 7.69% of block groups). [data.census.gov](https://data.census.gov/) is authoritative.",
+  "description": "American Community Survey 2020–2024 5-year indicators for all 85,184 census tracts in the United States and Puerto Rico — typically 1,200–8,000 people, the geography most small-area social research is done at. The same four themed collections as block groups — [income](./tract-income/collection.json), [people](./tract-people/collection.json), [housing](./tract-housing/collection.json), [connectivity](./tract-connectivity/collection.json) — plus [wellbeing](./tract-wellbeing/collection.json), which carries the health-insurance, disability, nativity and income-by-race tables the Census Bureau does not publish for block groups. All five share the same geometry and `geoid` and join 1:1; tract margins of error are substantially narrower than block-group margins (median household income is NULL on 1.59% of tracts against 7.69% of block groups). [data.census.gov](https://data.census.gov/) is authoritative. Three more collections sit beside these five, mirroring the block-group group: [age & sex](./tract-age-dec2020/collection.json), [household type](./tract-household-dec2020/collection.json) and [tenure](./tract-tenure-dec2020/collection.json), 2020 Census 100% counts with no margin of error.",
   "links": [
     {
       "rel": "agents",
@@ -58,6 +58,24 @@
       "href": "./tract-wellbeing/collection.json",
       "type": "application/json",
       "title": "Health, Disability & Income by Race — Census Tracts"
+    },
+    {
+      "rel": "child",
+      "href": "./tract-age-dec2020/collection.json",
+      "type": "application/json",
+      "title": "Age & Sex (2020 Census) — Census Tracts"
+    },
+    {
+      "rel": "child",
+      "href": "./tract-household-dec2020/collection.json",
+      "type": "application/json",
+      "title": "Household Type (2020 Census) — Census Tracts"
+    },
+    {
+      "rel": "child",
+      "href": "./tract-tenure-dec2020/collection.json",
+      "type": "application/json",
+      "title": "Tenure (2020 Census) — Census Tracts"
     },
     {
       "rel": "preview",

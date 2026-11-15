@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Vacant housing units",
+  "metadata": {
+    "description": "Vacant share of all housing units (H1 minus H4's occupied total), cream to deep red -- a 100% count, not the ACS housing collections' pct_vacant_units estimate. Measured over all 240,804 block groups with a published value: 6 classes with breaks at 3%/6%/10%/15%/25%, which fall at the 18th/45th/69th/84th/94th percentile of the national distribution.",
+    "portolan:column": "pct_vacant_2020",
+    "portolan:breaks": [
+      3,
+      6,
+      10,
+      15,
+      25
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../bg-tenure-dec2020.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "bg-tenure-dec2020",
+      "filter": [
+        "has",
+        "pct_vacant_2020"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_vacant_2020"
+          ],
+          "#fef0d9",
+          3,
+          "#fdd49e",
+          6,
+          "#fdbb84",
+          10,
+          "#fc8d59",
+          15,
+          "#e34a33",
+          25,
+          "#b30000"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "bg-tenure-dec2020",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

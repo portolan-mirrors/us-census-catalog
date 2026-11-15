@@ -1,0 +1,71 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.1",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T21:52:46.470308Z",
+      "breaking": false,
+      "assets": {
+        "bg-household-dec2020.parquet": {
+          "sha256": "07b4ce430670e39a4319c71abb97f5074c21c79c960b36e5473c7b8e295f55fa",
+          "size_bytes": 94165938,
+          "href": "block-groups/bg-household-dec2020/bg-household-dec2020.parquet",
+          "source_mtime": 1794779424.8666756,
+          "mtime": 1794779424.8666756,
+          "feature_count": 242298,
+          "schema_fingerprint": "ecfd18f36d70aeaf"
+        },
+        "bg-household-dec2020.pmtiles": {
+          "sha256": "d4630b880de0f1143a3fc875dfddefdc5775c37eecc05ce9ac4c8779f02a4b13",
+          "size_bytes": 1017665531,
+          "href": "block-groups/bg-household-dec2020/bg-household-dec2020.pmtiles",
+          "mtime": 1794779533.5157518
+        }
+      },
+      "changes": [
+        "bg-household-dec2020.parquet",
+        "bg-household-dec2020.pmtiles"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "created": "2026-11-15T22:09:55.095272Z",
+      "breaking": false,
+      "assets": {
+        "bg-household-dec2020.parquet": {
+          "sha256": "07b4ce430670e39a4319c71abb97f5074c21c79c960b36e5473c7b8e295f55fa",
+          "size_bytes": 94165938,
+          "href": "block-groups/bg-household-dec2020/bg-household-dec2020.parquet",
+          "source_mtime": 1794779424.8666756,
+          "mtime": 1794779424.8666756,
+          "feature_count": 242298,
+          "schema_fingerprint": "ecfd18f36d70aeaf"
+        },
+        "bg-household-dec2020.pmtiles": {
+          "sha256": "63d40453a43d8a1f61f39c95462f476045e4366b803aca43a98c0ce2416f01e3",
+          "size_bytes": 1004568055,
+          "href": "block-groups/bg-household-dec2020/bg-household-dec2020.pmtiles",
+          "mtime": 1794780469.8369422
+        },
+        "README.md": {
+          "sha256": "0d27e451a2ae1d6934fde1ee68d3c09e7a153792529952f99016709fa3657300",
+          "size_bytes": 19378,
+          "href": "block-groups/bg-household-dec2020/README.md",
+          "mtime": 1794779716.0891695
+        },
+        "thumbnail.png": {
+          "sha256": "a5ac085fc9e1f5eca7cbe8f2a003a5819c63274de241c665c01146fb385c0bd4",
+          "size_bytes": 190405,
+          "href": "block-groups/bg-household-dec2020/thumbnail.png",
+          "mtime": 1794780111.0084584
+        }
+      },
+      "changes": [
+        "README.md",
+        "thumbnail.png",
+        "bg-household-dec2020.pmtiles"
+      ]
+    }
+  ]
+}

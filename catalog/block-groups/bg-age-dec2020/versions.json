@@ -1,0 +1,84 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.1",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-15T21:52:46.459880Z",
+      "breaking": false,
+      "assets": {
+        "bg-age-dec2020.pmtiles": {
+          "sha256": "756c5ba01abe142f8316d2e90fd48e2d97639a76c2555070e1b188a9e759f8b4",
+          "size_bytes": 967923590,
+          "href": "block-groups/bg-age-dec2020/bg-age-dec2020.pmtiles",
+          "mtime": 1794779537.0031023
+        },
+        "bg-age-dec2020.parquet": {
+          "sha256": "ac963f770db87e3f505762c893528083463a2a92208be40275b2474dd748c4c3",
+          "size_bytes": 94588123,
+          "href": "block-groups/bg-age-dec2020/bg-age-dec2020.parquet",
+          "source_mtime": 1794779420.4625967,
+          "mtime": 1794779420.4625967,
+          "feature_count": 242298,
+          "schema_fingerprint": "893eddd42792d004"
+        },
+        "bg-age-dec2020.thumb.jpg": {
+          "sha256": "8df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325",
+          "size_bytes": 2323,
+          "href": "block-groups/bg-age-dec2020/bg-age-dec2020.thumb.jpg",
+          "mtime": 1794779570.1844046
+        }
+      },
+      "changes": [
+        "bg-age-dec2020.pmtiles",
+        "bg-age-dec2020.parquet",
+        "bg-age-dec2020.thumb.jpg"
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "created": "2026-11-15T22:09:55.084377Z",
+      "breaking": false,
+      "assets": {
+        "bg-age-dec2020.pmtiles": {
+          "sha256": "540f632dd39072c7ffe8198afefa0db953ee0d3b024d5cc09dceff5b917bc14a",
+          "size_bytes": 956061960,
+          "href": "block-groups/bg-age-dec2020/bg-age-dec2020.pmtiles",
+          "mtime": 1794780475.6053975
+        },
+        "bg-age-dec2020.parquet": {
+          "sha256": "ac963f770db87e3f505762c893528083463a2a92208be40275b2474dd748c4c3",
+          "size_bytes": 94588123,
+          "href": "block-groups/bg-age-dec2020/bg-age-dec2020.parquet",
+          "source_mtime": 1794779420.4625967,
+          "mtime": 1794779420.4625967,
+          "feature_count": 242298,
+          "schema_fingerprint": "893eddd42792d004"
+        },
+        "bg-age-dec2020.thumb.jpg": {
+          "sha256": "8df7fbf64ca7ae9f3602d20587b8c125c3e24feb7e6526ae1b21cf1842061325",
+          "size_bytes": 2323,
+          "href": "block-groups/bg-age-dec2020/bg-age-dec2020.thumb.jpg",
+          "mtime": 1794779570.1844046
+        },
+        "README.md": {
+          "sha256": "a3b1d4a168cc6f097a1231d36238e8320236d29757d722091edf58b565023083",
+          "size_bytes": 17795,
+          "href": "block-groups/bg-age-dec2020/README.md",
+          "mtime": 1794779716.0887053
+        },
+        "thumbnail.png": {
+          "sha256": "fdfd7cadac537faf4e3d93e65cbe96f6d9e5850a4f6e271409156963bb3c7b53",
+          "size_bytes": 202168,
+          "href": "block-groups/bg-age-dec2020/thumbnail.png",
+          "mtime": 1794780110.55478
+        }
+      },
+      "changes": [
+        "bg-age-dec2020.pmtiles",
+        "README.md",
+        "thumbnail.png"
+      ]
+    }
+  ]
+}

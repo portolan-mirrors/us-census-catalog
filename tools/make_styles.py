@@ -115,6 +115,20 @@ SOURCES = {
     "landmarks-area": ("reference/landmarks-area", "landmarks-area.parquet"),
     "landmarks-point": ("reference/landmarks-point",
                         "landmarks-point.parquet"),
+    # DHC subset (2026-11-15): 2020 Census age/sex, household type and
+    # tenure, beside the ACS collections at the same geography.
+    "bg-age-dec2020": ("block-groups/bg-age-dec2020",
+                       "bg-age-dec2020.parquet"),
+    "bg-household-dec2020": ("block-groups/bg-household-dec2020",
+                             "bg-household-dec2020.parquet"),
+    "bg-tenure-dec2020": ("block-groups/bg-tenure-dec2020",
+                         "bg-tenure-dec2020.parquet"),
+    "tract-age-dec2020": ("tracts/tract-age-dec2020",
+                         "tract-age-dec2020.parquet"),
+    "tract-household-dec2020": ("tracts/tract-household-dec2020",
+                                "tract-household-dec2020.parquet"),
+    "tract-tenure-dec2020": ("tracts/tract-tenure-dec2020",
+                            "tract-tenure-dec2020.parquet"),
 }
 
 # Point collections need a `circle` layer, not the `fill`/`line` pair every
@@ -148,6 +162,12 @@ UNIT = {
     "urban-areas": ("urban area", "urban areas"),
     "landmarks-area": ("landmark", "landmarks"),
     "landmarks-point": ("landmark", "landmarks"),
+    "bg-age-dec2020": ("block group", "block groups"),
+    "bg-household-dec2020": ("block group", "block groups"),
+    "bg-tenure-dec2020": ("block group", "block groups"),
+    "tract-age-dec2020": ("tract", "tracts"),
+    "tract-household-dec2020": ("tract", "tracts"),
+    "tract-tenure-dec2020": ("tract", "tracts"),
 }
 
 # ---------------------------------------------------------------------------
@@ -463,6 +483,68 @@ def wellbeing_styles(breaks=None, unit="tract"):
 
 
 STYLES["tract-wellbeing"] = wellbeing_styles()
+
+# -- DHC subset (2026-11-15): 2020 Census age/sex, household type, tenure --
+# Same breaks at bg and tract, same reasoning as income_styles: tract values
+# pool block-group values, so a shared scale lets the two maps compare
+# directly. No style here has a `_cv` column to fade on -- these are 100%
+# counts, not estimates -- so `fades()` is a no-op for every one of them,
+# which is the point: nothing here fabricates an uncertainty indicator.
+def age_styles():
+    return [
+        S("default", "Population 65 and over", "pct_65plus",
+          [8, 12, 16, 20, 25], "ylgn6",
+          "Share of the 2020 Census population age 65 and over, pale "
+          "yellow-green (low) to deep green (high) -- a 100% count, not "
+          "the ACS people collections' pct_65_plus estimate", default=True),
+        S("under18", "Population under 18", "pct_under18",
+          [18, 22, 26, 30, 35], "oranges6",
+          "Share of the 2020 Census population under 18, pale to deep "
+          "orange -- a 100% count, not the ACS people collections' "
+          "pct_under_18 estimate"),
+    ]
+
+
+def household_styles():
+    return [
+        S("default", "Family households", "pct_family_households",
+          [50, 60, 68, 76, 84], "cividis6",
+          "Share of households that are family households (P16), dark "
+          "blue through tan to yellow. The connectivity collections own "
+          "the blue ramp and the reference group owns the purple ramp, "
+          "so either would read as the same dataset in a card grid",
+          default=True),
+        S("living-alone", "Householders living alone", "pct_living_alone",
+          [18, 24, 30, 36, 44], "greens6",
+          "Share of households whose householder lives alone (P16), "
+          "pale to deep green"),
+    ]
+
+
+def tenure_styles():
+    return [
+        S("default", "Owner-occupied housing", "pct_owned",
+          [40, 55, 65, 75, 85], "rdpu6",
+          "Share of occupied housing units that are owner-occupied (H4), "
+          "pale pink to deep magenta -- a 100% count, not the ACS "
+          "housing collections' pct_owner_occupied estimate. Neither "
+          "blue nor green: connectivity owns the blue ramp and age the "
+          "green one, and a blue-green tested too close to connectivity "
+          "at card size. Pink is the one hue path no other default "
+          "style in this catalog uses", default=True),
+        S("vacant", "Vacant housing units", "pct_vacant_2020",
+          [3, 6, 10, 15, 25], "orrd6",
+          "Vacant share of all housing units (H1 minus H4's occupied "
+          "total), cream to deep red -- a 100% count, not the ACS "
+          "housing collections' pct_vacant_units estimate"),
+    ]
+
+
+DHC_BG_TRACT = {"age": age_styles, "household": household_styles,
+               "tenure": tenure_styles}
+for _dhc_theme, _dhc_fn in DHC_BG_TRACT.items():
+    STYLES[f"bg-{_dhc_theme}-dec2020"] = _dhc_fn()
+    STYLES[f"tract-{_dhc_theme}-dec2020"] = _dhc_fn()
 
 # -- counties and states ----------------------------------------------------
 # Averaging over a whole county or state collapses the national spread, so

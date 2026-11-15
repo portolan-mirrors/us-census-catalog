@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Family households",
+  "metadata": {
+    "description": "Share of households that are family households (P16), dark blue through tan to yellow. The connectivity collections own the blue ramp and the reference group owns the purple ramp, so either would read as the same dataset in a card grid. Measured over all 84,630 tracts with a published value: 6 classes with breaks at 50%/60%/68%/76%/84%, which fall at the 11th/28th/53rd/80th/95th percentile of the national distribution.",
+    "portolan:column": "pct_family_households",
+    "portolan:breaks": [
+      50,
+      60,
+      68,
+      76,
+      84
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-household-dec2020.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-household-dec2020",
+      "filter": [
+        "has",
+        "pct_family_households"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_family_households"
+          ],
+          "#00224e",
+          50,
+          "#35456c",
+          60,
+          "#666970",
+          68,
+          "#958f5f",
+          76,
+          "#cab969",
+          84,
+          "#fee838"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-household-dec2020",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

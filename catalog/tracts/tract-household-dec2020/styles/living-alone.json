@@ -1,0 +1,90 @@
+{
+  "version": 8,
+  "name": "Householders living alone",
+  "metadata": {
+    "description": "Share of households whose householder lives alone (P16), pale to deep green. Measured over all 84,630 tracts with a published value: 6 classes with breaks at 18%/24%/30%/36%/44%, which fall at the 18th/39th/64th/82nd/93rd percentile of the national distribution.",
+    "portolan:column": "pct_living_alone",
+    "portolan:breaks": [
+      18,
+      24,
+      30,
+      36,
+      44
+    ]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-household-dec2020.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-household-dec2020",
+      "filter": [
+        "has",
+        "pct_living_alone"
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          [
+            "get",
+            "pct_living_alone"
+          ],
+          "#edf8e9",
+          18,
+          "#c7e9c0",
+          24,
+          "#a1d99b",
+          30,
+          "#74c476",
+          36,
+          "#31a354",
+          44,
+          "#006d2c"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-household-dec2020",
+      "minzoom": 8,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.2,
+          13,
+          0.8
+        ],
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          8,
+          0.0,
+          10,
+          0.45
+        ]
+      }
+    }
+  ]
+}

@@ -19,7 +19,12 @@ collections (income, people, housing, connectivity, wellbeing), and the
 five coarse-or-sparse geographies — counties, states, ZCTAs, places,
 congressional districts — add a sixth collection carrying all 135 columns
 in one wide table. One further collection carries 2020 Decennial Census
-P.L. 94-171 counts at block level, hive-partitioned by state.
+P.L. 94-171 counts at block level, hive-partitioned by state. Six more,
+beside the block-group and tract ACS collections, carry curated 2020
+Census Demographic and Housing Characteristics (DHC) counts — age & sex,
+household type and tenure — 100% counts with no margin of error and no
+sampling error, protected instead by the Census Bureau's differential-
+privacy disclosure avoidance system.
 [data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and
 every collection links the exact upstream census.gov files it was built
 from.

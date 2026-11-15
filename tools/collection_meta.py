@@ -195,6 +195,52 @@ FEATURES.update({
     "landmarks-point": 1088085, "crosswalks": 22429855,
 })
 
+# --------------------------------------------------------------------------
+# DHC subset (2026-11-15): 2020 Census age/sex, household type and tenure,
+# placed beside the ACS collections at the same geography rather than in a
+# separate decennial group (docs/spec-dhc.md). Not built from
+# specs.COLLECTIONS -- a different survey, vintage and privacy model (100%
+# counts with injected noise, no margin of error) -- so, like reference/,
+# this is registered by hand. Unlike reference/, these six collections live
+# INSIDE the existing block-groups and tracts groups, so `_siblings_para`
+# below is patched to exclude them from the ACS sibling list it builds for
+# bg-income etc. rather than mixing DHC into that prose.
+# --------------------------------------------------------------------------
+DHC_THEMES = ["age", "household", "tenure"]
+DHC_LEVEL_PREFIX = {"bg": "bg", "tract": "tract"}
+DHC_GROUP_OF_LEVEL = {"bg": "block-groups", "tract": "tracts"}
+DHC_IDS = [f"{DHC_LEVEL_PREFIX[lvl]}-{theme}-dec2020"
+          for lvl in DHC_LEVEL_PREFIX for theme in DHC_THEMES]
+DHC_LEVEL_OF = {f"{DHC_LEVEL_PREFIX[lvl]}-{theme}-dec2020": lvl
+               for lvl in DHC_LEVEL_PREFIX for theme in DHC_THEMES}
+DHC_THEME_OF = {f"{DHC_LEVEL_PREFIX[lvl]}-{theme}-dec2020": theme
+               for lvl in DHC_LEVEL_PREFIX for theme in DHC_THEMES}
+for _cid, _lvl in DHC_LEVEL_OF.items():
+    _g = DHC_GROUP_OF_LEVEL[_lvl]
+    GROUPS.setdefault(_g, []).append(_cid)
+    GROUP_OF[_cid] = _g
+    COLL_REL[_cid] = f"{_g}/{_cid}"
+ALL_COLLECTIONS += DHC_IDS
+
+# Row counts: the join is driven by the same cartographic boundary files the
+# ACS bg/tract collections join to (staging/geo/cb_2024_us_{bg,tract}_
+# 4326.parquet), so the row counts are identical to the ACS collections at
+# the same geography -- measured, not assumed, by tools/build_dhc.py.
+FEATURES.update({cid: LEVEL_FEATURES[lvl] for cid, lvl in DHC_LEVEL_OF.items()})
+
+# 2020 Census disclosure avoidance: differential privacy, Title 13
+# confidentiality. Linked from every DHC collection's known_issues.
+DHC_PROGRAM = ("https://www.census.gov/programs-surveys/decennial-census/"
+              "about/rdo/summary-files.html")
+DHC_DAS = ("https://www.census.gov/programs-surveys/decennial-census/"
+          "decade/2020/planning-management/process/disclosure-avoidance.html")
+DHC_TECHDOC = ("https://www2.census.gov/programs-surveys/decennial/2020/"
+              "technical-documentation/complete-tech-docs/demographic-and-"
+              "housing-characteristics-file-and-demographic-profile/"
+              "2020census-demographic-and-housing-characteristics-file-and-"
+              "demographic-profile-techdoc.pdf")
+DHC_INTERVAL = ["2020-04-01T00:00:00Z", "2020-04-01T00:00:00Z"]
+
 # TIGER2024 (urban-areas, landmarks-*) carries a 2024-09 vintage date; the
 # rel2020 relationship files are keyed to the 2020 Census. The interval
 # spans both rather than picking one.
@@ -288,6 +334,8 @@ def theme_of(cid: str) -> str:
         return "blocks"
     if cid in REFERENCE_IDS:
         return "reference"
+    if cid in DHC_IDS:
+        return DHC_THEME_OF[cid]
     return cid.split("-", 1)[1]
 
 
@@ -300,6 +348,14 @@ TITLES.update({
     "landmarks-point": "Landmarks — Point",
     "crosswalks": "2020 Geography Crosswalks",
 })
+
+DHC_THEME_TITLE = {"age": "Age & Sex (2020 Census)",
+                   "household": "Household Type (2020 Census)",
+                   "tenure": "Tenure (2020 Census)"}
+DHC_LEVEL_TITLE = {"bg": LEVEL_TITLE["bg"], "tract": LEVEL_TITLE["tract"]}
+TITLES.update({cid: f"{DHC_THEME_TITLE[DHC_THEME_OF[cid]]} — "
+                   f"{DHC_LEVEL_TITLE[lvl]}"
+              for cid, lvl in DHC_LEVEL_OF.items()})
 
 
 _KW_REFERENCE = {
@@ -315,6 +371,15 @@ _KW_REFERENCE = {
 }
 
 
+_DHC_KW_THEME = {
+    "age": ["age", "sex", "age pyramid", "P12"],
+    "household": ["household type", "family households", "living alone",
+                  "relationship to householder", "P16", "P17"],
+    "tenure": ["tenure", "owner occupied", "renter occupied",
+              "housing units", "H1", "H4"],
+}
+
+
 def keywords(cid: str) -> list[str]:
     if cid == "blocks":
         return ["census", "2020 Census", "decennial census",
@@ -324,6 +389,14 @@ def keywords(cid: str) -> list[str]:
     if cid in REFERENCE_IDS:
         return (["census", "TIGER/Line", "geography", "United States"]
                 + _KW_REFERENCE[cid])
+    if cid in DHC_IDS:
+        kw = (["census", "2020 Census", "decennial census", "DHC",
+              "Demographic and Housing Characteristics",
+              "differential privacy", "disclosure avoidance",
+              "United States"]
+             + _DHC_KW_THEME[DHC_THEME_OF[cid]]
+             + _KW_LEVEL[DHC_LEVEL_OF[cid]])
+        return list(dict.fromkeys(kw))
     kw = _KW_COMMON + _KW_THEME[theme_of(cid)] + _KW_LEVEL[LEVEL_OF[cid]]
     return list(dict.fromkeys(kw))
 
@@ -928,7 +1001,12 @@ def _siblings_para(cid: str) -> str:
     group = GROUP_OF.get(cid)
     if group is None:  # blocks, which has no siblings and its own prose
         return ""
-    themed = [c for c in GROUPS[group] if c not in WIDE_IDS]
+    # DHC_IDS excluded: those six collections share a group directory with
+    # the ACS ones (docs/spec-dhc.md's placement rule) but are a different
+    # survey with their own cross-reference prose (_dhc_description), not
+    # an ACS themed chunk.
+    themed = [c for c in GROUPS[group] if c not in WIDE_IDS
+             and c not in DHC_IDS]
     wide = next((c for c in GROUPS[group] if c in WIDE_IDS), None)
     elsewhere = (
         f"Every other geography in this catalog is organized the same way — "
@@ -978,7 +1056,7 @@ def _siblings_para(cid: str) -> str:
             "the chunks on `geoid` or steps up to "
             "[counties](../../counties/counties/collection.json).")
     return (
-        f"This is one themed chunk of {_NUM[len(GROUPS[group])]} at this "
+        f"This is one themed chunk of {_NUM[len(themed)]} at this "
         f"geography. "
         f"The other themes are {joined}, split that way so a consumer who "
         f"wants one theme reads one file. Chunks at the same geography hold "
@@ -1000,6 +1078,134 @@ def _mirror_para(cid: str) -> str:
         f"published URLs.")
 
 
+DHC_TABLES = {"age": ["P12"], "household": ["P16", "P17"],
+             "tenure": ["H1", "H4"]}
+
+DHC_LEAD = {
+    "age": (
+        "Sex by age for 23 age bands (P12), the full 2020 Census age "
+        "pyramid: a total, a male/female split, and both sexes carried "
+        "through the same 23 bands from under 5 to 85 and over. "
+        "`pct_under18` and `pct_65plus` are this build's own sums of the "
+        "published bands (not published columns themselves), named "
+        "without the ACS collections' underscores (`pct_under18`, not "
+        "`pct_under_18`) on purpose, so a query against both files by "
+        "column name cannot silently select one sense when it meant the "
+        "other."),
+    "household": (
+        "Two household tables: household type (P16 — family/nonfamily, "
+        "married-couple, single-parent, living-alone) and household type "
+        "including living alone by relationship to householder (P17 — "
+        "spouse, child, parent, sibling, roommate, and the "
+        "institutionalized/noninstitutionalized group-quarters "
+        "population). `pct_family_households` and `pct_living_alone` are "
+        "this build's own shares of the P16 counts."),
+    "tenure": (
+        "Housing units (H1) and tenure of occupied housing units (H4 — "
+        "owned with a mortgage or loan, owned free and clear, renter "
+        "occupied). `pct_owned`, `pct_rented` and `pct_vacant_2020` are "
+        "this build's own shares, named apart from the ACS housing "
+        "collections' `pct_owner_occupied` and `pct_vacant_units` so the "
+        "two are never selected as if they were one column."),
+}
+
+DHC_SPEC_NOTE = (
+    "**Deviation from the original brief:** the spec named P16 and P18 "
+    "for household type. P18 turned out to be GROUP QUARTERS POPULATION "
+    "BY SEX BY AGE BY MAJOR GROUP QUARTERS TYPE — institutionalized and "
+    "noninstitutionalized counts, not household composition. P17, "
+    "HOUSEHOLD TYPE (INCLUDING LIVING ALONE) BY RELATIONSHIP, is the "
+    "table that actually carries relationship-to-householder detail, so "
+    "this collection reads P16 + P17, not P16 + P18. See "
+    "docs/dhc-build-notes.md.")
+
+
+def _dhc_cross_refs(cid: str) -> str:
+    level = DHC_LEVEL_OF[cid]
+    other_level = "tract" if level == "bg" else "bg"
+    other_cid = cid.replace(f"{DHC_LEVEL_PREFIX[level]}-",
+                            f"{DHC_LEVEL_PREFIX[other_level]}-")
+    group = DHC_GROUP_OF_LEVEL[level]
+    acs_siblings = [c for c in GROUPS[group]
+                    if c not in DHC_IDS and c not in WIDE_IDS]
+    acs_links = ", ".join(
+        f"[{THEME_TITLE[theme_of(c)]}](../{c}/collection.json)"
+        for c in acs_siblings)
+    other_theme = DHC_THEME_OF[cid]
+    return (
+        f"This sits beside the American Community Survey collections at "
+        f"the same geography, not in a separate decennial group: "
+        f"{acs_links}. All of them share this collection's `geoid` and "
+        f"geometry and join 1:1 on `geoid` — but **do not subtract one "
+        f"from the other**. This is a different measurement: a 2020 "
+        f"Census 100% count with injected noise, not a 2020–2024 ACS "
+        f"5-year sample estimate with a margin of error. The same theme "
+        f"at the other geography this batch covers is "
+        f"[{DHC_THEME_TITLE[other_theme]} — {DHC_LEVEL_TITLE[other_level]}]"
+        f"(../../{DHC_GROUP_OF_LEVEL[other_level]}/{other_cid}/"
+        f"collection.json).")
+
+
+DHC_TILES_PARA = (
+    "The PMTiles archive is one band, the collection's own features at "
+    "every zoom (`tylertoo tiles`, not the county/tract pyramid the ACS "
+    "collections use) — bg and tract are the two finest geographies this "
+    "batch covers and there is no coarser DHC band to step up to yet. "
+    "There are no `*_moe` columns to exclude: this is a 100% count, not "
+    "an estimate, so there is nothing to exclude.")
+
+
+def _dhc_mirror_para() -> str:
+    return (
+        f"This is a mirror — [data.census.gov]({DATA_CENSUS}) is "
+        f"authoritative, and nothing here is an official Census Bureau "
+        f"product. The exact upstream files this collection was built "
+        f"from are published as `source` assets, linked at their "
+        f"original census.gov URLs, so the original is always one click "
+        f"away; the Bureau's own documentation is linked alongside them.")
+
+
+def _dhc_description(cid: str, n: int) -> str:
+    level = DHC_LEVEL_OF[cid]
+    theme = DHC_THEME_OF[cid]
+    noun = LEVEL_PLURAL[level]
+    tables = " and ".join(DHC_TABLES[theme])
+    paras = [
+        f"{DHC_LEAD[theme]}\n\n"
+        f"All **{n:,}** {noun} in the 50 states, the District of Columbia "
+        f"and Puerto Rico, from the U.S. Census Bureau's [2020 Census "
+        f"Demographic and Housing Characteristics File]({DHC_PROGRAM}) "
+        f"(DHC), table{'s' if len(DHC_TABLES[theme]) > 1 else ''} "
+        f"{tables}. The DHC is a 100% count from every return, the same "
+        f"survey family as the "
+        f"[blocks](../../blocks/collection.json) collection's P.L. "
+        f"94-171 redistricting counts, read with the same per-state zip, "
+        f"Latin-1 geoheader and `LOGRECNO` join — but a different table "
+        f"set: blocks carries race, Hispanic origin, voting-age "
+        f"population and housing occupancy; this carries age, sex, "
+        f"household type and tenure, at block-groups and tracts rather "
+        f"than blocks.",
+        "**No margin of error, no coefficient of variation.** A 100% "
+        "count carries no sampling error, so there is nothing here to "
+        "estimate the uncertainty of — every column is the Bureau's "
+        "tabulated count, full stop.",
+        f"**Differential privacy.** The 2020 Census protects "
+        f"confidentiality with a disclosure avoidance system that injects "
+        f"statistical noise calibrated to a privacy-loss budget, most at "
+        f"block level and least at state level (state population totals "
+        f"are held exact; smaller geographies and smaller counts carry "
+        f"more). A block group or tract's individual cells can be off by "
+        f"a few people even though the file shows no margin of error; see "
+        f"the Census Bureau's [disclosure avoidance documentation]"
+        f"({DHC_DAS}) and the [DHC technical documentation]({DHC_TECHDOC}) "
+        f"(Chapter 4, \"Confidentiality of the Data\").",
+    ]
+    if theme == "household":
+        paras.append(DHC_SPEC_NOTE)
+    paras += [_dhc_cross_refs(cid), DHC_TILES_PARA, _dhc_mirror_para()]
+    return "\n\n".join(paras)
+
+
 def description(cid: str, features: int | None = None) -> str:
     """Full STAC description for a collection, as markdown."""
     n = features if features is not None else FEATURES[cid]
@@ -1007,6 +1213,8 @@ def description(cid: str, features: int | None = None) -> str:
         return _blocks_description(n)
     if cid in REFERENCE_IDS:
         return _reference_description(cid, n)
+    if cid in DHC_IDS:
+        return _dhc_description(cid, n)
     level = LEVEL_OF[cid]
 
     noun = LEVEL_PLURAL[level]
@@ -1244,7 +1452,13 @@ GROUP_DESCRIPTIONS = {
         f"estimate carries its margin of error, and block-group margins are "
         f"wide — read each collection's `*_cv` columns and its AGENTS.md "
         f"before mapping. [data.census.gov]({DATA_CENSUS}) is "
-        f"authoritative."),
+        f"authoritative. Three more collections sit beside these four: "
+        f"[age & sex](./bg-age-dec2020/collection.json), "
+        f"[household type](./bg-household-dec2020/collection.json) and "
+        f"[tenure](./bg-tenure-dec2020/collection.json), 2020 Census "
+        f"100% counts with no margin of error — a different measurement "
+        f"from the ACS estimates beside them, not a finer version of the "
+        f"same one."),
     "tracts": (
         "American Community Survey 2020–2024 5-year indicators for all "
         "85,184 census tracts in the United States and Puerto Rico — "
@@ -1260,7 +1474,12 @@ GROUP_DESCRIPTIONS = {
         "the same geometry and `geoid` and join 1:1; tract margins of error "
         "are substantially narrower than block-group margins (median "
         "household income is NULL on 1.59% of tracts against 7.69% of block "
-        f"groups). [data.census.gov]({DATA_CENSUS}) is authoritative."),
+        f"groups). [data.census.gov]({DATA_CENSUS}) is authoritative. Three "
+        f"more collections sit beside these five, mirroring the block-group "
+        f"group: [age & sex](./tract-age-dec2020/collection.json), "
+        f"[household type](./tract-household-dec2020/collection.json) and "
+        f"[tenure](./tract-tenure-dec2020/collection.json), 2020 Census "
+        f"100% counts with no margin of error."),
     "counties": (
         f"American Community Survey 2020–2024 5-year indicators for all "
         f"3,235 counties and county equivalents in the United States, Puerto "
@@ -1409,6 +1628,8 @@ def tables_for(cid: str) -> list[str]:
     """ACS tables a collection reads, in table-id order."""
     if cid == "blocks":
         return []
+    if cid in DHC_IDS:
+        return DHC_TABLES[DHC_THEME_OF[cid]]
     coll = next(c for c in specs.COLLECTIONS if c.id == cid)
     return sorted({s.table for s in specs.CONTEXT_SPEC + list(coll.spec)})
 
@@ -1517,6 +1738,84 @@ def _reference_source_assets(cid: str) -> dict:
     return out
 
 
+DHC_FTP_DIR = ("https://www2.census.gov/programs-surveys/decennial/2020/"
+              "data/demographic-and-housing-characteristics-file/")
+DHC_TABLE_MATRIX = ("https://www2.census.gov/programs-surveys/decennial/"
+                    "2020/technical-documentation/complete-tech-docs/"
+                    "demographic-and-housing-characteristics-file-and-"
+                    "demographic-profile/2020-dhc-table-matrix.xlsx")
+
+
+def _dhc_source_assets(cid: str) -> dict:
+    level = DHC_LEVEL_OF[cid]
+    out: dict[str, dict] = {
+        "source-dhc-states": {
+            "href": DHC_FTP_DIR,
+            "type": "text/html",
+            "title": "2020 Census Demographic and Housing Characteristics "
+                     "File (DHC) — state directories",
+            "description": (
+                "The 52 state archives (`{State_Name}/{ab}2020.dhc.zip`) "
+                "this collection's counts were read from. Each archive "
+                "holds a pipe-delimited Latin-1 geoheader plus 44 segment "
+                "files joined on `LOGRECNO`; this collection reads "
+                f"segments carrying {' and '.join(DHC_TABLES[DHC_THEME_OF[cid]])}"
+                f" and filters the geoheader to `SUMLEV = "
+                f"'{'150' if level == 'bg' else '140'}'`, "
+                "`GEOCOMP = '00'`. Served by census.gov."),
+            "roles": ["source"],
+        },
+        "doc-dhc-techdoc": {
+            "href": DHC_TECHDOC,
+            "type": "application/pdf",
+            "title": "2020 Census DHC and Demographic Profile — "
+                     "Technical Documentation",
+            "description": (
+                "Chapter 3 (Data Dictionary) gives the table shells; "
+                "Chapter 4 (Confidentiality of the Data) is the source for "
+                "this collection's differential-privacy known issue. "
+                "Served by census.gov."),
+            "roles": ["metadata"],
+        },
+        "doc-dhc-table-matrix": {
+            "href": DHC_TABLE_MATRIX,
+            "type": "application/vnd.openxmlformats-officedocument."
+                    "spreadsheetml.sheet",
+            "title": "2020 Census DHC Table Matrix",
+            "description": (
+                "Table ID, segment number and field position for every "
+                "DHC table — the spreadsheet this build's field positions "
+                "(tools/build_dhc.py) were derived from and verified "
+                "against the real per-state files' field counts. Served "
+                "by census.gov."),
+            "roles": ["metadata"],
+        },
+        "doc-disclosure-avoidance": {
+            "href": DHC_DAS,
+            "type": "text/html",
+            "title": "2020 Census Disclosure Avoidance System",
+            "description": (
+                "The Census Bureau's own explanation of the differential-"
+                "privacy system that injects noise into every 2020 Census "
+                "data product, this one included. Served by census.gov."),
+            "roles": ["metadata"],
+        },
+    }
+    year = cd.CB_VINTAGE[level]
+    out["source-cartographic-boundaries"] = {
+        "href": CB_LEVEL_URL[level],
+        "type": "application/zip",
+        "title": f"{year} cartographic boundary file — "
+                 f"{LEVEL_PLURAL[level]} (1:500,000, national)",
+        "description": (
+            "The same boundary file the ACS collections at this geography "
+            "join to — reused, not re-downloaded, so a DHC row and an ACS "
+            "row for the same `geoid` always share the same geometry."),
+        "roles": ["source"],
+    }
+    return out
+
+
 def source_assets(cid: str) -> dict:
     """Upstream `source` assets plus `metadata` documentation assets.
 
@@ -1527,6 +1826,8 @@ def source_assets(cid: str) -> dict:
     out: dict[str, dict] = {}
     if cid in REFERENCE_IDS:
         return _reference_source_assets(cid)
+    if cid in DHC_IDS:
+        return _dhc_source_assets(cid)
     level = LEVEL_OF[cid]
     if cid == "blocks":
         out["source-pl94171"] = {
@@ -1830,9 +2131,64 @@ def _reference_processing_notes(cid: str) -> str:
     ])
 
 
+DHC_BUILD_DATE = "2026-11-15"
+
+
+def _dhc_processing_notes(cid: str) -> str:
+    level = DHC_LEVEL_OF[cid]
+    theme = DHC_THEME_OF[cid]
+    sumlev = "150" if level == "bg" else "140"
+    return "\n\n".join([
+        f"Built {DHC_BUILD_DATE} from the 2020 Census DHC per-state zips "
+        f"({DHC_FTP_DIR}), downloaded one state at a time and deleted "
+        f"(zip and extract both) immediately after that state's rows "
+        f"were pulled — the national DHC source is roughly 15 GB "
+        f"compressed and several times larger extracted, so the build "
+        f"never holds more than one state on disk. tools/build_dhc.py.",
+
+        f"Per state: the geoheader (97 fields, Latin-1, same layout "
+        f"PL 94-171 uses) is filtered to `SUMLEV = '{sumlev}'`, "
+        f"`GEOCOMP = '00'` (the whole-geography total; block groups and "
+        f"tracts carry no other geographic component, but state and "
+        f"county records also carry urban/rural and housing-unit-count "
+        f"variants under other `GEOCOMP` values, which this filter "
+        f"excludes) and joined on `LOGRECNO` to the segment files "
+        f"carrying {' and '.join(DHC_TABLES[theme])}. Field positions "
+        f"were derived from the Census Bureau's own DHC Table Matrix "
+        f"(`TABLE_ID`, `SEGMENT_NUMBER`, `TOTAL_RECORDS`, "
+        f"`TABLE_SORT_ORDER` — cumulative field offsets within a "
+        f"segment, the same scheme tools/build_blocks.py documents for "
+        f"P.L. 94-171) and verified against the real field counts in "
+        f"every segment file this build reads, not assumed from the "
+        f"spreadsheet alone.",
+
+        f"`GEOCODE` is the field trusted for the GEOID, matching "
+        f"tools/build_blocks.py. Geometry is the same {cd.CB_VINTAGE[level]} "
+        f"cartographic boundary file the ACS collections at this "
+        f"geography join to (`{Path(CB_LEVEL_URL[level]).name}`), so a "
+        f"DHC row and an ACS row for the same `geoid` always share the "
+        f"same polygon; the join is driven by geometry, so a geography "
+        f"with boundaries but no DHC row (there are none at bg/tract — "
+        f"measured) would keep its row with NULL values rather than "
+        f"disappear.",
+
+        "Validated: every state's P12 `total_population` sum equals the "
+        "state's published 2020 apportionment population exactly (state "
+        "totals are held invariant by the disclosure avoidance system — "
+        "not noised); `occupied_total` (H4) equals `total_households` "
+        "(P16) and `total_population_p17` (P17) equals `total_population` "
+        "(P12) on every state, exactly; `male_total + female_total` "
+        "equals `total_population` on every state; three values "
+        "cross-checked against data.census.gov (see the build report in "
+        "docs/dhc-build-notes.md).",
+    ])
+
+
 def processing_notes(cid: str) -> str:
     if cid in REFERENCE_IDS:
         return _reference_processing_notes(cid)
+    if cid in DHC_IDS:
+        return _dhc_processing_notes(cid)
     if cid == "blocks":
         return "\n\n".join([
             f"Built {EXTRACTED} from two sets of Census Bureau files, "
@@ -2150,9 +2506,51 @@ def _reference_known_issues(cid: str) -> str:
         "merged.")
 
 
+def _dhc_known_issues(cid: str) -> str:
+    theme = DHC_THEME_OF[cid]
+    items = [
+        f"**The 2020 Census applied differential privacy.** Every count "
+        f"in this collection — not just the small ones — passed through "
+        f"the Census Bureau's disclosure avoidance system, which injects "
+        f"statistical noise calibrated to a privacy-loss budget. State "
+        f"population totals are held exact; housing unit counts and major "
+        f"group-quarters counts per block are held exact; everything "
+        f"else, including the counts in this collection, can carry "
+        f"injected noise, proportionally larger for a small count in a "
+        f"small geography than for a large one. There is no column here "
+        f"that quantifies that noise — see the Census Bureau's "
+        f"[disclosure avoidance documentation]({DHC_DAS}) — so treat a "
+        f"single block group's count with more caution than a tract's, "
+        f"and a tract's with more caution than a state's.",
+
+        "**This is a different measurement from the ACS collections "
+        "beside it, not a finer or coarser version of the same one.** "
+        "The ACS `*_moe`/`*_cv` columns describe sampling error in a "
+        "5-year rolling survey; this collection has no sampling error "
+        "and no margin of error because it is not a sample. Joining the "
+        "two on `geoid` is fine; subtracting one's count from the "
+        "other's estimate, or averaging them, treats two different "
+        "measurements of two different things as if they disagreed "
+        "about one.",
+    ]
+    if theme == "household":
+        items.append(DHC_SPEC_NOTE)
+    if theme == "age":
+        items.append(
+            "`total_population` (P12) is the same universe as "
+            "`total_population_p17` in the household collection at this "
+            "geography — both are the DHC's total population count — "
+            "but neither is published in this collection under the ACS "
+            "`population` column name, to keep a column-name join from "
+            "silently crossing collections.")
+    return "\n\n".join(items)
+
+
 def known_issues(cid: str) -> str:
     if cid in REFERENCE_IDS:
         return _reference_known_issues(cid)
+    if cid in DHC_IDS:
+        return _dhc_known_issues(cid)
     if cid == "blocks":
         return "\n\n".join([
             "28.97% of blocks have `pop_total = 0` (measured), so "
@@ -2462,6 +2860,8 @@ REFERENCE_SOURCE_URL = {
 def source_url(cid: str) -> str:
     if cid in REFERENCE_IDS:
         return REFERENCE_SOURCE_URL[cid]
+    if cid in DHC_IDS:
+        return DHC_FTP_DIR
     return PL_DIR if cid == "blocks" else ACS_5YR_DATA
 
 
@@ -2547,7 +2947,12 @@ description: |
   five coarse-or-sparse geographies — counties, states, ZCTAs, places,
   congressional districts — add a sixth collection carrying all 135 columns
   in one wide table. One further collection carries 2020 Decennial Census
-  P.L. 94-171 counts at block level, hive-partitioned by state.
+  P.L. 94-171 counts at block level, hive-partitioned by state. Six more,
+  beside the block-group and tract ACS collections, carry curated 2020
+  Census Demographic and Housing Characteristics (DHC) counts — age & sex,
+  household type and tenure — 100% counts with no margin of error and no
+  sampling error, protected instead by the Census Bureau's differential-
+  privacy disclosure avoidance system.
   [data.census.gov]({DATA_CENSUS}) is authoritative; this is a mirror, and
   every collection links the exact upstream census.gov files it was built
   from.

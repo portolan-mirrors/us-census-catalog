@@ -65,6 +65,11 @@ AGG = ROOT / "staging" / "agg"
 GEO = ROOT / "staging" / "geo"
 CATALOG = ROOT / "catalog"
 EXPECTED_BLOCK_POP = 334_735_155
+EXPECTED_DHC_POP = 334_735_155          # same national total build_dhc.py validated
+EXPECTED_DHC_US_HOUSING_UNITS = 140_498_736  # 50 states + DC, published Aug-2021 figure
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import build_dhc as dhc  # noqa: E402  -- reuses the P12/P16/P17/H4 column lists
 
 THEMES = ["income", "people", "housing", "connectivity", "wellbeing"]
 # theme -> the finest-grain parquet whose column list the county file must
@@ -227,18 +232,183 @@ def build_blocks_aggregates(validate: bool = True):
             print(f"  {level} aggregate validated: {total:,.0f}")
 
 
+DHC_THEMES = ["age", "household", "tenure"]
+CB_TRACT_4326 = GEO / "cb_2024_us_tract_4326.parquet"
+
+
+def _dhc_raw_cols(theme: str) -> list[str]:
+    """The exact raw column list build_dhc.py publishes for this theme —
+    imported, not retyped, so the two cannot drift apart."""
+    if theme == "age":
+        return ["total_population"] + dhc.P12_COLS
+    if theme == "household":
+        return (["total_households"] + dhc.P16_COLS
+               + ["total_population_p17"] + dhc.P17_COLS)
+    if theme == "tenure":
+        return ["total_housing_units", "occupied_total"] + dhc.H4_COLS
+    raise ValueError(theme)
+
+
+def _dhc_derived_sql(theme: str) -> list[str]:
+    """Derived percentage columns, recomputed from the SUMMED numerator and
+    denominator -- never averaged across tracts, which would weight a
+    100-person tract the same as a 10,000-person one."""
+    if theme == "age":
+        under18 = " + ".join(f"sum(t.{s}_{b})" for s in ("male", "female")
+                             for b in ("under5", "age5_9", "age10_14",
+                                      "age15_17"))
+        plus65 = " + ".join(f"sum(t.{s}_{b})" for s in ("male", "female")
+                            for b in ("age65_66", "age67_69", "age70_74",
+                                     "age75_79", "age80_84", "age85_plus"))
+        return [
+            f"CASE WHEN sum(t.total_population) > 0 THEN round(100.0 * "
+            f"({under18}) / sum(t.total_population), 2) END AS pct_under18",
+            f"CASE WHEN sum(t.total_population) > 0 THEN round(100.0 * "
+            f"({plus65}) / sum(t.total_population), 2) END AS pct_65plus",
+        ]
+    if theme == "household":
+        return [
+            "CASE WHEN sum(t.total_households) > 0 THEN round(100.0 * "
+            "sum(t.family_households) / sum(t.total_households), 2) END "
+            "AS pct_family_households",
+            "CASE WHEN sum(t.total_households) > 0 THEN round(100.0 * "
+            "sum(t.living_alone) / sum(t.total_households), 2) END "
+            "AS pct_living_alone",
+        ]
+    if theme == "tenure":
+        return [
+            "CASE WHEN sum(t.occupied_total) > 0 THEN round(100.0 * "
+            "(sum(t.owned_with_mortgage) + sum(t.owned_free_clear)) / "
+            "sum(t.occupied_total), 2) END AS pct_owned",
+            "CASE WHEN sum(t.occupied_total) > 0 THEN round(100.0 * "
+            "sum(t.renter_occupied) / sum(t.occupied_total), 2) END "
+            "AS pct_rented",
+            "CASE WHEN sum(t.total_housing_units) > 0 THEN round(100.0 * "
+            "(sum(t.total_housing_units) - sum(t.occupied_total)) / "
+            "sum(t.total_housing_units), 2) END AS pct_vacant_2020",
+        ]
+    raise ValueError(theme)
+
+
+def build_dhc_county_aggregates(validate: bool = True):
+    """staging/agg/{age,household,tenure}-county.parquet: the DHC subset's
+    coarse-zoom tile band, summed from the published tract-level files.
+
+    Reads catalog/tracts/tract-<theme>-dec2020.parquet, not the raw
+    per-state harvest in staging/dhc-build/ -- the published tract file's
+    `geoid` already comes from the join against the 2024 cartographic
+    boundary file (build_dhc.py's assemble_one), with Connecticut's old
+    8-county GEOIDs already crosswalked onto the 9 planning regions that
+    replaced them in 2022. Grouping that file by `substr(geoid, 1, 5)`
+    therefore lands Connecticut rows on the current county-equivalent
+    prefix for free; no second crosswalk pass is needed here, and the
+    population reconciliation below (the same 334,735,155 national total
+    build_dhc.py validated) is the proof it carried through correctly.
+
+    These are 100% counts, so summing to county is exact -- no MOE
+    quadrature, unlike the ACS aggregates this mirrors. Every derived
+    percentage is recomputed from the summed numerator and denominator.
+    """
+    AGG.mkdir(parents=True, exist_ok=True)
+    if not CB_COUNTY.exists():
+        sys.exit(f"missing {CB_COUNTY} — run "
+                  "`python3 tools/build_acs.py --stage geometry` first")
+
+    totals = {}
+    for theme in DHC_THEMES:
+        tract_path = (CATALOG / "tracts" / f"tract-{theme}-dec2020"
+                     / f"tract-{theme}-dec2020.parquet")
+        if not tract_path.exists():
+            sys.exit(f"missing {tract_path} — run "
+                      "`python3 tools/build_dhc.py --assemble` first")
+        raw_cols = _dhc_raw_cols(theme)
+        sum_exprs = ",\n    ".join(
+            f"sum(t.{c})::BIGINT AS {c}" for c in raw_cols)
+        derived = ",\n    ".join(_dhc_derived_sql(theme))
+        out = AGG / f"{theme}-county.parquet"
+        sql = f"""
+        COPY (
+          SELECT
+            g.GEOID AS geoid,
+            concat_ws(', ', g.NAMELSAD, g.STATE_NAME) AS name,
+            any_value(t.state) AS state,
+            round(g.ALAND / 1e6, 3) AS aland_sqkm,
+            {sum_exprs},
+            {derived},
+            g.geometry,
+            {{'xmin': ST_XMin(g.geometry), 'ymin': ST_YMin(g.geometry),
+              'xmax': ST_XMax(g.geometry), 'ymax': ST_YMax(g.geometry)}}
+                                                              AS bbox
+          FROM read_parquet('{tract_path}') t
+          JOIN read_parquet('{CB_COUNTY}') g ON g.GEOID = substr(t.geoid, 1, 5)
+          GROUP BY g.GEOID, g.NAMELSAD, g.STATE_NAME, g.ALAND, g.geometry
+        ) TO '{out}' (FORMAT PARQUET, COMPRESSION ZSTD);
+
+        SELECT '{theme}-county' AS file, count(*) AS rows
+        FROM read_parquet('{out}');
+        """
+        run_sql(sql)
+        tot_col = {"age": "total_population", "household": "total_households",
+                  "tenure": "total_housing_units"}[theme]
+        proc = subprocess.run(
+            ["duckdb", "-csv", "-noheader", "-c",
+             f"SELECT sum({tot_col}) FROM read_parquet('{out}')"],
+            capture_output=True, text=True, check=True,
+        )
+        totals[theme] = float(proc.stdout.strip())
+
+    if validate:
+        if totals["age"] != EXPECTED_DHC_POP:
+            sys.exit(f"age-county total_population {totals['age']:,.0f} != "
+                      f"{EXPECTED_DHC_POP:,}")
+        print(f"  age-county validated: total_population = "
+              f"{totals['age']:,.0f}")
+        # household: total_households has no single national control
+        # figure as clean as population, but it must equal the tenure
+        # aggregate's occupied_total exactly -- same universe, two tables.
+        proc = subprocess.run(
+            ["duckdb", "-csv", "-noheader", "-c",
+             f"SELECT sum(occupied_total) FROM read_parquet("
+             f"'{AGG / 'tenure-county.parquet'}')"],
+            capture_output=True, text=True, check=True,
+        )
+        occ_total = float(proc.stdout.strip())
+        if totals["household"] != occ_total:
+            sys.exit(f"household-county total_households "
+                      f"{totals['household']:,.0f} != tenure-county "
+                      f"occupied_total {occ_total:,.0f}")
+        print(f"  household-county validated: total_households = "
+              f"{totals['household']:,.0f} (= tenure-county occupied_total)")
+        proc = subprocess.run(
+            ["duckdb", "-csv", "-noheader", "-c",
+             f"SELECT sum(total_housing_units) FROM read_parquet("
+             f"'{AGG / 'tenure-county.parquet'}') WHERE state != 'PR'"],
+            capture_output=True, text=True, check=True,
+        )
+        us_units = float(proc.stdout.strip())
+        if us_units != EXPECTED_DHC_US_HOUSING_UNITS:
+            sys.exit(f"tenure-county US (ex-PR) total_housing_units "
+                      f"{us_units:,.0f} != {EXPECTED_DHC_US_HOUSING_UNITS:,}")
+        print(f"  tenure-county validated: 50-states+DC total_housing_units "
+              f"= {us_units:,.0f}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--acs", action="store_true",
                     help="only the 5 ACS theme county files")
     ap.add_argument("--blocks", action="store_true",
                     help="only the blocks county/tract aggregates")
+    ap.add_argument("--dhc", action="store_true",
+                    help="only the DHC subset's county aggregates")
     ap.add_argument("--no-validate", action="store_true",
-                    help="skip the blocks population-total check")
+                    help="skip the population-total checks")
     args = ap.parse_args()
 
-    do_acs = args.acs or not (args.acs or args.blocks)
-    do_blocks = args.blocks or not (args.acs or args.blocks)
+    any_named = args.acs or args.blocks or args.dhc
+    do_acs = args.acs or not any_named
+    do_blocks = args.blocks or not any_named
+    do_dhc = args.dhc or not any_named
 
     if do_acs:
         print("== ACS theme county files ==")
@@ -246,6 +416,9 @@ def main():
     if do_blocks:
         print("== blocks county/tract aggregates ==")
         build_blocks_aggregates(validate=not args.no_validate)
+    if do_dhc:
+        print("== DHC subset county aggregates ==")
+        build_dhc_county_aggregates(validate=not args.no_validate)
 
 
 if __name__ == "__main__":

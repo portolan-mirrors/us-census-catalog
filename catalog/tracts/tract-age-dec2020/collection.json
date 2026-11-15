@@ -1,0 +1,554 @@
+{
+  "type": "Collection",
+  "id": "tracts/tract-age-dec2020",
+  "stac_version": "1.1.0",
+  "description": "Sex by age for 23 age bands (P12), the full 2020 Census age pyramid: a total, a male/female split, and both sexes carried through the same 23 bands from under 5 to 85 and over. `pct_under18` and `pct_65plus` are this build's own sums of the published bands (not published columns themselves), named without the ACS collections' underscores (`pct_under18`, not `pct_under_18`) on purpose, so a query against both files by column name cannot silently select one sense when it meant the other.\n\nAll **85,184** census tracts in the 50 states, the District of Columbia and Puerto Rico, from the U.S. Census Bureau's [2020 Census Demographic and Housing Characteristics File](https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.html) (DHC), table P12. The DHC is a 100% count from every return, the same survey family as the [blocks](../../blocks/collection.json) collection's P.L. 94-171 redistricting counts, read with the same per-state zip, Latin-1 geoheader and `LOGRECNO` join — but a different table set: blocks carries race, Hispanic origin, voting-age population and housing occupancy; this carries age, sex, household type and tenure, at block-groups and tracts rather than blocks.\n\n**No margin of error, no coefficient of variation.** A 100% count carries no sampling error, so there is nothing here to estimate the uncertainty of — every column is the Bureau's tabulated count, full stop.\n\n**Differential privacy.** The 2020 Census protects confidentiality with a disclosure avoidance system that injects statistical noise calibrated to a privacy-loss budget, most at block level and least at state level (state population totals are held exact; smaller geographies and smaller counts carry more). A block group or tract's individual cells can be off by a few people even though the file shows no margin of error; see the Census Bureau's [disclosure avoidance documentation](https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance.html) and the [DHC technical documentation](https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/demographic-and-housing-characteristics-file-and-demographic-profile/2020census-demographic-and-housing-characteristics-file-and-demographic-profile-techdoc.pdf) (Chapter 4, \"Confidentiality of the Data\").\n\nThis sits beside the American Community Survey collections at the same geography, not in a separate decennial group: [Income & Poverty](../tract-income/collection.json), [People & Education](../tract-people/collection.json), [Housing & Rent](../tract-housing/collection.json), [Commuting & Connectivity](../tract-connectivity/collection.json), [Health, Disability & Income by Race](../tract-wellbeing/collection.json). All of them share this collection's `geoid` and geometry and join 1:1 on `geoid` — but **do not subtract one from the other**. This is a different measurement: a 2020 Census 100% count with injected noise, not a 2020–2024 ACS 5-year sample estimate with a margin of error. The same theme at the other geography this batch covers is [Age & Sex (2020 Census) — Block Groups](../../block-groups/bg-age-dec2020/collection.json).\n\nThe PMTiles archive is one band, the collection's own features at every zoom (`tylertoo tiles`, not the county/tract pyramid the ACS collections use) — bg and tract are the two finest geographies this batch covers and there is no coarser DHC band to step up to yet. There are no `*_moe` columns to exclude: this is a 100% count, not an estimate, so there is nothing to exclude.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-age-dec2020/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Census Tracts"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./tract-age-dec2020.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Age & Sex (2020 Census) — Census Tracts (vector tiles)",
+      "pmtiles:layers": [
+        "tract-age-dec2020"
+      ]
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "MultiPolygon",
+  "geoparquet:feature_count": 85184,
+  "pmtiles:min_zoom": 0,
+  "pmtiles:max_zoom": 12,
+  "pmtiles:tile_type": "mvt",
+  "pmtiles:center": [
+    0.3158795,
+    28.419558,
+    6
+  ],
+  "pmtiles:layers": [
+    "tract-age-dec2020"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.html",
+      "concepts": [
+        {
+          "id": "dec-dhc",
+          "title": "2020 Census Demographic and Housing Characteristics File"
+        }
+      ]
+    }
+  ],
+  "table:row_count": 85184,
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "11-character census tract GEOID — state (2) + county (3) + tract (6), e.g. `29510102200`. Joins the block-group collections on `substr(geoid, 1, 11)` and the block collection on `substr(geoid, 1, 11)`. Matches `GEOID` in the 2024 cartographic boundary tract file; the ACS `1400000US` prefix is stripped."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Human-readable name from the cartographic boundary tract file: `NAMELSAD`, `NAMELSADCO`, `STATE_NAME` — \"Census Tract 34.06, San Joaquin County, California\"."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Two-letter USPS state code, carried from the DHC geoheader's own per-state build rather than read off the boundary files (tools/build_dhc.py's `STATES` list)."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND / 1e6` from the cartographic boundary file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+    },
+    {
+      "name": "total_population",
+      "type": "int64",
+      "description": "Total population (P12 cell `P0120001`, \"Total:\"), the DHC's 100% count — not the ACS people collections' `population` estimate beside it."
+    },
+    {
+      "name": "male_total",
+      "type": "int64",
+      "description": "Male population (P12, \"Male:\")."
+    },
+    {
+      "name": "male_under5",
+      "type": "int64",
+      "description": "Male population, Under 5 years (P12)."
+    },
+    {
+      "name": "male_age5_9",
+      "type": "int64",
+      "description": "Male population, 5 to 9 years (P12)."
+    },
+    {
+      "name": "male_age10_14",
+      "type": "int64",
+      "description": "Male population, 10 to 14 years (P12)."
+    },
+    {
+      "name": "male_age15_17",
+      "type": "int64",
+      "description": "Male population, 15 to 17 years (P12)."
+    },
+    {
+      "name": "male_age18_19",
+      "type": "int64",
+      "description": "Male population, 18 and 19 years (P12)."
+    },
+    {
+      "name": "male_age20",
+      "type": "int64",
+      "description": "Male population, 20 years (P12)."
+    },
+    {
+      "name": "male_age21",
+      "type": "int64",
+      "description": "Male population, 21 years (P12)."
+    },
+    {
+      "name": "male_age22_24",
+      "type": "int64",
+      "description": "Male population, 22 to 24 years (P12)."
+    },
+    {
+      "name": "male_age25_29",
+      "type": "int64",
+      "description": "Male population, 25 to 29 years (P12)."
+    },
+    {
+      "name": "male_age30_34",
+      "type": "int64",
+      "description": "Male population, 30 to 34 years (P12)."
+    },
+    {
+      "name": "male_age35_39",
+      "type": "int64",
+      "description": "Male population, 35 to 39 years (P12)."
+    },
+    {
+      "name": "male_age40_44",
+      "type": "int64",
+      "description": "Male population, 40 to 44 years (P12)."
+    },
+    {
+      "name": "male_age45_49",
+      "type": "int64",
+      "description": "Male population, 45 to 49 years (P12)."
+    },
+    {
+      "name": "male_age50_54",
+      "type": "int64",
+      "description": "Male population, 50 to 54 years (P12)."
+    },
+    {
+      "name": "male_age55_59",
+      "type": "int64",
+      "description": "Male population, 55 to 59 years (P12)."
+    },
+    {
+      "name": "male_age60_61",
+      "type": "int64",
+      "description": "Male population, 60 and 61 years (P12)."
+    },
+    {
+      "name": "male_age62_64",
+      "type": "int64",
+      "description": "Male population, 62 to 64 years (P12)."
+    },
+    {
+      "name": "male_age65_66",
+      "type": "int64",
+      "description": "Male population, 65 and 66 years (P12)."
+    },
+    {
+      "name": "male_age67_69",
+      "type": "int64",
+      "description": "Male population, 67 to 69 years (P12)."
+    },
+    {
+      "name": "male_age70_74",
+      "type": "int64",
+      "description": "Male population, 70 to 74 years (P12)."
+    },
+    {
+      "name": "male_age75_79",
+      "type": "int64",
+      "description": "Male population, 75 to 79 years (P12)."
+    },
+    {
+      "name": "male_age80_84",
+      "type": "int64",
+      "description": "Male population, 80 to 84 years (P12)."
+    },
+    {
+      "name": "male_age85_plus",
+      "type": "int64",
+      "description": "Male population, 85 years and over (P12)."
+    },
+    {
+      "name": "female_total",
+      "type": "int64",
+      "description": "Female population (P12, \"Female:\")."
+    },
+    {
+      "name": "female_under5",
+      "type": "int64",
+      "description": "Female population, Under 5 years (P12)."
+    },
+    {
+      "name": "female_age5_9",
+      "type": "int64",
+      "description": "Female population, 5 to 9 years (P12)."
+    },
+    {
+      "name": "female_age10_14",
+      "type": "int64",
+      "description": "Female population, 10 to 14 years (P12)."
+    },
+    {
+      "name": "female_age15_17",
+      "type": "int64",
+      "description": "Female population, 15 to 17 years (P12)."
+    },
+    {
+      "name": "female_age18_19",
+      "type": "int64",
+      "description": "Female population, 18 and 19 years (P12)."
+    },
+    {
+      "name": "female_age20",
+      "type": "int64",
+      "description": "Female population, 20 years (P12)."
+    },
+    {
+      "name": "female_age21",
+      "type": "int64",
+      "description": "Female population, 21 years (P12)."
+    },
+    {
+      "name": "female_age22_24",
+      "type": "int64",
+      "description": "Female population, 22 to 24 years (P12)."
+    },
+    {
+      "name": "female_age25_29",
+      "type": "int64",
+      "description": "Female population, 25 to 29 years (P12)."
+    },
+    {
+      "name": "female_age30_34",
+      "type": "int64",
+      "description": "Female population, 30 to 34 years (P12)."
+    },
+    {
+      "name": "female_age35_39",
+      "type": "int64",
+      "description": "Female population, 35 to 39 years (P12)."
+    },
+    {
+      "name": "female_age40_44",
+      "type": "int64",
+      "description": "Female population, 40 to 44 years (P12)."
+    },
+    {
+      "name": "female_age45_49",
+      "type": "int64",
+      "description": "Female population, 45 to 49 years (P12)."
+    },
+    {
+      "name": "female_age50_54",
+      "type": "int64",
+      "description": "Female population, 50 to 54 years (P12)."
+    },
+    {
+      "name": "female_age55_59",
+      "type": "int64",
+      "description": "Female population, 55 to 59 years (P12)."
+    },
+    {
+      "name": "female_age60_61",
+      "type": "int64",
+      "description": "Female population, 60 and 61 years (P12)."
+    },
+    {
+      "name": "female_age62_64",
+      "type": "int64",
+      "description": "Female population, 62 to 64 years (P12)."
+    },
+    {
+      "name": "female_age65_66",
+      "type": "int64",
+      "description": "Female population, 65 and 66 years (P12)."
+    },
+    {
+      "name": "female_age67_69",
+      "type": "int64",
+      "description": "Female population, 67 to 69 years (P12)."
+    },
+    {
+      "name": "female_age70_74",
+      "type": "int64",
+      "description": "Female population, 70 to 74 years (P12)."
+    },
+    {
+      "name": "female_age75_79",
+      "type": "int64",
+      "description": "Female population, 75 to 79 years (P12)."
+    },
+    {
+      "name": "female_age80_84",
+      "type": "int64",
+      "description": "Female population, 80 to 84 years (P12)."
+    },
+    {
+      "name": "female_age85_plus",
+      "type": "int64",
+      "description": "Female population, 85 years and over (P12)."
+    },
+    {
+      "name": "pct_under18",
+      "type": "double",
+      "description": "Share of total population under 18 (`male_under5 + male_age5_9 + male_age10_14 + male_age15_17 +` the matching female bins, over `total_population`), this build's own sum of the published bands — not a column P12 itself publishes, and not the ACS people collections' `pct_under_18`."
+    },
+    {
+      "name": "pct_65plus",
+      "type": "double",
+      "description": "Share of total population 65 and over (the six 65-and-over bands for both sexes, over `total_population`), this build's own sum — not the ACS people collections' `pct_65_plus`."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2024 cartographic boundary census tract file (GENZ2024, 1:500,000), which clips to the shoreline — TIGER/Line would extend the census tract into open water. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    }
+  ],
+  "table:primary_geometry": "geometry",
+  "updated": "2026-11-12T00:00:00Z",
+  "title": "Age & Sex (2020 Census) — Census Tracts",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.146711,
+          -14.548699,
+          -64.565599,
+          71.387815
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-04-01T00:00:00Z",
+          "2020-04-01T00:00:00Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "keywords": [
+    "census",
+    "2020 Census",
+    "decennial census",
+    "DHC",
+    "Demographic and Housing Characteristics",
+    "differential privacy",
+    "disclosure avoidance",
+    "United States",
+    "age",
+    "sex",
+    "age pyramid",
+    "P12",
+    "census tracts"
+  ],
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "tract-age-dec2020-tiles": {
+      "href": "./tract-age-dec2020.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Age & Sex (2020 Census) — Census Tracts (PMTiles)",
+      "file:size": 361651316,
+      "file:checksum": "1220d6f9bec11b746505f136aaecb16a57751e03b77a2f56dc5b2788c860859f54ae",
+      "pmtiles:layers": [
+        "tract-age-dec2020"
+      ],
+      "roles": [
+        "data"
+      ]
+    },
+    "tract-age-dec2020": {
+      "href": "./tract-age-dec2020.parquet",
+      "type": "application/vnd.apache.parquet",
+      "title": "Age & Sex (2020 Census) — Census Tracts (GeoParquet, national)",
+      "file:size": 57115316,
+      "file:checksum": "12204721145d7478d8eeb75a62b8a25698006ae94262d77f2a000857bf0bacc5847c",
+      "roles": [
+        "data"
+      ]
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Age & Sex (2020 Census) — Census Tracts rendered with the default style",
+      "file:size": 92926,
+      "file:checksum": "12202f16d2fd39871bc3eea6a45a175648bdb9ff8e50752175597ecec1580236201b"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Population 65 and over",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "Share of the 2020 Census population age 65 and over, pale yellow-green (low) to deep green (high) -- a 100% count, not the ACS people collections' pct_65_plus estimate. Measured over all 84,781 tracts with a published value: 6 classes with breaks at 8%/12%/16%/20%/25%, which fall at the 8th/23rd/45th/68th/88th percentile of the national distribution.",
+      "file:size": 1874,
+      "file:checksum": "1220222c56ee804e0ba31aabead2cc0e2c70d00eb2f3476292fbce40a66498b817be"
+    },
+    "styles/under18": {
+      "href": "./styles/under18.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Population under 18",
+      "roles": [
+        "style"
+      ],
+      "description": "Share of the 2020 Census population under 18, pale to deep orange -- a 100% count, not the ACS people collections' pct_under_18 estimate. Measured over all 84,781 tracts with a published value: 6 classes with breaks at 18%/22%/26%/30%/35%, which fall at the 22nd/52nd/80th/94th/99th percentile of the national distribution.",
+      "file:size": 1847,
+      "file:checksum": "1220ed7b0e4a48420454a1ead56e4dbc6434644227d7f6e02113062ca8e8407a34b0"
+    },
+    "source-dhc-states": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/data/demographic-and-housing-characteristics-file/",
+      "type": "text/html",
+      "title": "2020 Census Demographic and Housing Characteristics File (DHC) — state directories",
+      "description": "The 52 state archives (`{State_Name}/{ab}2020.dhc.zip`) this collection's counts were read from. Each archive holds a pipe-delimited Latin-1 geoheader plus 44 segment files joined on `LOGRECNO`; this collection reads segments carrying P12 and filters the geoheader to `SUMLEV = '140'`, `GEOCOMP = '00'`. Served by census.gov.",
+      "roles": [
+        "source"
+      ]
+    },
+    "doc-dhc-techdoc": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/demographic-and-housing-characteristics-file-and-demographic-profile/2020census-demographic-and-housing-characteristics-file-and-demographic-profile-techdoc.pdf",
+      "type": "application/pdf",
+      "title": "2020 Census DHC and Demographic Profile — Technical Documentation",
+      "description": "Chapter 3 (Data Dictionary) gives the table shells; Chapter 4 (Confidentiality of the Data) is the source for this collection's differential-privacy known issue. Served by census.gov.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-dhc-table-matrix": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/demographic-and-housing-characteristics-file-and-demographic-profile/2020-dhc-table-matrix.xlsx",
+      "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "title": "2020 Census DHC Table Matrix",
+      "description": "Table ID, segment number and field position for every DHC table — the spreadsheet this build's field positions (tools/build_dhc.py) were derived from and verified against the real per-state files' field counts. Served by census.gov.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-disclosure-avoidance": {
+      "href": "https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance.html",
+      "type": "text/html",
+      "title": "2020 Census Disclosure Avoidance System",
+      "description": "The Census Bureau's own explanation of the differential-privacy system that injects noise into every 2020 Census data product, this one included. Served by census.gov.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "source-cartographic-boundaries": {
+      "href": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_tract_500k.zip",
+      "type": "application/zip",
+      "title": "2024 cartographic boundary file — census tracts (1:500,000, national)",
+      "description": "The same boundary file the ACS collections at this geography join to — reused, not re-downloaded, so a DHC row and an ACS row for the same `geoid` always share the same geometry.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 57829655,
+      "file:checksum": "1220abdf8bdae175e1ff98c214d8783ce3d1e252ee49d76ce9353cefae892843fa0c"
+    }
+  }
+}

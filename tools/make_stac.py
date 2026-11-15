@@ -424,6 +424,16 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
             "concepts": [{"id": "tiger-line",
                           "title": "TIGER/Line and geographic relationship "
                                    "files"}]}]
+    elif cid in meta.DHC_IDS:
+        # The DHC subset (2026-11-15) is the same decennial census program
+        # as blocks' P.L. 94-171, a different survey from the ACS and a
+        # different table within that survey, so it gets its own concept
+        # under the same scheme rather than reusing "dec-pl94171".
+        coll["themes"] = [{
+            "scheme": THEME_SCHEME_PL,
+            "concepts": [{"id": "dec-dhc",
+                          "title": "2020 Census Demographic and Housing "
+                                   "Characteristics File"}]}]
     else:
         coll["themes"] = [{
             "scheme": THEME_SCHEME_ACS,
@@ -433,6 +443,7 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
 
     interval = (meta.BLOCKS_INTERVAL if cid == "blocks"
                 else meta.REFERENCE_INTERVAL if cid in meta.REFERENCE_IDS
+                else meta.DHC_INTERVAL if cid in meta.DHC_IDS
                 else meta.ACS_INTERVAL)
     coll.setdefault("extent", {})["temporal"] = {"interval": [list(interval)]}
 
@@ -455,10 +466,11 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     if cid == "blocks":
         pq_glob = str(CATALOG / "blocks" / "state_fips=*" / "*.parquet")
         ext_sql = "bbox.xmin < 0"
-    elif cid in meta.REFERENCE_IDS:
-        # reference/ (2026-11-15): no `population` column -- these are not
-        # ACS collections, so there is no "carries an estimate" row to
-        # restrict to. Same western-hemisphere framing as blocks.
+    elif cid in meta.REFERENCE_IDS or cid in meta.DHC_IDS:
+        # reference/ (2026-11-15) and the DHC subset (2026-11-15): neither
+        # carries a `population` column -- these are not ACS collections,
+        # so there is no "carries an estimate" row to restrict to. Same
+        # western-hemisphere framing as blocks.
         pq_path = data_dir(cid) / f"{cid}.parquet"
         if pq_path.exists():
             pq_glob = str(pq_path)
@@ -588,10 +600,14 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
             "roles": ["visual"], "title": f"{meta.TITLES[cid]} (PMTiles)",
             "pmtiles:layers": [cid]}
     if (coll_dir / "thumbnail.png").exists():
-        assets.setdefault("thumbnail", {
+        # Overwrite, do not setdefault. `portolan add` drops a 396x158
+        # JPEG preview under the same asset key, and setdefault let that
+        # placeholder win over the rendered 1024x683 card on six
+        # collections before this was caught.
+        assets["thumbnail"] = {
             "href": "./thumbnail.png", "type": "image/png",
             "roles": ["thumbnail"],
-            "title": f"{meta.TITLES[cid]} rendered with the default style"})
+            "title": f"{meta.TITLES[cid]} rendered with the default style"}
 
     styles = style_assets(coll_dir)
     assets.update(styles)

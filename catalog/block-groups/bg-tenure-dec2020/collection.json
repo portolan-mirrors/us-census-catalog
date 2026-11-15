@@ -1,0 +1,341 @@
+{
+  "type": "Collection",
+  "id": "block-groups/bg-tenure-dec2020",
+  "stac_version": "1.1.0",
+  "description": "Housing units (H1) and tenure of occupied housing units (H4 — owned with a mortgage or loan, owned free and clear, renter occupied). `pct_owned`, `pct_rented` and `pct_vacant_2020` are this build's own shares, named apart from the ACS housing collections' `pct_owner_occupied` and `pct_vacant_units` so the two are never selected as if they were one column.\n\nAll **242,298** census block groups in the 50 states, the District of Columbia and Puerto Rico, from the U.S. Census Bureau's [2020 Census Demographic and Housing Characteristics File](https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.html) (DHC), tables H1 and H4. The DHC is a 100% count from every return, the same survey family as the [blocks](../../blocks/collection.json) collection's P.L. 94-171 redistricting counts, read with the same per-state zip, Latin-1 geoheader and `LOGRECNO` join — but a different table set: blocks carries race, Hispanic origin, voting-age population and housing occupancy; this carries age, sex, household type and tenure, at block-groups and tracts rather than blocks.\n\n**No margin of error, no coefficient of variation.** A 100% count carries no sampling error, so there is nothing here to estimate the uncertainty of — every column is the Bureau's tabulated count, full stop.\n\n**Differential privacy.** The 2020 Census protects confidentiality with a disclosure avoidance system that injects statistical noise calibrated to a privacy-loss budget, most at block level and least at state level (state population totals are held exact; smaller geographies and smaller counts carry more). A block group or tract's individual cells can be off by a few people even though the file shows no margin of error; see the Census Bureau's [disclosure avoidance documentation](https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance.html) and the [DHC technical documentation](https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/demographic-and-housing-characteristics-file-and-demographic-profile/2020census-demographic-and-housing-characteristics-file-and-demographic-profile-techdoc.pdf) (Chapter 4, \"Confidentiality of the Data\").\n\nThis sits beside the American Community Survey collections at the same geography, not in a separate decennial group: [Income & Poverty](../bg-income/collection.json), [People & Education](../bg-people/collection.json), [Housing & Rent](../bg-housing/collection.json), [Commuting & Connectivity](../bg-connectivity/collection.json). All of them share this collection's `geoid` and geometry and join 1:1 on `geoid` — but **do not subtract one from the other**. This is a different measurement: a 2020 Census 100% count with injected noise, not a 2020–2024 ACS 5-year sample estimate with a margin of error. The same theme at the other geography this batch covers is [Tenure (2020 Census) — Census Tracts](../../tracts/tract-tenure-dec2020/collection.json).\n\nThe PMTiles archive is one band, the collection's own features at every zoom (`tylertoo tiles`, not the county/tract pyramid the ACS collections use) — bg and tract are the two finest geographies this batch covers and there is no coarser DHC band to step up to yet. There are no `*_moe` columns to exclude: this is a 100% count, not an estimate, so there is nothing to exclude.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-tenure-dec2020/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Block Groups"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./bg-tenure-dec2020.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Tenure (2020 Census) — Block Groups (vector tiles)",
+      "pmtiles:layers": [
+        "bg-tenure-dec2020"
+      ]
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "MultiPolygon",
+  "geoparquet:feature_count": 242298,
+  "pmtiles:min_zoom": 0,
+  "pmtiles:max_zoom": 13,
+  "pmtiles:tile_type": "mvt",
+  "pmtiles:center": [
+    0.3158795,
+    28.419558,
+    6
+  ],
+  "pmtiles:layers": [
+    "bg-tenure-dec2020"
+  ],
+  "table:row_count": 242298,
+  "table:primary_geometry": "geometry",
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "12-character census block-group GEOID — state (2) + county (3) + tract (6) + block group (1), e.g. `295101022004`. The join key across the census family: `substr(geoid, 1, 11)` is the tract, `substr(geoid, 1, 5)` the county, `substr(geoid, 1, 2)` the state FIPS code. Matches `GEOID` in the Census Bureau's 2024 cartographic boundary block-group file; the summary-level prefix the ACS summary file carries on `GEO_ID` (`1500000US`) is stripped."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "Human-readable name, assembled from the cartographic boundary files with `concat_ws(', ', …)`: the block group's own `NAMELSAD`, the tract's `NAMELSAD`, then the county's `NAMELSAD` and `STATE_NAME` — \"Block Group 4, Census Tract 1022, St. Louis city, Missouri\". The block-group file carries only \"Block Group 4\", so the tract and county files supply the rest."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Two-letter USPS state code, carried from the DHC geoheader's own per-state build rather than read off the boundary files (tools/build_dhc.py's `STATES` list)."
+    },
+    {
+      "name": "aland_sqkm",
+      "type": "double",
+      "description": "Land area in square kilometres, rounded to 3 decimals. `ALAND / 1e6` from the cartographic boundary file. Land only: water area is excluded, which is what makes it the right denominator for population density."
+    },
+    {
+      "name": "total_housing_units",
+      "type": "int64",
+      "description": "Total housing units (H1 cell `P0010001` per the geoheader's own count, table `H1`, \"Total\"). Not the ACS housing collections' `housing_units`."
+    },
+    {
+      "name": "occupied_total",
+      "type": "int64",
+      "description": "Occupied housing units (H4 cell `H0040001`, \"Total:\" — the universe of H4 is occupied housing units). Equals `total_households` in the household collection at this geography."
+    },
+    {
+      "name": "owned_with_mortgage",
+      "type": "int64",
+      "description": "Occupied housing units owned with a mortgage or a loan (H4)."
+    },
+    {
+      "name": "owned_free_clear",
+      "type": "int64",
+      "description": "Occupied housing units owned free and clear, with no mortgage or loan (H4)."
+    },
+    {
+      "name": "renter_occupied",
+      "type": "int64",
+      "description": "Renter-occupied housing units (H4)."
+    },
+    {
+      "name": "pct_owned",
+      "type": "double",
+      "description": "Share of occupied housing units that are owner-occupied, with or without a mortgage (`(owned_with_mortgage + owned_free_clear) / occupied_total`), this build's own derived share — not the ACS housing collections' `pct_owner_occupied`."
+    },
+    {
+      "name": "pct_rented",
+      "type": "double",
+      "description": "Share of occupied housing units that are renter-occupied (`renter_occupied / occupied_total`), this build's own derived share."
+    },
+    {
+      "name": "pct_vacant_2020",
+      "type": "double",
+      "description": "Share of all housing units that are vacant (`(total_housing_units - occupied_total) / total_housing_units`), this build's own derived share — named apart from the ACS housing collections' `pct_vacant_units` so the two are never selected as if they were one column."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2024 cartographic boundary block group file (GENZ2024, 1:500,000), which clips to the shoreline — TIGER/Line would extend the block group into open water. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    }
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/decennial-census/about/rdo/summary-files.html",
+      "concepts": [
+        {
+          "id": "dec-dhc",
+          "title": "2020 Census Demographic and Housing Characteristics File"
+        }
+      ]
+    }
+  ],
+  "updated": "2026-11-12T00:00:00Z",
+  "title": "Tenure (2020 Census) — Block Groups",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.146711,
+          -14.548699,
+          -64.565599,
+          71.387815
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2020-04-01T00:00:00Z",
+          "2020-04-01T00:00:00Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "keywords": [
+    "census",
+    "2020 Census",
+    "decennial census",
+    "DHC",
+    "Demographic and Housing Characteristics",
+    "differential privacy",
+    "disclosure avoidance",
+    "United States",
+    "tenure",
+    "owner occupied",
+    "renter occupied",
+    "housing units",
+    "H1",
+    "H4",
+    "block groups"
+  ],
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "bg-tenure-dec2020": {
+      "href": "./bg-tenure-dec2020.parquet",
+      "type": "application/vnd.apache.parquet",
+      "title": "Tenure (2020 Census) — Block Groups (GeoParquet, national)",
+      "file:size": 86634271,
+      "file:checksum": "12202ff809e0fe42428b2ed2a2d56a9e5a80d20f35aa7ee9b14d46bd4506282c82cb",
+      "roles": [
+        "data"
+      ]
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Tenure (2020 Census) — Block Groups rendered with the default style",
+      "file:size": 92187,
+      "file:checksum": "1220c91abdc030c44ce362a1ae62ae6348a3e2016fe83ed153809abd0e7504f362f4"
+    },
+    "bg-tenure-dec2020-tiles": {
+      "href": "./bg-tenure-dec2020.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Tenure (2020 Census) — Block Groups (PMTiles)",
+      "pmtiles:layers": [
+        "bg-tenure-dec2020"
+      ],
+      "file:size": 552643695,
+      "file:checksum": "12200b105ad3ba81234b86432976bed25dc0f476d4168f0f47b2b3050fde829dfd08",
+      "roles": [
+        "visual"
+      ]
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Owner-occupied housing",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "Share of occupied housing units that are owner-occupied (H4), pale pink to deep magenta -- a 100% count, not the ACS housing collections' pct_owner_occupied estimate. Neither blue nor green: connectivity owns the blue ramp and age the green one, and a blue-green tested too close to connectivity at card size. Pink is the one hue path no other default style in this catalog uses. Measured over all 240,563 block groups with a published value: 6 classes with breaks at 40%/55%/65%/75%/85%, which fall at the 20th/32nd/42nd/56th/76th percentile of the national distribution.",
+      "file:size": 2093,
+      "file:checksum": "1220caadccfee4d26984d96c0f3209f4ed9c3014b25b6eabf31db6eb4d072a3601cd"
+    },
+    "styles/vacant": {
+      "href": "./styles/vacant.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Vacant housing units",
+      "roles": [
+        "style"
+      ],
+      "description": "Vacant share of all housing units (H1 minus H4's occupied total), cream to deep red -- a 100% count, not the ACS housing collections' pct_vacant_units estimate. Measured over all 240,804 block groups with a published value: 6 classes with breaks at 3%/6%/10%/15%/25%, which fall at the 18th/45th/69th/84th/94th percentile of the national distribution.",
+      "file:size": 1884,
+      "file:checksum": "1220a801ec8239c1c67a7850449b66c499d2412234b1c0f4607c48b335140049b856"
+    },
+    "source-dhc-states": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/data/demographic-and-housing-characteristics-file/",
+      "type": "text/html",
+      "title": "2020 Census Demographic and Housing Characteristics File (DHC) — state directories",
+      "description": "The 52 state archives (`{State_Name}/{ab}2020.dhc.zip`) this collection's counts were read from. Each archive holds a pipe-delimited Latin-1 geoheader plus 44 segment files joined on `LOGRECNO`; this collection reads segments carrying H1 and H4 and filters the geoheader to `SUMLEV = '150'`, `GEOCOMP = '00'`. Served by census.gov.",
+      "roles": [
+        "source"
+      ]
+    },
+    "doc-dhc-techdoc": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/demographic-and-housing-characteristics-file-and-demographic-profile/2020census-demographic-and-housing-characteristics-file-and-demographic-profile-techdoc.pdf",
+      "type": "application/pdf",
+      "title": "2020 Census DHC and Demographic Profile — Technical Documentation",
+      "description": "Chapter 3 (Data Dictionary) gives the table shells; Chapter 4 (Confidentiality of the Data) is the source for this collection's differential-privacy known issue. Served by census.gov.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-dhc-table-matrix": {
+      "href": "https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/complete-tech-docs/demographic-and-housing-characteristics-file-and-demographic-profile/2020-dhc-table-matrix.xlsx",
+      "type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "title": "2020 Census DHC Table Matrix",
+      "description": "Table ID, segment number and field position for every DHC table — the spreadsheet this build's field positions (tools/build_dhc.py) were derived from and verified against the real per-state files' field counts. Served by census.gov.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-disclosure-avoidance": {
+      "href": "https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance.html",
+      "type": "text/html",
+      "title": "2020 Census Disclosure Avoidance System",
+      "description": "The Census Bureau's own explanation of the differential-privacy system that injects noise into every 2020 Census data product, this one included. Served by census.gov.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "source-cartographic-boundaries": {
+      "href": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_bg_500k.zip",
+      "type": "application/zip",
+      "title": "2024 cartographic boundary file — census block groups (1:500,000, national)",
+      "description": "The same boundary file the ACS collections at this geography join to — reused, not re-downloaded, so a DHC row and an ACS row for the same `geoid` always share the same geometry.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 97058751,
+      "file:checksum": "12207c4da3ed6e4eaf6f99f731f7d3eeefd921d6d57d6b4a622c1da5e6f91ba38549"
+    }
+  }
+}

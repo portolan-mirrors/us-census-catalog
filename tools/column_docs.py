@@ -1174,6 +1174,187 @@ _REFERENCE_DOC = {
 }
 
 
+# DHC subset (2026-11-15): 2020 Census age/sex, household type and tenure,
+# duplicated from tools/collection_meta.py's DHC_IDS for the same circular-
+# import reason as REFERENCE_IDS above.
+DHC_IDS = ["bg-age-dec2020", "bg-household-dec2020", "bg-tenure-dec2020",
+          "tract-age-dec2020", "tract-household-dec2020",
+          "tract-tenure-dec2020"]
+DHC_LEVEL_OF = {cid: ("bg" if cid.startswith("bg-") else "tract")
+               for cid in DHC_IDS}
+DHC_THEME_OF = {cid: cid.split("-")[1] for cid in DHC_IDS}
+
+# Age-bin token (tools/build_dhc.py's AGE_BINS) -> the exact P12 cell label
+# from the Census Bureau's own table shell (2020-dhc-table-matrix.xlsx).
+DHC_AGE_BIN_LABEL = {
+    "under5": "Under 5 years", "age5_9": "5 to 9 years",
+    "age10_14": "10 to 14 years", "age15_17": "15 to 17 years",
+    "age18_19": "18 and 19 years", "age20": "20 years", "age21": "21 years",
+    "age22_24": "22 to 24 years", "age25_29": "25 to 29 years",
+    "age30_34": "30 to 34 years", "age35_39": "35 to 39 years",
+    "age40_44": "40 to 44 years", "age45_49": "45 to 49 years",
+    "age50_54": "50 to 54 years", "age55_59": "55 to 59 years",
+    "age60_61": "60 and 61 years", "age62_64": "62 to 64 years",
+    "age65_66": "65 and 66 years", "age67_69": "67 to 69 years",
+    "age70_74": "70 to 74 years", "age75_79": "75 to 79 years",
+    "age80_84": "80 to 84 years", "age85_plus": "85 years and over",
+}
+
+_DHC_AGE_DOC = {
+    "total_population": "Total population (P12 cell `P0120001`, "
+        "\"Total:\"), the DHC's 100% count — not the ACS people "
+        "collections' `population` estimate beside it.",
+    "male_total": "Male population (P12, \"Male:\").",
+    "female_total": "Female population (P12, \"Female:\").",
+    "pct_under18": "Share of total population under 18 "
+        "(`male_under5 + male_age5_9 + male_age10_14 + male_age15_17 "
+        "+` the matching female bins, over `total_population`), this "
+        "build's own sum of the published bands — not a column P12 "
+        "itself publishes, and not the ACS people collections' "
+        "`pct_under_18`.",
+    "pct_65plus": "Share of total population 65 and over (the six "
+        "65-and-over bands for both sexes, over `total_population`), "
+        "this build's own sum — not the ACS people collections' "
+        "`pct_65_plus`.",
+}
+for _bin, _label in DHC_AGE_BIN_LABEL.items():
+    _DHC_AGE_DOC[f"male_{_bin}"] = f"Male population, {_label} (P12)."
+    _DHC_AGE_DOC[f"female_{_bin}"] = f"Female population, {_label} (P12)."
+
+_DHC_HOUSEHOLD_DOC = {
+    "total_households": "Total households (P16 cell `P0160001`, "
+        "\"Total:\"). Equals `occupied_total` in the tenure collection "
+        "at this geography — a household and an occupied housing unit "
+        "are the same count in the 2020 Census.",
+    "family_households": "Family households (P16, \"Family households:\").",
+    "married_couple_family": "Married-couple family households (P16).",
+    "other_family": "Family households other than married-couple — "
+        "single householder with relatives present, no spouse (P16, "
+        "\"Other family:\").",
+    "other_family_male_no_spouse": "Other-family households with a male "
+        "householder and no spouse present (P16).",
+    "other_family_female_no_spouse": "Other-family households with a "
+        "female householder and no spouse present (P16).",
+    "nonfamily_households": "Nonfamily households — a householder living "
+        "alone or with only unrelated people (P16).",
+    "living_alone": "Nonfamily households where the householder lives "
+        "alone (P16, \"Householder living alone\").",
+    "not_living_alone": "Nonfamily households where the householder "
+        "lives with at least one other, unrelated, person (P16).",
+    "pct_family_households": "Share of households that are family "
+        "households (`family_households / total_households`), this "
+        "build's own derived share.",
+    "pct_living_alone": "Share of households whose householder lives "
+        "alone (`living_alone / total_households`), this build's own "
+        "derived share.",
+    "total_population_p17": "Total population (P17 cell `P0170001`, "
+        "\"Total:\") — the same DHC total population count as "
+        "`total_population` in the age collection at this geography, "
+        "kept under its own name here because P17's universe includes "
+        "the group-quarters population (`in_group_quarters` below) "
+        "that a household table would not otherwise carry.",
+    "in_households": "Population living in households, as opposed to "
+        "group quarters (P17).",
+    "householder_total": "Householders — the person households tables "
+        "key the household's characteristics to (P17).",
+    "householder_male": "Male householders (P17).",
+    "male_living_alone": "Male householders living alone (P17).",
+    "male_not_living_alone": "Male householders not living alone (P17).",
+    "householder_female": "Female householders (P17).",
+    "female_living_alone": "Female householders living alone (P17).",
+    "female_not_living_alone": "Female householders not living alone "
+        "(P17).",
+    "spouse_opposite_sex": "Opposite-sex spouses of the householder "
+        "(P17).",
+    "spouse_same_sex": "Same-sex spouses of the householder (P17).",
+    "partner_opposite_sex": "Opposite-sex unmarried partners of the "
+        "householder (P17).",
+    "partner_same_sex": "Same-sex unmarried partners of the householder "
+        "(P17).",
+    "biological_child": "Biological children of the householder (P17).",
+    "biological_child_under18": "Biological children of the householder "
+        "under 18 years (P17, a subset of `biological_child`).",
+    "adopted_child": "Adopted children of the householder (P17).",
+    "adopted_child_under18": "Adopted children of the householder under "
+        "18 years (P17, a subset of `adopted_child`).",
+    "stepchild": "Stepchildren of the householder (P17).",
+    "stepchild_under18": "Stepchildren of the householder under 18 "
+        "years (P17, a subset of `stepchild`).",
+    "grandchild": "Grandchildren of the householder (P17).",
+    "grandchild_under18": "Grandchildren of the householder under 18 "
+        "years (P17, a subset of `grandchild`).",
+    "sibling": "Brothers or sisters of the householder (P17).",
+    "parent": "Parents of the householder (P17).",
+    "parent_in_law": "Parents-in-law of the householder (P17).",
+    "child_in_law": "Sons-in-law or daughters-in-law of the householder "
+        "(P17).",
+    "other_relatives": "Other relatives of the householder not covered "
+        "by another P17 category (P17).",
+    "foster_child": "Foster children of the householder (P17).",
+    "other_nonrelatives": "People in the household unrelated to the "
+        "householder and not an unmarried partner (P17).",
+    "in_group_quarters": "Population living in group quarters rather "
+        "than a household (P17) — institutionalized facilities "
+        "(correctional, nursing, juvenile and other) plus "
+        "noninstitutionalized facilities (college housing, military "
+        "quarters and others). See the blocks collection's "
+        "`group_quarters_pop` for the P.L. 94-171 count of the same "
+        "population.",
+    "institutionalized": "Group-quarters population in institutional "
+        "facilities — correctional, juvenile, nursing/skilled-nursing "
+        "and other institutional facilities (P17, a subset of "
+        "`in_group_quarters`).",
+    "noninstitutionalized": "Group-quarters population in "
+        "noninstitutional facilities — college/university housing, "
+        "military quarters and others (P17, a subset of "
+        "`in_group_quarters`).",
+}
+
+_DHC_TENURE_DOC = {
+    "total_housing_units": "Total housing units (H1 cell `P0010001` "
+        "per the geoheader's own count, table `H1`, \"Total\"). Not the "
+        "ACS housing collections' `housing_units`.",
+    "occupied_total": "Occupied housing units (H4 cell `H0040001`, "
+        "\"Total:\" — the universe of H4 is occupied housing units). "
+        "Equals `total_households` in the household collection at this "
+        "geography.",
+    "owned_with_mortgage": "Occupied housing units owned with a "
+        "mortgage or a loan (H4).",
+    "owned_free_clear": "Occupied housing units owned free and clear, "
+        "with no mortgage or loan (H4).",
+    "renter_occupied": "Renter-occupied housing units (H4).",
+    "pct_owned": "Share of occupied housing units that are owner-"
+        "occupied, with or without a mortgage "
+        "(`(owned_with_mortgage + owned_free_clear) / occupied_total`), "
+        "this build's own derived share — not the ACS housing "
+        "collections' `pct_owner_occupied`.",
+    "pct_rented": "Share of occupied housing units that are renter-"
+        "occupied (`renter_occupied / occupied_total`), this build's "
+        "own derived share.",
+    "pct_vacant_2020": "Share of all housing units that are vacant "
+        "(`(total_housing_units - occupied_total) / "
+        "total_housing_units`), this build's own derived share — named "
+        "apart from the ACS housing collections' `pct_vacant_units` so "
+        "the two are never selected as if they were one column.",
+}
+
+_DHC_DOC_BY_THEME = {"age": _DHC_AGE_DOC, "household": _DHC_HOUSEHOLD_DOC,
+                     "tenure": _DHC_TENURE_DOC}
+
+
+def _dhc_describe(column: str, collection_id: str) -> str | None:
+    level = DHC_LEVEL_OF[collection_id]
+    if column == "geoid":
+        return GEOID_DOC[level]
+    if column == "state":
+        return ("Two-letter USPS state code, carried from the DHC "
+                "geoheader's own per-state build rather than read off "
+                "the boundary files (tools/build_dhc.py's `STATES` list).")
+    if column in ("name", "aland_sqkm", "geometry", "bbox"):
+        return CONTEXT_DOC[column](level)
+    return _DHC_DOC_BY_THEME[DHC_THEME_OF[collection_id]].get(column)
+
+
 def describe(column: str, collection_id: str) -> str | None:
     """The description for one column of one collection, or None.
 
@@ -1182,6 +1363,8 @@ def describe(column: str, collection_id: str) -> str | None:
     """
     if collection_id in REFERENCE_IDS:
         return _REFERENCE_DOC.get(collection_id, {}).get(column)
+    if collection_id in DHC_IDS:
+        return _dhc_describe(column, collection_id)
     level = LEVEL_OF.get(collection_id)
     if level is None:
         raise KeyError(f"unknown collection id: {collection_id!r}")

@@ -220,6 +220,59 @@ REFERENCE_SPATIAL = [
     ("landmarks-point", "0-14:geom", "2M"),
 ]
 
+# ===== DHC subset (2026-11-15): block-groups/bg-*-dec2020, tracts/tract- ===
+# *-dec2020. Same census pyramid as the ACS bg-*/tract-* chunks above --
+# county band at z0-5, tract band at z6-7 (bg only), the collection's own
+# features below that -- built once staging/agg/<theme>-county.parquet
+# existed (tools/build_tile_staging.py --dhc). theme here is the DHC theme
+# token (age/household/tenure), which also names the county aggregate
+# file; the tract/bg parquet paths carry the "-dec2020" suffix the ACS
+# chunks do not, hence separate builder functions rather than reusing
+# build_bg_cmd/build_themed_pyramid_cmd directly.
+DHC_BG_CHUNKS = [
+    ("block-groups", "bg-age-dec2020", "age"),
+    ("block-groups", "bg-household-dec2020", "household"),
+    ("block-groups", "bg-tenure-dec2020", "tenure"),
+]
+DHC_TRACT_CHUNKS = [
+    ("tracts", "tract-age-dec2020", "age"),
+    ("tracts", "tract-household-dec2020", "household"),
+    ("tracts", "tract-tenure-dec2020", "tenure"),
+]
+
+
+def build_dhc_bg_cmd(group, cid, theme):
+    d = coll_dir(group, cid)
+    out = f"{d}/{cid}.pmtiles"
+    bg_path = f"{d}/{cid}.parquet"
+    tract_cid = cid.replace("bg-", "tract-")
+    tract_path = (f"{ROOT}/catalog/tracts/{tract_cid}/{tract_cid}.parquet")
+    county_path = f"{AGG}/{theme}-county.parquet"
+    cmd = [TT, "pyramid", out,
+           "--band", f"0-5:{county_path}:{cid}",
+           "--band", f"6-7:{tract_path}:{cid}",
+           "--band", f"8-13:{bg_path}:{cid}",
+           "--generalize"]
+    for c in moe_cols(bg_path):
+        cmd += ["--exclude-property", c]
+    cmd += ["--report", f"{LOGDIR}/{cid}.report.json", "-f"]
+    return cmd, out
+
+
+def build_dhc_tract_cmd(group, cid, theme):
+    d = coll_dir(group, cid)
+    out = f"{d}/{cid}.pmtiles"
+    tract_path = f"{d}/{cid}.parquet"
+    county_path = f"{AGG}/{theme}-county.parquet"
+    cmd = [TT, "pyramid", out,
+           "--band", f"0-5:{county_path}:{cid}",
+           "--band", f"6-12:{tract_path}:{cid}",
+           "--generalize"]
+    for c in moe_cols(tract_path):
+        cmd += ["--exclude-property", c]
+    cmd += ["--report", f"{LOGDIR}/{cid}.report.json", "-f"]
+    return cmd, out
+
 
 def build_geom_cmd(cid, band, max_tile, group=None):
     d = coll_dir(group, cid)
@@ -299,6 +352,11 @@ def recipes():
     for cid, band, cap in REFERENCE_SPATIAL:
         out[cid] = (lambda c=cid, b=band, p=cap:
                     build_geom_cmd(c, b, p, group="reference"))
+    for group, cid, theme in DHC_BG_CHUNKS:
+        out[cid] = (lambda g=group, c=cid, t=theme: build_dhc_bg_cmd(g, c, t))
+    for group, cid, theme in DHC_TRACT_CHUNKS:
+        out[cid] = (lambda g=group, c=cid, t=theme:
+                    build_dhc_tract_cmd(g, c, t))
     for group, prefix, band, cap in GEOM_LEVELS:
         for theme in THEMES:
             cid = f"{prefix}-{theme}"
