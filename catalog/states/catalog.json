@@ -64,9 +64,16 @@
       "href": "./states/collection.json",
       "type": "application/json",
       "title": "All Indicators — States"
+    },
+    {
+      "rel": "preview",
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "title": "States rendered with a default style"
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json"
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json"
   ]
 }

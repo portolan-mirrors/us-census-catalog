@@ -666,6 +666,17 @@ def finalize_group(group: str) -> str:
                           "href": f"./{cid}/collection.json",
                           "type": "application/json",
                           "title": meta.TITLES[cid]})
+    # A card image for the root grid: one of the group's own child
+    # thumbnails, copied beside the catalog. The Portolan spec keeps
+    # assets off catalogs (PTL-AST-005), so this is a `preview` link,
+    # which stac-js falls back to when an entity has no assets.
+    cat.pop("assets", None)
+    links = [l for l in links if l.get("rel") != "preview"]
+    if (d / "thumbnail.png").exists():
+        links.append({"rel": "preview", "href": "./thumbnail.png",
+                      "type": "image/png",
+                      "title": f"{meta.GROUP_TITLES[group]} rendered with "
+                               f"a default style"})
     cat["links"] = links
     f.write_text(json.dumps(cat, indent=2, ensure_ascii=False) + "\n")
     n = sum(1 for l in links if l["rel"] == "child")
