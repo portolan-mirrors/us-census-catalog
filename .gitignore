@@ -37,3 +37,12 @@ __pycache__/
 # Census source downloads and build scratch
 staging/
 *.dat
+
+# Credentials. The Census API key is a secret and this repository is
+# public. The patterns are broad on purpose: a key must never reach a
+# commit, and a near-miss filename must not defeat the rule.
+census-api-key.txt
+*api-key*
+*api_key*
+*.key
+!**/*.keep
