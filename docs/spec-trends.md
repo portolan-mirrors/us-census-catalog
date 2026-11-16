@@ -14,6 +14,41 @@ pipeline reads today. Verified 2026-11-15:
 - Geos: `.../2019/prototype/Geos20195YR.csv`, 579,680 rows, including
   220,333 block groups and 74,001 tracts.
 
+### Findings already measured (2026-11-16), do not re-derive
+
+The re-pinning was done and verified. All 55 shell pins and all 120
+(table, line) pairs across 32 tables resolve to the SAME line with the
+SAME concept in 2019 as in 2024. The derived groups (UNDER18, OVER65,
+NOINS, DISAB) and the four B17001 poverty-by-age lists are unchanged
+too. Nothing moved.
+
+Two label changes on unchanged lines:
+
+- `B05002` line 13 is "Foreign born:" in 2019 and "Foreign-born:" in
+  2024. The pin's substring carries the hyphen, so this check FAILS
+  against 2019 unless the test normalizes the hyphen.
+- `B08301` line 10 is "Public transportation (excluding taxicab):" in
+  2019. The existing substring already matches. No change needed.
+
+**`specs.LEVELS` prefixes are vintage-specific and two of them change.**
+Measured against the real 2019 file, not assumed:
+
+| level | 2019 | 2024 |
+|---|---|---|
+| congressional district | `5001600US` (437, 116th) | `5001900US` (441, 119th) |
+| ZCTA | `8600000US` (33,120) | `860Z200US` (33,791) |
+| block group | `1500000US` (220,333) | same |
+| tract | `1400000US` (74,001) | same |
+| county | `0500000US` (3,220) | same |
+| state | `0400000US` (52) | same |
+
+A 2019 run that reuses the 2024 prefixes extracts ZERO rows for
+congressional districts and ZCTAs. It fails silently, because an empty
+filter is not an error.
+
+Geometry files confirmed present at
+`https://www2.census.gov/geo/tiger/GENZ2019/shp/cb_2019_us_<level>_500k.zip`.
+
 **Re-pin every Spec against ACS2019_Table_Shells.csv.** Do not assume the
 2024 line numbers hold. Table definitions drift between vintages: lines
 are added, split and redefined. This is the real work of this part, and
