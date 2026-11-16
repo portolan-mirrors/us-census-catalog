@@ -34,6 +34,35 @@ BUILD = ROOT / "staging" / "acs-build"
 ACS_RELEASE = "20245YR"  # ACS 2020-2024 5-year estimates
 SHELLS = CACHE / f"ACS{ACS_RELEASE}_Table_Shells.txt"
 
+# The 2015-2019 vintage (batch 4, trends). Measured 2026-11-16 against the
+# real prototype files and the Census API (docs/spec-trends.md, "Findings
+# already measured"): every one of the 55 shell pins and all 120 (table,
+# line) pairs across 32 tables resolve to the SAME line with the SAME
+# concept in both vintages. Nothing moved. Two things DO differ and are
+# handled below rather than hardcoded for 2024 only:
+#   - B05002 line 13 is "Foreign born:" in 2019 vs "Foreign-born:" in 2024
+#     -- a hyphen, not a redefinition. shell_lines() normalizes it away.
+#   - specs.LEVELS' congressional-district and ZCTA prefixes are
+#     vintage-specific (116th Congress / 2010 ZCTA in 2019, 119th / 2020
+#     ZCTA in 2024). bg/tract/county/state prefixes are identical in both.
+#     A build that reuses the 2024 prefixes for a 2019 cd/zcta extract
+#     gets zero rows and no error, because an empty filter is not a
+#     failure -- see LEVELS_OVERRIDE and levels_for().
+TRENDS_RELEASE = "20195YR"  # ACS 2015-2019 5-year estimates
+TRENDS_SHELLS = CACHE / "ACS2019_Table_Shells.csv"  # comma-delimited, no
+                                                    # Indent column -- a
+                                                    # different layout than
+                                                    # the 2024 .txt
+
+LEVELS_OVERRIDE = {
+    TRENDS_RELEASE: {"cd": "5001600US", "zcta": "8600000US"},
+}
+
+
+def levels_for(release: str = ACS_RELEASE) -> dict:
+    """LEVELS, with any vintage-specific prefix overrides applied."""
+    return {**LEVELS, **LEVELS_OVERRIDE.get(release, {})}
+
 Z90 = 1.645       # ACS margins of error are published at 90% confidence
 JAM = -111111111  # any value at or below this is an ACS jam code, not data
 
@@ -292,6 +321,24 @@ WELLBEING_SPEC = [
 ALL_SPEC = (INCOME_SPEC + PEOPLE_SPEC + HOUSING_SPEC + CONNECTIVITY_SPEC
             + WELLBEING_SPEC)
 
+# --------------------------------------------------------------------------
+# Trends (batch 4): about a dozen headline indicators, carried across the
+# 2015-2019 and 2020-2024 vintages. Picked from INCOME_SPEC_BG/PEOPLE_SPEC/
+# HOUSING_SPEC rather than WELLBEING/CONNECTIVITY so the same column list
+# still works when trends extends to tract and block group (WELLBEING_SPEC
+# is tract-and-coarser only; gini_index and the poverty-by-age pair are
+# withheld from bg for the same reason -- see INCOME_SPEC_BG above). Spec
+# objects are referenced, not re-declared, so a trends column can never
+# drift from its themed-collection definition.
+_TRENDS_NAMES = [
+    "population", "median_hh_income", "per_capita_income",
+    "pct_below_poverty", "pct_unemployed", "median_age",
+    "pct_bachelors_plus", "pct_people_of_color", "households",
+    "pct_owner_occupied", "median_home_value", "median_gross_rent",
+]
+_BY_NAME = {s.name: s for s in CONTEXT_SPEC + ALL_SPEC}
+TRENDS_SPEC = [_BY_NAME[n] for n in _TRENDS_NAMES]
+
 
 class Collection(NamedTuple):
     group: str | None  # catalog subdirectory, None for the coarse levels
@@ -363,36 +410,60 @@ WIDE_IDS = {c.id for c in COLLECTIONS if c.group == c.id}
 # Table shells: line-number pinning and derived line groups
 # --------------------------------------------------------------------------
 
-_shells: list[tuple[str, int, str]] | None = None
+_shells_by_release: dict[str, list[tuple[str, int, str]]] = {}
+
+# release -> (path, label-column-index). The 2024 shells file is
+# pipe-delimited with an Indent column ("Table ID|Line|Indent|Unique ID|
+# Label|Title|Universe|Type", label at index 4); the 2019 prototype shells
+# file is comma-delimited with no Indent column ("Table ID,Line,UniqueID,
+# Stub,Data Release", label -- called "Stub" -- at index 3). Different
+# vintages, different layouts; measured directly off both files rather
+# than assumed.
+_SHELLS_LAYOUT = {
+    ACS_RELEASE: (SHELLS, "|", 4, "utf-8"),
+    TRENDS_RELEASE: (TRENDS_SHELLS, ",", 3, "latin-1"),
+}
 
 
-def shells() -> list[tuple[str, int, str]]:
-    """(table, line, label) from this vintage's table-shells file."""
-    global _shells
-    if _shells is None:
+def shells(release: str = ACS_RELEASE) -> list[tuple[str, int, str]]:
+    """(table, line, label) from a vintage's table-shells file."""
+    if release not in _shells_by_release:
+        path, delim, label_idx, encoding = _SHELLS_LAYOUT[release]
         rows = []
-        with open(SHELLS, encoding="utf-8") as f:
-            reader = csv.reader(f, delimiter="|")
+        with open(path, encoding=encoding, newline="") as f:
+            reader = csv.reader(f, delimiter=delim)
             next(reader)
             for row in reader:
-                if len(row) >= 5 and row[1]:
-                    rows.append((row[0], int(float(row[1])), row[4]))
-        _shells = rows
-    return _shells
+                if len(row) > label_idx and row[1].strip():
+                    rows.append((row[0].strip(), int(float(row[1])),
+                                row[label_idx].strip()))
+        _shells_by_release[release] = rows
+    return _shells_by_release[release]
 
 
-def shell_lines(table: str, label_substr: str) -> list[int]:
+def _norm(label: str) -> str:
+    """Normalize cosmetic punctuation that drifts between vintages without
+    changing a table's meaning -- e.g. B05002 line 13 is "Foreign born:" in
+    2019 and "Foreign-born:" in 2024. Hyphens and spaces are the only drift
+    measured so far (docs/spec-trends.md, "Findings already measured")."""
+    return label.replace("-", " ")
+
+
+def shell_lines(table: str, label_substr: str,
+               release: str = ACS_RELEASE) -> list[int]:
     """Line numbers in `table` whose shell label contains `label_substr`."""
-    return [line for t, line, label in shells()
-            if t == table and label_substr in label]
+    needle = _norm(label_substr)
+    return [line for t, line, label in shells(release)
+            if t == table and needle in _norm(label)]
 
 
-def check_shell(table: str, line: int, label_substr: str) -> None:
+def check_shell(table: str, line: int, label_substr: str,
+                release: str = ACS_RELEASE) -> None:
     """Fail loudly if a pinned line's label moved in this vintage."""
-    if line not in shell_lines(table, label_substr):
+    if line not in shell_lines(table, label_substr, release):
         raise RuntimeError(
             f"{table} line {line} no longer matches {label_substr!r} in the "
-            f"ACS {ACS_RELEASE} table shells — the vintage moved a line")
+            f"ACS {release} table shells — the vintage moved a line")
 
 
 # Age components appear once per sex, so each label resolves to two lines;
@@ -403,10 +474,10 @@ OVER_65_LABELS = ["65 and 66 years", "67 to 69 years", "70 to 74 years",
                   "75 to 79 years", "80 to 84 years", "85 years and over"]
 
 
-def age_lines(labels: list[str]) -> list[int]:
+def age_lines(labels: list[str], release: str = ACS_RELEASE) -> list[int]:
     out = []
     for lab in labels:
-        found = shell_lines("B01001", lab)
+        found = shell_lines("B01001", lab, release)
         if len(found) != 2:  # one male line + one female line
             raise RuntimeError(f"B01001 {lab!r}: expected 2 lines, got "
                                f"{found}")
@@ -414,7 +485,8 @@ def age_lines(labels: list[str]) -> list[int]:
     return out
 
 
-def poverty_lines(labels: list[str]) -> tuple[list[int], list[int]]:
+def poverty_lines(labels: list[str],
+                  release: str = ACS_RELEASE) -> tuple[list[int], list[int]]:
     """(below-poverty lines, total/denominator lines) for B17001 age labels.
 
     B17001's labels are not unique substrings of each other ("5 years" is a
@@ -426,7 +498,7 @@ def poverty_lines(labels: list[str]) -> tuple[list[int], list[int]]:
     """
     below, total = [], []
     for lab in labels:
-        found = sorted(line for t, line, label in shells()
+        found = sorted(line for t, line, label in shells(release)
                        if t == "B17001" and label == lab)
         if len(found) != 4:
             raise RuntimeError(f"B17001 {lab!r}: expected 4 lines, got "
@@ -436,20 +508,21 @@ def poverty_lines(labels: list[str]) -> tuple[list[int], list[int]]:
     return sorted(below), sorted(total)
 
 
-def resolve_lines(spec_lines, table: str) -> list[int]:
+def resolve_lines(spec_lines, table: str,
+                  release: str = ACS_RELEASE) -> list[int]:
     """Expand the named line groups that are derived from the shells."""
     if spec_lines == "UNDER18":
-        return age_lines(UNDER_18_LABELS)
+        return age_lines(UNDER_18_LABELS, release)
     if spec_lines == "OVER65":
-        return age_lines(OVER_65_LABELS)
+        return age_lines(OVER_65_LABELS, release)
     if spec_lines == "NOINS":
-        lines = shell_lines(table, "No health insurance coverage")
+        lines = shell_lines(table, "No health insurance coverage", release)
         if len(lines) != 18:  # 9 age groups x 2 sexes
             raise RuntimeError(f"B27001: expected 18 no-coverage lines, "
                                f"got {len(lines)}")
         return lines
     if spec_lines == "DISAB":
-        lines = shell_lines(table, "With a disability")
+        lines = shell_lines(table, "With a disability", release)
         if len(lines) != 12:  # 6 age groups x 2 sexes
             raise RuntimeError(f"B18101: expected 12 disability lines, "
                                f"got {len(lines)}")
@@ -457,29 +530,29 @@ def resolve_lines(spec_lines, table: str) -> list[int]:
     return spec_lines
 
 
-def check_all_shells() -> list[tuple[str, int, str]]:
+def check_all_shells(release: str = ACS_RELEASE) -> list[tuple[str, int, str]]:
     """Verify every pinned line in every spec. Returns what was checked."""
     pins = []
     for spec in [CONTEXT_SPEC, ALL_SPEC]:
         for s in spec:
             if s.check:
-                check_shell(*s.check)
+                check_shell(*s.check, release=release)
                 pins.append(s.check)
     # The derived groups self-check their cardinality.
     for group, table in (("UNDER18", "B01001"), ("OVER65", "B01001"),
                          ("NOINS", "B27001"), ("DISAB", "B18101")):
-        resolve_lines(group, table)
+        resolve_lines(group, table, release)
     # The B17001 poverty-by-age line lists are literals (Spec.den must be a
     # plain tuple at import time), so re-derive them from the live shells
     # and fail loudly if a vintage renumbered a line instead of silently
     # publishing a wrong child- or senior-poverty rate.
-    child_below, child_total = poverty_lines(POV_CHILD_LABELS)
+    child_below, child_total = poverty_lines(POV_CHILD_LABELS, release)
     if (child_below, child_total) != (POV_CHILD_BELOW, POV_CHILD_TOTAL):
         raise RuntimeError(
             f"B17001 child-poverty lines moved: shells give "
             f"below={child_below} total={child_total}, specs.py has "
             f"below={POV_CHILD_BELOW} total={POV_CHILD_TOTAL}")
-    senior_below, senior_total = poverty_lines(POV_SENIOR_LABELS)
+    senior_below, senior_total = poverty_lines(POV_SENIOR_LABELS, release)
     if (senior_below, senior_total) != (POV_SENIOR_BELOW, POV_SENIOR_TOTAL):
         raise RuntimeError(
             f"B17001 senior-poverty lines moved: shells give "

@@ -18,6 +18,8 @@ TESTS = [
     "test_publish.py",
     "test_upload_data.py",
     "test_stac_valid.py",
+    "test_thumbnails.py",
+    "test_tile_layers.py",
     "test_conformance.py",
 ]
 

@@ -434,6 +434,15 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
             "concepts": [{"id": "dec-dhc",
                           "title": "2020 Census Demographic and Housing "
                                    "Characteristics File"}]}]
+    elif cid in meta.TRENDS_IDS:
+        # Two ACS releases, not one -- a distinct concept from "acs5" so a
+        # theme-grouping browser does not file a two-vintage trend product
+        # under the same bucket as a single-vintage estimate.
+        coll["themes"] = [{
+            "scheme": THEME_SCHEME_ACS,
+            "concepts": [{"id": "acs5-trends",
+                          "title": "American Community Survey 5-year "
+                                   "estimates — time series"}]}]
     else:
         coll["themes"] = [{
             "scheme": THEME_SCHEME_ACS,
@@ -444,6 +453,7 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     interval = (meta.BLOCKS_INTERVAL if cid == "blocks"
                 else meta.REFERENCE_INTERVAL if cid in meta.REFERENCE_IDS
                 else meta.DHC_INTERVAL if cid in meta.DHC_IDS
+                else meta.TRENDS_INTERVAL if cid in meta.TRENDS_IDS
                 else meta.ACS_INTERVAL)
     coll.setdefault("extent", {})["temporal"] = {"interval": [list(interval)]}
 
@@ -537,6 +547,15 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
                     "Decennial Census P.L. 94-171 Redistricting Data program")
         ensure_link(links, "via", meta.PL_DIR, "text/html",
                     "2020 P.L. 94-171 state archives (source data)")
+    elif cid in meta.TRENDS_IDS:
+        ensure_link(links, "via", meta.ACS_PROGRAM, "text/html",
+                    "American Community Survey program documentation")
+        ensure_link(links, "via", meta.TRENDS_5YR_DATA_2019, "text/html",
+                    "ACS 2015–2019 5-year table-based prototype Summary "
+                    "File (source data, earlier period)")
+        ensure_link(links, "via", meta.ACS_5YR_DATA, "text/html",
+                    "ACS 2020–2024 5-year table-based Summary File "
+                    "(source data, later period)")
     else:
         ensure_link(links, "via", meta.ACS_PROGRAM, "text/html",
                     "American Community Survey program documentation")

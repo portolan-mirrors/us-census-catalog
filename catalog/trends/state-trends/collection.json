@@ -1,0 +1,772 @@
+{
+  "type": "Collection",
+  "id": "trends/state-trends",
+  "stac_version": "1.1.0",
+  "description": "A dozen headline indicators — population, median household income, per capita income, the poverty rate, the unemployment rate, median age, the bachelor's-degree-or-higher share, the share of people of color, households, the owner-occupied share, median home value and median gross rent — carried across two non-overlapping ACS 5-year releases: **2015-2019** (`acsdt5y2019`, the Census Bureau's table-based [prototype summary file](https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/), validated against the [Census API](https://api.census.gov/data/2019/acs/acs5) before this collection was built — 29 requests, ~4.66 million compared values across every summary level this catalog uses including block groups, 0 mismatches) and **2020-2024** (`acsdt5y2024`, the same release every other ACS collection here reads). **Long form**: one row per `geoid` per `period`, not one row per geoid — a consumer who wants \"both years side by side\" pivots on `period`, and the `chg_*` columns already carry the 2020-2024-minus-2015-2019 difference on the 2020-2024 row so a map style can classify on it without a join.\n\nAll **112** rows at this geography (56 states and state equivalents × 2 periods), in the United States, Puerto Rico and the island areas.\n\n**The two periods do not overlap, which is what makes them comparable.** 2015-2019 and 2020-2024 share no sample year, unlike two 5-year releases one year apart (2019-2023 and 2020-2024, say), which the Census Bureau's own guidance on [Comparing ACS Data](https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html) says not to compare because their overlapping sample years make a measured difference partly an artifact of shared data. This collection's two periods are five years apart with no shared sample year, so a difference here is a measured change, not a sampling artifact of the comparison itself — though it is still a difference of two margin-of-error estimates, see `chg_*_moe` and the known issues before calling a small difference real.\n\n**`geo_change` is measured per geoid, not assumed** — see the column's own description for the full definition of each value. At this geography: `identical` (92.9%, 52 of 56); `no_acs_data` (7.1%, 4). Never apportioned: the period a geoid's lineage does not support a legitimate figure for carries NULL on the affected columns rather than a modelled or carried-over number dressed up as a measurement.\n\nEvery estimate ships with its margin of error — `<column>_moe`, at the 90% confidence level, the level the Census Bureau publishes — and the headline statistics also carry a coefficient of variation (`<column>_cv` = `moe / 1.645 / estimate`) so small-area noise can be flagged rather than mapped as if certain. Derived percentages propagate error with the Census Bureau's own formulas from [ACS Accuracy of the Data](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf): sums add in quadrature, proportions use the subset formula with the ratio formula as fallback. ACS jam values for suppressed or unestimable cells are NULL here, never numbers, and medians are published as the Bureau publishes them — a median cannot be aggregated to a larger area. Each column's description names its ACS table, its exact universe, and the lines summed to make it.\n\nGeometries are the Census Bureau's [2024 cartographic boundary files](https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html) for states and state equivalents (GENZ2024, 1:500,000), reprojected to EPSG:4326 and joined on `GEOID`. Cartographic rather than TIGER/Line because TIGER extends census geographies into open water while the cartographic files clip to the shoreline, which is what a choropleth wants. The boundary vintage matches the estimate vintage.\n\nThree collections, one per geography: [Trends, 2015–2024 — Counties](../county-trends/collection.json) and [Trends, 2015–2024 — Census Tracts](../tract-trends/collection.json). All three carry the same dozen indicators and the same `geo_change` taxonomy; they do not join to each other on `geoid` (a tract is not a county). This group sits beside the ACS themed chunks at the same geographies, not inside them — a different shape (long form, two periods, `geo_change`) from every themed collection this catalog otherwise publishes, and it carries only 12 of the catalog's ~135 indicators rather than a theme's full set. For every other 2020-2024 indicator at this geography, or for a 2020-2024-only question with no time dimension, see [states](../../states/catalog.json).\n\nThe PMTiles archive carries the same columns as the GeoParquet minus the `*_moe` columns, at every zoom, for the `2020-2024` period's features only (one geometry per geoid, with its `chg_*` columns already on it — tiling both periods' identical geometries twice would double the archive for no visual gain). Built with [tylertoo](https://github.com/geoparquet-io/tylertoo). Statistics come from the GeoParquet, which keeps both periods.\n\nThis is a mirror — [data.census.gov](https://data.census.gov/) is authoritative, and nothing here is an official Census Bureau product. The exact upstream files this collection was built from are published as `source` assets, linked at their original census.gov URLs, so the original is always one click away; the Bureau's own documentation is linked alongside them. Read the collection's [AGENTS.md](AGENTS.md) before querying: it carries the schema, the join keys, the NULL-rate story and tested queries against the published URLs.",
+  "links": [
+    {
+      "rel": "agents",
+      "href": "./AGENTS.md",
+      "type": "text/markdown",
+      "title": "Agent/LLM usage guide"
+    },
+    {
+      "rel": "describedby",
+      "href": "./README.md",
+      "type": "text/markdown",
+      "title": "Collection README"
+    },
+    {
+      "rel": "alternate",
+      "href": "https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/trends/state-trends/collection.json",
+      "type": "text/html",
+      "title": "Open in the Portolan Browser (interactive map)"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json",
+      "type": "application/json",
+      "title": "US Census Demographics — Cloud-Native Mirror"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json",
+      "type": "application/json",
+      "title": "Trends, 2015–2024"
+    },
+    {
+      "rel": "license",
+      "href": "https://www.census.gov/about/policies/open-gov/open-data.html",
+      "type": "text/html",
+      "title": "U.S. Census Bureau open data policy — U.S. Government work, public domain"
+    },
+    {
+      "rel": "via",
+      "href": "https://data.census.gov/",
+      "type": "text/html",
+      "title": "data.census.gov — the authoritative source for this data"
+    },
+    {
+      "rel": "via",
+      "href": "https://www.census.gov/programs-surveys/acs.html",
+      "type": "text/html",
+      "title": "American Community Survey program documentation"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2015–2019 5-year table-based prototype Summary File (source data, earlier period)"
+    },
+    {
+      "rel": "via",
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
+      "type": "text/html",
+      "title": "ACS 2020–2024 5-year table-based Summary File (source data, later period)"
+    },
+    {
+      "rel": "pmtiles",
+      "href": "./state-trends.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "title": "Trends, 2015–2024 — States (vector tiles)",
+      "pmtiles:layers": [
+        "state-trends"
+      ]
+    }
+  ],
+  "stac_extensions": [
+    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.1.0/schema.json",
+    "https://stac-extensions.github.io/table/v1.2.0/schema.json",
+    "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
+    "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+  ],
+  "geoparquet:geometry_type": "MultiPolygon",
+  "geoparquet:feature_count": 112,
+  "table:row_count": 112,
+  "table:primary_geometry": "geometry",
+  "table:columns": [
+    {
+      "name": "geoid",
+      "type": "string",
+      "description": "2-character state FIPS code, e.g. `29` for Missouri. Covers the 50 states, the District of Columbia, Puerto Rico and the four island areas. Matches `GEOID` in the 2024 cartographic boundary state file; the ACS `0400000US` prefix is stripped. Keyed to the geography the 2020-2024 ACS release tabulates (the same geoid every other collection at this geography uses); a 2015-2019 predecessor that no longer exists under this geoid (Connecticut's 8 old counties, Alaska's Valdez-Cordova Census Area) is not published as a row of its own -- see `geo_change`."
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "description": "State name from the cartographic boundary state file's `NAME` field — \"Missouri\"."
+    },
+    {
+      "name": "state",
+      "type": "string",
+      "description": "Two-letter USPS state or territory code (`MO`, `PR`, `GU`). Carried on every collection from the `STATEFP → USPS` lookup embedded in `tools/specs.py` rather than read off the boundary files, because the 2024 cartographic boundary block-group file has no `STUSPS` column while the tract, county and state files do."
+    },
+    {
+      "name": "period",
+      "type": "string",
+      "description": "Which ACS 5-year release this row's estimates come from: `2015-2019` (`acsdt5y2019`, the Census Bureau's table-based prototype summary file, validated against the Census API with 0 mismatches across ~4.66 million compared values before this collection was built) or `2020-2024` (`acsdt5y2024`, the same release every other ACS collection in this catalog reads). The two periods do not overlap, which is what makes them comparable in the first place -- see the collection's known_issues and [Comparing ACS Data](https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html)."
+    },
+    {
+      "name": "geo_change",
+      "type": "string",
+      "description": "How this row's geoid relates across the two periods -- measured against the real geometry change between the 2015-2019 and 2020-2024 vintages (population-weighted at tract level, via catalog/reference/crosswalks/t10t20-tract.parquet and catalog/blocks' 2020 population; exact at county level, via the preserved 6-digit tract number for Connecticut's 2022 county realignment), never assumed. One of five values:\n\n- `identical` -- bidirectionally 1:1: this geoid's predecessor sent essentially all (>=99%) of its population here, and this geoid received essentially all of its population from that one predecessor. All 12 indicators carry over.\n- `absorbed` -- several clean predecessors (each sending >=99% of ITS OWN population here) combine into this geoid. Counts (`population`, `households`) SUM across the predecessors' raw census cells with margins added in quadrature -- a legitimate aggregation -- and the five rate columns (`pct_below_poverty`, `pct_unemployed`, `pct_bachelors_plus`, `pct_people_of_color`, `pct_owner_occupied`) recompute from the summed numerator and denominator. The five medians (`median_hh_income`, `per_capita_income`, `median_age`, `median_home_value`, `median_gross_rent`) are NULL for the 2015-2019 period: a median cannot be derived from medians, so there is no legitimate figure for a geography the Census Bureau never tabulated directly.\n- `subdivided` -- this geoid gets >=99% of its population from a single predecessor, but that predecessor itself sends population to more than one place (it is not a clean 1:1 match on its own side). The five rates and five medians carry over from that one predecessor under an explicit part-resembles-whole assumption -- flagged here, not hidden -- while `population` and `households` are NULL: carrying a whole predecessor's population onto a fragment of it would overstate the fragment.\n- `mixed` -- genuinely mixed sources: no predecessor dominates and no clean set of feeders combines cleanly either. Every indicator is NULL for the 2015-2019 period.\n- `no_acs_data` -- a cartographic boundary exists and the ACS 5-year program tabulates NEITHER period here (American Samoa, Guam, the Northern Mariana Islands, the U.S. Virgin Islands). Not a geography change -- a program gap in both periods.\n\nThe period with no legitimate figure carries NULL, never an apportioned or carried-over number dressed up as a measurement. See the collection's known_issues for the measured share of each category and the Connecticut/Alaska specifics."
+    },
+    {
+      "name": "population",
+      "type": "int64",
+      "description": "Total population. Universe: total population. The single line of [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) (Total Population), published as an integer. Carried on every ACS collection so a rate can be weighted or sanity-checked without a second download. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "population_moe",
+      "type": "double",
+      "description": "Margin of error for `population` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "chg_population",
+      "type": "double",
+      "description": "`population` in the `2020-2024` row minus `population` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `population` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. `chg_pct_below_poverty` is the column the collection's diverging style classifies on, not this one."
+    },
+    {
+      "name": "chg_population_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_population`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_population` is NULL."
+    },
+    {
+      "name": "median_hh_income",
+      "type": "double",
+      "description": "Median household income in the past 12 months, in 2024 inflation-adjusted dollars. Universe: households. Line 1 of [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013), published as the Census Bureau publishes it. A median cannot be aggregated: there is no way to combine the medians of two block groups into the median of their union. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "median_hh_income_moe",
+      "type": "double",
+      "description": "Margin of error for `median_hh_income` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "chg_median_hh_income",
+      "type": "double",
+      "description": "`median_hh_income` in the `2020-2024` row minus `median_hh_income` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `median_hh_income` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. **Not on a common dollar basis**: each ACS release reports this column in its OWN vintage's inflation-adjusted dollars, not re-based to a common dollar-year here, so this difference mixes real change with five years of inflation -- measured at state level, 52 of 52 states show a nominal increase and 0 a decrease, which is this build's own evidence that the comparison is partly a dollar-basis effect. Deflate to a common dollar-year (e.g. CPI-U-RS) before treating this as a real-dollar change."
+    },
+    {
+      "name": "chg_median_hh_income_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_median_hh_income`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_median_hh_income` is NULL."
+    },
+    {
+      "name": "per_capita_income",
+      "type": "double",
+      "description": "Per capita income in the past 12 months, in 2024 inflation-adjusted dollars — aggregate income divided by total population, so children and people with no income are in the denominator. Universe: total population. Line 1 of [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301). Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "per_capita_income_moe",
+      "type": "double",
+      "description": "Margin of error for `per_capita_income` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "chg_per_capita_income",
+      "type": "double",
+      "description": "`per_capita_income` in the `2020-2024` row minus `per_capita_income` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `per_capita_income` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. **Not on a common dollar basis**: each ACS release reports this column in its OWN vintage's inflation-adjusted dollars, not re-based to a common dollar-year here, so this difference mixes real change with five years of inflation -- measured at state level, 52 of 52 states show a nominal increase and 0 a decrease, which is this build's own evidence that the comparison is partly a dollar-basis effect. Deflate to a common dollar-year (e.g. CPI-U-RS) before treating this as a real-dollar change."
+    },
+    {
+      "name": "chg_per_capita_income_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_per_capita_income`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_per_capita_income` is NULL."
+    },
+    {
+      "name": "pct_below_poverty",
+      "type": "double",
+      "description": "Percent of the population below the federal poverty level — an income-to-poverty ratio under 1.00. Universe: population for whom poverty status is determined, which excludes institutionalized people, people in military group quarters and in college dormitories, and unrelated individuals under 15. Lines 2 (\"Under .50\") + 3 (\".50 to .99\") of [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) over line 1. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "pct_below_poverty_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_below_poverty` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "chg_pct_below_poverty",
+      "type": "double",
+      "description": "`pct_below_poverty` in the `2020-2024` row minus `pct_below_poverty` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `pct_below_poverty` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. This is the column the collection's diverging style classifies on."
+    },
+    {
+      "name": "chg_pct_below_poverty_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_pct_below_poverty`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_pct_below_poverty` is NULL."
+    },
+    {
+      "name": "pct_unemployed",
+      "type": "double",
+      "description": "Unemployment rate: unemployed people as a percent of the civilian labor force. Universe for the table is the population 16 years and over, but the denominator here is line 3, \"Civilian labor force\" — the labor force, not the whole population 16+, because that is what an unemployment rate divides by. Line 5 (\"Unemployed\") over line 3 of [B23025](https://data.census.gov/table/ACSDT5Y2024.B23025). Members of the Armed Forces and people not in the labor force are excluded from both parts. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "pct_unemployed_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_unemployed` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "chg_pct_unemployed",
+      "type": "double",
+      "description": "`pct_unemployed` in the `2020-2024` row minus `pct_unemployed` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `pct_unemployed` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. `chg_pct_below_poverty` is the column the collection's diverging style classifies on, not this one."
+    },
+    {
+      "name": "chg_pct_unemployed_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_pct_unemployed`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_pct_unemployed` is NULL."
+    },
+    {
+      "name": "median_age",
+      "type": "double",
+      "description": "Median age in years. Universe: total population. Line 1 of [B01002](https://data.census.gov/table/ACSDT5Y2024.B01002) (Median Age by Sex); the male and female medians on lines 2 and 3 are not published here. Like every median, not aggregable. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "median_age_moe",
+      "type": "double",
+      "description": "Margin of error for `median_age` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "chg_median_age",
+      "type": "double",
+      "description": "`median_age` in the `2020-2024` row minus `median_age` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `median_age` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. `chg_pct_below_poverty` is the column the collection's diverging style classifies on, not this one."
+    },
+    {
+      "name": "chg_median_age_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_median_age`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_median_age` is NULL."
+    },
+    {
+      "name": "pct_bachelors_plus",
+      "type": "double",
+      "description": "Percent of adults 25 and over whose highest attainment is a bachelor's degree or more. Universe: population 25 years and over. Lines 22–25 of [B15003](https://data.census.gov/table/ACSDT5Y2024.B15003) (Bachelor's, Master's, Professional school, Doctorate) over line 1. Associate's degrees (line 21) are deliberately excluded. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "pct_bachelors_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_bachelors_plus` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "chg_pct_bachelors_plus",
+      "type": "double",
+      "description": "`pct_bachelors_plus` in the `2020-2024` row minus `pct_bachelors_plus` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `pct_bachelors_plus` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. `chg_pct_below_poverty` is the column the collection's diverging style classifies on, not this one."
+    },
+    {
+      "name": "chg_pct_bachelors_plus_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_pct_bachelors_plus`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_pct_bachelors_plus` is NULL."
+    },
+    {
+      "name": "pct_people_of_color",
+      "type": "double",
+      "description": "Percent of the population that is **not** White-alone non-Hispanic: `100 − pct_white_nh`. Universe: total population. Derived from [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002). A complement, so it carries `pct_white_nh`'s own margin of error unchanged — a share and its complement have the same sampling error. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "pct_people_of_color_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_people_of_color` at the 90% confidence level, the level the Census Bureau publishes. A complement carries the margin of error of the share it was taken from, unchanged — `100 − p` has the same sampling error as `p`."
+    },
+    {
+      "name": "chg_pct_people_of_color",
+      "type": "double",
+      "description": "`pct_people_of_color` in the `2020-2024` row minus `pct_people_of_color` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `pct_people_of_color` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. `chg_pct_below_poverty` is the column the collection's diverging style classifies on, not this one."
+    },
+    {
+      "name": "chg_pct_people_of_color_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_pct_people_of_color`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_pct_people_of_color` is NULL."
+    },
+    {
+      "name": "households",
+      "type": "int64",
+      "description": "Households — occupied housing units. One household per occupied unit, by definition. Universe: occupied housing units. Line 1 of [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003) (Tenure), published as an integer. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "households_moe",
+      "type": "double",
+      "description": "Margin of error for `households` at the 90% confidence level, the level the Census Bureau publishes. Component margins add in quadrature — `sqrt(Σ moe²)` — which is the Census Bureau's formula for the margin of a sum. NULL when every component is a jam value."
+    },
+    {
+      "name": "chg_households",
+      "type": "double",
+      "description": "`households` in the `2020-2024` row minus `households` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `households` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. `chg_pct_below_poverty` is the column the collection's diverging style classifies on, not this one."
+    },
+    {
+      "name": "chg_households_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_households`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_households` is NULL."
+    },
+    {
+      "name": "pct_owner_occupied",
+      "type": "double",
+      "description": "Percent of occupied housing units that are owner-occupied. Universe: occupied housing units. Line 2 (\"Owner occupied\") over line 1 of [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003). The homeownership rate of households, not of people, and vacant units are outside the universe entirely. Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "pct_owner_occupied_moe",
+      "type": "double",
+      "description": "Margin of error for `pct_owner_occupied` at the 90% confidence level, the level the Census Bureau publishes. Propagated with the Census Bureau's proportion formula, `sqrt(moe_num² − p²·moe_den²) / den`, falling back to the ratio formula (`+` instead of `−`) when the radicand goes negative because the numerator is not a true subset of the denominator. Multiplied by 100 to match the percentage, rounded to 2 decimals, and NULL rather than guessed when an input margin is NULL or the denominator is 0."
+    },
+    {
+      "name": "chg_pct_owner_occupied",
+      "type": "double",
+      "description": "`pct_owner_occupied` in the `2020-2024` row minus `pct_owner_occupied` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `pct_owner_occupied` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. `chg_pct_below_poverty` is the column the collection's diverging style classifies on, not this one."
+    },
+    {
+      "name": "chg_pct_owner_occupied_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_pct_owner_occupied`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_pct_owner_occupied` is NULL."
+    },
+    {
+      "name": "median_home_value",
+      "type": "double",
+      "description": "Median value of owner-occupied housing units, in dollars — the owner's estimate of what the property would sell for, not an assessment or a sale price. Universe: owner-occupied housing units. Line 1 of [B25077](https://data.census.gov/table/ACSDT5Y2024.B25077). Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "median_home_value_moe",
+      "type": "double",
+      "description": "Margin of error for `median_home_value` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "chg_median_home_value",
+      "type": "double",
+      "description": "`median_home_value` in the `2020-2024` row minus `median_home_value` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `median_home_value` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. **Not on a common dollar basis**: each ACS release reports this column in its OWN vintage's inflation-adjusted dollars, not re-based to a common dollar-year here, so this difference mixes real change with five years of inflation -- measured at state level, 52 of 52 states show a nominal increase and 0 a decrease, which is this build's own evidence that the comparison is partly a dollar-basis effect. Deflate to a common dollar-year (e.g. CPI-U-RS) before treating this as a real-dollar change."
+    },
+    {
+      "name": "chg_median_home_value_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_median_home_value`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_median_home_value` is NULL."
+    },
+    {
+      "name": "median_gross_rent",
+      "type": "double",
+      "description": "Median gross rent in dollars per month — contract rent plus the estimated average monthly cost of utilities and fuels. Universe: renter-occupied housing units **paying cash rent**, so units occupied rent-free are excluded. Line 1 of [B25064](https://data.census.gov/table/ACSDT5Y2024.B25064). Carried for both the 2015-2019 and 2020-2024 periods (see `period`); NULL for whichever period `geo_change` says has no legitimate figure, never an apportioned or carried-over number."
+    },
+    {
+      "name": "median_gross_rent_moe",
+      "type": "double",
+      "description": "Margin of error for `median_gross_rent` at the 90% confidence level, the level the Census Bureau publishes. Published as the Census Bureau publishes it for this line. A median's margin cannot be recomputed from a distribution, so it is passed through untouched."
+    },
+    {
+      "name": "chg_median_gross_rent",
+      "type": "double",
+      "description": "`median_gross_rent` in the `2020-2024` row minus `median_gross_rent` in the `2015-2019` row for the same `geoid`, carried on the `2020-2024` row only -- change belongs to the endpoint, not to either period alone, and a map style cannot compute a difference across two rows at render time. NULL on every `2015-2019` row, and NULL on a `2020-2024` row wherever either period's `median_gross_rent` is NULL -- which already encodes `geo_change` correctly: a `subdivided` geoid has no `chg_population`/`chg_households` but does have the rate and median `chg_*` columns, and `absorbed` is the mirror image. **Not on a common dollar basis**: each ACS release reports this column in its OWN vintage's inflation-adjusted dollars, not re-based to a common dollar-year here, so this difference mixes real change with five years of inflation -- measured at state level, 52 of 52 states show a nominal increase and 0 a decrease, which is this build's own evidence that the comparison is partly a dollar-basis effect. Deflate to a common dollar-year (e.g. CPI-U-RS) before treating this as a real-dollar change."
+    },
+    {
+      "name": "chg_median_gross_rent_moe",
+      "type": "double",
+      "description": "Margin of error for `chg_median_gross_rent`: `sqrt(moe_2020_2024² + moe_2015_2019²)`, the Census Bureau's quadrature formula for the margin of a difference between two independent estimates (ACS Accuracy of the Data). NULL wherever `chg_median_gross_rent` is NULL."
+    },
+    {
+      "name": "geometry",
+      "type": "binary",
+      "description": "Boundary polygon (Polygon or MultiPolygon), WKB-encoded, in EPSG:4326 / OGC:CRS84 — the GeoParquet default CRS, written as an omitted `crs` key. From the Census Bureau's 2024 cartographic boundary state file (GENZ2024, 1:500,000), which clips to the shoreline — TIGER/Line would extend the state into open water. Generalized for mapping and point-in-polygon work, not for legal-boundary or precise-area work."
+    },
+    {
+      "name": "bbox",
+      "type": "struct<xmin: double, ymin: double, xmax: double, ymax: double>",
+      "description": "GeoParquet 1.1 covering struct (`xmin`, `ymin`, `xmax`, `ymax`) for the row's geometry, with row-group statistics, so a spatial filter can skip most of the file over the network. Written by geoparquet-io, not by the Census Bureau."
+    }
+  ],
+  "title": "Trends, 2015–2024 — States",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -179.146711,
+          17.88329,
+          -65.221081,
+          71.387815
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2015-01-01T00:00:00Z",
+          "2024-12-31T23:59:59Z"
+        ]
+      ]
+    }
+  },
+  "license": "CC0-1.0",
+  "providers": [
+    {
+      "name": "U.S. Census Bureau",
+      "description": "Produces the American Community Survey, the Decennial Census, and the TIGER/cartographic boundary geographies this catalog is built from.",
+      "roles": [
+        "producer",
+        "licensor"
+      ],
+      "url": "https://www.census.gov/"
+    },
+    {
+      "name": "Portolan Mirrors",
+      "description": "Converted the published summary files and boundary files to cloud-native formats and maintains this mirror. Not an official Census Bureau product.",
+      "roles": [
+        "processor",
+        "host"
+      ],
+      "url": "https://github.com/portolan-mirrors/us-census-catalog"
+    }
+  ],
+  "assets": {
+    "state-trends": {
+      "href": "./state-trends.parquet",
+      "type": "application/vnd.apache.parquet",
+      "file:size": 4089017,
+      "file:checksum": "1220010345491cdecfa863e1c7aae2e4dd653a49701fea305b860ff10207690878ef",
+      "roles": [
+        "data"
+      ],
+      "title": "Trends, 2015–2024 — States (GeoParquet, national)"
+    },
+    "thumbnail": {
+      "href": "./thumbnail.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "title": "Trends, 2015–2024 — States rendered with the default style",
+      "file:size": 61421,
+      "file:checksum": "1220d8c2c8a0e8d4d34f677d14b0437f853ca61ccd55384d43ed94cf1ee043609de8"
+    },
+    "state-trends-tiles": {
+      "href": "./state-trends.pmtiles",
+      "type": "application/vnd.pmtiles",
+      "roles": [
+        "visual"
+      ],
+      "title": "Trends, 2015–2024 — States (PMTiles)",
+      "pmtiles:layers": [
+        "state-trends"
+      ],
+      "file:size": 1905237,
+      "file:checksum": "1220bd53490a159b35dfb8f0cc5c99c95136d1c57da0dad7a975c3ee93ba9a600592"
+    },
+    "styles/default": {
+      "href": "./styles/default.json",
+      "type": "application/vnd.mapbox.style+json",
+      "title": "Median household income, 2020-2024",
+      "roles": [
+        "style",
+        "default"
+      ],
+      "description": "Median household income by state, 2020-2024 period, viridis dark purple (low) to yellow (high). Measured over 52 states and state equivalents with a published value (4 island areas carry no ACS estimate and draw gray): 6 classes with breaks at $55k/$65k/$75k/$85k/$100k, which fall at the 2nd/15th/38th/69th/90th percentile of the national distribution (1/7/12/16/11/5 states).",
+      "file:size": 1703,
+      "file:checksum": "122019752ce4107e8fbf32dacac619f539b637a2a4e82594ef74c661e3d9a89e18bb"
+    },
+    "source-b01002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01002 — Median Age by Sex",
+      "description": "The upstream file this collection's B01002 columns were read from: one pipe-delimited row per geography, estimate (`B01002_E###`) and margin of error (`B01002_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01002](https://data.census.gov/table/ACSDT5Y2024.B01002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 26666521,
+      "file:checksum": "122004784637609550868d9da7321e7a947b34e0a10b654dbf6d344599f97f8de7f8"
+    },
+    "source-2019-b01002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b01002.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B01002 — Median Age by Sex",
+      "description": "The 2015-2019 upstream file this collection's B01002 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B01002_E001|B01002_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Total population. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b01003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b01003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B01003 — Total Population",
+      "description": "The upstream file this collection's B01003 columns were read from: one pipe-delimited row per geography, estimate (`B01003_E###`) and margin of error (`B01003_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B01003](https://data.census.gov/table/ACSDT5Y2024.B01003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18313708,
+      "file:checksum": "122038d1a992bb058d184009b10b9b34987279aee575e4323165cfb5706c69b6ca90"
+    },
+    "source-2019-b01003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b01003.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B01003 — Total Population",
+      "description": "The 2015-2019 upstream file this collection's B01003 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B01003_E001|B01003_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Total population. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b03002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b03002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B03002 — Hispanic or Latino Origin by Race",
+      "description": "The upstream file this collection's B03002 columns were read from: one pipe-delimited row per geography, estimate (`B03002_E###`) and margin of error (`B03002_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B03002](https://data.census.gov/table/ACSDT5Y2024.B03002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 83256772,
+      "file:checksum": "1220ef1a9310905393bf477820de8edb2935c1e9bdb356be65b5ee5fb6fceda911c1"
+    },
+    "source-2019-b03002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b03002.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B03002 — Hispanic or Latino Origin by Race",
+      "description": "The 2015-2019 upstream file this collection's B03002 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B03002_E001|B03002_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Total population. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b15003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b15003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B15003 — Educational Attainment for the Population 25 Years and Over",
+      "description": "The upstream file this collection's B15003 columns were read from: one pipe-delimited row per geography, estimate (`B15003_E###`) and margin of error (`B15003_M###`) side by side, for every summary level in one national file. Universe: Population 25 years and over. Served by census.gov, not by this mirror; see [B15003](https://data.census.gov/table/ACSDT5Y2024.B15003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 92292840,
+      "file:checksum": "1220d0c8609e958022459215c8a31d7452ef7528ee8dd70fbb6f9a99de0f491f42d7"
+    },
+    "source-2019-b15003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b15003.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B15003 — Educational Attainment for the Population 25 Years and Over",
+      "description": "The 2015-2019 upstream file this collection's B15003 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B15003_E001|B15003_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Population 25 years and over. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b19013": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19013 — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The upstream file this collection's B19013 columns were read from: one pipe-delimited row per geography, estimate (`B19013_E###`) and margin of error (`B19013_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B19013](https://data.census.gov/table/ACSDT5Y2024.B19013) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17917916,
+      "file:checksum": "1220b25a176b0e6c339b6f3a2a0d3d8446bf06f5f080b4395993ec9a8313efb1c229"
+    },
+    "source-2019-b19013": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b19013.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B19013 — Median Household Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The 2015-2019 upstream file this collection's B19013 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B19013_E001|B19013_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Households. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b19301": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19301.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B19301 — Per Capita Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The upstream file this collection's B19301 columns were read from: one pipe-delimited row per geography, estimate (`B19301_E###`) and margin of error (`B19301_M###`) side by side, for every summary level in one national file. Universe: Total population. Served by census.gov, not by this mirror; see [B19301](https://data.census.gov/table/ACSDT5Y2024.B19301) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17123907,
+      "file:checksum": "12209fc107e98fee7fa49bb8314560205569184fad65fb64b80adb5c5bdd83ccc409"
+    },
+    "source-2019-b19301": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b19301.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B19301 — Per Capita Income in the Past 12 Months (in 2024 Inflation-Adjusted Dollars)",
+      "description": "The 2015-2019 upstream file this collection's B19301 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B19301_E001|B19301_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Total population. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b23025": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b23025.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B23025 — Employment Status for the Population 16 Years and Over",
+      "description": "The upstream file this collection's B23025 columns were read from: one pipe-delimited row per geography, estimate (`B23025_E###`) and margin of error (`B23025_M###`) side by side, for every summary level in one national file. Universe: Population 16 years and over. Served by census.gov, not by this mirror; see [B23025](https://data.census.gov/table/ACSDT5Y2024.B23025) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 39968046,
+      "file:checksum": "1220264a5bd9367c5f58d9773fa4966fa94fe1e02f9c7106bc2ab39168d6de7c3e4a"
+    },
+    "source-2019-b23025": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b23025.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B23025 — Employment Status for the Population 16 Years and Over",
+      "description": "The 2015-2019 upstream file this collection's B23025 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B23025_E001|B23025_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Population 16 years and over. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b25003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25003.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25003 — Tenure",
+      "description": "The upstream file this collection's B25003 columns were read from: one pipe-delimited row per geography, estimate (`B25003_E###`) and margin of error (`B25003_M###`) side by side, for every summary level in one national file. Universe: Occupied housing units. Served by census.gov, not by this mirror; see [B25003](https://data.census.gov/table/ACSDT5Y2024.B25003) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 26901770,
+      "file:checksum": "122068e963e1ed60fcf6b0658579cefc6498b7a9eb780b9f3e87fd1b9775c4d4ac6c"
+    },
+    "source-2019-b25003": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b25003.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B25003 — Tenure",
+      "description": "The 2015-2019 upstream file this collection's B25003 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B25003_E001|B25003_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Occupied housing units. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b25064": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25064.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25064 — Median Gross Rent (Dollars)",
+      "description": "The upstream file this collection's B25064 columns were read from: one pipe-delimited row per geography, estimate (`B25064_E###`) and margin of error (`B25064_M###`) side by side, for every summary level in one national file. Universe: Renter-occupied housing units paying cash rent. Served by census.gov, not by this mirror; see [B25064](https://data.census.gov/table/ACSDT5Y2024.B25064) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 17272062,
+      "file:checksum": "1220b36e6dc1fcef36b8b307d31b37517b64c80d8b9c70d48c9b1894242860f42eb0"
+    },
+    "source-2019-b25064": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b25064.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B25064 — Median Gross Rent (Dollars)",
+      "description": "The 2015-2019 upstream file this collection's B25064 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B25064_E001|B25064_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Renter-occupied housing units paying cash rent. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-b25077": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b25077.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table B25077 — Median Value (Dollars)",
+      "description": "The upstream file this collection's B25077 columns were read from: one pipe-delimited row per geography, estimate (`B25077_E###`) and margin of error (`B25077_M###`) side by side, for every summary level in one national file. Universe: Owner-occupied housing units. Served by census.gov, not by this mirror; see [B25077](https://data.census.gov/table/ACSDT5Y2024.B25077) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 18496426,
+      "file:checksum": "122089eb2153764a2330b23959d8bbc29b3a8f3016f087b990f2a8ea0d5096d9a816"
+    },
+    "source-2019-b25077": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-b25077.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table B25077 — Median Value (Dollars)",
+      "description": "The 2015-2019 upstream file this collection's B25077 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|B25077_E001|B25077_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Owner-occupied housing units. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-c17002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-c17002.dat",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 detailed table C17002 — Ratio of Income to Poverty Level in the Past 12 Months",
+      "description": "The upstream file this collection's C17002 columns were read from: one pipe-delimited row per geography, estimate (`C17002_E###`) and margin of error (`C17002_M###`) side by side, for every summary level in one national file. Universe: Population for whom poverty status is determined. Served by census.gov, not by this mirror; see [C17002](https://data.census.gov/table/ACSDT5Y2024.C17002) for the same table rendered on data.census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 42027042,
+      "file:checksum": "1220dc3dc675113683ec3ff2a0e29a840f43e03268151d7f14b922658d7306da5187"
+    },
+    "source-2019-c17002": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/5YRData/acsdt5y2019-c17002.dat",
+      "type": "text/plain",
+      "title": "ACS 2015–2019 prototype detailed table C17002 — Ratio of Income to Poverty Level in the Past 12 Months",
+      "description": "The 2015-2019 upstream file this collection's C17002 columns were read from, from the Census Bureau's table-based prototype directory — the same layout as the 2020-2024 production file (`GEO_ID|C17002_E001|C17002_M001|...`), validated against the Census API before this collection was built (see processing_notes). Universe: Population for whom poverty status is determined. Served by census.gov, not by this mirror.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-table-shells-2024": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/documentation/ACS20245YR_Table_Shells.txt",
+      "type": "text/plain",
+      "title": "ACS 2020–2024 5-year table shells",
+      "description": "Every 2020-2024 line number this collection reads is pinned against this file. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 5622840,
+      "file:checksum": "12205b46f4af873744a415c4974204010db976e2a61ff916674732f81c496a6b517d"
+    },
+    "source-table-shells-2019": {
+      "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2019/prototype/ACS2019_Table_Shells.csv",
+      "type": "text/csv",
+      "title": "ACS 2015–2019 prototype table shells",
+      "description": "Re-pinned against this file before the 2015-2019 side of this collection was built: all 55 shell pins and all 120 (table, line) pairs this catalog's specs use resolve to the SAME line with the SAME concept as the 2020-2024 shells. A different layout from the 2024 file (comma-delimited, no Indent column, the label column called \"Stub\"), handled by `tools/specs.py`'s `shells()`. Served by census.gov.",
+      "roles": [
+        "source"
+      ]
+    },
+    "source-cartographic-boundaries": {
+      "href": "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_us_state_500k.zip",
+      "type": "application/zip",
+      "title": "2024 cartographic boundary file — states and state equivalents (1:500,000, national)",
+      "description": "The geometry both periods' rows join to — the current (2020-2024) boundary, used for both periods: a 2015-2019 predecessor whose geoid no longer exists under this boundary (Connecticut's 8 old counties, Alaska's Valdez-Cordova Census Area, every pre-2020-vintage tract that split) is not published as a row of its own — see `geo_change`. Served by census.gov.",
+      "roles": [
+        "source"
+      ],
+      "file:size": 3242450,
+      "file:checksum": "12203e81cbb6cf5f60d9b01ef3e730afa14d61ce5f784252a0b33a696135e71447bc"
+    },
+    "doc-comparing-acs": {
+      "href": "https://www.census.gov/programs-surveys/acs/guidance/comparing-acs-data.html",
+      "type": "text/html",
+      "title": "Comparing ACS Data — Census Bureau guidance",
+      "description": "The Census Bureau's own guidance on which ACS period pairs can be compared: non-overlapping 5-year periods (this collection's 2015-2019 and 2020-2024) can be; overlapping ones cannot, because shared sample years make a measured difference partly an artifact of the comparison itself.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-handbook": {
+      "href": "https://www.census.gov/programs-surveys/acs/library/handbooks/general.html",
+      "type": "text/html",
+      "title": "Understanding and Using American Community Survey Data — Census Bureau handbooks",
+      "description": "The Bureau's own guidance on what ACS estimates can and cannot support, including comparing estimates across vintages.",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "doc-acs-accuracy": {
+      "href": "https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/MultiyearACSAccuracyofData2024.pdf",
+      "type": "application/pdf",
+      "title": "ACS Accuracy of the Data (2024, multiyear estimates)",
+      "description": "The source of the quadrature formula `chg_*_moe` applies to the difference of two periods' margins, and of every other margin-of-error formula this build applies.",
+      "roles": [
+        "metadata"
+      ],
+      "file:size": 387987,
+      "file:checksum": "12204d3258202e02828c55e95312573f48c83e2fee26f5967fcf817c273b154741ad"
+    },
+    "doc-geo-glossary": {
+      "href": "https://www.census.gov/programs-surveys/geography/about/glossary.html",
+      "type": "text/html",
+      "title": "Census Bureau geography program glossary",
+      "description": "Definitions of the geographies and the identifiers used here — block, block group, tract, county equivalent, GEOID, and what nests inside what.",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "keywords": [
+    "census",
+    "ACS",
+    "American Community Survey",
+    "demographics",
+    "United States",
+    "margins of error",
+    "trends",
+    "time series",
+    "change over time",
+    "2015-2019",
+    "2020-2024",
+    "Connecticut",
+    "geo_change",
+    "t10t20",
+    "states"
+  ],
+  "themes": [
+    {
+      "scheme": "https://www.census.gov/programs-surveys/acs.html",
+      "concepts": [
+        {
+          "id": "acs5-trends",
+          "title": "American Community Survey 5-year estimates — time series"
+        }
+      ]
+    }
+  ],
+  "updated": "2026-11-12T00:00:00Z"
+}

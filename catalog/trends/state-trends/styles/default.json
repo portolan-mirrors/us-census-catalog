@@ -1,0 +1,58 @@
+{
+  "version": 8,
+  "name": "Median household income, 2020-2024",
+  "metadata": {
+    "description": "Median household income by state, 2020-2024 period, viridis dark purple (low) to yellow (high). Measured over 52 states and state equivalents with a published value (4 island areas carry no ACS estimate and draw gray): 6 classes with breaks at $55k/$65k/$75k/$85k/$100k, which fall at the 2nd/15th/38th/69th/90th percentile of the national distribution (1/7/12/16/11/5 states).",
+    "portolan:column": "median_hh_income",
+    "portolan:breaks": [55000, 65000, 75000, 85000, 100000]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../state-trends.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-trends",
+      "filter": ["!", ["has", "median_hh_income"]],
+      "paint": {
+        "fill-color": "#cccccc",
+        "fill-opacity": 0.35
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "state-trends",
+      "filter": ["has", "median_hh_income"],
+      "paint": {
+        "fill-color": [
+          "step",
+          ["get", "median_hh_income"],
+          "#440154",
+          55000, "#443983",
+          65000, "#31688e",
+          75000, "#21918c",
+          85000, "#35b779",
+          100000, "#fde725"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "state-trends",
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 2, 0.2, 7, 0.8]
+      }
+    }
+  ]
+}

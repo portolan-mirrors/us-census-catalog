@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-16T08:57:57.402253Z",
+      "breaking": false,
+      "assets": {
+        "state-trends.parquet": {
+          "sha256": "010345491cdecfa863e1c7aae2e4dd653a49701fea305b860ff10207690878ef",
+          "size_bytes": 4089017,
+          "href": "trends/state-trends/state-trends.parquet",
+          "source_mtime": 1794818926.5724068,
+          "mtime": 1794818926.5724068,
+          "feature_count": 112,
+          "schema_fingerprint": "e461aee940bd270e"
+        },
+        "state-trends.thumb.jpg": {
+          "sha256": "fbffaa25edc2072707fd5ad17ebaf4e11a7024e32e715ed0a9e11d5997d5e986",
+          "size_bytes": 3179,
+          "href": "trends/state-trends/state-trends.thumb.jpg",
+          "mtime": 1794819479.8810945
+        }
+      },
+      "changes": [
+        "state-trends.parquet",
+        "state-trends.thumb.jpg"
+      ]
+    }
+  ]
+}

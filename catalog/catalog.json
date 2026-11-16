@@ -6,7 +6,7 @@
   ],
   "id": "us-census",
   "title": "US Census Demographics — Cloud-Native Mirror",
-  "description": "Nationwide United States census statistics as cloud-native GeoParquet and\nPMTiles with STAC metadata, at every census geography from states down to\nthe 242,298 block groups and 8,174,955 blocks of the 2020 Census, plus the\n33,791 ZIP Code Tabulation Areas, 32,612 places and 441 congressional\ndistricts of the 119th Congress. Thirty-nine collections carry curated\n[American Community Survey](https://www.census.gov/programs-surveys/acs.html)\n2020–2024 5-year indicators — income, poverty, age, race and ethnicity,\neducation, housing cost and tenure, vehicles, commuting, internet access,\nhealth insurance, disability, nativity — every estimate with its margin of\nerror at the 90% confidence level and the headline statistics with a\ncoefficient of variation. Every geography is a sub-catalog of themed\ncollections (income, people, housing, connectivity, wellbeing), and the\nfive coarse-or-sparse geographies — counties, states, ZCTAs, places,\ncongressional districts — add a sixth collection carrying all 135 columns\nin one wide table. One further collection carries 2020 Decennial Census\nP.L. 94-171 counts at block level, hive-partitioned by state.\n[data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and\nevery collection links the exact upstream census.gov files it was built\nfrom.",
+  "description": "Nationwide United States census statistics as cloud-native GeoParquet and\nPMTiles with STAC metadata, at every census geography from states down to\nthe 242,298 block groups and 8,174,955 blocks of the 2020 Census, plus the\n33,791 ZIP Code Tabulation Areas, 32,612 places and 441 congressional\ndistricts of the 119th Congress. Thirty-nine collections carry curated\n[American Community Survey](https://www.census.gov/programs-surveys/acs.html)\n2020–2024 5-year indicators — income, poverty, age, race and ethnicity,\neducation, housing cost and tenure, vehicles, commuting, internet access,\nhealth insurance, disability, nativity — every estimate with its margin of\nerror at the 90% confidence level and the headline statistics with a\ncoefficient of variation. Every geography is a sub-catalog of themed\ncollections (income, people, housing, connectivity, wellbeing), and the\nfive coarse-or-sparse geographies — counties, states, ZCTAs, places,\ncongressional districts — add a sixth collection carrying all 135 columns\nin one wide table. One further collection carries 2020 Decennial Census\nP.L. 94-171 counts at block level, hive-partitioned by state. Six more,\nbeside the block-group and tract ACS collections, carry curated 2020\nCensus Demographic and Housing Characteristics (DHC) counts — age & sex,\nhousehold type and tenure — 100% counts with no margin of error and no\nsampling error, protected instead by the Census Bureau's differential-\nprivacy disclosure avoidance system.\n[data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and\nevery collection links the exact upstream census.gov files it was built\nfrom.",
   "updated": "2026-11-12T00:00:00Z",
   "license": "CC0-1.0",
   "providers": [
@@ -120,6 +120,12 @@
       "href": "./reference/catalog.json",
       "type": "application/json",
       "title": "Reference Geography"
+    },
+    {
+      "rel": "child",
+      "href": "./trends/catalog.json",
+      "type": "application/json",
+      "title": "Trends, 2015–2024"
     },
     {
       "rel": "child",

@@ -321,6 +321,58 @@ GEOM_LEVELS = [
 PYRAMID_LEVELS = [("zctas", "zcta"), ("places", "place")]
 
 
+# ===== trends/ (batch 4, 2026-11-16): long form, two periods per geoid ======
+# county-trends/state-trends/tract-trends publish one row per (geoid,
+# period) -- tiling the file as published would draw every geometry
+# twice, once per period, for no visual gain (a vector-tile style reads
+# one feature's properties, never a sibling row). tools/build_trends.py's
+# tiling-staging step filters each collection down to its 2020-2024 rows
+# only (staging/agg/<level>-trends-2024.parquet) -- one feature per
+# geoid, already carrying the `chg_*` columns the diverging style
+# classifies on. county-trends/state-trends are geometry-only, like their
+# non-trends county/state siblings; tract-trends gets the same county/
+# tract pyramid every other tract collection in this catalog uses, with
+# the county band read from the trends county staging file so the layer
+# carries the same (fewer) columns at every zoom.
+TRENDS_GEOM = [("county-trends", "0-10:geom", "2M"),
+              ("state-trends", "0-8:geom", None)]
+
+
+def build_trends_geom_cmd(cid, band, max_tile):
+    level = cid.split("-")[0]
+    d = coll_dir("trends", cid)
+    path = f"{AGG}/{level}-trends-2024.parquet"
+    out = f"{d}/{cid}.pmtiles"
+    # --layer-name is required here. tylertoo defaults the layer to the
+    # INPUT file stem, and the staging input is <level>-trends-2024, so
+    # the layer came out as county-trends-2024 while the style and the
+    # STAC both named county-trends. The map drew nothing. Every
+    # collection in this catalog names its layer for the collection id.
+    cmd = [TT, "tiles", path, out, "--band", band, "--layer-name", cid]
+    if max_tile:
+        cmd += ["--max-compressed-tile-size", max_tile]
+    for c in moe_cols(path):
+        cmd += ["--exclude-property", c]
+    cmd += ["-f"]
+    return cmd, out
+
+
+def build_trends_tract_cmd():
+    cid = "tract-trends"
+    d = coll_dir("trends", cid)
+    out = f"{d}/{cid}.pmtiles"
+    tract_path = f"{AGG}/tract-trends-2024.parquet"
+    county_path = f"{AGG}/county-trends-2024.parquet"
+    cmd = [TT, "pyramid", out,
+           "--band", f"0-5:{county_path}:{cid}",
+           "--band", f"6-12:{tract_path}:{cid}",
+           "--generalize"]
+    for c in moe_cols(tract_path):
+        cmd += ["--exclude-property", c]
+    cmd += ["--report", f"{LOGDIR}/{cid}.report.json", "-f"]
+    return cmd, out
+
+
 # ===== blocks: 2020 Decennial counts, 8.17M features, its own 3-band plan ===
 def build_blocks_cmd():
     out = f"{ROOT}/catalog/blocks/blocks.pmtiles"
@@ -367,6 +419,9 @@ def recipes():
             cid = f"{prefix}-{theme}"
             out[cid] = (lambda g=group, c=cid, t=theme:
                         build_themed_pyramid_cmd(g, c, t))
+    for cid, band, cap in TRENDS_GEOM:
+        out[cid] = (lambda c=cid, b=band, p=cap: build_trends_geom_cmd(c, b, p))
+    out["tract-trends"] = build_trends_tract_cmd
     out["blocks"] = build_blocks_cmd
     return out
 

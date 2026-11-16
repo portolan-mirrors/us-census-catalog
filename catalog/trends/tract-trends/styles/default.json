@@ -1,0 +1,62 @@
+{
+  "version": 8,
+  "name": "Change in the poverty rate, 2015-2019 to 2020-2024",
+  "metadata": {
+    "description": "Percentage-point change in the share of people below the poverty line, 2015-2019 to 2020-2024, diverging blue (rate fell) to red (rate rose), white at zero. Measured over 81,410 tracts with a legitimate chg_pct_below_poverty value (geo_change identical, absorbed or subdivided; mixed/no_acs_data tracts carry NULL and draw gray): 8 classes with breaks at -15/-8/-3/0/3/8/15 points, which fall at the 4th/14th/34th/55th/74th/91st/98th percentile of the national distribution and none empty (3,200/8,151/15,989/17,182/16,055/13,223/5,677/1,933 tracts). 54.7% of tracts improved (chg below 0).",
+    "portolan:column": "chg_pct_below_poverty",
+    "portolan:breaks": [-15, -8, -3, 0, 3, 8, 15]
+  },
+  "sources": {
+    "data": {
+      "type": "vector",
+      "url": "pmtiles://../tract-trends.pmtiles"
+    }
+  },
+  "layers": [
+    {
+      "id": "no-data",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-trends",
+      "filter": ["!", ["has", "chg_pct_below_poverty"]],
+      "paint": {
+        "fill-color": "#cccccc",
+        "fill-opacity": 0.35
+      }
+    },
+    {
+      "id": "fill",
+      "type": "fill",
+      "source": "data",
+      "source-layer": "tract-trends",
+      "filter": ["has", "chg_pct_below_poverty"],
+      "paint": {
+        "fill-color": [
+          "step",
+          ["get", "chg_pct_below_poverty"],
+          "#2166ac",
+          -15, "#4393c3",
+          -8, "#92c5de",
+          -3, "#d1e5f0",
+          0, "#fddbc7",
+          3, "#f4a582",
+          8, "#d6604d",
+          15, "#b2182b"
+        ],
+        "fill-opacity": 0.8
+      }
+    },
+    {
+      "id": "outline",
+      "type": "line",
+      "source": "data",
+      "source-layer": "tract-trends",
+      "minzoom": 6,
+      "paint": {
+        "line-color": "#4d4d4d",
+        "line-width": ["interpolate", ["linear"], ["zoom"], 6, 0.2, 11, 0.6],
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 6, 0.0, 8, 0.4]
+      }
+    }
+  ]
+}

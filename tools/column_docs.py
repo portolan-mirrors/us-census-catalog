@@ -65,6 +65,8 @@ PL_TECHDOC_URL = (
     "technical-documentation/complete-tech-docs/summary-file/"
     "2020Census_PL94_171Redistricting_StatesTechDoc_English.pdf"
 )
+COMPARING_ACS_URL = ("https://www.census.gov/programs-surveys/acs/guidance/"
+                     "comparing-acs-data.html")
 
 
 def acs_table(table: str) -> str:
@@ -1365,6 +1367,8 @@ def describe(column: str, collection_id: str) -> str | None:
         return _REFERENCE_DOC.get(collection_id, {}).get(column)
     if collection_id in DHC_IDS:
         return _dhc_describe(column, collection_id)
+    if collection_id in TRENDS_IDS:
+        return _trends_describe(column, collection_id)
     level = LEVEL_OF.get(collection_id)
     if level is None:
         raise KeyError(f"unknown collection id: {collection_id!r}")
@@ -1397,10 +1401,162 @@ def columns_for(collection_id: str) -> list[str]:
     if collection_id == "blocks":
         return (["geoid", "state"] + list(BLOCK_DOC) +
                 ["pop_density", "aland_sqkm", "geometry", "bbox"])
+    if collection_id in TRENDS_IDS:
+        head = ["geoid", "name", "state", "period", "geo_change"]
+        body = []
+        for n in TRENDS_NAMES:
+            body += [n, f"{n}_moe", f"chg_{n}", f"chg_{n}_moe"]
+        return head + body + ["geometry", "bbox"]
     coll = next(c for c in specs.COLLECTIONS if c.id == collection_id)
     head = ["geoid", "name", "state", "population", "population_moe",
             "aland_sqkm", "pop_density"]
     return head + specs.out_columns(coll.spec) + ["geometry", "bbox"]
+
+
+# Trends (batch 4, 2026-11-16): county-trends, state-trends, tract-trends.
+# Not in specs.COLLECTIONS -- a different shape (long form, two vintages,
+# a geo_change column) from every other ACS collection -- so hand-
+# registered here the same way REFERENCE_IDS/DHC_IDS are, and duplicated
+# in tools/collection_meta.py for the same circular-import reason.
+TRENDS_IDS = ["county-trends", "state-trends", "tract-trends"]
+TRENDS_LEVEL_OF = {"county-trends": "county", "state-trends": "state",
+                  "tract-trends": "tract"}
+TRENDS_NAMES = [s.name for s in specs.TRENDS_SPEC]
+TRENDS_PERIODS = ("2015-2019", "2020-2024")
+
+TRENDS_GEO_CHANGE_DOC = (
+    "How this row's geoid relates across the two periods -- measured "
+    "against the real geometry change between the 2015-2019 and "
+    "2020-2024 vintages (population-weighted at tract level, via "
+    "catalog/reference/crosswalks/t10t20-tract.parquet and catalog/"
+    "blocks' 2020 population; exact at county level, via the preserved "
+    "6-digit tract number for Connecticut's 2022 county realignment), "
+    "never assumed. One of five values:\n\n"
+    "- `identical` -- bidirectionally 1:1: this geoid's predecessor sent "
+    "essentially all (>=99%) of its population here, and this geoid "
+    "received essentially all of its population from that one "
+    "predecessor. All 12 indicators carry over.\n"
+    "- `absorbed` -- several clean predecessors (each sending >=99% of "
+    "ITS OWN population here) combine into this geoid. Counts "
+    "(`population`, `households`) SUM across the predecessors' raw "
+    "census cells with margins added in quadrature -- a legitimate "
+    "aggregation -- and the five rate columns (`pct_below_poverty`, "
+    "`pct_unemployed`, `pct_bachelors_plus`, `pct_people_of_color`, "
+    "`pct_owner_occupied`) recompute from the summed numerator and "
+    "denominator. The five medians (`median_hh_income`, "
+    "`per_capita_income`, `median_age`, `median_home_value`, "
+    "`median_gross_rent`) are NULL for the 2015-2019 period: a median "
+    "cannot be derived from medians, so there is no legitimate figure "
+    "for a geography the Census Bureau never tabulated directly.\n"
+    "- `subdivided` -- this geoid gets >=99% of its population from a "
+    "single predecessor, but that predecessor itself sends population "
+    "to more than one place (it is not a clean 1:1 match on its own "
+    "side). The five rates and five medians carry over from that one "
+    "predecessor under an explicit part-resembles-whole assumption -- "
+    "flagged here, not hidden -- while `population` and `households` "
+    "are NULL: carrying a whole predecessor's population onto a "
+    "fragment of it would overstate the fragment.\n"
+    "- `mixed` -- genuinely mixed sources: no predecessor dominates and "
+    "no clean set of feeders combines cleanly either. Every indicator "
+    "is NULL for the 2015-2019 period.\n"
+    "- `no_acs_data` -- a cartographic boundary exists and the ACS "
+    "5-year program tabulates NEITHER period here (American Samoa, "
+    "Guam, the Northern Mariana Islands, the U.S. Virgin Islands). Not "
+    "a geography change -- a program gap in both periods.\n\n"
+    "The period with no legitimate figure carries NULL, never an "
+    "apportioned or carried-over number dressed up as a measurement. "
+    "See the collection's known_issues for the measured share of each "
+    "category and the Connecticut/Alaska specifics.")
+
+TRENDS_PERIOD_DOC = (
+    "Which ACS 5-year release this row's estimates come from: "
+    "`2015-2019` (`acsdt5y2019`, the Census Bureau's table-based "
+    "prototype summary file, validated against the Census API with 0 "
+    "mismatches across ~4.66 million compared values before this "
+    "collection was built) or `2020-2024` (`acsdt5y2024`, the same "
+    "release every other ACS collection in this catalog reads). The two "
+    "periods do not overlap, which is what makes them comparable in the "
+    "first place -- see the collection's known_issues and [Comparing ACS "
+    f"Data]({COMPARING_ACS_URL}).")
+
+
+_CHG_DOLLAR_NOTE = (
+    " **Not on a common dollar basis**: each ACS release reports this "
+    "column in its OWN vintage's inflation-adjusted dollars, not re-"
+    "based to a common dollar-year here, so this difference mixes real "
+    "change with five years of inflation -- measured at state level, "
+    "52 of 52 states show a nominal increase and 0 a decrease, which is "
+    "this build's own evidence that the comparison is partly a dollar-"
+    "basis effect. Deflate to a common dollar-year (e.g. CPI-U-RS) "
+    "before treating this as a real-dollar change.")
+_CHG_DOLLAR_BASES = {"median_hh_income", "per_capita_income",
+                     "median_home_value", "median_gross_rent"}
+
+
+def chg_doc(base: str) -> str:
+    """Description for `chg_<base>`."""
+    return (
+        f"`{base}` in the `2020-2024` row minus `{base}` in the `2015-2019` "
+        f"row for the same `geoid`, carried on the `2020-2024` row only -- "
+        f"change belongs to the endpoint, not to either period alone, and "
+        f"a map style cannot compute a difference across two rows at "
+        f"render time. NULL on every `2015-2019` row, and NULL on a "
+        f"`2020-2024` row wherever either period's `{base}` is NULL -- "
+        f"which already encodes `geo_change` correctly: a `subdivided` "
+        f"geoid has no `chg_population`/`chg_households` but does have "
+        f"the rate and median `chg_*` columns, and `absorbed` is the "
+        f"mirror image."
+        + (_CHG_DOLLAR_NOTE if base in _CHG_DOLLAR_BASES else
+           " `chg_pct_below_poverty` is the column the collection's "
+           "diverging style classifies on, not this one."
+           if base != "pct_below_poverty" else
+           " This is the column the collection's diverging style "
+           "classifies on."))
+
+
+def chg_moe_doc(base: str) -> str:
+    return (f"Margin of error for `chg_{base}`: `sqrt(moe_2020_2024² + "
+           f"moe_2015_2019²)`, the Census Bureau's quadrature formula for "
+           f"the margin of a difference between two independent "
+           f"estimates (ACS Accuracy of the Data). NULL wherever "
+           f"`chg_{base}` is NULL.")
+
+
+def _trends_describe(column: str, collection_id: str) -> str | None:
+    level = TRENDS_LEVEL_OF[collection_id]
+    if column == "geoid":
+        return (GEOID_DOC[level] + " Keyed to the geography the "
+               "2020-2024 ACS release tabulates (the same geoid every "
+               "other collection at this geography uses); a 2015-2019 "
+               "predecessor that no longer exists under this geoid "
+               "(Connecticut's 8 old counties, Alaska's Valdez-Cordova "
+               "Census Area) is not published as a row of its own -- see "
+               "`geo_change`.")
+    if column in ("name", "state", "geometry", "bbox"):
+        return CONTEXT_DOC[column](level)
+    if column == "period":
+        return TRENDS_PERIOD_DOC
+    if column == "geo_change":
+        return TRENDS_GEO_CHANGE_DOC
+    if column.startswith("chg_"):
+        base = column[len("chg_"):]
+        if base.endswith("_moe") and base[:-4] in TRENDS_NAMES:
+            return chg_moe_doc(base[:-4])
+        if base in TRENDS_NAMES:
+            return chg_doc(base)
+        return None
+    base_doc = ACS_DOC.get(column)
+    if base_doc:
+        return (f"{base_doc} Carried for both the 2015-2019 and 2020-2024 "
+               f"periods (see `period`); NULL for whichever period "
+               f"`geo_change` says has no legitimate figure, never an "
+               f"apportioned or carried-over number.")
+    for suffix, fn in (("_moe", moe_doc), ("_cv", cv_doc)):
+        if column.endswith(suffix):
+            b = column[: -len(suffix)]
+            if b in TRENDS_NAMES:
+                return fn(b)
+    return None
 
 
 def docs_for(collection_id: str) -> dict[str, str]:

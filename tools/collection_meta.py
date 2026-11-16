@@ -246,6 +246,41 @@ DHC_INTERVAL = ["2020-04-01T00:00:00Z", "2020-04-01T00:00:00Z"]
 # spans both rather than picking one.
 REFERENCE_INTERVAL = ["2020-04-01T00:00:00Z", "2024-12-31T23:59:59Z"]
 
+# --------------------------------------------------------------------------
+# trends/ (batch 4, 2026-11-16): a dozen headline indicators, long form,
+# across the 2015-2019 and 2020-2024 ACS 5-year vintages (docs/spec-
+# trends.md). Not built from specs.COLLECTIONS -- long form (one row per
+# geoid PER PERIOD, not one row per geoid), a geo_change column, and a
+# second vintage -- so registered by hand like reference/ and DHC above,
+# and duplicated in tools/column_docs.py for the same circular-import
+# reason as REFERENCE_IDS/DHC_IDS there.
+# --------------------------------------------------------------------------
+TRENDS_IDS = ["county-trends", "state-trends", "tract-trends"]
+TRENDS_LEVEL_OF = {"county-trends": "county", "state-trends": "state",
+                  "tract-trends": "tract"}
+GROUPS["trends"] = TRENDS_IDS
+GROUP_OF.update({cid: "trends" for cid in TRENDS_IDS})
+COLL_REL.update({cid: f"trends/{cid}" for cid in TRENDS_IDS})
+ALL_COLLECTIONS += TRENDS_IDS
+
+# Row counts, measured off the published files 2026-11-16 (one row per
+# geoid per period, so twice the geography's own feature count).
+FEATURES.update({"county-trends": 6470, "state-trends": 112,
+                 "tract-trends": 170368})
+
+# The 2015-2019 vintage starts the interval; 2020-2024 ends it. The STAC
+# temporal extent must cover both periods, not just the current one.
+TRENDS_INTERVAL = ["2015-01-01T00:00:00Z", "2024-12-31T23:59:59Z"]
+
+TRENDS_SHELLS_URL_2019 = (
+    "https://www2.census.gov/programs-surveys/acs/summary_file/2019/"
+    "prototype/ACS2019_Table_Shells.csv")
+TRENDS_5YR_DATA_2019 = ("https://www2.census.gov/programs-surveys/acs/"
+                        "summary_file/2019/prototype/5YRData/")
+TRENDS_GEOS_2019 = ("https://www2.census.gov/programs-surveys/acs/"
+                    "summary_file/2019/prototype/Geos20195YR.csv")
+COMPARING_ACS = cd.COMPARING_ACS_URL
+
 LEVEL_PLURAL = {
     "bg": "census block groups", "tract": "census tracts",
     "county": "counties and county equivalents",
@@ -292,6 +327,7 @@ GROUP_TITLES = {
     "places": LEVEL_TITLE["place"],
     "congressional-districts": LEVEL_TITLE["cd"],
     "reference": "Reference Geography",
+    "trends": "Trends, 2015–2024",
 }
 
 # --------------------------------------------------------------------------
@@ -357,6 +393,9 @@ TITLES.update({cid: f"{DHC_THEME_TITLE[DHC_THEME_OF[cid]]} — "
                    f"{DHC_LEVEL_TITLE[lvl]}"
               for cid, lvl in DHC_LEVEL_OF.items()})
 
+TITLES.update({cid: f"Trends, 2015–2024 — {LEVEL_TITLE[lvl]}"
+              for cid, lvl in TRENDS_LEVEL_OF.items()})
+
 
 _KW_REFERENCE = {
     "urban-areas": ["urban area", "urban cluster", "UAC20", "TIGER",
@@ -396,6 +435,13 @@ def keywords(cid: str) -> list[str]:
               "United States"]
              + _DHC_KW_THEME[DHC_THEME_OF[cid]]
              + _KW_LEVEL[DHC_LEVEL_OF[cid]])
+        return list(dict.fromkeys(kw))
+    if cid in TRENDS_IDS:
+        kw = (["census", "ACS", "American Community Survey", "demographics",
+              "United States", "margins of error", "trends", "time series",
+              "change over time", "2015-2019", "2020-2024",
+              "Connecticut", "geo_change", "t10t20"]
+             + _KW_LEVEL[TRENDS_LEVEL_OF[cid]])
         return list(dict.fromkeys(kw))
     kw = _KW_COMMON + _KW_THEME[theme_of(cid)] + _KW_LEVEL[LEVEL_OF[cid]]
     return list(dict.fromkeys(kw))
@@ -1206,6 +1252,148 @@ def _dhc_description(cid: str, n: int) -> str:
     return "\n\n".join(paras)
 
 
+# Measured 2026-11-16 off the published files: the geo_change distribution
+# at each level, as (identical, absorbed, subdivided, mixed, no_acs_data)
+# counts of GEOIDS (not rows -- each geoid is 2 rows, one per period).
+TRENDS_GEO_CHANGE_COUNTS = {
+    "state": (52, 0, 0, 0, 4),
+    "county": (3211, 0, 4, 7, 13),
+    "tract": (58409, 403, 23068, 3075, 229),
+}
+
+TRENDS_LEAD = (
+    "A dozen headline indicators — population, median household income, "
+    "per capita income, the poverty rate, the unemployment rate, median "
+    "age, the bachelor's-degree-or-higher share, the share of people of "
+    "color, households, the owner-occupied share, median home value and "
+    "median gross rent — carried across two non-overlapping ACS 5-year "
+    "releases: **2015-2019** (`acsdt5y2019`, the Census Bureau's "
+    f"table-based [prototype summary file]({TRENDS_5YR_DATA_2019}), "
+    "validated against the [Census API](https://api.census.gov/data/2019/"
+    "acs/acs5) before this collection was built — 29 requests, ~4.66 "
+    "million compared values across every summary level this catalog "
+    "uses including block groups, 0 mismatches) and **2020-2024** "
+    f"(`acsdt5y2024`, the same release every other ACS collection here "
+    f"reads). **Long form**: one row per `geoid` per `period`, not one "
+    f"row per geoid — a consumer who wants \"both years side by side\" "
+    f"pivots on `period`, and the `chg_*` columns already carry the "
+    f"2020-2024-minus-2015-2019 difference on the 2020-2024 row so a map "
+    f"style can classify on it without a join."
+)
+
+TRENDS_OVERLAP_NOTE = (
+    "**The two periods do not overlap, which is what makes them "
+    "comparable.** 2015-2019 and 2020-2024 share no sample year, unlike "
+    "two 5-year releases one year apart (2019-2023 and 2020-2024, say), "
+    "which the Census Bureau's own guidance on "
+    f"[Comparing ACS Data]({COMPARING_ACS}) says not to compare because "
+    "their overlapping sample years make a measured difference partly an "
+    "artifact of shared data. This collection's two periods are five "
+    "years apart with no shared sample year, so a difference here is a "
+    "measured change, not a sampling artifact of the comparison itself — "
+    "though it is still a difference of two margin-of-error estimates, "
+    "see `chg_*_moe` and the known issues before calling a small "
+    "difference real."
+)
+
+
+def _trends_geo_change_para(cid: str) -> str:
+    level = TRENDS_LEVEL_OF[cid]
+    ident, absorbed, subdiv, mixed, gap = TRENDS_GEO_CHANGE_COUNTS[level]
+    total = ident + absorbed + subdiv + mixed + gap
+    pct = lambda n: f"{100 * n / total:.1f}%"
+    parts = [f"`identical` ({pct(ident)}, {ident:,} of {total:,})"]
+    if absorbed:
+        parts.append(f"`absorbed` ({pct(absorbed)}, {absorbed:,})")
+    if subdiv:
+        parts.append(f"`subdivided` ({pct(subdiv)}, {subdiv:,})")
+    if mixed:
+        parts.append(f"`mixed` ({pct(mixed)}, {mixed:,})")
+    parts.append(f"`no_acs_data` ({pct(gap)}, {gap:,})")
+    measured = "; ".join(parts)
+    return (
+        f"**`geo_change` is measured per geoid, not assumed** — see the "
+        f"column's own description for the full definition of each "
+        f"value. At this geography: {measured}. Never apportioned: the "
+        f"period a geoid's lineage does not support a legitimate figure "
+        f"for carries NULL on the affected columns rather than a modelled "
+        f"or carried-over number dressed up as a measurement."
+    )
+
+
+_TRENDS_SAME_GEO_GROUP = {"county-trends": "counties", "state-trends": "states",
+                         "tract-trends": "tracts"}
+
+
+def _trends_siblings_para(cid: str) -> str:
+    others = [f"[{TITLES[c]}](../{c}/collection.json)"
+             for c in TRENDS_IDS if c != cid]
+    joined = ", ".join(others[:-1]) + f" and {others[-1]}"
+    same_geo = _TRENDS_SAME_GEO_GROUP[cid]
+    return (
+        f"Three collections, one per geography: {joined}. All three carry "
+        f"the same dozen indicators and the same `geo_change` taxonomy; "
+        f"they do not join to each other on `geoid` (a tract is not a "
+        f"county). This group sits beside the ACS themed chunks at the "
+        f"same geographies, not inside them — a different shape (long "
+        f"form, two periods, `geo_change`) from every themed collection "
+        f"this catalog otherwise publishes, and it carries only 12 of "
+        f"the catalog's ~135 indicators rather than a theme's full set. "
+        f"For every other 2020-2024 indicator at this geography, or for "
+        f"a 2020-2024-only question with no time dimension, see "
+        f"[{GROUP_PHRASE[same_geo]}](../../{same_geo}/catalog.json).")
+
+
+def _trends_tiles_para(cid: str) -> str:
+    level = TRENDS_LEVEL_OF[cid]
+    if level == "tract":
+        p = PYRAMID["tract"]
+        return (
+            f"The PMTiles archive is a census-geography pyramid built "
+            f"with [tylertoo]({TYLERTOO}): {p['bands']}, exactly as the "
+            f"tract ACS collections tile. A pyramid, not real tract "
+            f"polygons at every zoom, because this collection holds two "
+            f"periods' worth of 85,184 tracts and thinning that down to "
+            f"a national zoom would show a biased subset rather than "
+            f"less data. {p['not'].capitalize()}. The tiles carry the "
+            f"`2020-2024` period's features only (one geometry per "
+            f"geoid, with its `chg_*` columns already on it) — tiling "
+            f"both periods' identical geometries twice would double the "
+            f"archive for no visual gain, since a map renders one period "
+            f"at a time. `*_moe` columns are excluded; `chg_*_moe` and "
+            f"`*_cv`-equivalent reliability columns are not — there are "
+            f"none on this collection, so check `chg_*_moe` before "
+            f"styling confidently on a small difference. Statistics come "
+            f"from the GeoParquet, which keeps both periods.")
+    return (
+        "The PMTiles archive carries the same columns as the GeoParquet "
+        "minus the `*_moe` columns, at every zoom, for the `2020-2024` "
+        "period's features only (one geometry per geoid, with its "
+        "`chg_*` columns already on it — tiling both periods' identical "
+        "geometries twice would double the archive for no visual gain). "
+        f"Built with [tylertoo]({TYLERTOO}). Statistics come from the "
+        "GeoParquet, which keeps both periods.")
+
+
+def _trends_description(cid: str, n: int) -> str:
+    level = TRENDS_LEVEL_OF[cid]
+    noun = LEVEL_PLURAL[level]
+    paras = [
+        f"{TRENDS_LEAD}\n\n"
+        f"All **{n:,}** rows at this geography ({n // 2:,} {noun} × 2 "
+        f"periods), in the United States, Puerto Rico and the island "
+        f"areas.",
+        TRENDS_OVERLAP_NOTE,
+        _trends_geo_change_para(cid),
+        STATS_PARA,
+        _geom_para(level),
+        _trends_siblings_para(cid),
+        _trends_tiles_para(cid),
+        _mirror_para(cid),
+    ]
+    return "\n\n".join(p for p in paras if p)
+
+
 def description(cid: str, features: int | None = None) -> str:
     """Full STAC description for a collection, as markdown."""
     n = features if features is not None else FEATURES[cid]
@@ -1215,6 +1403,8 @@ def description(cid: str, features: int | None = None) -> str:
         return _reference_description(cid, n)
     if cid in DHC_IDS:
         return _dhc_description(cid, n)
+    if cid in TRENDS_IDS:
+        return _trends_description(cid, n)
     level = LEVEL_OF[cid]
 
     noun = LEVEL_PLURAL[level]
@@ -1604,6 +1794,24 @@ GROUP_DESCRIPTIONS = {
         "1:1 join across this group the way the ACS geographies join "
         "across their themed collections — each collection here stands "
         "on its own."),
+    "trends": (
+        "A dozen headline indicators across two non-overlapping ACS "
+        "5-year releases, 2015-2019 and 2020-2024, long form — one row "
+        "per `geoid` per `period`. Three collections, one per geography: "
+        "[county-trends](./county-trends/collection.json) (3,235 "
+        "counties), [state-trends](./state-trends/collection.json) (56 "
+        "states) and [tract-trends](./tract-trends/collection.json) "
+        "(85,184 tracts). Every row carries `geo_change` — `identical`, "
+        "`absorbed`, `subdivided`, `mixed` or `no_acs_data` — measured "
+        "per geoid against the real 2010-to-2020 tract crosswalk and the "
+        "2022 Connecticut county realignment, never assumed, and the "
+        "period a geoid's lineage cannot legitimately support carries "
+        "NULL rather than an apportioned number. The `chg_*` columns "
+        "carry the 2020-2024-minus-2015-2019 difference, already "
+        "computed, on the 2020-2024 row. These three collections carry "
+        "only 12 of the catalog's ~135 indicators; for everything else, "
+        "or for a 2020-2024-only question, see the counties, states and "
+        "tracts groups."),
 }
 
 # --------------------------------------------------------------------------
@@ -1630,6 +1838,9 @@ def tables_for(cid: str) -> list[str]:
         return []
     if cid in DHC_IDS:
         return DHC_TABLES[DHC_THEME_OF[cid]]
+    if cid in TRENDS_IDS:
+        import build_trends as bt
+        return sorted(bt.TABLE_LINES)
     coll = next(c for c in specs.COLLECTIONS if c.id == cid)
     return sorted({s.table for s in specs.CONTEXT_SPEC + list(coll.spec)})
 
@@ -1649,6 +1860,25 @@ def _dat_asset(table: str) -> tuple[str, dict]:
             f"{universe}. Served by census.gov, not by this mirror; see "
             f"{cd.acs_table(table)} for the same table rendered on "
             f"data.census.gov."),
+        "roles": ["source"],
+    }
+
+
+def _dat_asset_2019(table: str) -> tuple[str, dict]:
+    title, universe = cd.TABLE_UNIVERSE[table]
+    key = f"source-2019-{table.lower()}"
+    return key, {
+        "href": f"{TRENDS_5YR_DATA_2019}acsdt5y2019-{table.lower()}.dat",
+        "type": "text/plain",
+        "title": f"ACS 2015–2019 prototype detailed table {table} — {title}",
+        "description": (
+            f"The 2015-2019 upstream file this collection's {table} "
+            f"columns were read from, from the Census Bureau's "
+            f"table-based prototype directory — the same layout as the "
+            f"2020-2024 production file (`GEO_ID|{table}_E001|"
+            f"{table}_M001|...`), validated against the Census API before "
+            f"this collection was built (see processing_notes). Universe: "
+            f"{universe}. Served by census.gov, not by this mirror."),
         "roles": ["source"],
     }
 
@@ -1816,6 +2046,118 @@ def _dhc_source_assets(cid: str) -> dict:
     return out
 
 
+def _trends_source_assets(cid: str) -> dict:
+    out: dict[str, dict] = {}
+    for table in tables_for(cid):
+        key, asset = _dat_asset(table)
+        out[key] = asset
+        key19, asset19 = _dat_asset_2019(table)
+        out[key19] = asset19
+    out["source-table-shells-2024"] = {
+        "href": cd.SHELLS_URL,
+        "type": "text/plain",
+        "title": "ACS 2020–2024 5-year table shells",
+        "description": (
+            "Every 2020-2024 line number this collection reads is pinned "
+            "against this file. Served by census.gov."),
+        "roles": ["source"],
+    }
+    out["source-table-shells-2019"] = {
+        "href": TRENDS_SHELLS_URL_2019,
+        "type": "text/csv",
+        "title": "ACS 2015–2019 prototype table shells",
+        "description": (
+            "Re-pinned against this file before the 2015-2019 side of "
+            "this collection was built: all 55 shell pins and all 120 "
+            "(table, line) pairs this catalog's specs use resolve to "
+            "the SAME line with the SAME concept as the 2020-2024 "
+            "shells. A different layout from the 2024 file (comma-"
+            "delimited, no Indent column, the label column called "
+            "\"Stub\"), handled by `tools/specs.py`'s `shells()`. "
+            "Served by census.gov."),
+        "roles": ["source"],
+    }
+    level = TRENDS_LEVEL_OF[cid]
+    year = cd.CB_VINTAGE[level]
+    out["source-cartographic-boundaries"] = {
+        "href": CB_LEVEL_URL[level],
+        "type": "application/zip",
+        "title": f"{year} cartographic boundary file — "
+                 f"{LEVEL_PLURAL[level]} (1:500,000, national)",
+        "description": (
+            "The geometry both periods' rows join to — the current "
+            "(2020-2024) boundary, used for both periods: a 2015-2019 "
+            "predecessor whose geoid no longer exists under this "
+            "boundary (Connecticut's 8 old counties, Alaska's "
+            "Valdez-Cordova Census Area, every pre-2020-vintage tract "
+            "that split) is not published as a row of its own — see "
+            "`geo_change`. Served by census.gov."),
+        "roles": ["source"],
+    }
+    if level == "tract":
+        out["source-t10t20-crosswalk"] = {
+            "href": f"{PUBLIC_BASE}/reference/crosswalks/t10t20-tract.parquet",
+            "type": "application/vnd.apache.parquet",
+            "title": "2010-to-2020 tract relationship (this catalog's own "
+                     "reference/crosswalks collection)",
+            "description": (
+                "The block-level 2010-tract-to-2020-tract relationship "
+                "this collection's `geo_change` classification is "
+                "measured from, population-weighted by `catalog/blocks`' "
+                "2020 block population apportioned by each block pair's "
+                "land-area overlap (`arealand_int`). A collection this "
+                "catalog already publishes, not re-fetched."),
+            "roles": ["source"],
+        }
+        out["source-blocks-population"] = {
+            "href": f"{PUBLIC_BASE}/blocks/state_fips=*/*.parquet",
+            "type": "application/vnd.apache.parquet",
+            "title": "2020 Census block population (this catalog's own "
+                     "blocks collection)",
+            "description": (
+                "The population weights behind the t10t20 crosswalk's "
+                "apportionment, and behind the exact Connecticut "
+                "old-county-to-new-planning-region county-level mapping "
+                "(matched on the preserved 6-digit tract number, same "
+                "as `docs/runbook.md`'s Connecticut fix elsewhere in "
+                "this catalog)."),
+            "roles": ["source"],
+        }
+    out["doc-comparing-acs"] = {
+        "href": COMPARING_ACS,
+        "type": "text/html",
+        "title": "Comparing ACS Data — Census Bureau guidance",
+        "description": (
+            "The Census Bureau's own guidance on which ACS period pairs "
+            "can be compared: non-overlapping 5-year periods (this "
+            "collection's 2015-2019 and 2020-2024) can be; overlapping "
+            "ones cannot, because shared sample years make a measured "
+            "difference partly an artifact of the comparison itself."),
+        "roles": ["metadata"],
+    }
+    out["doc-acs-handbook"] = {
+        "href": ACS_HANDBOOK, "type": "text/html",
+        "title": "Understanding and Using American Community Survey Data "
+                 "— Census Bureau handbooks",
+        "description": (
+            "The Bureau's own guidance on what ACS estimates can and "
+            "cannot support, including comparing estimates across "
+            "vintages."),
+        "roles": ["metadata"],
+    }
+    out["doc-acs-accuracy"] = {
+        "href": ACS_ACCURACY, "type": "application/pdf",
+        "title": "ACS Accuracy of the Data (2024, multiyear estimates)",
+        "description": (
+            "The source of the quadrature formula `chg_*_moe` applies to "
+            "the difference of two periods' margins, and of every other "
+            "margin-of-error formula this build applies."),
+        "roles": ["metadata"],
+    }
+    out["doc-geo-glossary"] = _glossary_asset()
+    return out
+
+
 def source_assets(cid: str) -> dict:
     """Upstream `source` assets plus `metadata` documentation assets.
 
@@ -1828,6 +2170,8 @@ def source_assets(cid: str) -> dict:
         return _reference_source_assets(cid)
     if cid in DHC_IDS:
         return _dhc_source_assets(cid)
+    if cid in TRENDS_IDS:
+        return _trends_source_assets(cid)
     level = LEVEL_OF[cid]
     if cid == "blocks":
         out["source-pl94171"] = {
@@ -2184,11 +2528,102 @@ def _dhc_processing_notes(cid: str) -> str:
     ])
 
 
+def _trends_processing_notes(cid: str) -> str:
+    level = TRENDS_LEVEL_OF[cid]
+    tables = ", ".join(tables_for(cid))
+    common = [
+        f"Built 2026-11-16 from `tools/build_trends.py`, reading "
+        f"{tables} from both the ACS 2015-2019 prototype summary file "
+        f"({TRENDS_5YR_DATA_2019}) and the 2020-2024 production summary "
+        f"file ({ACS_5YR_DATA}), both over plain HTTPS, no API key for "
+        f"the bulk files.",
+
+        "**Re-pinned, not assumed.** Every line number this catalog's "
+        "`tools/specs.py` uses was re-checked against the 2019 "
+        "prototype's own table shells before any 2019 value was read: "
+        "all 55 shell pins and all 120 (table, line) pairs resolve to "
+        "the SAME line with the SAME concept in both vintages. Two "
+        "label changes only, neither a line move: B05002 line 13 reads "
+        "\"Foreign born:\" in 2019 versus \"Foreign-born:\" in 2024 "
+        "(a hyphen, normalized away rather than hardcoded), and B08301 "
+        "line 10 drops a parenthetical in 2024 that the pin's substring "
+        "match already tolerated.",
+
+        "**Proven before anything depended on it.** The 2019 source is "
+        "labelled a prototype, so it was validated against the Census "
+        "API (`api.census.gov/data/2019/acs/acs5`) before this "
+        "collection was built: 29 requests, stratified across state, "
+        "county, 10 sampled states' full tract and block-group "
+        "coverage (including Connecticut, Alaska and Puerto Rico), "
+        "place, congressional district and a full national ZCTA pull — "
+        "~4.66 million raw cell values compared, 0 mismatches.",
+
+        "`geo_change` is measured the same way at every geography: "
+        "population-weighted correspondence between the 2015-2019-"
+        "vintage predecessor geography and the 2020-2024-vintage "
+        "geography this catalog otherwise publishes, classified "
+        "`identical` / `absorbed` / `subdivided` / `mixed` at a 99% "
+        "population-share threshold each way (see the `geo_change` "
+        "column description for the full rule). At county and state "
+        "this needed real crosswalking in exactly two places, both "
+        "measured by diffing the full set of county geoids each "
+        "vintage's B01003 file carries: Connecticut's 8 old counties "
+        "(2015-2019) versus 9 planning regions (2020-2024, effective "
+        "2022, mapped on the preserved 6-digit tract number against "
+        "`catalog/blocks`' 2020 population — exact, not estimated, "
+        "since whole tracts move together at this level) and Alaska's "
+        "Valdez-Cordova Census Area splitting into Chugach and Copper "
+        "River (population-weighted, via the tract crosswalk below, "
+        "since this is a genuine 2010-to-2020 boundary change the "
+        "Census Bureau's own TIGER vintages already carry).",
+    ]
+    if level == "tract":
+        common.append(
+            "At tract level the crosswalk is the real one: 2010-vintage "
+            "tracts (2015-2019's geography) do not nest inside "
+            "2020-vintage tracts (2020-2024's geography, and every "
+            "other tract collection in this catalog), so every 2015-2019 "
+            "value is read through "
+            "`catalog/reference/crosswalks/t10t20-tract.parquet`, a "
+            "2010-block-to-2020-block relationship. Each 2020 block's "
+            "actual 2020 population (`catalog/blocks`) is apportioned "
+            "across its 2010-block predecessors by land-area share "
+            "(`arealand_int`), summed to a (2010 tract, 2020 tract, "
+            "weight) table, and classified at a 99% threshold both "
+            "ways. `absorbed` sums the predecessors' raw census cells "
+            "(not population-weighted — a legitimate whole-tract "
+            "aggregation) and recomputes rates from the summed "
+            "numerator and denominator; `identical`/`subdivided` carry "
+            "the single dominant predecessor's own computed values. "
+            "Connecticut tract geoids need one more step: both sides of "
+            "the crosswalk predate the 2022 planning-region switch, so "
+            "a classified 2020-side geoid is relabeled onto its current "
+            "(2024 cartographic file) tract geoid by the same preserved-"
+            "tract-number match the county-level fix uses, before the "
+            "final output is written.")
+    common.append(
+        f"`chg_<indicator>` is the 2020-2024 value minus the 2015-2019 "
+        f"value, computed once both periods' rows exist and carried on "
+        f"the 2020-2024 row only; `chg_<indicator>_moe` is the "
+        f"quadrature sum of the two periods' margins (ACS Accuracy of "
+        f"the Data's formula for the margin of a difference of two "
+        f"independent estimates).")
+    common.append(
+        f"Geometry is the same {cd.CB_VINTAGE[level]} cartographic "
+        f"boundary file ({Path(CB_LEVEL_URL[level]).name}) the "
+        f"2020-2024 themed ACS collections at this geography join to, "
+        f"reused rather than re-fetched, for both periods' rows.")
+    common.append(PROCESSING_COMMON)
+    return "\n\n".join(common)
+
+
 def processing_notes(cid: str) -> str:
     if cid in REFERENCE_IDS:
         return _reference_processing_notes(cid)
     if cid in DHC_IDS:
         return _dhc_processing_notes(cid)
+    if cid in TRENDS_IDS:
+        return _trends_processing_notes(cid)
     if cid == "blocks":
         return "\n\n".join([
             f"Built {EXTRACTED} from two sets of Census Bureau files, "
@@ -2546,11 +2981,133 @@ def _dhc_known_issues(cid: str) -> str:
     return "\n\n".join(items)
 
 
+def _trends_known_issues(cid: str) -> str:
+    level = TRENDS_LEVEL_OF[cid]
+    ident, absorbed, subdiv, mixed, gap = TRENDS_GEO_CHANGE_COUNTS[level]
+    total = ident + absorbed + subdiv + mixed + gap
+    items = [
+        "**Never apportioned.** Where `geo_change` says a period has no "
+        "legitimate figure for a geoid (`mixed` always; `subdivided` "
+        "for `population`/`households`; `absorbed` for the five "
+        "medians; `no_acs_data` always), that cell is NULL. No value "
+        "here was ever modelled, interpolated or carried over from a "
+        "different geography and published as if it were a direct "
+        "measurement.",
+
+        f"**A median cannot be derived from medians.** `absorbed` rows "
+        f"(several 2015-2019 predecessors combine into one 2020-2024 "
+        f"geoid) NULL `median_hh_income`, `per_capita_income`, "
+        f"`median_age`, `median_home_value` and `median_gross_rent` for "
+        f"2015-2019 for exactly this reason — summing the predecessors' "
+        f"raw census cells and recomputing is legitimate for counts "
+        f"and rates, and this build does it, but there is no published "
+        f"2015-2019 median for a geography the Census Bureau never "
+        f"tabulated directly, so inventing one by averaging or "
+        f"reweighting predecessor medians would be a model wearing a "
+        f"measurement's clothes.",
+
+        f"**`subdivided` carries an explicit assumption.** A "
+        f"`subdivided` geoid's rates and medians are its single "
+        f"dominant 2015-2019 predecessor's own published values, "
+        f"copied over under a part-resembles-whole assumption — the "
+        f"predecessor's overall rate or median is assumed to hold for "
+        f"the fragment too, which is not measured and can be wrong for "
+        f"a fragment that differs from its parent's average. "
+        f"`population` and `households` are NULL there instead of "
+        f"carrying the whole predecessor's count, which would overstate "
+        f"a fragment.",
+
+        f"**Measured `geo_change` distribution at this geography:** "
+        f"`identical` {ident:,} ({100*ident/total:.1f}%)"
+        + (f", `absorbed` {absorbed:,} ({100*absorbed/total:.1f}%)"
+           if absorbed else "")
+        + (f", `subdivided` {subdiv:,} ({100*subdiv/total:.1f}%)"
+           if subdiv else "")
+        + (f", `mixed` {mixed:,} ({100*mixed/total:.1f}%)" if mixed else "")
+        + f", `no_acs_data` {gap:,} ({100*gap/total:.1f}%) of {total:,} "
+          f"geoids.",
+
+        "**The four dollar medians are not on a common dollar basis "
+        "across the two periods, and `chg_median_hh_income`, "
+        "`chg_per_capita_income`, `chg_median_home_value` and "
+        "`chg_median_gross_rent` inherit that.** Each ACS release "
+        "reports its dollar medians in ITS OWN vintage's inflation-"
+        "adjusted dollars — `B19013` is titled \"...in 2019 inflation-"
+        "adjusted dollars\" in the 2015-2019 release and \"...in 2024 "
+        "inflation-adjusted dollars\" in the 2020-2024 release, exactly "
+        "as published, not re-based to a common dollar-year by this "
+        "build. A positive `chg_median_hh_income` mixes real change "
+        "with five years of inflation, and it shows: measured at state "
+        "level, 52 of 52 states show a nominal increase and 0 show a "
+        "decrease, which is implausible as a real-income statement over "
+        "five years for every single state and is this build's own "
+        "evidence that the comparison is partly a dollar-basis effect, "
+        "not a finding that incomes rose everywhere. This is why the "
+        "collection's diverging style classifies on "
+        "`chg_pct_below_poverty` (a percentage-point difference, immune "
+        "to this) rather than on a dollar column. Deflate "
+        "`median_hh_income`/`per_capita_income`/`median_home_value`/"
+        "`median_gross_rent` to a common dollar-year yourself (e.g. CPI-"
+        "U-RS) before treating any `chg_<dollar column>` as a real-"
+        "dollar change.",
+    ]
+    if level == "county":
+        items.append(
+            "Connecticut and Alaska are the only two county-level "
+            "geography changes this catalog measured between the two "
+            "vintages (diffed off the full set of county geoids each "
+            "vintage's B01003 file carries — nothing else moved). "
+            "Connecticut's 9 planning regions split 2 ways: Greater "
+            "Bridgeport (`09120`) and South Central Connecticut "
+            "(`09170`) are `subdivided` (each a clean fragment of "
+            "old Fairfield and New Haven counties respectively); the "
+            "other 7 are `mixed` — Connecticut's planning regions were "
+            "not drawn along the old county lines, so most of them "
+            "blend population from more than one old county with no "
+            "single county contributing 99% of either side. Alaska's "
+            "Chugach (`02063`) and Copper River (`02066`) Census Areas "
+            "are both `subdivided` fragments of the old Valdez-Cordova "
+            "Census Area.")
+    if level == "tract":
+        items.append(
+            "Connecticut's tract **numbers** do not change in 2022 — "
+            "only the county prefix does — so a Connecticut tract's "
+            "`geo_change` category is measured the same way as any "
+            "other state's; only its published `geoid` gets relabeled "
+            "onto the current planning-region prefix after "
+            "classification. A tract with no measured 2010 lineage at "
+            "all (a handful of water-only or newly-platted 2020 tracts "
+            "with zero population weight in the crosswalk) is "
+            "classified `mixed` rather than guessed at.")
+        items.append(
+            "This is the one geography in the catalog where `mixed` is "
+            "a meaningful share (3.6%) rather than a near-zero edge "
+            "case: a fifth of 2020 tracts overlap more than one 2010 "
+            "predecessor at all (absorbed + subdivided + mixed ≈ 31%), "
+            "and most of those overlaps are clean enough to carry a "
+            "legitimate figure forward. Filter on `geo_change` before "
+            "computing a national or state-level 2015-2019 statistic "
+            "from this file; the measured distribution above is the "
+            "honest accounting of how much of this tier is a real "
+            "measurement versus how much had to go NULL.")
+    items.append(TRENDS_OVERLAP_NOTE)
+    items.append(
+        "This group carries 12 of the catalog's ~135 ACS indicators. "
+        "For every other indicator, or for a 2020-2024-only question "
+        "with no time dimension, use the current-vintage themed "
+        "collections at this geography instead — they are not a finer "
+        "or coarser version of these numbers, they are the same survey "
+        "at the same geography with the rest of the columns.")
+    return "\n\n".join(items)
+
+
 def known_issues(cid: str) -> str:
     if cid in REFERENCE_IDS:
         return _reference_known_issues(cid)
     if cid in DHC_IDS:
         return _dhc_known_issues(cid)
+    if cid in TRENDS_IDS:
+        return _trends_known_issues(cid)
     if cid == "blocks":
         return "\n\n".join([
             "28.97% of blocks have `pop_total = 0` (measured), so "
@@ -2862,6 +3419,12 @@ def source_url(cid: str) -> str:
         return REFERENCE_SOURCE_URL[cid]
     if cid in DHC_IDS:
         return DHC_FTP_DIR
+    if cid in TRENDS_IDS:
+        # The current (2020-2024) release, for the single-URL field every
+        # other collection's metadata.yaml carries; the 2015-2019
+        # prototype directory is the collection's `source-2019-*` assets
+        # and processing_notes, not this field.
+        return ACS_5YR_DATA
     return PL_DIR if cid == "blocks" else ACS_5YR_DATA
 
 

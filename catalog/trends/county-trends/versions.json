@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-16T08:57:57.387717Z",
+      "breaking": false,
+      "assets": {
+        "county-trends.parquet": {
+          "sha256": "2e657aa1105761d13b1c5a2d5d125330a173e07d0a37906dfe3266b635d64a95",
+          "size_bytes": 13243744,
+          "href": "trends/county-trends/county-trends.parquet",
+          "source_mtime": 1794818930.7949646,
+          "mtime": 1794818930.7949646,
+          "feature_count": 6470,
+          "schema_fingerprint": "e461aee940bd270e"
+        },
+        "county-trends.thumb.jpg": {
+          "sha256": "3e74053dd5446246fda3462c7495bb8a7919d906c24811e1a4b67a416c90be7a",
+          "size_bytes": 2835,
+          "href": "trends/county-trends/county-trends.thumb.jpg",
+          "mtime": 1794819479.6093407
+        }
+      },
+      "changes": [
+        "county-trends.parquet",
+        "county-trends.thumb.jpg"
+      ]
+    }
+  ]
+}

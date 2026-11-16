@@ -1,0 +1,32 @@
+{
+  "spec_version": "1.0.0",
+  "current_version": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "created": "2026-11-16T08:57:57.419558Z",
+      "breaking": false,
+      "assets": {
+        "tract-trends.parquet": {
+          "sha256": "5c0f9501f365ad53fe4dc051441376ce550932b2976fdb28c809fd6ff2be9fa9",
+          "size_bytes": 68082800,
+          "href": "trends/tract-trends/tract-trends.parquet",
+          "source_mtime": 1794818962.4698014,
+          "mtime": 1794818962.4698014,
+          "feature_count": 170368,
+          "schema_fingerprint": "e461aee940bd270e"
+        },
+        "tract-trends.thumb.jpg": {
+          "sha256": "9b9e920d42945e29c9e88925bf015ecc7973107615065cdbef730439ac859e40",
+          "size_bytes": 2976,
+          "href": "trends/tract-trends/tract-trends.thumb.jpg",
+          "mtime": 1794819485.4617424
+        }
+      },
+      "changes": [
+        "tract-trends.parquet",
+        "tract-trends.thumb.jpg"
+      ]
+    }
+  ]
+}
