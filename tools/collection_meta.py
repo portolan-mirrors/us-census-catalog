@@ -2110,8 +2110,10 @@ def _trends_source_assets(cid: str) -> dict:
             "roles": ["source"],
         }
         out["source-blocks-population"] = {
-            "href": f"{PUBLIC_BASE}/blocks/state_fips=*/*.parquet",
-            "type": "application/vnd.apache.parquet",
+            # The collection document, not a data glob: an https glob does
+            # not expand, and v0.3 keeps globs out of asset hrefs.
+            "href": f"{PUBLIC_BASE}/blocks/collection.json",
+            "type": "application/json",
             "title": "2020 Census block population (this catalog's own "
                      "blocks collection)",
             "description": (

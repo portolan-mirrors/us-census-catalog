@@ -78,11 +78,13 @@ CHECKSUM_CACHE = ROOT / "staging" / "checksums.json"
 SOURCE_SIZES = ROOT / "staging" / "source_sizes.json"
 
 PORTOLAN_SCHEMA_DEFAULT = (
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json")
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json")
 FILE_EXT = "https://stac-extensions.github.io/file/v2.1.0/schema.json"
 TABLE_EXT = "https://stac-extensions.github.io/table/v1.2.0/schema.json"
 THEMES_EXT = "https://stac-extensions.github.io/themes/v1.0.0/schema.json"
 WML_EXT = "https://stac-extensions.github.io/web-map-links/v1.3.0/schema.json"
+PARTITION_EXT = ("https://schemas.portolan-sdi.org/incubating/partition/"
+                 "v1.0.0/schema.json")
 
 PARQUET_TYPE = "application/vnd.apache.parquet"
 PMTILES_TYPE = "application/vnd.pmtiles"
@@ -237,6 +239,15 @@ def ensure_link(links: list, rel: str, href: str, type_: str | None = None,
 def root_title() -> str:
     return json.loads((CATALOG / "catalog.json").read_text()).get(
         "title", "US Census Demographics — Cloud-Native Mirror")
+
+
+# The AWS bucket that serves this catalog's bytes, for the partition glob.
+# PORTO-FMT-064 wants a glob clients can list anonymously. The repository
+# publishes through the data.source.coop gateway (catalog.publish.yaml), but
+# the gateway's s3 names are not listable by consumers; the real bucket is.
+# Verified 2026-11-20: `aws s3 ls --no-sign-request` lists this prefix.
+PUBLIC_S3_BASE = ("s3://us-west-2.opendata.source.coop/"
+                  "portolan-mirrors/us-census-catalog")
 
 
 def portolan_schema() -> str:
@@ -401,10 +412,14 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
 
     has_pmtiles = (data_dir(cid) / f"{cid}.pmtiles").exists()
     dpre = data_prefix(cid)
-    ext = set(coll.get("stac_extensions", []))
+    ext = {e for e in coll.get("stac_extensions", [])
+           if "schemas.portolan-sdi.org/portolan/" not in e}
     ext.update({portolan_schema(), FILE_EXT, TABLE_EXT, THEMES_EXT})
     if has_pmtiles:
         ext.add(WML_EXT)
+    if cid == "blocks":
+        # PTL-PRT-001: the partition:* fields need their extension declared.
+        ext.add(PARTITION_EXT)
     coll["stac_extensions"] = sorted(ext)
 
     # Program as a theme, so a browser can group by survey rather than by
@@ -510,7 +525,16 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
         if "geoparquet:feature_count" in coll:
             coll["geoparquet:feature_count"] = n
     coll["table:columns"] = table_columns(cid, coll.get("table:columns", []))
-    coll.setdefault("table:primary_geometry", "geometry")
+    if cid == "crosswalks":
+        # The 29 relationship tables carry no geometry column (the
+        # collection description says so, and the parquet schemas agree).
+        # Declaring a primary geometry made validators treat the collection
+        # as geospatial and demand a thumbnail (PTL-VIZ-001). The bbox
+        # stays: a tabular collection still states the region it covers.
+        coll.pop("table:primary_geometry", None)
+        coll.pop("geoparquet:feature_count", None)
+    else:
+        coll.setdefault("table:primary_geometry", "geometry")
 
     coll["providers"] = [PRODUCER, HOST]
     # PTL-PRO-003: a mirror records its last sync date.
@@ -600,17 +624,56 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
         assets.move_to_end(cid, last=False) if hasattr(assets, "move_to_end") \
             else None
 
+    if cid == "blocks":
+        # v0.3: a data asset links exactly one file (PTL-AST-012), and a
+        # partition glob is an absolute bucket URL a client can list
+        # (PTL-PRT-002). The 52 per-state items carry the single-file data
+        # assets, so the collection keeps only the glob.
+        assets.pop("partitioned_data", None)
+        coll["partition:glob"] = (
+            f"{PUBLIC_S3_BASE}/blocks/state_fips=*/*.parquet")
+
     for key, asset in assets.items():
         href = asset.get("href", "")
-        if href.endswith(".parquet") or href.endswith("*.parquet"):
+        if key == "geoparquet-items":
+            asset["title"] = f"{meta.TITLES[cid]} STAC items (GeoParquet)"
+            asset["description"] = (
+                "The collection's items as one STAC-GeoParquet table, "
+                "one row per partition item.")
+        elif href.endswith(".parquet") or href.endswith("*.parquet"):
             asset["type"] = PARQUET_TYPE
             asset.setdefault("roles", ["data"])
-            asset["title"] = (f"{meta.TITLES[cid]} (GeoParquet, "
-                              f"{'52 state partitions' if cid == 'blocks' else 'national'})")
+            if cid == "crosswalks":
+                # 29 relationship tables ship as sibling assets. Title each
+                # by the Bureau's own rel2020 file name instead of repeating
+                # the collection title 29 times. The name is not decoded:
+                # what each geography pair means is in the collection
+                # description and the rel2020 listing it links.
+                asset["title"] = f"Relationship table {key} (rel2020)"
+                asset["description"] = (
+                    "One 2020 Census relationship file, converted to "
+                    "parquet unchanged. The table joins the two geography "
+                    "vintages named in the file name; see the collection "
+                    "description and the rel2020 source listing.")
+            else:
+                asset["title"] = (f"{meta.TITLES[cid]} (GeoParquet, "
+                                  f"{'52 state partitions' if cid == 'blocks' else 'national'})")
+                asset["description"] = (
+                    f"{'Hive-partitioned ' if cid == 'blocks' else ''}"
+                    f"GeoParquet with the collection's features and "
+                    f"attributes. Every column carries a description in "
+                    f"this collection's table:columns.")
         elif href.endswith(".pmtiles"):
             asset["type"] = PMTILES_TYPE
-            asset.setdefault("roles", ["visual"])
+            # PORTO-FMT-062 (v0.3): PMTiles is the visual layer, never the
+            # data role. `portolan add` wrote roles: ["data"] and a
+            # setdefault kept it, which is what PTL-AST-009 flags.
+            asset["roles"] = ["visual"]
             asset["title"] = f"{meta.TITLES[cid]} (PMTiles)"
+            asset["description"] = (
+                f"Vector tiles rendered from the collection's GeoParquet "
+                f"for map display, layer '{cid}'. The collection "
+                f"description states what each zoom band carries.")
             asset["pmtiles:layers"] = [cid]
     if has_pmtiles and not any(
             a.get("href", "").endswith(".pmtiles") for a in assets.values()):
@@ -626,7 +689,9 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
         assets["thumbnail"] = {
             "href": "./thumbnail.png", "type": "image/png",
             "roles": ["thumbnail"],
-            "title": f"{meta.TITLES[cid]} rendered with the default style"}
+            "title": f"{meta.TITLES[cid]} rendered with the default style",
+            "description": ("A rendered card of the collection's own data, "
+                            "drawn with the default style.")}
 
     styles = style_assets(coll_dir)
     assets.update(styles)
@@ -634,6 +699,15 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     src_assets = meta.source_assets(cid)
     for asset in src_assets.values():
         asset.update(source_meta(asset["href"]))
+        # A source asset that names a file this catalog itself publishes is
+        # stamped from the local copy: the published bytes are these bytes.
+        href = asset["href"]
+        if href.startswith(meta.PUBLIC_BASE + "/") and "*" not in href \
+                and not href.endswith(".json"):
+            local = (CATALOG / href[len(meta.PUBLIC_BASE) + 1:])
+            if local.is_file():
+                asset["file:size"] = local.stat().st_size
+                asset["file:checksum"] = multihash(local)
     assets.update(src_assets)
 
     for asset in assets.values():
@@ -679,6 +753,13 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
             if href.endswith(".parquet"):
                 asset["type"] = PARQUET_TYPE
                 asset.setdefault("roles", ["data"])
+                fips = item.get("id", item_path.stem)
+                asset["title"] = (f"{meta.TITLES[cid]} — state FIPS {fips} "
+                                  f"(GeoParquet partition)")
+                asset["description"] = (
+                    f"One hive partition (state_fips={fips}) of the "
+                    f"collection's GeoParquet. The schema is the "
+                    f"collection's table:columns.")
             stamp_asset(item_path.parent, asset, checksums)
         item_path.write_text(json.dumps(item, indent=2,
                                         ensure_ascii=False) + "\n")
@@ -707,7 +788,12 @@ def finalize_group(group: str) -> str:
     cat["title"] = meta.GROUP_TITLES[group]
     cat["description"] = meta.GROUP_DESCRIPTIONS[group]
     cat["stac_extensions"] = sorted(
-        set(cat.get("stac_extensions", [])) | {portolan_schema()})
+        {e for e in cat.get("stac_extensions", [])
+         if "schemas.portolan-sdi.org/portolan/" not in e}
+        | {portolan_schema()})
+    # PTL-PRO-003 (v0.3 applies it to catalogs too): a mirror records its
+    # last sync on every catalog level, the same date the collections carry.
+    cat["updated"] = meta.EXTRACTED + "T00:00:00Z"
     links = [l for l in cat.get("links", [])
              if l.get("rel") not in ("self", "child", "root", "parent")]
     ensure_link(links, "root", "../catalog.json", "application/json",
