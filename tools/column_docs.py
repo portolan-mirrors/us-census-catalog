@@ -745,9 +745,9 @@ ACS_DOC = {
 # --------------------------------------------------------------------------
 
 _PL_SRC = (
-    f"Read from the 2020 P.L. 94-171 redistricting file at the field "
-    f"position pinned in `docs/blocks-build-notes.md` against the Census "
-    f"Bureau's own R import scripts")
+    "Read from the 2020 P.L. 94-171 redistricting file at the field "
+    "position pinned in `docs/blocks-build-notes.md` against the Census "
+    "Bureau's own R import scripts")
 
 BLOCK_DOC = {
     "pop_total": (

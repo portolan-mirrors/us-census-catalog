@@ -46,6 +46,10 @@ jobs:
           done
           rm -f site/serve.py site/*.test.mjs
       - uses: actions/configure-pages@v5
+        with:
+          # The first deploy creates the Pages site, so nobody has to
+          # enable Pages in the repository settings by hand.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

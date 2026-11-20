@@ -90,7 +90,6 @@ tools/build_tile_staging.py for how staging/agg/ is produced.
 
 import argparse
 import subprocess
-import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 

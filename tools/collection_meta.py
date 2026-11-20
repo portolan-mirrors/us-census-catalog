@@ -2254,10 +2254,10 @@ def source_assets(cid: str) -> dict:
         "title": f"{year} cartographic boundary file — "
                  f"{LEVEL_PLURAL[level]} (1:500,000, national)",
         "description": (
-            f"The geometry this collection joins onto, shoreline-clipped and "
-            f"generalized for mapping. Only the join key, the name parts and "
-            f"the land-area field are kept; reprojected from NAD83 to "
-            f"EPSG:4326 with ogr2ogr."
+            "The geometry this collection joins onto, shoreline-clipped and "
+            "generalized for mapping. Only the join key, the name parts and "
+            "the land-area field are kept; reprojected from NAD83 to "
+            "EPSG:4326 with ogr2ogr."
             + (" GENZ2020 is the only cartographic ZCTA edition the Census "
                "Bureau publishes, and the 2020-based ZCTAs are the vintage "
                "this ACS release tabulates; its fields are suffixed with the "
@@ -2607,12 +2607,12 @@ def _trends_processing_notes(cid: str) -> str:
             "tract-number match the county-level fix uses, before the "
             "final output is written.")
     common.append(
-        f"`chg_<indicator>` is the 2020-2024 value minus the 2015-2019 "
-        f"value, computed once both periods' rows exist and carried on "
-        f"the 2020-2024 row only; `chg_<indicator>_moe` is the "
-        f"quadrature sum of the two periods' margins (ACS Accuracy of "
-        f"the Data's formula for the margin of a difference of two "
-        f"independent estimates).")
+        "`chg_<indicator>` is the 2020-2024 value minus the 2015-2019 "
+        "value, computed once both periods' rows exist and carried on "
+        "the 2020-2024 row only; `chg_<indicator>_moe` is the "
+        "quadrature sum of the two periods' margins (ACS Accuracy of "
+        "the Data's formula for the margin of a difference of two "
+        "independent estimates).")
     common.append(
         f"Geometry is the same {cd.CB_VINTAGE[level]} cartographic "
         f"boundary file ({Path(CB_LEVEL_URL[level]).name}) the "
@@ -2672,8 +2672,8 @@ def processing_notes(cid: str) -> str:
         f"pass per file — this collection's is `{specs.LEVELS[level]}`, read "
         f"off the files themselves rather than taken from a summary-level "
         f"table"
-        + (f" (the `19` is the congress number)" if level == "cd" else
-           f" (the `Z2` is the 2020 ZCTA vintage)" if level == "zcta" else "")
+        + (" (the `19` is the congress number)" if level == "cd" else
+           " (the `Z2` is the 2020 ZCTA vintage)" if level == "zcta" else "")
         + ".",
 
         "Jam values (the sentinels the ACS publishes in place of "
@@ -2999,30 +2999,30 @@ def _trends_known_issues(cid: str) -> str:
         "different geography and published as if it were a direct "
         "measurement.",
 
-        f"**A median cannot be derived from medians.** `absorbed` rows "
-        f"(several 2015-2019 predecessors combine into one 2020-2024 "
-        f"geoid) NULL `median_hh_income`, `per_capita_income`, "
-        f"`median_age`, `median_home_value` and `median_gross_rent` for "
-        f"2015-2019 for exactly this reason — summing the predecessors' "
-        f"raw census cells and recomputing is legitimate for counts "
-        f"and rates, and this build does it, but there is no published "
-        f"2015-2019 median for a geography the Census Bureau never "
-        f"tabulated directly, so inventing one by averaging or "
-        f"reweighting predecessor medians would be a model wearing a "
-        f"measurement's clothes.",
+        "**A median cannot be derived from medians.** `absorbed` rows "
+        "(several 2015-2019 predecessors combine into one 2020-2024 "
+        "geoid) NULL `median_hh_income`, `per_capita_income`, "
+        "`median_age`, `median_home_value` and `median_gross_rent` for "
+        "2015-2019 for exactly this reason — summing the predecessors' "
+        "raw census cells and recomputing is legitimate for counts "
+        "and rates, and this build does it, but there is no published "
+        "2015-2019 median for a geography the Census Bureau never "
+        "tabulated directly, so inventing one by averaging or "
+        "reweighting predecessor medians would be a model wearing a "
+        "measurement's clothes.",
 
-        f"**`subdivided` carries an explicit assumption.** A "
-        f"`subdivided` geoid's rates and medians are its single "
-        f"dominant 2015-2019 predecessor's own published values, "
-        f"copied over under a part-resembles-whole assumption — the "
-        f"predecessor's overall rate or median is assumed to hold for "
-        f"the fragment too, which is not measured and can be wrong for "
-        f"a fragment that differs from its parent's average. "
-        f"`population` and `households` are NULL there instead of "
-        f"carrying the whole predecessor's count, which would overstate "
-        f"a fragment.",
+        "**`subdivided` carries an explicit assumption.** A "
+        "`subdivided` geoid's rates and medians are its single "
+        "dominant 2015-2019 predecessor's own published values, "
+        "copied over under a part-resembles-whole assumption — the "
+        "predecessor's overall rate or median is assumed to hold for "
+        "the fragment too, which is not measured and can be wrong for "
+        "a fragment that differs from its parent's average. "
+        "`population` and `households` are NULL there instead of "
+        "carrying the whole predecessor's count, which would overstate "
+        "a fragment.",
 
-        f"**Measured `geo_change` distribution at this geography:** "
+        "**Measured `geo_change` distribution at this geography:** "
         f"`identical` {ident:,} ({100*ident/total:.1f}%)"
         + (f", `absorbed` {absorbed:,} ({100*absorbed/total:.1f}%)"
            if absorbed else "")

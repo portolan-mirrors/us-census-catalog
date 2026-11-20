@@ -618,7 +618,7 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
     if dpre == "../":
         for a in assets.values():
             if a.get("href", "") in (f"./{cid}.parquet", f"./{cid}.pmtiles",
-                                     f"./items.parquet"):
+                                     "./items.parquet"):
                 a["href"] = "../" + a["href"][2:]
     if (data_dir(cid) / f"{cid}.parquet").exists() and not any(
             a.get("href", "") == f"{dpre}{cid}.parquet"
