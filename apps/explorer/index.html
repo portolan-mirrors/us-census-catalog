@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Census Atlas — US Census Demographics Explorer</title>
+<meta name="description" content="Explore nationwide US Census demographics — income, poverty, housing, education, broadband and more — from states down to blocks, with change over time, as cloud-native GeoParquet and PMTiles." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,600&family=Public+Sans:wght@400;600;700&display=swap" />
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/pmtiles@3.2.0/dist/pmtiles.js"></script>
+<script>
+// Browsers stop requestAnimationFrame in hidden tabs, which stalls MapLibre
+// before its first frame. Run frames on a timer only while the document is
+// hidden, so headless checks and background loads still render.
+(() => {
+  const native = window.requestAnimationFrame.bind(window);
+  window.requestAnimationFrame = (cb) =>
+    document.hidden ? setTimeout(() => cb(performance.now()), 33) : native(cb);
+})();
+</script>
+<link rel="stylesheet" href="style.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%231f2733'/%3E%3Crect x='14' y='14' width='34' height='34' fill='%239e3b2f'/%3E%3Crect x='52' y='14' width='34' height='34' fill='%23d08770'/%3E%3Crect x='14' y='52' width='34' height='34' fill='%23f3f0e9'/%3E%3Crect x='52' y='52' width='34' height='34' fill='%23577a9e'/%3E%3C/svg%3E" />
+</head>
+<body>
+<div id="layout">
+  <aside id="sidebar">
+    <header>
+      <h1 class="wordmark">Census <span class="atlas">Atlas</span></h1>
+      <p class="tagline">US Census demographics, states to blocks · a cloud-native mirror</p>
+      <div class="searchwrap">
+        <input id="q" type="search" placeholder="Search a place or an indicator…"
+               autocomplete="off" role="combobox" aria-expanded="false"
+               aria-label="Search places and datasets" />
+        <div id="search-results" role="listbox" hidden></div>
+      </div>
+    </header>
+    <div id="panel"></div>
+    <footer>
+      Data: <a href="https://www.census.gov/">U.S. Census Bureau</a> (public domain),
+      mirrored cloud-native by
+      <a href="https://source.coop/portolan-mirrors/us-census-catalog">Portolan Mirrors</a>.
+      <a href="https://github.com/portolan-mirrors/us-census-catalog">Catalog repository</a> ·
+      <a href="https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json">STAC root</a> ·
+      <a href="https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/catalog.json">Portolan Browser</a>
+    </footer>
+  </aside>
+  <div id="maps">
+    <div id="map"></div>
+    <div id="mapB"></div>
+    <div id="swipebar" hidden></div>
+    <div id="legend" hidden></div>
+    <div id="dock" hidden>
+      <select id="dock-ind" aria-label="Indicator"></select>
+      <button type="button" data-mode="chg" title="Change between the two ACS releases">Change</button>
+      <span class="sep"></span>
+      <button type="button" data-mode="2015-2019">2015–19</button>
+      <button type="button" data-mode="2020-2024">2020–24</button>
+      <button type="button" id="dock-play">▶</button>
+      <span class="sep"></span>
+      <button type="button" data-mode="swipe" title="Swipe the two periods side by side">⇆ Compare</button>
+    </div>
+    <button type="button" id="themebtn" title="Switch light/dark">◐</button>
+    <button type="button" id="menubtn" title="Datasets">☰</button>
+    <div id="note" hidden></div>
+  </div>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
