@@ -35,7 +35,7 @@ jobs:
           python -m pip install pyflakes
           pyflakes tools/*.py tests/*.py
 
-      # CI_LIGHT exempts asset hrefs with a data suffix from the link check.
+      # CI_LIGHT exempts an href with a data suffix from the link check.
       # The checkout holds the metadata and not the bytes. Structural links
       # and every non-data asset still resolve. Leave it unset locally.
       - name: Catalog gates
