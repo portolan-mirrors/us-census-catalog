@@ -66,6 +66,12 @@
       "pmtiles:layers": [
         "tract-tenure-dec2020"
       ]
+    },
+    {
+      "rel": "alternate",
+      "href": "https://portolan-mirrors.github.io/us-census-catalog/#c=tracts/tract-tenure-dec2020",
+      "type": "text/html",
+      "title": "Open in the Census Atlas (catalog explorer app)"
     }
   ],
   "stac_extensions": [

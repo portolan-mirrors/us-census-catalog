@@ -72,6 +72,12 @@
       "pmtiles:layers": [
         "county-trends"
       ]
+    },
+    {
+      "rel": "alternate",
+      "href": "https://portolan-mirrors.github.io/us-census-catalog/#c=trends/county-trends",
+      "type": "text/html",
+      "title": "Open in the Census Atlas (catalog explorer app)"
     }
   ],
   "stac_extensions": [

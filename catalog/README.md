@@ -1,6 +1,6 @@
 # US Census Demographics — Cloud-Native Mirror
 
-**[🗺️ Open in the data browser](https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)** · [Source repository](https://github.com/portolan-mirrors/us-census-catalog) · [Agent guide](https://source.coop/portolan-mirrors/us-census-catalog/AGENTS.md) · [STAC root](https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)
+**[🗺️ Open in the data browser](https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)** · [🧭 Census Atlas](https://portolan-mirrors.github.io/us-census-catalog/) · [Source repository](https://github.com/portolan-mirrors/us-census-catalog) · [Agent guide](https://source.coop/portolan-mirrors/us-census-catalog/AGENTS.md) · [STAC root](https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json)
 
 ![census](https://img.shields.io/badge/census-blue) ![ACS](https://img.shields.io/badge/ACS-blue) ![American Community Survey](https://img.shields.io/badge/American_Community_Survey-blue) ![decennial census](https://img.shields.io/badge/decennial_census-blue) ![demographics](https://img.shields.io/badge/demographics-blue) ![United States](https://img.shields.io/badge/United_States-blue) ![GeoParquet](https://img.shields.io/badge/GeoParquet-blue) ![PMTiles](https://img.shields.io/badge/PMTiles-blue) ![STAC](https://img.shields.io/badge/STAC-blue) ![cloud-native](https://img.shields.io/badge/cloud--native-blue)
 
@@ -25,6 +25,9 @@ Census Demographic and Housing Characteristics (DHC) counts — age & sex,
 household type and tenure — 100% counts with no margin of error and no
 sampling error, protected instead by the Census Bureau's differential-
 privacy disclosure avoidance system.
+Explore it all interactively — change maps, 2015–2019 / 2020–2024
+comparison and place search — in the [Census Atlas](https://portolan-mirrors.github.io/us-census-catalog/), the
+catalog's own map explorer.
 [data.census.gov](https://data.census.gov/) is authoritative; this is a mirror, and
 every collection links the exact upstream census.gov files it was built
 from.

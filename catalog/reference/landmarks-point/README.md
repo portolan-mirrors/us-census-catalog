@@ -1,6 +1,6 @@
 # Landmarks — Point
 
-**[🗺️ Open in the data browser](https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-point/collection.json)** · [Download the GeoParquet](https://data.source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-point/landmarks-point.parquet) · [Agent guide](https://source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-point/AGENTS.md) · [Source repository](https://github.com/portolan-mirrors/us-census-catalog)
+**[🗺️ Open in the data browser](https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-point/collection.json)** · [🧭 Census Atlas](https://portolan-mirrors.github.io/us-census-catalog/#c=reference/landmarks-point) · [Download the GeoParquet](https://data.source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-point/landmarks-point.parquet) · [Agent guide](https://source.coop/portolan-mirrors/us-census-catalog/reference/landmarks-point/AGENTS.md) · [Source repository](https://github.com/portolan-mirrors/us-census-catalog)
 
 Point landmarks from [TIGER/Line 2024 `POINTLM`](https://www2.census.gov/geo/tiger/TIGER2024/POINTLM/): all **1,088,085** features, one file per state (56 state and territory files), each carrying the `state` USPS code its source file was read from.
 

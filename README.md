@@ -6,6 +6,11 @@ mirroring United States Census Bureau demographics as cloud-native
 [Source Cooperative](https://source.coop/portolan-mirrors/us-census-catalog).
 
 - Catalog root: `https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json`
+- **Explore it in the [Census Atlas](https://portolan-mirrors.github.io/us-census-catalog/)** —
+  the catalog's own zero-build map explorer (`apps/explorer/`): every
+  collection with its curated styles and legends, 2015–2019 → 2020–2024
+  change maps with animated and swipe comparison, place/dataset search,
+  and copyable download + DuckDB snippets per collection
 - ACS 2020–2024 5-year indicators (income, poverty, age, race, education,
   housing, vehicles, commuting, internet, health insurance, disability,
   nativity) at **block group**, **tract**, **county**, **state**, **ZCTA**,
@@ -81,6 +86,7 @@ Then read the agent guides, which carry the join keys, the NULL stories, and
 | Path | Purpose |
 |---|---|
 | `catalog/` | The published tree — synced 1:1 to Source Cooperative. Parquet/PMTiles are generated, gitignored artifacts. |
+| `apps/explorer/` | The [Census Atlas](https://portolan-mirrors.github.io/us-census-catalog/) viewer — deployed to GitHub Pages by `.github/workflows/pages.yml`, reads the published catalog over HTTPS |
 | `staging/` | Downloaded census source files (gitignored) |
 | `tools/` | The pipeline (fetch → build → tile → style → document) |
 | `tests/` | Conformance and consistency gates |

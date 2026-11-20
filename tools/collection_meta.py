@@ -50,6 +50,9 @@ CATALOG = ROOT / "catalog"
 EXTRACTED = "2026-11-12"          # the day every source file here was read
 PUBLIC_BASE = "https://data.source.coop/portolan-mirrors/us-census-catalog"
 REPO = "https://github.com/portolan-mirrors/us-census-catalog"
+# The Census Atlas explorer app (apps/explorer/), deployed by
+# .github/workflows/pages.yml. `#c=<COLL_REL id>` deep-links a collection.
+ATLAS = "https://portolan-mirrors.github.io/us-census-catalog/"
 CONTACT_NAME = "Chris Holmes"
 CONTACT_EMAIL = "cholmes@9eo.org"
 
@@ -3518,6 +3521,9 @@ description: |
   household type and tenure — 100% counts with no margin of error and no
   sampling error, protected instead by the Census Bureau's differential-
   privacy disclosure avoidance system.
+  Explore it all interactively — change maps, 2015–2019 / 2020–2024
+  comparison and place search — in the [Census Atlas]({ATLAS}), the
+  catalog's own map explorer.
   [data.census.gov]({DATA_CENSUS}) is authoritative; this is a mirror, and
   every collection links the exact upstream census.gov files it was built
   from.

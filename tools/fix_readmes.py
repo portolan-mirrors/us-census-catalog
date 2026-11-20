@@ -28,6 +28,7 @@ CATALOG = ROOT / "catalog"
 SC = "https://source.coop/portolan-mirrors/us-census-catalog"
 DATA = "https://data.source.coop/portolan-mirrors/us-census-catalog"
 GH = "https://github.com/portolan-mirrors/us-census-catalog"
+ATLAS = "https://portolan-mirrors.github.io/us-census-catalog/"
 BROWSER = ("https://browser.portolan-sdi.org/?catalog="
            f"{DATA}/catalog.json#/external/"
            "data.source.coop/portolan-mirrors/us-census-catalog")
@@ -64,6 +65,7 @@ def nav_line(rel: str, cid: str | None) -> str:
         target = f"{BROWSER}/{rel}/catalog.json" if rel else \
                  f"{BROWSER}/catalog.json"
         return (f"**[🗺️ Open in the data browser]({target})** · "
+                f"[🧭 Census Atlas]({ATLAS}) · "
                 f"[Source repository]({GH}) · "
                 f"[Agent guide]({SC}{'/' + rel if rel else ''}/AGENTS.md) · "
                 f"[STAC root]({DATA}/catalog.json)\n")
@@ -85,16 +87,22 @@ def nav_line(rel: str, cid: str | None) -> str:
         parquet = f"{DATA}/{data_rel}/{cid}.parquet"
         parquet_label = "Download the GeoParquet"
     return (f"**[🗺️ Open in the data browser]({BROWSER}/{rel}/"
-            f"collection.json)** · [{parquet_label}]({parquet}) · "
+            f"collection.json)** · "
+            f"[🧭 Census Atlas]({ATLAS}#c={rel}) · "
+            f"[{parquet_label}]({parquet}) · "
             f"[Agent guide]({SC}/{rel}/AGENTS.md) · "
             f"[Source repository]({GH})\n")
 
 
 def inject_nav(text: str, line: str) -> str:
     """Put the nav line after the badges (or the H1 if no badges)."""
-    if line.split("·")[0] in text:  # already injected (idempotence)
-        return text
     lines = text.split("\n")
+    # An earlier run already injected a nav line: replace it, so a change
+    # to the nav format reaches READMEs that carry the old one.
+    for i, ln in enumerate(lines):
+        if ln.startswith("**[🗺️ Open in the data browser]"):
+            lines[i] = line.rstrip()
+            return "\n".join(lines)
     # after the first blank line following the H1/badge block
     for i, ln in enumerate(lines):
         if ln.startswith("# "):

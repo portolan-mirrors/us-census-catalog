@@ -597,6 +597,9 @@ def finalize_collection(cid: str, checksums: bool = True) -> str:
                f"{meta.COLL_REL[cid]}/collection.json")
     ensure_link(links, "alternate", browser, "text/html",
                 "Open in the Portolan Browser (interactive map)")
+    ensure_link(links, "alternate", f"{meta.ATLAS}#c={meta.COLL_REL[cid]}",
+                "text/html",
+                "Open in the Census Atlas (catalog explorer app)")
     coll["links"] = links
 
     # Assets. Source and style assets are rebuilt rather than merged, so a
