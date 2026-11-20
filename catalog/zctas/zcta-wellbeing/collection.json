@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 219943389,
       "file:checksum": "122072da0b7f6fa071afb89b7674cd83513678b909084a5ecbb6254c28b6ed763c65",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Health, Disability & Income by Race — ZIP Code Tabulation Areas (PMTiles)",
       "pmtiles:layers": [
         "zcta-wellbeing"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'zcta-wellbeing'. The collection description states what each zoom band carries."
     },
     "zcta-wellbeing": {
       "href": "./zcta-wellbeing.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "Health, Disability & Income by Race — ZIP Code Tabulation Areas (GeoParquet, national)",
       "file:size": 69676429,
-      "file:checksum": "122020863dec9ec6fb9a456bbf17c1777a450ee2386205339d623ca8308139ea4f2a"
+      "file:checksum": "122020863dec9ec6fb9a456bbf17c1777a450ee2386205339d623ca8308139ea4f2a",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "Health, Disability & Income by Race — ZIP Code Tabulation Areas rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 92496,
       "file:checksum": "12207f654c10dc2e5c06e49c265fd9c72502bb62adeeb664e8ef5a324e47fa4bac36"
     },

@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 1776251,
       "file:checksum": "1220891b7fce51ec69eb8d0c0c6d83cf780d77a155368848a751ba04a4a1905e03fb",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Health, Disability & Income by Race — States (PMTiles)",
       "pmtiles:layers": [
         "state-wellbeing"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'state-wellbeing'. The collection description states what each zoom band carries."
     },
     "state-wellbeing": {
       "href": "./state-wellbeing.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "Health, Disability & Income by Race — States (GeoParquet, national)",
       "file:size": 4074179,
-      "file:checksum": "1220121b9051a16a6fe2d575f0358bb067cb7cc9f689578c5fe91a926f145268018a"
+      "file:checksum": "1220121b9051a16a6fe2d575f0358bb067cb7cc9f689578c5fe91a926f145268018a",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "Health, Disability & Income by Race — States rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 25995,
       "file:checksum": "122037915075d8c00a47d272a0b1900cfc664a0e1a3da5f2f2ce707de9e92e342869"
     },

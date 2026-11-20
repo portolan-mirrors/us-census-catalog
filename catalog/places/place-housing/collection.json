@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 99324458,
       "file:checksum": "1220d88ae319716c98c3c6b8125f029b92b87483520dfd0dde934d7e36d9c9952b03",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Housing & Rent — Places & CDPs (PMTiles)",
       "pmtiles:layers": [
         "place-housing"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'place-housing'. The collection description states what each zoom band carries."
     },
     "place-housing": {
       "href": "./place-housing.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "Housing & Rent — Places & CDPs (GeoParquet, national)",
       "file:size": 29535232,
-      "file:checksum": "122053122e8e3de8d40d6e8d0a00a313a5c29db9748b5872eaa0042779d692d671ec"
+      "file:checksum": "122053122e8e3de8d40d6e8d0a00a313a5c29db9748b5872eaa0042779d692d671ec",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "Housing & Rent — Places & CDPs rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 94059,
       "file:checksum": "12203f56567fb20a0fe71e27fb4c3593072fba630140a42851de0d60e90ef2cf7e04"
     },

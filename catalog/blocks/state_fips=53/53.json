@@ -307,7 +307,9 @@
       "file:checksum": "122029988392dcdb5bd3d0685cbb659f51cb1012b9d1daf12ba4171e62d9c206342d",
       "roles": [
         "data"
-      ]
+      ],
+      "title": "2020 Census Counts — Blocks — state FIPS 53 (GeoParquet partition)",
+      "description": "One hive partition (state_fips=53) of the collection's GeoParquet. The schema is the collection's table:columns."
     },
     "blocks-tiles": {
       "href": "../blocks.pmtiles",
@@ -315,12 +317,13 @@
       "file:size": 7067134582,
       "file:checksum": "12202a415c3722a13bd9b848f223494e63098dbf50315ff12e8dc6e2631a2f6ce260",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "2020 Census Counts — Blocks (PMTiles)",
       "pmtiles:layers": [
         "blocks"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'blocks'. The collection description states what each zoom band carries."
     },
     "styles/black-share": {
       "href": "../styles/black-share.json",

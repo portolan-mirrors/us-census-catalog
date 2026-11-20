@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -302,7 +302,8 @@
       "roles": [
         "data"
       ],
-      "title": "Health, Disability & Income by Race — Congressional Districts (119th Congress) (GeoParquet, national)"
+      "title": "Health, Disability & Income by Race — Congressional Districts (119th Congress) (GeoParquet, national)",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -311,6 +312,7 @@
         "thumbnail"
       ],
       "title": "Health, Disability & Income by Race — Congressional Districts (119th Congress) rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 51474,
       "file:checksum": "122002f86f57148c7131c2038c7bc0b9874d7a6b0912fe30cd531c20e5c875de27ec"
     },
@@ -325,7 +327,8 @@
         "cd-wellbeing"
       ],
       "file:size": 12194733,
-      "file:checksum": "1220735ac6224b89aecc4a885f262cf28abd9aa622c128b2f666afe815b81e061a20"
+      "file:checksum": "1220735ac6224b89aecc4a885f262cf28abd9aa622c128b2f666afe815b81e061a20",
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'cd-wellbeing'. The collection description states what each zoom band carries."
     },
     "styles/default": {
       "href": "./styles/default.json",

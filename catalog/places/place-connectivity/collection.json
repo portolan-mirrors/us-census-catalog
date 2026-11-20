@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 92826255,
       "file:checksum": "122050f1bd724ac6fcc4c077130b4f4ad0207281fe28f52119e6811f272d1f8bba4b",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Commuting & Connectivity — Places & CDPs (PMTiles)",
       "pmtiles:layers": [
         "place-connectivity"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'place-connectivity'. The collection description states what each zoom band carries."
     },
     "place-connectivity": {
       "href": "./place-connectivity.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "Commuting & Connectivity — Places & CDPs (GeoParquet, national)",
       "file:size": 29240899,
-      "file:checksum": "1220c21ce4f750d8277f271bf2f221ec68da5b7c04a42a13f27940296a5dd4010f0c"
+      "file:checksum": "1220c21ce4f750d8277f271bf2f221ec68da5b7c04a42a13f27940296a5dd4010f0c",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "Commuting & Connectivity — Places & CDPs rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 91648,
       "file:checksum": "1220dbd23130745db670794527bb2eea45995bc9be0b2faeec10451fe18d5cf58d49"
     },

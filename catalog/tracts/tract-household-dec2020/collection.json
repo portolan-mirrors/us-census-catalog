@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -414,8 +414,9 @@
         "tract-household-dec2020"
       ],
       "roles": [
-        "data"
-      ]
+        "visual"
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'tract-household-dec2020'. The collection description states what each zoom band carries."
     },
     "tract-household-dec2020": {
       "href": "./tract-household-dec2020.parquet",
@@ -425,7 +426,8 @@
       "file:checksum": "122080cd7e137aed1d14fe8f94176ec9f656d9835da309ec51c5b2195f0920be9c4e",
       "roles": [
         "data"
-      ]
+      ],
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -434,6 +436,7 @@
         "thumbnail"
       ],
       "title": "Household Type (2020 Census) — Census Tracts rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 83377,
       "file:checksum": "1220a8a04a9d92c63dfcd33294b39e851fdd667f87d9ae430b6226dc84bdbf98eed3"
     },

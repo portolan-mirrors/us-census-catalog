@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 1692560,
       "file:checksum": "12202e489ce3749b107fa0f226941c7f2a8ea4beaf3f72d12950220b4a54dc110b83",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Housing & Rent — States (PMTiles)",
       "pmtiles:layers": [
         "state-housing"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'state-housing'. The collection description states what each zoom band carries."
     },
     "state-housing": {
       "href": "./state-housing.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "Housing & Rent — States (GeoParquet, national)",
       "file:size": 4073213,
-      "file:checksum": "1220a12d8fb66e12171767906ba2c45bb7cd0b30b6079e26d9d2e9547a30722c7c9f"
+      "file:checksum": "1220a12d8fb66e12171767906ba2c45bb7cd0b30b6079e26d9d2e9547a30722c7c9f",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "Housing & Rent — States rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 26233,
       "file:checksum": "12207680ab99d4f55469d266a46550408aaee5160ae122d71ecbe353656a242b150a"
     },

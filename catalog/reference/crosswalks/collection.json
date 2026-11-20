@@ -60,7 +60,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json"
@@ -191,7 +191,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table aiannh-county20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "aiannh-cousub20": {
       "href": "./aiannh-cousub20.parquet",
@@ -276,7 +277,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table aiannh-cousub20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "aiannh-tract20": {
       "href": "./aiannh-tract20.parquet",
@@ -357,7 +359,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table aiannh-tract20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "blkgrp": {
       "href": "./blkgrp.parquet",
@@ -434,7 +437,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table blkgrp (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "cbsa-cbsa23": {
       "href": "./cbsa-cbsa23.parquet",
@@ -511,7 +515,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table cbsa-cbsa23 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "cbsa-necta23": {
       "href": "./cbsa-necta23.parquet",
@@ -588,7 +593,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table cbsa-necta23 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "cbsa-ua23": {
       "href": "./cbsa-ua23.parquet",
@@ -665,7 +671,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table cbsa-ua23 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "cousub": {
       "href": "./cousub.parquet",
@@ -750,7 +757,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table cousub (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "place": {
       "href": "./place.parquet",
@@ -835,7 +843,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table place (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "puma520-cousub20": {
       "href": "./puma520-cousub20.parquet",
@@ -916,7 +925,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table puma520-cousub20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "puma520-puma510": {
       "href": "./puma520-puma510.parquet",
@@ -993,7 +1003,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table puma520-puma510 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "puma520-ua20": {
       "href": "./puma520-ua20.parquet",
@@ -1070,7 +1081,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table puma520-ua20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "puma520-zcta520": {
       "href": "./puma520-zcta520.parquet",
@@ -1151,7 +1163,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table puma520-zcta520 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "t10t20-tract": {
       "href": "./t10t20-tract.parquet",
@@ -1236,7 +1249,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table t10t20-tract (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "tract": {
       "href": "./tract.parquet",
@@ -1313,7 +1327,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table tract (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "ua-cd118": {
       "href": "./ua-cd118.parquet",
@@ -1390,7 +1405,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table ua-cd118 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "ua-county20": {
       "href": "./ua-county20.parquet",
@@ -1471,7 +1487,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table ua-county20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "ua-cousub20": {
       "href": "./ua-cousub20.parquet",
@@ -1552,7 +1569,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table ua-cousub20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "ua-place20": {
       "href": "./ua-place20.parquet",
@@ -1633,7 +1651,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table ua-place20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "ua-sldl2022": {
       "href": "./ua-sldl2022.parquet",
@@ -1710,7 +1729,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table ua-sldl2022 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "ua-sldu2022": {
       "href": "./ua-sldu2022.parquet",
@@ -1787,7 +1807,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table ua-sldu2022 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "ua-ua10": {
       "href": "./ua-ua10.parquet",
@@ -1864,7 +1885,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table ua-ua10 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "ua-zcta520": {
       "href": "./ua-zcta520.parquet",
@@ -1945,7 +1967,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table ua-zcta520 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "zcta520-county20": {
       "href": "./zcta520-county20.parquet",
@@ -2030,7 +2053,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table zcta520-county20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "zcta520-cousub20": {
       "href": "./zcta520-cousub20.parquet",
@@ -2115,7 +2139,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table zcta520-cousub20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "zcta520-place20": {
       "href": "./zcta520-place20.parquet",
@@ -2200,7 +2225,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table zcta520-place20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "zcta520-tabblock20": {
       "href": "./zcta520-tabblock20.parquet",
@@ -2281,7 +2307,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table zcta520-tabblock20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "zcta520-tract20": {
       "href": "./zcta520-tract20.parquet",
@@ -2362,7 +2389,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table zcta520-tract20 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "zcta520-zcta510": {
       "href": "./zcta520-zcta510.parquet",
@@ -2447,7 +2475,8 @@
       "roles": [
         "data"
       ],
-      "title": "2020 Geography Crosswalks (GeoParquet, national)"
+      "title": "Relationship table zcta520-zcta510 (rel2020)",
+      "description": "One 2020 Census relationship file, converted to parquet unchanged. The table joins the two geography vintages named in the file name; see the collection description and the rel2020 source listing."
     },
     "source-rel2020": {
       "href": "https://www2.census.gov/geo/docs/maps-data/data/rel2020/",
@@ -2483,6 +2512,5 @@
       ]
     }
   ],
-  "table:primary_geometry": "geometry",
   "updated": "2026-11-12T00:00:00Z"
 }

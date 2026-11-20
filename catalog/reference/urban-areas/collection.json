@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
@@ -139,12 +139,13 @@
       "file:checksum": "12200b4835552d5784d6c6b9c586906d9837ff13e7f7e44a5e16687fd8c3e60995ea",
       "proj:code": "EPSG:4269",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "2020 Urban Areas (PMTiles)",
       "pmtiles:layers": [
         "urban-areas"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'urban-areas'. The collection description states what each zoom band carries."
     },
     "urban-areas": {
       "href": "./urban-areas.parquet",
@@ -154,7 +155,8 @@
       ],
       "title": "2020 Urban Areas (GeoParquet, national)",
       "file:size": 80876821,
-      "file:checksum": "1220826addc007a92c4b5d216a89be7b3ed08054f81a9f07543b78474e124f3dcb7d"
+      "file:checksum": "1220826addc007a92c4b5d216a89be7b3ed08054f81a9f07543b78474e124f3dcb7d",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -163,6 +165,7 @@
         "thumbnail"
       ],
       "title": "2020 Urban Areas rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 29661,
       "file:checksum": "1220ab0eff7b5608400cc3b42e6c09fd18c5d31ed8ba6c25881123283b4084eb2e28"
     },
@@ -185,7 +188,8 @@
       "description": "The one national shapefile this collection's 2,644 features were read from.",
       "roles": [
         "source"
-      ]
+      ],
+      "file:size": 73763076
     },
     "doc-mtfcc": {
       "href": "https://www2.census.gov/geo/pdfs/reference/mtfccs2022.pdf",

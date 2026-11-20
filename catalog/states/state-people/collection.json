@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 1562518,
       "file:checksum": "12205b151f3296c30d61bfafd5c7fd79e162b8ed078cb2f3e971c4acb3ff82c35446",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "People & Education — States (PMTiles)",
       "pmtiles:layers": [
         "state-people"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'state-people'. The collection description states what each zoom band carries."
     },
     "state-people": {
       "href": "./state-people.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "People & Education — States (GeoParquet, national)",
       "file:size": 4068829,
-      "file:checksum": "12203ee2e25bbfc0e3d91fe8519b4ac4155f3a445bf35d5d09d16784d1714389849f"
+      "file:checksum": "12203ee2e25bbfc0e3d91fe8519b4ac4155f3a445bf35d5d09d16784d1714389849f",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "People & Education — States rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 26404,
       "file:checksum": "1220425b8b0e404affb1fb2f3f5d45f086c16311e3d1e9b4fb0ce1ebbcaf56407176"
     },

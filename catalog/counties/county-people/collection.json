@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 19596578,
       "file:checksum": "1220602c1b1ccfa4cc354267ea52e43339ef2ade9e17908cdc98b6aa0a268cd666b9",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "People & Education — Counties (PMTiles)",
       "pmtiles:layers": [
         "county-people"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'county-people'. The collection description states what each zoom band carries."
     },
     "county-people": {
       "href": "./county-people.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "People & Education — Counties (GeoParquet, national)",
       "file:size": 12917841,
-      "file:checksum": "12200d8b537d0b274330ff6494731223fa88df38384b95f2a7c80ebf58aad1cb108a"
+      "file:checksum": "12200d8b537d0b274330ff6494731223fa88df38384b95f2a7c80ebf58aad1cb108a",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "People & Education — Counties rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 99361,
       "file:checksum": "122055dff098a9fcd6b95bdcba7dcdff5a2bed7cdc612b2d4adc1d403dc02e6af29d"
     },

@@ -382,7 +382,7 @@
   ],
   "stac_extensions": [
     "https://schemas.portolan-sdi.org/incubating/partition/v1.0.0/schema.json",
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -459,24 +459,16 @@
     ]
   },
   "assets": {
-    "partitioned_data": {
-      "href": "./state_fips=*/*.parquet",
-      "type": "application/vnd.apache.parquet",
-      "title": "2020 Census Counts — Blocks (GeoParquet, 52 state partitions)",
-      "description": "Glob pattern for 52 partitioned files",
-      "roles": [
-        "data"
-      ]
-    },
     "geoparquet-items": {
       "href": "./items.parquet",
       "type": "application/vnd.apache.parquet",
-      "title": "2020 Census Counts — Blocks (GeoParquet, 52 state partitions)",
+      "title": "2020 Census Counts — Blocks STAC items (GeoParquet)",
       "roles": [
         "collection-mirror"
       ],
       "file:size": 84821,
-      "file:checksum": "122044b9f84946b9de6ff052a209a548af60dbc8cd7ef5f9433c5a98048f688870c9"
+      "file:checksum": "122044b9f84946b9de6ff052a209a548af60dbc8cd7ef5f9433c5a98048f688870c9",
+      "description": "The collection's items as one STAC-GeoParquet table, one row per partition item."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -485,6 +477,7 @@
         "thumbnail"
       ],
       "title": "2020 Census Counts — Blocks rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 89966,
       "file:checksum": "122015b68f91c4e61bdbff826ee5c73446d0671b7ec67158f34ed9a40c38106db58f"
     },
@@ -494,12 +487,13 @@
       "file:size": 7067134582,
       "file:checksum": "12202a415c3722a13bd9b848f223494e63098dbf50315ff12e8dc6e2631a2f6ce260",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "2020 Census Counts — Blocks (PMTiles)",
       "pmtiles:layers": [
         "blocks"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'blocks'. The collection description states what each zoom band carries."
     },
     "styles/black-share": {
       "href": "./styles/black-share.json",
@@ -607,7 +601,7 @@
       ]
     }
   },
-  "partition:glob": "./state_fips=*/*.parquet",
+  "partition:glob": "s3://us-west-2.opendata.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=*/*.parquet",
   "keywords": [
     "census",
     "2020 Census",

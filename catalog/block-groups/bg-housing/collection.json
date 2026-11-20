@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -303,7 +303,8 @@
       "roles": [
         "data"
       ],
-      "title": "Housing & Rent — Block Groups (GeoParquet, national)"
+      "title": "Housing & Rent — Block Groups (GeoParquet, national)",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "bg-housing-tiles": {
       "href": "./bg-housing.pmtiles",
@@ -316,7 +317,8 @@
         "bg-housing"
       ],
       "file:size": 732050291,
-      "file:checksum": "1220d14ab041fb733d55a4b11fbd1e2e0c8c954f15a1ce3cec2e9f5717fb895821cb"
+      "file:checksum": "1220d14ab041fb733d55a4b11fbd1e2e0c8c954f15a1ce3cec2e9f5717fb895821cb",
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'bg-housing'. The collection description states what each zoom band carries."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -325,6 +327,7 @@
         "thumbnail"
       ],
       "title": "Housing & Rent — Block Groups rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 93919,
       "file:checksum": "1220f9ba8530a09377ada50a209a5a5ad5d38a79ed922767d8f5738267674dcf124b"
     },

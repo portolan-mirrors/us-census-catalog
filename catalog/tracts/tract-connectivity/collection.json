@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -138,6 +138,7 @@
         "thumbnail"
       ],
       "title": "Commuting & Connectivity — Census Tracts rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 92449,
       "file:checksum": "12202583d7ac489e2e8dadf3d4f9843d6d242481b1875c0f2eb71738bf6da455b504"
     },
@@ -147,12 +148,13 @@
       "file:size": 245475349,
       "file:checksum": "1220240319a5d88c2f7b51ed24b6d1c915d80f9e6d2d44d749bbc609a33fe7982ae1",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Commuting & Connectivity — Census Tracts (PMTiles)",
       "pmtiles:layers": [
         "tract-connectivity"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'tract-connectivity'. The collection description states what each zoom band carries."
     },
     "tract-connectivity": {
       "href": "./tract-connectivity.parquet",
@@ -162,7 +164,8 @@
       ],
       "title": "Commuting & Connectivity — Census Tracts (GeoParquet, national)",
       "file:size": 55929687,
-      "file:checksum": "1220a1d5db1ada790f65ef9844c65c02cf95161aa09b96e82a5f1e12230e5fb565e2"
+      "file:checksum": "1220a1d5db1ada790f65ef9844c65c02cf95161aa09b96e82a5f1e12230e5fb565e2",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "styles/default": {
       "href": "./styles/default.json",

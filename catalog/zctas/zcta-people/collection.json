@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 200409607,
       "file:checksum": "1220ee7f0a04501fa71463773142b09802559d6b02165b252bc2bb14f7abebf7a027",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "People & Education — ZIP Code Tabulation Areas (PMTiles)",
       "pmtiles:layers": [
         "zcta-people"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'zcta-people'. The collection description states what each zoom band carries."
     },
     "zcta-people": {
       "href": "./zcta-people.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "People & Education — ZIP Code Tabulation Areas (GeoParquet, national)",
       "file:size": 69568044,
-      "file:checksum": "1220ccad7005e85eef7c6ef89d6d6679b924d2ca9cbc3572214437866421eb9730e0"
+      "file:checksum": "1220ccad7005e85eef7c6ef89d6d6679b924d2ca9cbc3572214437866421eb9730e0",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "People & Education — ZIP Code Tabulation Areas rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 93095,
       "file:checksum": "1220833f0a8f3c2c0b14ba97e8695bd5242c8c0fdb7601268f203d0ce029d7ac2f33"
     },

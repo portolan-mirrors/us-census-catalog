@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
@@ -139,12 +139,13 @@
       "file:checksum": "1220de752979550f7b23235fd965f8ef4a70c29f377e5bd5d1f905e1e7416ac17184",
       "proj:code": "EPSG:4269",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Landmarks — Area (PMTiles)",
       "pmtiles:layers": [
         "landmarks-area"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'landmarks-area'. The collection description states what each zoom band carries."
     },
     "landmarks-area": {
       "href": "./landmarks-area.parquet",
@@ -154,7 +155,8 @@
       ],
       "title": "Landmarks — Area (GeoParquet, national)",
       "file:size": 69056083,
-      "file:checksum": "1220464c66f52cddb992c6bc1dff1beb085beffb02e31d5daa99afe0a653d1a51741"
+      "file:checksum": "1220464c66f52cddb992c6bc1dff1beb085beffb02e31d5daa99afe0a653d1a51741",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -163,6 +165,7 @@
         "thumbnail"
       ],
       "title": "Landmarks — Area rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 24721,
       "file:checksum": "122033f6088ba0933e76590cc8f3da1a4935181f3f37d840404b19e830431b7a54d0"
     },
@@ -205,7 +208,8 @@
       "description": "The one national shapefile this collection's `landmark_kind = 'military'` rows were read from.",
       "roles": [
         "source"
-      ]
+      ],
+      "file:size": 2979527
     },
     "doc-mtfcc": {
       "href": "https://www2.census.gov/geo/pdfs/reference/mtfccs2022.pdf",

@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -138,6 +138,7 @@
         "thumbnail"
       ],
       "title": "Income & Poverty — Block Groups rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 90978,
       "file:checksum": "1220dff528dea69cc274b828696dbe509e1cad4ac82d84779cf7538fdde049c3f444"
     },
@@ -147,12 +148,13 @@
       "file:size": 847627715,
       "file:checksum": "122052045d59b33fb750da2dc2e4d3405a345576ecba32a37c7210f16479e6e82b65",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Income & Poverty — Block Groups (PMTiles)",
       "pmtiles:layers": [
         "bg-income"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'bg-income'. The collection description states what each zoom band carries."
     },
     "bg-income": {
       "href": "./bg-income.parquet",
@@ -162,7 +164,8 @@
       ],
       "title": "Income & Poverty — Block Groups (GeoParquet, national)",
       "file:size": 102668144,
-      "file:checksum": "1220f58df2e7a011e570572284acc535ff224bc78e4e6f1d02527934d29c4b22d559"
+      "file:checksum": "1220f58df2e7a011e570572284acc535ff224bc78e4e6f1d02527934d29c4b22d559",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "styles/default": {
       "href": "./styles/default.json",
@@ -227,7 +230,9 @@
       "description": "The upstream file this collection's B19001 columns were read from: one pipe-delimited row per geography, estimate (`B19001_E###`) and margin of error (`B19001_M###`) side by side, for every summary level in one national file. Universe: Households. Served by census.gov, not by this mirror; see [B19001](https://data.census.gov/table/ACSDT5Y2024.B19001) for the same table rendered on data.census.gov.",
       "roles": [
         "source"
-      ]
+      ],
+      "file:size": 68953041,
+      "file:checksum": "12201af421b3b9d0f85dbd938cd518ad5d01c693fa2870f24e1089552ea5c1e6683f"
     },
     "source-b19013": {
       "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b19013.dat",
@@ -258,7 +263,9 @@
       "description": "The upstream file this collection's B20002 columns were read from: one pipe-delimited row per geography, estimate (`B20002_E###`) and margin of error (`B20002_M###`) side by side, for every summary level in one national file. Universe: Population 16 years and over with earnings. Served by census.gov, not by this mirror; see [B20002](https://data.census.gov/table/ACSDT5Y2024.B20002) for the same table rendered on data.census.gov.",
       "roles": [
         "source"
-      ]
+      ],
+      "file:size": 31604299,
+      "file:checksum": "1220dc3ddd2ba5d69fd1aed8a67f90d8f1a6597cea65f4593d460dc8cee22158c6d1"
     },
     "source-b22010": {
       "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/acsdt5y2024-b22010.dat",

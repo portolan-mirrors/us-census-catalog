@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -277,7 +277,8 @@
       "roles": [
         "data"
       ],
-      "title": "People & Education — Places & CDPs (GeoParquet, national)"
+      "title": "People & Education — Places & CDPs (GeoParquet, national)",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -286,6 +287,7 @@
         "thumbnail"
       ],
       "title": "People & Education — Places & CDPs rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 79643,
       "file:checksum": "12202692b0d8a761dc982f500dee6e1e8520f9c2a8269fdd505109eb1356c1399bf1"
     },
@@ -300,7 +302,8 @@
         "place-people"
       ],
       "file:size": 86879716,
-      "file:checksum": "1220e266a103f3ceaf132eddc60808ec2297ec1dac26765b71a44865d16fda2c809e"
+      "file:checksum": "1220e266a103f3ceaf132eddc60808ec2297ec1dac26765b71a44865d16fda2c809e",
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'place-people'. The collection description states what each zoom band carries."
     },
     "styles/default": {
       "href": "./styles/default.json",

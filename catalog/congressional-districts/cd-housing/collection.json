@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 11385789,
       "file:checksum": "1220ff920ae465dc5716940d8e94f345a2df02af51bfa08454c0044e67cc4871c1da",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Housing & Rent — Congressional Districts (119th Congress) (PMTiles)",
       "pmtiles:layers": [
         "cd-housing"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'cd-housing'. The collection description states what each zoom band carries."
     },
     "cd-housing": {
       "href": "./cd-housing.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "Housing & Rent — Congressional Districts (119th Congress) (GeoParquet, national)",
       "file:size": 8882514,
-      "file:checksum": "12200ce140367d18bbd715f47275fea137431eb324697601e6485081c8d346bc0b5f"
+      "file:checksum": "12200ce140367d18bbd715f47275fea137431eb324697601e6485081c8d346bc0b5f",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "Housing & Rent — Congressional Districts (119th Congress) rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 52457,
       "file:checksum": "122061e3e337f0c74826590367954a37888124d9de5a9ba70a8f4a8dd79e77b36b83"
     },

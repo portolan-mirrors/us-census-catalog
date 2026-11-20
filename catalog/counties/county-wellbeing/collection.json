@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 23042543,
       "file:checksum": "1220745b9f13bf7e5b4ac2d3943943bb22d7eeee278eef64a6f89bf22565f69af787",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Health, Disability & Income by Race — Counties (PMTiles)",
       "pmtiles:layers": [
         "county-wellbeing"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'county-wellbeing'. The collection description states what each zoom band carries."
     },
     "county-wellbeing": {
       "href": "./county-wellbeing.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "Health, Disability & Income by Race — Counties (GeoParquet, national)",
       "file:size": 13002446,
-      "file:checksum": "122074e641a27a70a8bf4ec84337703e68ccd710500988b53902a1f84a1b50329d71"
+      "file:checksum": "122074e641a27a70a8bf4ec84337703e68ccd710500988b53902a1f84a1b50329d71",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "Health, Disability & Income by Race — Counties rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 99651,
       "file:checksum": "12209ecf9d2d4e2573b056e932a25597f44e02e8221184670b8c50d35f55e076c30b"
     },

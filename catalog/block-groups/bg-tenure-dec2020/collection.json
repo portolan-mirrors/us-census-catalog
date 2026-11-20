@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -242,7 +242,8 @@
       "file:checksum": "12202ff809e0fe42428b2ed2a2d56a9e5a80d20f35aa7ee9b14d46bd4506282c82cb",
       "roles": [
         "data"
-      ]
+      ],
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -251,6 +252,7 @@
         "thumbnail"
       ],
       "title": "Tenure (2020 Census) — Block Groups rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 92187,
       "file:checksum": "1220c91abdc030c44ce362a1ae62ae6348a3e2016fe83ed153809abd0e7504f362f4"
     },
@@ -265,7 +267,8 @@
       "file:checksum": "12200b105ad3ba81234b86432976bed25dc0f476d4168f0f47b2b3050fde829dfd08",
       "roles": [
         "visual"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'bg-tenure-dec2020'. The collection description states what each zoom band carries."
     },
     "styles/default": {
       "href": "./styles/default.json",

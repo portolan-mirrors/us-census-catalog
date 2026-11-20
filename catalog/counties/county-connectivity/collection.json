@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -126,12 +126,13 @@
       "file:size": 21430701,
       "file:checksum": "1220962879e42c3c29c754bf1b90740604a51baa2ef7d8951f0d5193047d9e3a7b49",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Commuting & Connectivity — Counties (PMTiles)",
       "pmtiles:layers": [
         "county-connectivity"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'county-connectivity'. The collection description states what each zoom band carries."
     },
     "county-connectivity": {
       "href": "./county-connectivity.parquet",
@@ -141,7 +142,8 @@
       ],
       "title": "Commuting & Connectivity — Counties (GeoParquet, national)",
       "file:size": 12979251,
-      "file:checksum": "1220357bd72f4188df8bf3e5b3e094166c033f7d3bdd40b43afd365fd386e1a7c6fa"
+      "file:checksum": "1220357bd72f4188df8bf3e5b3e094166c033f7d3bdd40b43afd365fd386e1a7c6fa",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -150,6 +152,7 @@
         "thumbnail"
       ],
       "title": "Commuting & Connectivity — Counties rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 101488,
       "file:checksum": "12205e18c91815bc3b97858501d4a106582ba03da11e77d31153dcc8b6d641b23838"
     },

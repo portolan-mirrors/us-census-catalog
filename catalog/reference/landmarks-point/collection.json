@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
@@ -139,12 +139,13 @@
       "file:checksum": "1220df3e75bf57c5df97b8c461809cbadb1f7749c4813f6f9a76ff7109039c472a53",
       "proj:code": "EPSG:4269",
       "roles": [
-        "data"
+        "visual"
       ],
       "title": "Landmarks — Point (PMTiles)",
       "pmtiles:layers": [
         "landmarks-point"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'landmarks-point'. The collection description states what each zoom band carries."
     },
     "landmarks-point": {
       "href": "./landmarks-point.parquet",
@@ -154,7 +155,8 @@
       ],
       "title": "Landmarks — Point (GeoParquet, national)",
       "file:size": 46357443,
-      "file:checksum": "1220da3fbef9063d21f467d03a4a72ed10816e6a36686b2bbaebe52588faf89c2cba"
+      "file:checksum": "1220da3fbef9063d21f467d03a4a72ed10816e6a36686b2bbaebe52588faf89c2cba",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -163,6 +165,7 @@
         "thumbnail"
       ],
       "title": "Landmarks — Point rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 80697,
       "file:checksum": "122070bdfe563e17b23c2654f8aeac6c740ea30a020a1c395d9685eaa54410dfd36a"
     },

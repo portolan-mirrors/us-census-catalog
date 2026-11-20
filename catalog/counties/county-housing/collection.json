@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -292,7 +292,8 @@
       "roles": [
         "data"
       ],
-      "title": "Housing & Rent — Counties (GeoParquet, national)"
+      "title": "Housing & Rent — Counties (GeoParquet, national)",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -301,6 +302,7 @@
         "thumbnail"
       ],
       "title": "Housing & Rent — Counties rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 97987,
       "file:checksum": "12208398f4883b079ebf3811606420fd63a0610c323e3dce5297c1a7b99d333572da"
     },
@@ -315,7 +317,8 @@
         "county-housing"
       ],
       "file:size": 22733425,
-      "file:checksum": "12206df5ff0ff070df5bf70d92f02e287e4bc88cb25e3508767952f17329636d5e32"
+      "file:checksum": "12206df5ff0ff070df5bf70d92f02e287e4bc88cb25e3508767952f17329636d5e32",
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'county-housing'. The collection description states what each zoom band carries."
     },
     "styles/default": {
       "href": "./styles/default.json",

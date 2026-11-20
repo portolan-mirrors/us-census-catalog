@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -455,7 +455,8 @@
       "file:checksum": "1220ac963f770db87e3f505762c893528083463a2a92208be40275b2474dd748c4c3",
       "roles": [
         "data"
-      ]
+      ],
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -464,6 +465,7 @@
         "thumbnail"
       ],
       "title": "Age & Sex (2020 Census) — Block Groups rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 92926,
       "file:checksum": "12202f16d2fd39871bc3eea6a45a175648bdb9ff8e50752175597ecec1580236201b"
     },
@@ -478,7 +480,8 @@
       "file:checksum": "1220540f632dd39072c7ffe8198afefa0db953ee0d3b024d5cc09dceff5b917bc14a",
       "roles": [
         "visual"
-      ]
+      ],
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'bg-age-dec2020'. The collection description states what each zoom band carries."
     },
     "styles/default": {
       "href": "./styles/default.json",

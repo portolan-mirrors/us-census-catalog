@@ -69,7 +69,7 @@
     }
   ],
   "stac_extensions": [
-    "https://schemas.portolan-sdi.org/portolan/v0.2.0/schema.json",
+    "https://schemas.portolan-sdi.org/portolan/v0.3.0/schema.json",
     "https://stac-extensions.github.io/file/v2.1.0/schema.json",
     "https://stac-extensions.github.io/table/v1.2.0/schema.json",
     "https://stac-extensions.github.io/themes/v1.0.0/schema.json",
@@ -282,7 +282,8 @@
       "roles": [
         "data"
       ],
-      "title": "Commuting & Connectivity — ZIP Code Tabulation Areas (GeoParquet, national)"
+      "title": "Commuting & Connectivity — ZIP Code Tabulation Areas (GeoParquet, national)",
+      "description": "GeoParquet with the collection's features and attributes. Every column carries a description in this collection's table:columns."
     },
     "thumbnail": {
       "href": "./thumbnail.png",
@@ -291,6 +292,7 @@
         "thumbnail"
       ],
       "title": "Commuting & Connectivity — ZIP Code Tabulation Areas rendered with the default style",
+      "description": "A rendered card of the collection's own data, drawn with the default style.",
       "file:size": 94851,
       "file:checksum": "12201d148c52360b72b08e7f84123eee465010c7d7e6096fcc838c800cf11a013aa1"
     },
@@ -305,7 +307,8 @@
         "zcta-connectivity"
       ],
       "file:size": 216372393,
-      "file:checksum": "122044b2b864c65a423a02af1e4b420cefb1a50318f108408bad207481cea36054ce"
+      "file:checksum": "122044b2b864c65a423a02af1e4b420cefb1a50318f108408bad207481cea36054ce",
+      "description": "Vector tiles rendered from the collection's GeoParquet for map display, layer 'zcta-connectivity'. The collection description states what each zoom band carries."
     },
     "styles/default": {
       "href": "./styles/default.json",
