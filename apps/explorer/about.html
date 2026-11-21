@@ -615,7 +615,7 @@ FROM bg GROUP BY 1 ORDER BY people DESC;</pre>
   <p class="intro">GeoPandas reads the same files. So does anything built on
     Arrow or GDAL — QGIS will open these URLs directly.</p>
   <div class="snip wide" data-copy data-run="python">
-<pre># pip install geopandas "fsspec[http]"
+<pre># pip install geopandas pyarrow "fsspec[http]"
 import fsspec
 import geopandas as gpd
 
