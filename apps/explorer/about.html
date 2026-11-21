@@ -18,8 +18,8 @@
   <a class="back" href="index.html">&larr; <span>Census <em>Atlas</em></span></a>
   <div class="spacer"></div>
   <a href="#llm">Ask an LLM</a>
+  <a href="#reference">What&rsquo;s in here</a>
   <a href="#queries">Queries</a>
-  <a href="#reference">Reference</a>
   <button type="button" id="themebtn" title="Switch light/dark">&#9680;</button>
 </nav>
 
@@ -332,16 +332,142 @@ Read the AGENTS.md at the catalog root before querying. It documents the join ke
   </aside>
 </section>
 
+<!-- ------------------------------------------------------------ reference -->
+<section id="reference">
+  <p class="secnum">04</p>
+  <h2>What is in here</h2>
+  <p class="intro">
+    Ten groups, 53 collections. Indicators come from the American Community
+    Survey 2020–2024 five-year release unless the collection name says
+    otherwise; collections marked <code>dec2020</code> are 2020 Decennial
+    counts, which are complete counts rather than estimates.
+  </p>
+
+  <table class="ref">
+    <thead>
+      <tr><th>Geography</th><th class="num">Rows</th><th>Themes published</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>States &amp; equivalents</td><td class="num">56</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
+      <tr><td>Counties</td><td class="num">3,235</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
+      <tr><td>Congressional districts <span>119th</span></td><td class="num">441</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
+      <tr><td>ZIP code tabulation areas</td><td class="num">33,791</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
+      <tr><td>Places &amp; CDPs</td><td class="num">32,612</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
+      <tr><td>Census tracts</td><td class="num">85,184</td><td>people, income, housing, connectivity, wellbeing, + 3 decennial</td></tr>
+      <tr><td>Block groups</td><td class="num">242,298</td><td>people, income, housing, connectivity, + 3 decennial</td></tr>
+      <tr><td>Census blocks <span>2020 counts</span></td><td class="num">8,174,955</td><td>race, voting-age population, housing occupancy</td></tr>
+      <tr><td>Trends <span>2015–2024</span></td><td class="num">6,470 <small>counties</small></td><td>12 indicators across two ACS releases, with change</td></tr>
+      <tr><td>Reference geography</td><td class="num">1,215,746</td><td>urban areas, area and point landmarks, geography crosswalks</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="subhead">How a question becomes a query</h3>
+  <p class="intro">
+    None of the question shapes above need you to know this. It is
+    here because the mechanisms are simple, and knowing them tells you what
+    else you could ask.
+  </p>
+
+  <table class="ref mech">
+    <thead>
+      <tr><th>To ask about</th><th>The mechanism</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Two themes at once</td>
+        <td>Income, people, housing, connectivity and wellbeing are separate
+          files at each geography, joined 1:1 on <code>geoid</code>.</td>
+      </tr>
+      <tr>
+        <td>Change over time</td>
+        <td>The trends collections carry both ACS releases in a
+          <code>period</code> column, with a <code>chg_</code> column per
+          indicator so the difference is already computed.</td>
+      </tr>
+      <tr>
+        <td>A bigger or smaller area</td>
+        <td><code>geoid</code> nests by prefix: a block group&rsquo;s first 11
+          characters are its tract, its first 5 its county, its first 2 its
+          state. No crosswalk needed.</td>
+      </tr>
+      <tr>
+        <td>A point on the map</td>
+        <td><code>ST_Contains</code> against the geometry column. The
+          geometries are in the files, so no geocoder and no spatial database
+          are involved.</td>
+      </tr>
+      <tr>
+        <td>Only one city</td>
+        <td>A <code>bbox</code> column lets the reader skip every row group
+          outside the window, so a national file answers a local question
+          without being downloaded.</td>
+      </tr>
+      <tr>
+        <td>Your own data</td>
+        <td>DuckDB reads your local CSV and the remote GeoParquet in the same
+          query. Nothing is uploaded.</td>
+      </tr>
+      <tr>
+        <td>Another catalog</td>
+        <td>Two URLs in one query. Check the CRS of each side first &mdash;
+          publishers differ, and a silent mismatch returns zero rows rather
+          than an error.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="ref-notes">
+    <article>
+      <h3>The join key</h3>
+      <p>
+        <code>geoid</code> is the Census Bureau's GEOID, and it nests by
+        prefix. A block group's first 11 characters are its tract; the first
+        5 are its county; the first 2 are its state. That is how you roll a
+        tract question up to a county, or push a county question down to
+        block groups, without a crosswalk.
+      </p>
+    </article>
+    <article>
+      <h3>Suffixes on columns</h3>
+      <p>
+        <code>_moe</code> is the 90% margin of error for the estimate beside
+        it. <code>_cv</code> is the coefficient of variation, a quick
+        reliability check: above about 30, treat the estimate as weak.
+        <code>pct_</code> columns are percentages, not proportions —
+        <code>4.23</code> means 4.23%.
+      </p>
+    </article>
+    <article>
+      <h3>Per-collection guides</h3>
+      <p>
+        Every collection ships a <code>README.md</code> and an
+        <code>AGENTS.md</code> next to its data, listing each column with its
+        source census table. Start from the
+        <a href="https://data.source.coop/portolan-mirrors/us-census-catalog/AGENTS.md">root
+        AGENTS.md</a> and follow it down.
+      </p>
+    </article>
+  </div>
+</section>
+
 <!-- ------------------------------------------------------------ queries -->
 <section id="queries">
-  <p class="secnum">04</p>
+  <p class="secnum">05</p>
   <h2>Queries that run</h2>
   <p class="intro">
-    Every example below was executed against the published files, over the
-    public internet, with no credentials. Install DuckDB and paste one in.
-    Each reads only the bytes it needs, so none of them download the whole
-    table.
+    You do not need any of this to use the data — asking in plain language
+    works. It is here for the reader who wants to see the SQL, and as proof
+    that the recipes are real: every one was executed against the published
+    files, over the public internet, with no credentials, and CI runs them
+    all again on every change.
   </p>
+
+  <details id="queries-detail" class="fold">
+    <summary>
+      <span class="fold-label">Show the queries</span>
+      <span class="fold-meta">8 worked examples &middot; DuckDB and Python</span>
+    </summary>
+    <div class="fold-body">
 
   <div class="q" data-collection="counties/county-income"
        data-cols="name,state,median_hh_income,pct_below_poverty">
@@ -629,125 +755,10 @@ with fsspec.open(url) as f:
 
 gdf.nlargest(5, "median_hh_income")[["name", "median_hh_income"]]</pre>
   </div>
+    </div>
+  </details>
 </section>
 
-<!-- ------------------------------------------------------------ reference -->
-<section id="reference">
-  <p class="secnum">05</p>
-  <h2>What is in here</h2>
-  <p class="intro">
-    Ten groups, 53 collections. Indicators come from the American Community
-    Survey 2020–2024 five-year release unless the collection name says
-    otherwise; collections marked <code>dec2020</code> are 2020 Decennial
-    counts, which are complete counts rather than estimates.
-  </p>
-
-  <table class="ref">
-    <thead>
-      <tr><th>Geography</th><th class="num">Rows</th><th>Themes published</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>States &amp; equivalents</td><td class="num">56</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
-      <tr><td>Counties</td><td class="num">3,235</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
-      <tr><td>Congressional districts <span>119th</span></td><td class="num">441</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
-      <tr><td>ZIP code tabulation areas</td><td class="num">33,791</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
-      <tr><td>Places &amp; CDPs</td><td class="num">32,612</td><td>boundaries, people, income, housing, connectivity, wellbeing</td></tr>
-      <tr><td>Census tracts</td><td class="num">85,184</td><td>people, income, housing, connectivity, wellbeing, + 3 decennial</td></tr>
-      <tr><td>Block groups</td><td class="num">242,298</td><td>people, income, housing, connectivity, + 3 decennial</td></tr>
-      <tr><td>Census blocks <span>2020 counts</span></td><td class="num">8,174,955</td><td>race, voting-age population, housing occupancy</td></tr>
-      <tr><td>Trends <span>2015–2024</span></td><td class="num">6,470 <small>counties</small></td><td>12 indicators across two ACS releases, with change</td></tr>
-      <tr><td>Reference geography</td><td class="num">1,215,746</td><td>urban areas, area and point landmarks, geography crosswalks</td></tr>
-    </tbody>
-  </table>
-
-  <h3 class="subhead">How a question becomes a query</h3>
-  <p class="intro">
-    None of the question shapes in section 03 need you to know this. It is
-    here because the mechanisms are simple, and knowing them tells you what
-    else you could ask.
-  </p>
-
-  <table class="ref mech">
-    <thead>
-      <tr><th>To ask about</th><th>The mechanism</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Two themes at once</td>
-        <td>Income, people, housing, connectivity and wellbeing are separate
-          files at each geography, joined 1:1 on <code>geoid</code>.</td>
-      </tr>
-      <tr>
-        <td>Change over time</td>
-        <td>The trends collections carry both ACS releases in a
-          <code>period</code> column, with a <code>chg_</code> column per
-          indicator so the difference is already computed.</td>
-      </tr>
-      <tr>
-        <td>A bigger or smaller area</td>
-        <td><code>geoid</code> nests by prefix: a block group&rsquo;s first 11
-          characters are its tract, its first 5 its county, its first 2 its
-          state. No crosswalk needed.</td>
-      </tr>
-      <tr>
-        <td>A point on the map</td>
-        <td><code>ST_Contains</code> against the geometry column. The
-          geometries are in the files, so no geocoder and no spatial database
-          are involved.</td>
-      </tr>
-      <tr>
-        <td>Only one city</td>
-        <td>A <code>bbox</code> column lets the reader skip every row group
-          outside the window, so a national file answers a local question
-          without being downloaded.</td>
-      </tr>
-      <tr>
-        <td>Your own data</td>
-        <td>DuckDB reads your local CSV and the remote GeoParquet in the same
-          query. Nothing is uploaded.</td>
-      </tr>
-      <tr>
-        <td>Another catalog</td>
-        <td>Two URLs in one query. Check the CRS of each side first &mdash;
-          publishers differ, and a silent mismatch returns zero rows rather
-          than an error.</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="ref-notes">
-    <article>
-      <h3>The join key</h3>
-      <p>
-        <code>geoid</code> is the Census Bureau's GEOID, and it nests by
-        prefix. A block group's first 11 characters are its tract; the first
-        5 are its county; the first 2 are its state. That is how you roll a
-        tract question up to a county, or push a county question down to
-        block groups, without a crosswalk.
-      </p>
-    </article>
-    <article>
-      <h3>Suffixes on columns</h3>
-      <p>
-        <code>_moe</code> is the 90% margin of error for the estimate beside
-        it. <code>_cv</code> is the coefficient of variation, a quick
-        reliability check: above about 30, treat the estimate as weak.
-        <code>pct_</code> columns are percentages, not proportions —
-        <code>4.23</code> means 4.23%.
-      </p>
-    </article>
-    <article>
-      <h3>Per-collection guides</h3>
-      <p>
-        Every collection ships a <code>README.md</code> and an
-        <code>AGENTS.md</code> next to its data, listing each column with its
-        source census table. Start from the
-        <a href="https://data.source.coop/portolan-mirrors/us-census-catalog/AGENTS.md">root
-        AGENTS.md</a> and follow it down.
-      </p>
-    </article>
-  </div>
-</section>
 
 </main>
 

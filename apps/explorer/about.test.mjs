@@ -208,6 +208,37 @@ test("the cross-catalog examples name catalogs in the registry", () => {
   assert.ok(html.includes("portolan-sdi/portolan-registry"), "registry link missing");
 });
 
+test("what is in here comes before the queries", () => {
+  const ref = html.indexOf('<section id="reference"');
+  const qry = html.indexOf('<section id="queries"');
+  assert.ok(ref > 0 && qry > 0, "both sections should exist");
+  assert.ok(ref < qry, "the reference section should precede the queries section");
+});
+
+test("the section numbers run in order", () => {
+  const nums = [...html.matchAll(/<p class="secnum">(\d+)<\/p>/g)].map((m) => m[1]);
+  assert.deepEqual(nums, ["01", "02", "03", "04", "05"]);
+});
+
+test("the queries section starts collapsed", () => {
+  // It is long and optional, so it must not be open on arrival. A bare
+  // <details> defaults to closed; an `open` attribute would undo that.
+  const fold = /<details id="queries-detail"([^>]*)>/.exec(html);
+  assert.ok(fold, "the queries fold is missing");
+  assert.ok(!/\bopen\b/.test(fold[1]), "the queries fold ships open");
+  assert.ok(
+    html.includes('class="fold-label"'),
+    "the fold needs a label the script can retitle",
+  );
+});
+
+test("every query example sits inside the fold", () => {
+  const body = html.slice(html.indexOf('<div class="fold-body">'));
+  const inFold = (body.match(/<div class="q"/g) ?? []).length;
+  const total = (html.match(/<div class="q"/g) ?? []).length;
+  assert.equal(inFold, total, "a query example escaped the collapsible body");
+});
+
 test("copyLabel covers its states and falls back to idle", () => {
   assert.equal(copyLabel("idle"), "Copy");
   assert.equal(copyLabel("done"), "Copied");

@@ -616,3 +616,64 @@ table.ref tbody tr:hover td { background: var(--accent-soft); }
    first column is prose, not a nowrap label like the row-count table's. */
 table.ref.mech td:first-child { white-space: normal; width: 30%; }
 table.ref.mech td { font-size: 13px; }
+
+/* ------------------------------------------------------------ fold */
+/* The queries section is closed on arrival: a reader who only wants to ask
+   questions in plain language never has to scroll past 300 lines of SQL. */
+details.fold { margin: 4px 0 0; }
+details.fold > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 15px 20px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  list-style: none;
+  transition: border-color 0.12s ease-out;
+}
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary:hover { border-color: var(--accent); }
+details.fold > summary::before {
+  content: "+";
+  font-family: var(--mono);
+  font-size: 17px;
+  line-height: 1;
+  color: var(--accent);
+  transform: translateY(1px);
+}
+details.fold[open] > summary::before { content: "\2212"; }
+details.fold[open] > summary {
+  border-radius: 10px 10px 0 0;
+  border-bottom-color: transparent;
+}
+.fold-label {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.fold-meta {
+  font-size: 12px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+.fold-body {
+  padding: 2px 20px 20px;
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+/* Inside the fold the first example needs no heavy rule: the summary above
+   it already separates the section. */
+.fold-body .q:first-of-type { border-top: 0; padding-top: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  details.fold > summary { transition: none; }
+}
+@media (max-width: 620px) {
+  details.fold > summary { padding: 13px 15px; gap: 10px; flex-wrap: wrap; }
+  .fold-body { padding: 2px 14px 16px; }
+}

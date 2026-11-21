@@ -58,3 +58,26 @@ for (const box of document.querySelectorAll("[data-copy]")) {
   });
   box.appendChild(btn);
 }
+
+// The queries section ships closed. A link to it — the nav, or a URL someone
+// shared — should open it, or the reader lands on a collapsed heading and
+// sees nothing. Covers both the initial hash and later in-page clicks.
+const queriesFold = document.getElementById("queries-detail");
+
+function openFoldFor(hash) {
+  if (hash === "#queries" && queriesFold) queriesFold.open = true;
+}
+
+if (queriesFold) {
+  const label = queriesFold.querySelector(".fold-label");
+  queriesFold.addEventListener("toggle", () => {
+    if (label) {
+      label.textContent = queriesFold.open
+        ? "Hide the queries"
+        : "Show the queries";
+    }
+  });
+}
+
+openFoldFor(location.hash);
+window.addEventListener("hashchange", () => openFoldFor(location.hash));
