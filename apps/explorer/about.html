@@ -183,152 +183,152 @@
   <p class="secnum">03</p>
   <h2>Querying this with an LLM</h2>
   <p class="intro">
-    This catalog is unusually good at being handed to a language model, for a
-    reason that is structural rather than clever: <strong>the data describes
-    itself in text, and the data itself is reachable by URL.</strong> A model
-    can read the STAC JSON to learn what exists and what the columns mean,
-    then write a query that runs against the files without anything being
-    loaded or provisioned first.
+    You can ask questions of this data in plain language and get real answers
+    back, because the catalog describes itself in text and every file is
+    reachable by URL. An assistant reads what exists, writes the query and
+    runs it. Nothing is loaded, uploaded or provisioned first.
   </p>
 
   <div class="steps">
     <article>
       <p class="stepnum">Step 1</p>
-      <h3>Give it the catalog</h3>
+      <h3>Install the Portolan skills</h3>
       <p>
-        Paste this into any assistant that can fetch a URL. It is the whole
-        setup — one address, from which everything else is discoverable.
+        The skills teach an assistant how to read a Portolan catalog: how to
+        navigate the metadata, how to query GeoParquet with DuckDB, and how to
+        join data across catalogs. In Claude Code:
       </p>
       <div class="snip" data-copy>
-        <pre>Read https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json and the AGENTS.md beside it. It is a STAC catalog of US Census data published as GeoParquet and PMTiles on object storage. Tell me which collections exist and what columns they carry.</pre>
+<pre>/plugin marketplace add portolan-sdi/portolan-skills
+/plugin install portolan</pre>
       </div>
       <p class="aside-note">
-        <code>AGENTS.md</code> is written for exactly this: a guide at the
-        catalog root, and one in each collection, stating the join keys,
-        the column meanings and the gotchas. Every claim in it is quoted
-        from the Census Bureau or measured from the data.
+        Other assistants can read the same guidance directly from
+        <a href="https://github.com/portolan-sdi/portolan-skills">the skills
+        repository</a>.
       </p>
     </article>
 
     <article>
       <p class="stepnum">Step 2</p>
-      <h3>Ask in plain language</h3>
+      <h3>Point it at the catalog</h3>
       <p>
-        Then ask for the answer, not the query. A capable model will pick the
-        right collection, read the column list from the STAC document, write
-        the DuckDB SQL and run it — if it has a tool that can.
+        One prompt is the whole setup. It names the skill to read and the
+        address to start from, and everything else is discoverable from
+        there.
       </p>
       <div class="snip" data-copy>
-        <pre>Using that catalog, which 10 counties have the highest share of households with no internet subscription, and what is the median household income in each? Query the GeoParquet directly with DuckDB.</pre>
+<pre>Read the reading-portolan skill, then explore this Portolan catalog: https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json
+
+Read the AGENTS.md at the catalog root before querying. It documents the join keys, the column meanings and the traps. Then tell me what is in here.</pre>
       </div>
       <p class="aside-note">
-        No tool? Ask it to write the query and run it yourself — the SQL in
-        <a href="#queries">section 04</a> is the shape it will produce.
+        <code>AGENTS.md</code> sits at the catalog root and in every
+        collection. It states the join keys, documents each column against
+        the census table it comes from, and spells out how to read the
+        margins of error. Every claim in it is quoted from the Census Bureau
+        or measured from the data, so an assistant that reads it first does
+        not have to guess.
       </p>
     </article>
 
     <article>
       <p class="stepnum">Step 3</p>
-      <h3>Keep it honest</h3>
+      <h3>Ask for the answer</h3>
       <p>
-        The failure mode of an LLM on a dataset is a confident invented column
-        name. Two habits catch it:
+        Then just ask. Ask for the finding, not for the SQL — a capable
+        assistant picks the collection, writes the query, runs it and tells
+        you what it found.
       </p>
-      <ul>
-        <li>Tell it to list the columns from the STAC document
-          <em>before</em> writing SQL, and to use only those.</li>
-        <li>Ask for the row count and a few sample rows alongside any
-          aggregate, so a silently empty result is visible.</li>
-      </ul>
+      <div class="snip" data-copy>
+<pre>Which 10 counties have the highest share of households with no internet subscription, and what is the median household income in each?</pre>
+      </div>
       <p class="aside-note">
-        While writing this page, a draft query used
-        <code>pct_broadband</code>. That column does not exist; the real one
-        is <code>pct_no_internet</code>, and it runs the other way round.
-        Every query on this page was executed against the live files before
-        it was published.
+        The guide tells it the rest: to report the margin of error, to keep
+        unreliable small areas out of a ranking, and to say what the number
+        is about. You do not have to ask for any of that.
       </p>
     </article>
   </div>
 
   <h3 class="subhead">Questions that suit this data</h3>
   <p class="intro">
-    The catalog is strongest on comparison — across places, across scales and
-    across time. Some shapes that work well, each a prompt you can paste:
+    This data is strongest on comparison — between places, across scales and
+    over time. Each of these is a prompt you can paste as it stands.
   </p>
 
   <div class="qgrid">
     <article>
-      <p class="qkind">Ranking &amp; outliers</p>
+      <p class="qkind">Ranking</p>
       <p class="qex">&ldquo;Which 20 census tracts in Texas have the highest rent
-        burden, and how does each compare to its county's median?&rdquo;</p>
-      <p class="qwhy">One table, one sort. The cheapest kind of question
-        here, and a good first test that your setup works.</p>
+        burden, and how does each compare to its county&rsquo;s median?&rdquo;</p>
     </article>
     <article>
-      <p class="qkind">Relationships across themes</p>
-      <p class="qex">&ldquo;Across all counties, what is the correlation between the
-        share of adults with a bachelor's degree and median household income?
-        Which counties are the biggest outliers from that trend?&rdquo;</p>
-      <p class="qwhy">Themes live in separate collections, joined on
-        <code>geoid</code>. Income, people, housing, connectivity and
-        wellbeing all share that key at each geography.</p>
+      <p class="qkind">One thing against another</p>
+      <p class="qex">&ldquo;Across all counties, what is the relationship between
+        the share of adults with a bachelor&rsquo;s degree and median household
+        income? Which counties are the biggest exceptions?&rdquo;</p>
     </article>
     <article>
       <p class="qkind">Change over time</p>
       <p class="qex">&ldquo;Which counties saw median gross rent rise most between
-        the 2015–2019 and 2020–2024 ACS releases, and did their poverty rate
-        move with it?&rdquo;</p>
-      <p class="qwhy">The trends collections carry both periods in a
-        <code>period</code> column, plus a <code>chg_</code> column per
-        indicator so the difference is already computed.</p>
+        the 2015–2019 and 2020–2024 releases, and did their poverty rate move
+        with it?&rdquo;</p>
     </article>
     <article>
       <p class="qkind">Somewhere specific</p>
       <p class="qex">&ldquo;What are the demographics of the census tract
-        containing 40.7128, -74.0060, and how does it differ from the
+        containing 40.7128, -74.0060, and how do they differ from the
         surrounding county?&rdquo;</p>
-      <p class="qwhy">Point-in-polygon with <code>ST_Contains</code>, then a
-        prefix of the tract <code>geoid</code> gives you the county. No
-        geocoder needed.</p>
     </article>
     <article>
-      <p class="qkind">Across scales</p>
+      <p class="qkind">Zooming in</p>
       <p class="qex">&ldquo;Within Cook County, Illinois, how much does the poverty
-        rate vary between block groups, and which share the most and least
+        rate vary between neighbourhoods, and which have the most and least
         internet access?&rdquo;</p>
-      <p class="qwhy">The same indicators are published from states down to
-        block groups, and <code>geoid</code> nests: a block group's first
-        five characters are its county.</p>
     </article>
     <article>
-      <p class="qkind">Joined to your own data</p>
+      <p class="qkind">Your own data alongside</p>
       <p class="qex">&ldquo;Here is a CSV of our store locations. For each one, give
         me the median income and population density of its census tract.&rdquo;</p>
-      <p class="qwhy">DuckDB can read your local file and the remote
-        GeoParquet in the same query. Nothing has to be uploaded anywhere.</p>
+    </article>
+    <article>
+      <p class="qkind">Another catalog alongside</p>
+      <p class="qex">&ldquo;Using the TriMet catalog in the Portolan registry, which
+        Portland neighbourhoods have the most transit stops, and do the
+        people there actually commute by transit?&rdquo;</p>
+    </article>
+    <article>
+      <p class="qkind">A question nobody published</p>
+      <p class="qex">&ldquo;How many people in Harris County, Texas live in a FEMA
+        high-risk flood zone, and are they poorer than the county as a
+        whole?&rdquo;</p>
     </article>
   </div>
 
-  <aside class="callout warn">
-    <h3>What this data cannot tell you</h3>
+  <aside class="callout">
+    <h3>It already knows the traps</h3>
     <p>
-      Ask an LLM for a causal story and it will happily write one. The data
-      does not support it. Three limits worth putting in your prompt:
+      Census data has a handful of ways to mislead you, and an assistant that
+      reads the catalog&rsquo;s <code>AGENTS.md</code> is warned about all of them
+      before it writes a line of SQL. Three it will tell you about:
     </p>
     <ul>
-      <li><strong>These are estimates with error bars.</strong> Every ACS
-        value has a <code>_moe</code> column beside it (90% margin of error),
-        and some have a <code>_cv</code>. At tract and block-group level the
-        margin is often large enough to swamp the difference you are
-        comparing. Ask for the MOE alongside the estimate.</li>
-      <li><strong>Boundaries move.</strong> Tracts were redrawn for 2020, so a
-        2015–2019 tract is not always the same ground as its 2020–2024
-        namesake. The trends collections carry a <code>geo_change</code> flag
-        for this; counties and states are far more stable.</li>
-      <li><strong>Correlation across areas is not a fact about people.</strong>
-        Two indicators moving together across tracts says nothing about any
-        individual in them.</li>
+      <li><strong>These are estimates, not counts.</strong> The typical
+        neighbourhood poverty rate in this data is 9.3% give or take 7.4
+        points. Many differences people want to rank are smaller than the
+        error bar.</li>
+      <li><strong>Boundaries move.</strong> Tracts were redrawn for 2020, so
+        about a third of them are not the same ground in the two periods.
+        Change figures have to account for that.</li>
+      <li><strong>These are facts about places, not people.</strong> The
+        income of a neighbourhood is not the income of anyone in it.</li>
     </ul>
+    <p class="aside-note">
+      Read it yourself:
+      <a href="https://data.source.coop/portolan-mirrors/us-census-catalog/AGENTS.md">AGENTS.md</a>
+      at the catalog root.
+    </p>
   </aside>
 </section>
 
@@ -348,7 +348,7 @@
     <h3>The highest-income counties in the country</h3>
     <p>The simplest shape: one remote file, sorted. Returns in a second or
       two, having read two columns out of a 13&nbsp;MB table.</p>
-    <div class="snip" data-copy>
+    <div class="snip" data-copy data-run="duckdb">
 <pre>INSTALL spatial; LOAD spatial; INSTALL httpfs; LOAD httpfs;
 
 SELECT name, state, median_hh_income, pct_below_poverty
@@ -377,7 +377,7 @@ LIMIT 5;</pre>
     <p>Income and connectivity are separate collections. <code>geoid</code>
       joins them — and joins either to any other theme at the same
       geography.</p>
-    <div class="snip" data-copy>
+    <div class="snip" data-copy data-run="duckdb">
 <pre>LOAD spatial; LOAD httpfs;
 SET VARIABLE base = 'https://data.source.coop/portolan-mirrors/us-census-catalog';
 
@@ -408,7 +408,7 @@ LIMIT 4;</pre>
     <p>The trends collections hold both periods. Filter to one
       <code>period</code> and the <code>chg_</code> columns give you the
       movement without a self-join.</p>
-    <div class="snip" data-copy>
+    <div class="snip" data-copy data-run="duckdb">
 <pre>LOAD spatial; LOAD httpfs;
 
 SELECT name, period, median_gross_rent, chg_median_gross_rent
@@ -435,7 +435,7 @@ LIMIT 4;</pre>
     <h3>Which tract contains this point</h3>
     <p>A spatial predicate against 85,184 tract geometries, straight over
       HTTPS. No geocoder, no PostGIS, no upload.</p>
-    <div class="snip" data-copy>
+    <div class="snip" data-copy data-run="duckdb">
 <pre>LOAD spatial; LOAD httpfs;
 
 SELECT geoid, name, median_hh_income
@@ -458,7 +458,7 @@ WHERE ST_Contains(geometry, ST_Point(-122.4862, 37.7694));</pre>
       column lets DuckDB skip every row group outside the window, so a
       national table answers a Manhattan question in about seven seconds
       without being downloaded.</p>
-    <div class="snip" data-copy>
+    <div class="snip" data-copy data-run="duckdb">
 <pre>LOAD spatial; LOAD httpfs;
 
 SELECT count(*) AS tracts_in_bbox
@@ -482,9 +482,10 @@ WHERE bbox.xmin > -74.02 AND bbox.xmax < -73.90
       touches two files. A Hive-partitioned glob needs the anonymous S3
       endpoint: the HTTPS gateway cannot list a directory, so a glob over it
       returns 404.</p>
-    <div class="snip" data-copy>
+    <div class="snip" data-copy data-run="duckdb">
 <pre>LOAD spatial; LOAD httpfs;
 SET s3_region = 'us-west-2';
+SET s3_url_style = 'path';   -- the bucket name has dots; vhost URLs fail TLS
 
 SELECT state, count(*) AS blocks, sum(pop_total) AS people
 FROM read_parquet(
@@ -505,14 +506,126 @@ ORDER BY state;</pre>
     </details>
   </div>
 
+  <h3 class="subhead">Joining another catalog</h3>
+  <p class="intro">
+    Nothing about this is special to the census. Every catalog in the
+    <a href="https://github.com/portolan-sdi/portolan-registry">Portolan
+    registry</a> publishes files the same way, so a join across two of them is
+    one query against two URLs. Neither publisher has to agree to anything,
+    and no data moves anywhere.
+  </p>
+
+  <div class="q" data-collection="tracts/tract-connectivity"
+       data-cols="geoid,name,pct_commute_transit,pct_hh_no_vehicle">
+    <h3>Transit stops against transit commuting, Portland</h3>
+    <p>
+      Census tracts from this catalog, bus and rail stops from the
+      <a href="https://data.source.coop/cholmes/trimet/catalog.json">TriMet
+      catalog</a>. TriMet publishes in Oregon State Plane feet, so the stops
+      are reprojected in the query &mdash; the one wrinkle worth knowing about
+      a cross-catalog join.
+    </p>
+    <div class="snip" data-copy data-run="duckdb">
+<pre>LOAD spatial; LOAD httpfs;
+
+WITH pdx AS (
+  SELECT geoid, name, geometry, pct_commute_transit, pct_hh_no_vehicle
+  FROM read_parquet('https://data.source.coop/portolan-mirrors/us-census-catalog/tracts/tract-connectivity/tract-connectivity.parquet')
+  WHERE geoid LIKE '41051%'          -- Multnomah County, Oregon
+),
+stops AS (
+  SELECT stop_id,
+         ST_Transform(geometry, 'EPSG:2913', 'EPSG:4326', always_xy := true) AS geom
+  FROM read_parquet('https://data.source.coop/cholmes/trimet/stops/stops.parquet')
+)
+SELECT p.name, p.pct_commute_transit, p.pct_hh_no_vehicle, count(s.stop_id) AS stops
+FROM pdx p LEFT JOIN stops s ON ST_Contains(p.geometry, s.geom)
+GROUP BY ALL ORDER BY stops DESC LIMIT 5;</pre>
+    </div>
+    <details class="result">
+      <summary>Result</summary>
+<pre>┌──────────────────────────────────────────────┬─────────────────────┬───────────────────┬───────┐
+│                     name                     │ pct_commute_transit │ pct_hh_no_vehicle │ stops │
+├──────────────────────────────────────────────┼─────────────────────┼───────────────────┼───────┤
+│ Census Tract 72.02, Multnomah County, Oregon │                1.62 │              1.01 │    88 │
+│ Census Tract 43, Multnomah County, Oregon    │                 0.0 │              4.11 │    76 │
+│ Census Tract 102, Multnomah County, Oregon   │                0.59 │              4.07 │    67 │
+│ Census Tract 23.03, Multnomah County, Oregon │               18.14 │             38.05 │    59 │
+│ Census Tract 73, Multnomah County, Oregon    │               10.76 │               0.0 │    55 │
+└──────────────────────────────────────────────┴─────────────────────┴───────────────────┴───────┘</pre>
+    </details>
+    <p class="aside-note">
+      The most-served tract barely commutes by transit; the tract with 59
+      stops sends 18% of its commuters on it and has 38% of households
+      without a car. Stop counts are not service, and this is the kind of
+      question that has no published answer to look up.
+    </p>
+  </div>
+
+  <div class="q" data-collection="block-groups/bg-income"
+       data-cols="geoid,population,median_hh_income">
+    <h3>Who lives in the floodplain, Harris County</h3>
+    <p>
+      Census block groups here, flood zones from the
+      <a href="https://parquetry.geomermaids.com/nfhl/catalog/catalog.json">FEMA
+      National Flood Hazard Layer catalog</a>, which publishes one file per
+      county. A block group counts as at risk when its centroid falls inside a
+      FEMA Special Flood Hazard Area.
+    </p>
+    <div class="snip" data-copy data-run="duckdb">
+<pre>LOAD spatial; LOAD httpfs;
+
+WITH bg AS (
+  SELECT geoid, population, median_hh_income, ST_Centroid(geometry) AS pt
+  FROM read_parquet('https://data.source.coop/portolan-mirrors/us-census-catalog/block-groups/bg-income/bg-income.parquet')
+  WHERE geoid LIKE '48201%'          -- Harris County, Texas
+),
+sfha AS (
+  -- FEMA publishes EPSG:4269, this catalog OGC:CRS84. Reconcile them or
+  -- DuckDB refuses the comparison.
+  SELECT ST_Transform(geometry, 'EPSG:4269', 'OGC:CRS84', always_xy := true) AS geom
+  FROM read_parquet('https://parquetry.geomermaids.com/nfhl/latest/state=TX/48201C.parquet')
+  WHERE sfha                          -- Special Flood Hazard Area
+)
+SELECT
+  CASE WHEN EXISTS (SELECT 1 FROM sfha f WHERE ST_Contains(f.geom, bg.pt))
+       THEN 'high-risk flood zone' ELSE 'outside it' END AS area,
+  count(*) AS block_groups,
+  sum(population) AS people,
+  round(median(median_hh_income)) AS median_income
+FROM bg GROUP BY 1 ORDER BY people DESC;</pre>
+    </div>
+    <details class="result">
+      <summary>Result</summary>
+<pre>┌──────────────────────┬──────────────┬─────────┬───────────────┐
+│         area         │ block_groups │ people  │ median_income │
+├──────────────────────┼──────────────┼─────────┼───────────────┤
+│ outside it           │         2468 │ 4242605 │       72764.0 │
+│ high-risk flood zone │          362 │  595698 │       68857.0 │
+└──────────────────────┴──────────────┴─────────┴───────────────┘</pre>
+    </details>
+    <p class="aside-note">
+      A centroid is in or out, so this counts whole block groups and will
+      miss people near a zone edge. It is an estimate of the order of
+      magnitude, not a flood-insurance determination.
+    </p>
+  </div>
+
   <h3 class="subhead">Python, if you would rather</h3>
   <p class="intro">GeoPandas reads the same files. So does anything built on
     Arrow or GDAL — QGIS will open these URLs directly.</p>
-  <div class="snip wide" data-copy>
-<pre>import geopandas as gpd
+  <div class="snip wide" data-copy data-run="python">
+<pre>import fsspec
+import geopandas as gpd
 
 base = "https://data.source.coop/portolan-mirrors/us-census-catalog"
-gdf = gpd.read_parquet(f"{base}/counties/county-income/county-income.parquet")
+url = f"{base}/counties/county-income/county-income.parquet"
+
+# pyarrow does not resolve https:// on its own, so open the URL with fsspec
+# and hand GeoPandas the file object. Naming columns keeps the read small.
+with fsspec.open(url) as f:
+    gdf = gpd.read_parquet(f, columns=["name", "median_hh_income", "geometry"])
+
 gdf.nlargest(5, "median_hh_income")[["name", "median_hh_income"]]</pre>
   </div>
 </section>
@@ -543,6 +656,61 @@ gdf.nlargest(5, "median_hh_income")[["name", "median_hh_income"]]</pre>
       <tr><td>Census blocks <span>2020 counts</span></td><td class="num">8,174,955</td><td>race, voting-age population, housing occupancy</td></tr>
       <tr><td>Trends <span>2015–2024</span></td><td class="num">6,470 <small>counties</small></td><td>12 indicators across two ACS releases, with change</td></tr>
       <tr><td>Reference geography</td><td class="num">1,215,746</td><td>urban areas, area and point landmarks, geography crosswalks</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="subhead">How a question becomes a query</h3>
+  <p class="intro">
+    None of the question shapes in section 03 need you to know this. It is
+    here because the mechanisms are simple, and knowing them tells you what
+    else you could ask.
+  </p>
+
+  <table class="ref mech">
+    <thead>
+      <tr><th>To ask about</th><th>The mechanism</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Two themes at once</td>
+        <td>Income, people, housing, connectivity and wellbeing are separate
+          files at each geography, joined 1:1 on <code>geoid</code>.</td>
+      </tr>
+      <tr>
+        <td>Change over time</td>
+        <td>The trends collections carry both ACS releases in a
+          <code>period</code> column, with a <code>chg_</code> column per
+          indicator so the difference is already computed.</td>
+      </tr>
+      <tr>
+        <td>A bigger or smaller area</td>
+        <td><code>geoid</code> nests by prefix: a block group&rsquo;s first 11
+          characters are its tract, its first 5 its county, its first 2 its
+          state. No crosswalk needed.</td>
+      </tr>
+      <tr>
+        <td>A point on the map</td>
+        <td><code>ST_Contains</code> against the geometry column. The
+          geometries are in the files, so no geocoder and no spatial database
+          are involved.</td>
+      </tr>
+      <tr>
+        <td>Only one city</td>
+        <td>A <code>bbox</code> column lets the reader skip every row group
+          outside the window, so a national file answers a local question
+          without being downloaded.</td>
+      </tr>
+      <tr>
+        <td>Your own data</td>
+        <td>DuckDB reads your local CSV and the remote GeoParquet in the same
+          query. Nothing is uploaded.</td>
+      </tr>
+      <tr>
+        <td>Another catalog</td>
+        <td>Two URLs in one query. Check the CRS of each side first &mdash;
+          publishers differ, and a silent mismatch returns zero rows rather
+          than an error.</td>
+      </tr>
     </tbody>
   </table>
 

@@ -23,6 +23,12 @@
       "title": "Open in the Portolan Browser (interactive map)"
     },
     {
+      "rel": "alternate",
+      "href": "https://portolan-mirrors.github.io/us-census-catalog/#c=tracts/tract-household-dec2020",
+      "type": "text/html",
+      "title": "Open in the Census Atlas (catalog explorer app)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -66,12 +72,6 @@
       "pmtiles:layers": [
         "tract-household-dec2020"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://portolan-mirrors.github.io/us-census-catalog/#c=tracts/tract-household-dec2020",
-      "type": "text/html",
-      "title": "Open in the Census Atlas (catalog explorer app)"
     }
   ],
   "stac_extensions": [

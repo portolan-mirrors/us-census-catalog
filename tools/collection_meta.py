@@ -1505,7 +1505,8 @@ def _blocks_description(n: int) -> str:
         "under `state_fips=<FIPS>/`, one STAC item each with its own bbox "
         "and row count. Pull one state and you download one file. To query "
         "all 52 as one table use the glob over the anonymous S3 endpoint "
-        "(`SET s3_region='us-west-2'; ... read_parquet('s3://us-west-2."
+        "(`SET s3_region='us-west-2'; SET s3_url_style='path'; ... "
+        "read_parquet('s3://us-west-2."
         "opendata.source.coop/portolan-mirrors/us-census-catalog/blocks/"
         "state_fips=*/*.parquet', hive_partitioning=true)`) — an HTTPS glob "
         "cannot list a directory and returns 404; see the "
@@ -3467,6 +3468,7 @@ def metadata_yaml(cid: str) -> str:
     data_href = data_url(cid)
     example = (
         "INSTALL httpfs; LOAD httpfs; SET s3_region='us-west-2';\n"
+        "SET s3_url_style='path';\n"
         "SELECT geoid, pop_total, housing_units FROM read_parquet("
         "'s3://us-west-2.opendata.source.coop/portolan-mirrors/"
         "us-census-catalog/blocks/state_fips=*/*.parquet', "

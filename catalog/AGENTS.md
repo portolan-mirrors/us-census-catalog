@@ -17,6 +17,26 @@ place and congressional-district level, plus 2020 Decennial counts at block
 level. Each collection's own `AGENTS.md` documents its columns and carries
 tested queries; this file covers what spans collections.
 
+## Before you write a query
+
+Read the column list before you write SQL, and use only names you have read.
+Each collection's `collection.json` carries its schema, and each collection's
+own `AGENTS.md` documents every column with the census table it comes from. A
+plausible name is not a real one: this catalog has `pct_no_internet`, not
+`pct_broadband`, and the two run in opposite directions. A query against a
+column that does not exist fails loudly, which is the good case; a query
+against the wrong real column returns a confident wrong answer.
+
+Four habits keep an answer honest, and the sections below give the detail:
+
+1. Report the margin of error with any ACS estimate, and do not rank on a
+   difference smaller than it.
+2. Gate a ranking on `*_cv` so small, unreliable areas do not win it.
+3. Filter `geo_change = 'identical'` before reporting change over time at
+   tract or block-group level.
+4. Say what the number is about. These are statistics about places, not
+   about the people in them.
+
 ## Shape: seven geographies, five themes
 
 **Every ACS geography is a sub-catalog of themed collections**, and the
@@ -89,6 +109,31 @@ Three geographies break the prefix rule, and each breaks it differently:
 - ACS margins of error are published at the **90% confidence level**. To sum
   estimates across geographies, add MOEs in quadrature; never sum medians at
   all (a median of a region is not derivable from its parts).
+- **Two ACS estimates are not different because the numbers differ.** Each is
+  an interval. Before reporting that A is higher than B, check whether
+  `A - A_moe > B + B_moe`; if the intervals overlap, the honest answer is
+  "no measurable difference". The margins grow sharply as the geography
+  shrinks: the median `pct_below_poverty` is **13.35% ± 2.37 points at county
+  level, 10.70% ± 5.68 at tract level and 9.28% ± 7.36 at block-group level**
+  (measured over every row carrying a margin). At block-group level the
+  interval is wider than most of the differences anyone wants to rank, so a
+  top-10 list there is mostly noise unless it is gated on `*_cv`.
+- **A 2015–2019 tract is not always the same ground as its 2020–2024
+  namesake.** The Census Bureau redrew tract and block-group boundaries for
+  2020, and a GEOID can be reused for a different polygon. The trends
+  collections carry a `geo_change` column for exactly this, with one row per
+  geography per period. Measured over `tract-trends`: `identical` on 116,818
+  rows, `subdivided` on 46,136, `mixed` on 6,150, `absorbed` on 806 and
+  `no_acs_data` on 458 — so **roughly a third of tract rows are not a
+  like-for-like comparison** and a change figure there mixes real change with
+  a boundary edit. Filter to `geo_change = 'identical'` before reporting
+  change at tract level. Counties are far more stable: 6,422 of 6,470
+  `county-trends` rows are `identical` (measured).
+- **An area statistic is not a fact about a person.** Two indicators moving
+  together across tracts says nothing about any individual in them, and the
+  income of a tract is not the income of anyone who lives there. Report these
+  as properties of places. Treating them as properties of people is the
+  ecological fallacy, and it is the most common way this data is misread.
 - Jam values (e.g. `-666666666`) in Census files mean "no estimate"; they
   are already `NULL` here. A query that averages a column needs no jam
   filtering, but remember NULLs reduce the row count.

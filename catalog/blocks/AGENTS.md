@@ -247,6 +247,7 @@ the S3 endpoint — anonymously, no credentials:
 ```sql
 LOAD httpfs;
 SET s3_region = 'us-west-2';
+SET s3_url_style = 'path';  -- the bucket name has dots; vhost URLs fail TLS
 SELECT count(*) AS blocks, sum(pop_total) AS people,
        round(100.0*count(*) FILTER (WHERE pop_total = 0)/count(*), 2) AS pct_empty
 FROM read_parquet('s3://us-west-2.opendata.source.coop/portolan-mirrors/us-census-catalog/blocks/state_fips=*/*.parquet',

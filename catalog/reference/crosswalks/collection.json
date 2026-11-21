@@ -23,6 +23,12 @@
       "title": "Open in the Portolan Browser (interactive map)"
     },
     {
+      "rel": "alternate",
+      "href": "https://portolan-mirrors.github.io/us-census-catalog/#c=reference/crosswalks",
+      "type": "text/html",
+      "title": "Open in the Census Atlas (catalog explorer app)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -57,12 +63,6 @@
       "href": "https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/5YRData/",
       "type": "text/html",
       "title": "ACS 2020–2024 5-year table-based Summary File (source data)"
-    },
-    {
-      "rel": "alternate",
-      "href": "https://portolan-mirrors.github.io/us-census-catalog/#c=reference/crosswalks",
-      "type": "text/html",
-      "title": "Open in the Census Atlas (catalog explorer app)"
     }
   ],
   "stac_extensions": [

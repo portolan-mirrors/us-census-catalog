@@ -42,3 +42,23 @@ jobs:
         env:
           CI_LIGHT: "1"
         run: python3 tests/run_all.py
+
+  # Every query printed in a guide or on the explainer page, executed against
+  # the published files. The other gates read metadata only; this one proves
+  # the recipes we hand to people still return rows. It needs the network, so
+  # it is a separate job: a failure here points at the docs or at an outage,
+  # never at the catalog metadata.
+  doc-queries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the query engines
+        run: python -m pip install duckdb geopandas fsspec requests
+
+      - name: Run every documented query
+        run: python3 tests/test_doc_queries.py --workers 10

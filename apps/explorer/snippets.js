@@ -12,7 +12,7 @@ export function duckdbSnippet(entry, base) {
     const s3 = "s3://us-west-2.opendata.source.coop/portolan-mirrors/us-census-catalog/" + d.href;
     return [
       "INSTALL spatial; LOAD spatial; INSTALL httpfs; LOAD httpfs;",
-      "SET s3_region='us-west-2';",
+      "SET s3_region='us-west-2'; SET s3_url_style='path';",
       `SELECT * FROM read_parquet('${s3}', hive_partitioning=true) LIMIT 10;`,
     ].join("\n");
   }

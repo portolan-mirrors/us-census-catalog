@@ -478,12 +478,19 @@ figcaption {
   grid-template-columns: repeat(auto-fit, minmax(286px, 1fr));
   gap: 1px;
   margin: 26px 0 0;
-  background: var(--line);
+  /* Panel, not line, so a row that does not fill leaves no grey cell. The
+     hairlines come from each card's own outline, which overlaps its
+     neighbour's in the 1px gap and is clipped at the rounded edge. */
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
   overflow: hidden;
 }
-.qgrid article { padding: 20px 21px; background: var(--panel); }
+.qgrid article {
+  padding: 20px 21px;
+  background: var(--panel);
+  outline: 1px solid var(--line);
+}
 .qkind {
   margin: 0 0 10px;
   font-size: 10.5px;
@@ -604,3 +611,8 @@ table.ref tbody tr:hover td { background: var(--accent-soft); }
   .stats dt { font-size: 27px; }
   .snip pre { font-size: 11px; padding-right: 60px; }
 }
+
+/* The mechanism table pairs a question with how it is answered, so its
+   first column is prose, not a nowrap label like the row-count table's. */
+table.ref.mech td:first-child { white-space: normal; width: 30%; }
+table.ref.mech td { font-size: 13px; }

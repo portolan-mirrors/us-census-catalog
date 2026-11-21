@@ -149,6 +149,65 @@ test("the page links the live catalog root, not a local base", () => {
   assert.ok(!/localhost|127\.0\.0\.1/.test(html), "a local URL leaked in");
 });
 
+test("the page sends people to the Portolan skills first", () => {
+  assert.ok(
+    html.includes("portolan-sdi/portolan-skills"),
+    "step 1 should install the Portolan skills",
+  );
+  assert.ok(
+    /Read the reading-portolan skill/.test(html),
+    "the first prompt should tell the agent to read the reading-portolan skill",
+  );
+});
+
+test("the question cards carry no mechanism copy", () => {
+  // The mechanics belong in the section at the end, so a reader who does not
+  // care how it works can read the questions straight through.
+  assert.ok(
+    !html.includes('class="qwhy"'),
+    "a question card still explains the plumbing",
+  );
+  const cards = html.match(/<p class="qkind">/g) ?? [];
+  assert.ok(cards.length >= 6, `expected at least six question cards, got ${cards.length}`);
+});
+
+test("the caveats live in the catalog guide, not only on the page", () => {
+  // The page claims an agent is warned about these before it writes SQL.
+  // That is only true if the guide actually says so.
+  const guide = readFileSync(
+    new URL("../../catalog/AGENTS.md", import.meta.url), "utf8",
+  );
+  for (const phrase of ["geo_change", "ecological fallacy", "90% confidence level"]) {
+    assert.ok(
+      guide.includes(phrase),
+      `catalog/AGENTS.md no longer mentions "${phrase}", which about.html promises it does`,
+    );
+  }
+});
+
+test("every runnable snippet is marked for the query gate", () => {
+  // tests/test_doc_queries.py runs what is marked. An unmarked SQL block is
+  // a query nothing checks.
+  const snips = [...html.matchAll(/<div class="snip[^"]*"([^>]*)>\s*<pre>([\s\S]*?)<\/pre>/g)];
+  for (const [, attrs, body] of snips) {
+    const looksLikeSql = /^(SELECT|WITH|LOAD|INSTALL|SET)\b/m.test(body.trim());
+    if (looksLikeSql) {
+      assert.ok(
+        attrs.includes('data-run="duckdb"'),
+        `an SQL snippet is not marked data-run: ${body.trim().slice(0, 60)}`,
+      );
+    }
+  }
+  const marked = (html.match(/data-run="duckdb"/g) ?? []).length;
+  assert.ok(marked >= 8, `expected at least eight runnable queries, got ${marked}`);
+});
+
+test("the cross-catalog examples name catalogs in the registry", () => {
+  assert.ok(html.includes("data.source.coop/cholmes/trimet"), "TriMet example missing");
+  assert.ok(html.includes("parquetry.geomermaids.com/nfhl"), "FEMA example missing");
+  assert.ok(html.includes("portolan-sdi/portolan-registry"), "registry link missing");
+});
+
 test("copyLabel covers its states and falls back to idle", () => {
   assert.equal(copyLabel("idle"), "Copy");
   assert.equal(copyLabel("done"), "Copied");

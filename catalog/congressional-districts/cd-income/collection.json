@@ -23,6 +23,12 @@
       "title": "Open in the Portolan Browser (interactive map)"
     },
     {
+      "rel": "alternate",
+      "href": "https://portolan-mirrors.github.io/us-census-catalog/#c=congressional-districts/cd-income",
+      "type": "text/html",
+      "title": "Open in the Census Atlas (catalog explorer app)"
+    },
+    {
       "rel": "root",
       "href": "../../catalog.json",
       "type": "application/json",
@@ -66,12 +72,6 @@
       "pmtiles:layers": [
         "cd-income"
       ]
-    },
-    {
-      "rel": "alternate",
-      "href": "https://portolan-mirrors.github.io/us-census-catalog/#c=congressional-districts/cd-income",
-      "type": "text/html",
-      "title": "Open in the Census Atlas (catalog explorer app)"
     }
   ],
   "stac_extensions": [
