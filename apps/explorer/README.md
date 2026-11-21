@@ -29,17 +29,27 @@ bundler for no visual gain (see `docs/superpowers/specs/`).
   DuckDB form, because the HTTPS gateway has no listing for globs.
 - The URL hash carries collection, view, period and camera, so any view
   is shareable.
+- An about dialog (the ⓘ button) states what the atlas demonstrates and
+  deep-links the Portolan Browser at the collection on screen.
+- `about.html` is the explainer page: how the three formats remove the
+  server, how to hand the catalog to an LLM, and six DuckDB queries that
+  run against the published files.
 
 ## Development
 
 ```bash
 cd apps/explorer
 python3 serve.py 8899        # python -m http.server breaks PMTiles (no Range)
-node --test *.test.mjs       # pure-module tests: styles, format, hash, snippets
+node --test *.test.mjs       # pure modules, plus about.html's claims
 ```
 
 `?base=<url>` points the app at another catalog root, e.g. a local tree
 served with Range support.
+
+`about.test.mjs` measures the explainer page against `manifest.json`: every
+column an example names must exist in the collection it queries, and every
+row count printed on the page must match the catalog. A renamed column fails
+the build instead of teaching a reader a column that is not there.
 
 After any change to catalog metadata or styles, regenerate the manifest
 and gazetteer:
@@ -60,6 +70,9 @@ test files are removed from the site.
 | file | role |
 | --- | --- |
 | `index.html`, `style.css` | shell and the "statistical atlas" look |
+| `tokens.css` | the palette and fonts, shared by both pages |
+| `about.html`, `about.css`, `about.js` | the "how this works" explainer page |
+| `about-copy.js` | copy-button labels (pure) |
 | `app.js` | map, state, sidebar, legend, time dock, swipe, popups |
 | `styles.js` | style resolution, legend extraction, trends layers (pure) |
 | `search.js` | place/dataset combobox, hyparquet places loader |

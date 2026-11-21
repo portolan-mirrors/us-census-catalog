@@ -21,6 +21,7 @@
     document.hidden ? setTimeout(() => cb(performance.now()), 33) : native(cb);
 })();
 </script>
+<link rel="stylesheet" href="tokens.css" />
 <link rel="stylesheet" href="style.css" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%231f2733'/%3E%3Crect x='14' y='14' width='34' height='34' fill='%239e3b2f'/%3E%3Crect x='52' y='14' width='34' height='34' fill='%23d08770'/%3E%3Crect x='14' y='52' width='34' height='34' fill='%23f3f0e9'/%3E%3Crect x='52' y='52' width='34' height='34' fill='%23577a9e'/%3E%3C/svg%3E" />
 </head>
@@ -42,6 +43,7 @@
       Data: <a href="https://www.census.gov/">U.S. Census Bureau</a> (public domain),
       mirrored cloud-native by
       <a href="https://source.coop/portolan-mirrors/us-census-catalog">Portolan Mirrors</a>.
+      <a href="about.html">How this works</a> ·
       <a href="https://github.com/portolan-mirrors/us-census-catalog">Catalog repository</a> ·
       <a href="https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json">STAC root</a> ·
       <a href="https://browser.portolan-sdi.org/?catalog=https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json#/external/data.source.coop/portolan-mirrors/us-census-catalog/catalog.json">Portolan Browser</a>
@@ -62,10 +64,51 @@
       <span class="sep"></span>
       <button type="button" data-mode="swipe" title="Swipe the two periods side by side">⇆ Compare</button>
     </div>
+    <button type="button" id="aboutbtn" title="About this atlas"
+            aria-haspopup="dialog">ⓘ</button>
     <button type="button" id="themebtn" title="Switch light/dark">◐</button>
     <button type="button" id="menubtn" title="Datasets">☰</button>
     <div id="note" hidden></div>
   </div>
+</div>
+<div id="about-backdrop" hidden></div>
+<div id="about" role="dialog" aria-modal="true" aria-labelledby="about-title" hidden>
+  <button type="button" class="about-x" id="about-close" aria-label="Close">&#10005;</button>
+  <p class="eyebrow">About this atlas</p>
+  <h2 id="about-title">No API. No server.<br />Just files.</h2>
+  <p>
+    The Census Atlas is a demonstration of <strong>cloud-native geospatial</strong>.
+    Every map you pan, every number in every popup and every byte behind them
+    comes from static files on object storage, read directly by your browser
+    over HTTPS.
+  </p>
+  <p>
+    There is no tile server, no feature service, no database and no API in
+    front of the data. The map reads <strong>PMTiles</strong>, a single-file
+    tile archive. The tables are <strong>GeoParquet</strong>. The metadata is
+    <strong>STAC</strong>. This page is static too. Nothing here can rate-limit
+    you, go down on its own, or charge for a query.
+  </p>
+  <p>
+    That is the point: the data is not trapped behind an interface. It is
+    yours to download, query and join &mdash; with DuckDB, with Python, or by
+    pointing an LLM at it.
+  </p>
+  <div class="about-cta">
+    <a class="btn-primary" id="about-browser" href="#">
+      Open in the Portolan Browser
+      <span>Download the data &middot; read the metadata &middot; copy a query</span>
+    </a>
+    <a class="btn-ghost" href="about.html">
+      How to query this with an LLM &rarr;
+      <span>What to ask, prompts to paste, queries that run</span>
+    </a>
+  </div>
+  <p class="about-foot">
+    <a href="https://data.source.coop/portolan-mirrors/us-census-catalog/catalog.json">STAC root</a> &middot;
+    <a href="https://github.com/portolan-mirrors/us-census-catalog">Catalog repository</a> &middot;
+    <a href="https://www.census.gov/">U.S. Census Bureau</a> (public domain)
+  </p>
 </div>
 <script type="module" src="app.js"></script>
 </body>

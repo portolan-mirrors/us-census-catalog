@@ -792,6 +792,7 @@ async function boot() {
   $("menubtn").addEventListener("click", () => {
     $("sidebar").classList.toggle("open");
   });
+  wireAbout();
 
   const startC = want.c && entryOf(want.c) ? want.c : "trends/county-trends";
   state.c = startC;
@@ -799,6 +800,41 @@ async function boot() {
   if (inSwipe()) toggleSwipe(true);
   renderPanel();
   renderMap();
+}
+
+/* ------------------------------------------------------------ about box */
+/** The Portolan Browser URL for a collection, or the catalog root. */
+export function browserUrl(collRel) {
+  const root = "https://data.source.coop/portolan-mirrors/us-census-catalog";
+  const target = collRel
+    ? `data.source.coop/portolan-mirrors/us-census-catalog/${collRel}/collection.json`
+    : "data.source.coop/portolan-mirrors/us-census-catalog/catalog.json";
+  return `https://browser.portolan-sdi.org/?catalog=${root}/catalog.json#/external/${target}`;
+}
+
+function wireAbout() {
+  const box = $("about");
+  const back = $("about-backdrop");
+  let lastFocus = null;
+
+  function open() {
+    lastFocus = document.activeElement;
+    // Deep-link the Browser at whatever the map is showing.
+    $("about-browser").href = browserUrl(state.c);
+    box.hidden = back.hidden = false;
+    $("about-close").focus();
+  }
+  function close() {
+    box.hidden = back.hidden = true;
+    lastFocus?.focus();
+  }
+
+  $("aboutbtn").addEventListener("click", open);
+  $("about-close").addEventListener("click", close);
+  back.addEventListener("click", close);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !box.hidden) close();
+  });
 }
 
 boot().then(() => {

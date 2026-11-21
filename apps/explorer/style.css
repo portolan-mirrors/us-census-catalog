@@ -1,31 +1,6 @@
 /* Census Atlas — layout: fixed 380px sidebar, map fills the rest; legend
-   floats bottom-left, the trends time dock bottom-center. */
-:root {
-  --paper: #f3f0e9;
-  --panel: #faf8f2;
-  --ink: #1f2733;
-  --ink-soft: #5a6372;
-  --line: #ddd7c9;
-  --accent: #9e3b2f;
-  --accent-soft: #9e3b2f22;
-  --chip: #eceade;
-  --shadow: 0 2px 14px rgba(31, 39, 51, 0.18);
-  --display: "Fraunces", "Georgia", serif;
-  --body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
-}
-:root[data-theme="dark"] {
-  --paper: #10141c;
-  --panel: #171c26;
-  --ink: #e8e5db;
-  --ink-soft: #9aa2b1;
-  --line: #2a3140;
-  --accent: #d08770;
-  --accent-soft: #d0877026;
-  --chip: #1f2531;
-  --shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
-  color-scheme: dark;
-}
-
+   floats bottom-left, the trends time dock bottom-center.
+   Design tokens live in tokens.css, which index.html loads first. */
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }
@@ -458,7 +433,7 @@ footer a { color: var(--accent); text-decoration: none; }
 }
 #dock .sep { width: 1px; height: 20px; background: var(--line); }
 
-#themebtn, #menubtn {
+#themebtn, #menubtn, #aboutbtn {
   position: absolute;
   z-index: 11;
   font: inherit;
@@ -474,7 +449,7 @@ footer a { color: var(--accent); text-decoration: none; }
   cursor: pointer;
   box-shadow: var(--shadow);
 }
-#themebtn { top: 86px; right: 10px; }
+#themebtn { top: 124px; right: 10px; }
 #menubtn { top: 10px; left: 10px; display: none; }
 
 #note {
@@ -574,4 +549,127 @@ footer a { color: var(--accent); text-decoration: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   #sidebar { transition: none; }
+}
+
+/* ------------------------------------------------------------ about box */
+#aboutbtn { top: 86px; right: 10px; font-size: 16px; }
+
+#about-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: rgba(31, 39, 51, 0.42);
+  backdrop-filter: blur(2px);
+  animation: fade 0.18s ease-out;
+}
+#about {
+  position: absolute;
+  z-index: 41;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 30px 34px 24px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 18px 48px rgba(31, 39, 51, 0.3);
+  animation: rise 0.22s cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+@keyframes fade { from { opacity: 0; } }
+@keyframes rise {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)); }
+}
+.about-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-soft);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.about-x:hover { color: var(--accent); border-color: var(--line); }
+
+.eyebrow {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+#about h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 6px 0 16px;
+}
+#about h2::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 3px;
+  margin-top: 14px;
+  background: var(--accent);
+}
+#about p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--ink);
+  max-width: 48ch;
+}
+#about strong { font-weight: 700; }
+
+.about-cta { display: grid; gap: 9px; margin: 20px 0 16px; }
+.about-cta a {
+  display: block;
+  padding: 11px 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13.5px;
+  border: 1px solid var(--line);
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+}
+.about-cta a span {
+  display: block;
+  margin-top: 3px;
+  font-weight: 400;
+  font-size: 11.5px;
+  opacity: 0.78;
+}
+.about-cta a:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent) !important;
+  color: #fff;
+}
+.btn-ghost { background: var(--chip); color: var(--ink); }
+.btn-ghost:hover { border-color: var(--accent) !important; color: var(--accent); }
+
+.about-foot {
+  margin: 0 !important;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px !important;
+  color: var(--ink-soft) !important;
+}
+.about-foot a { color: var(--ink-soft); }
+.about-foot a:hover { color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  #about, #about-backdrop { animation: none; }
+  .about-cta a { transition: none; }
 }

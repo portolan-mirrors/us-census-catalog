@@ -1,0 +1,29 @@
+/* Census Atlas — design tokens, shared by the app shell (style.css) and the
+   about page (about.css). One definition, so the two cannot drift apart.
+   The app writes data-theme on <html> and remembers it in localStorage under
+   "atlas-theme"; both pages read the same key. */
+:root {
+  --paper: #f3f0e9;
+  --panel: #faf8f2;
+  --ink: #1f2733;
+  --ink-soft: #5a6372;
+  --line: #ddd7c9;
+  --accent: #9e3b2f;
+  --accent-soft: #9e3b2f22;
+  --chip: #eceade;
+  --shadow: 0 2px 14px rgba(31, 39, 51, 0.18);
+  --display: "Fraunces", "Georgia", serif;
+  --body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+}
+:root[data-theme="dark"] {
+  --paper: #10141c;
+  --panel: #171c26;
+  --ink: #e8e5db;
+  --ink-soft: #9aa2b1;
+  --line: #2a3140;
+  --accent: #d08770;
+  --accent-soft: #d0877026;
+  --chip: #1f2531;
+  --shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
